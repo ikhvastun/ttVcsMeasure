@@ -188,19 +188,19 @@ int nBins[nVars] = {
 
 
 // Lepton SF
-TFile *file_dataMC = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
+TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
 
-TFile *lepSF_ele_file = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/LeptonSF/scaleFactors.root","READ");
+TFile *lepSF_ele_file = TFile::Open("leptonSF/scaleFactorsAll.root","READ");
 
 TFile * recoToLoose_leptonSF_mu1 = TFile::Open("leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
 TFile * recoToLoose_leptonSF_mu2 = TFile::Open("leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
 TFile * recoToLoose_leptonSF_mu3 = TFile::Open("leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
 
-TFile *lepSF_mu_trackBF = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/LeptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
-TFile *lepSF_mu_trackGH = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/LeptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
+TFile *lepSF_mu_trackBF = TFile::Open("leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
+TFile *lepSF_mu_trackGH = TFile::Open("leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
 
-TFile *electronTrack = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/LeptonSF/egammaEffi.txt_EGM2D.root","READ");
+TFile *electronTrack = TFile::Open("leptonSF/egammaEffi.txt_EGM2D.root","READ");
 
 TFile *lepSF_el_LeptonMVAfile = TFile::Open("leptonSF/scaleFactors.root","READ");
 //TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("leptonSF/lepMVAEffSF_el_3l.root","READ");
@@ -233,8 +233,8 @@ TH2F* lepSFMapsMuon[4] = {
 
 // btag SF
 BTagCalibration calib_csvv2[2] {
-  {"CSVv2BF", "/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/btagSF/CSVv2_Moriond17_B_F.csv"},
-  {"CSVv2GH", "/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/btagSF/CSVv2_Moriond17_G_H.csv"},
+  {"CSVv2BF", "btagSF/CSVv2_Moriond17_B_F.csv"},
+  {"CSVv2GH", "btagSF/CSVv2_Moriond17_G_H.csv"},
 };
 
 const std::vector<std::string> otherSysTypes={"up_hf", "down_hf", "up_lf", "down_lf"};
@@ -249,7 +249,7 @@ BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_RESHAPING, "central", o
 
 };
 
-TFile *file_btagEff = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/btagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
+TFile *file_btagEff = TFile::Open("tagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
 TH2D* h_btagEff[3] = {
     (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_udsg"), 
     (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_c"),

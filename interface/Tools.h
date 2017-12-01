@@ -69,7 +69,7 @@ void getFRmaps(vector<TH2D> & fakeMaps){
 
     for (int i=0; i!=nFlavors; ++i){
 
-      fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis_withMVATTH/FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
+      fakerate = TFile::Open("FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
       TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
 
       //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_data_comb" + additionalString[i]));
