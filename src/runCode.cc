@@ -414,9 +414,11 @@ void treeReader::Analyze(){
             mvaVL = reader->EvaluateMVA( "BDTG method"           );
           }
 
+          /*
           if(leptonSelectionAnalysis == 2){
             if(mvaVL > 0) continue;
           }
+          */
 
           distribs[12].vectorHisto[samCategory].Fill(TMath::Min(mvaVL,varMax[12]-0.001),weight);
 
@@ -581,6 +583,12 @@ void treeReader::Analyze(){
   plot[10]->cd();
   showHist(plot[10],distribs[18],"","Non-Z lepton p_{T} [GeV]","Events",scale_num, mtleg);
 
+  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ"};
+  int countPlot = 0;
+  for(auto & i : namesForSaveFiles){
+    plot[countPlot]->SaveAs("plotsForSave/" + i + ".pdf");
+    countPlot++;
+  }
   //plot[8]->cd();
   //drawSystUnc(plot[8], distribs[15], 8);
   
