@@ -33,25 +33,20 @@ void treeReader::setConePt(){
 bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
 
-    if(_lFlavor[l] == 1 && !_lEwkLoose[l]) return false;
+    //if(_lFlavor[l] == 1 && !_lEwkLoose[l]) return false;
     if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
-    if(_closestJetCsvV2[l] > 0.8484) return false;
+    //if(_closestJetCsvV2[l] > 0.8484) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
-    if(_leptonMvaTTH[l] < 0.9) return false;
+    if(_lFlavor[l] == 0 && !_lPOGMediumWOIso[l]) return false;
+    if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) return false;
+    if(_lFlavor[l] == 0 && _relIso[l] > 0.1) return false;
 
-    if(leptonSelection == 2){
+    //if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+    //if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+    //if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
 
-        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
-        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+    if(fabs(_3dIPSig[l]) > 4) return false;
 
-        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
-    }
-    /*
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) continue;
-    if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) continue;
-    if(fabs(_3dIPSig[l]) > 4) continue;
-    */
     return true;
 }
 
@@ -108,7 +103,7 @@ unsigned treeReader::selectLep(std::vector<unsigned>& ind){
             ptMap.push_back({_lPt[l], l});
         }
     }
-    //if(lCount < 2) return 0;
+    if(lCount < 2) return 0;
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
     for(unsigned l = 0; l < lCount; ++l){
         ind.push_back(ptMap[l].second);
@@ -198,11 +193,19 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
 
-    if(ptMap[0].first < 25 && _lFlavor[ptMap[0].second] == 1) return false;
-    if(ptMap[1].first < 25 && _lFlavor[ptMap[1].second] == 1) return false;
+    if(_lPt[ind.at(0)] < 25 && _lFlavor[ind.at(0)] == 1) return false;
+    if(_lPt[ind.at(1)] < 15 && _lFlavor[ind.at(1)] == 0) return false;
 
-    if(ptMap[0].first < 40 && _lFlavor[ptMap[0].second] == 0) return false;
-    if(ptMap[1].first < 27 && _lFlavor[ptMap[1].second] == 0) return false;
+    if(_lPt[ind.at(0)] < 25 && _lFlavor[ind.at(0)] == 0) return false;
+    if(_lPt[ind.at(1)] < 10 && _lFlavor[ind.at(1)] == 1) return false;
+    
+    /*
+    if(ptMap[0].first < 25 && _lFlavor[ptMap[0].second] == 1) return false;
+    if(ptMap[1].first < 15 && _lFlavor[ptMap[1].second] == 0) return false;
+
+    if(ptMap[0].first < 25 && _lFlavor[ptMap[0].second] == 0) return false;
+    if(ptMap[1].first < 10 && _lFlavor[ptMap[1].second] == 1) return false;
+    */
        
     return true;
 }
@@ -405,6 +408,8 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "WZ") return 51;
     if(name == "ZZ") return 8;
     if(name == "rare") return 8;
+
+    if(name == "ttbar") return kBlue-9;
 
     return kBlack;
 }

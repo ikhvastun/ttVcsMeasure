@@ -129,6 +129,9 @@ class treeReader {
         Bool_t          _lPOGLoose[nL_max];   
         Bool_t          _lPOGMedium[nL_max];   
         Bool_t          _lPOGTight[nL_max];   
+        Bool_t          _lPOGLooseWOIso[nL_max];   //[_nL]
+        Bool_t          _lPOGMediumWOIso[nL_max];   //[_nL]
+        Bool_t          _lPOGTightWOIso[nL_max];   //[_nL]
         Bool_t          _tauMuonVeto[nL_max];   
         Bool_t          _tauEleVeto[nL_max];   
         Bool_t          _decayModeFindingNew[nL_max];   
@@ -254,7 +257,7 @@ class treeReader {
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        const double dataLumi = 35.9;                                          //in units of 1/fb
+        const double dataLumi = 14.6;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
@@ -366,6 +369,9 @@ class treeReader {
         TBranch        *b__lPOGLoose;   
         TBranch        *b__lPOGMedium;   
         TBranch        *b__lPOGTight;   
+        TBranch        *b__lPOGLooseWOIso;   //!
+        TBranch        *b__lPOGMediumWOIso;   //!
+        TBranch        *b__lPOGTightWOIso;   //!
         TBranch        *b__tauMuonVeto;   
         TBranch        *b__tauEleVeto;   
         TBranch        *b__decayModeFindingNew;   

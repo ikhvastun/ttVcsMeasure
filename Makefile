@@ -2,7 +2,7 @@ CXX=g++
 RM=rm -f
 CPPFLAGS=-std=c++0x -g $(shell root-config --cflags)
 LDFLAGS=-g $(shell root-config --ldflags)
-LDLIBS=$(shell root-config --libs) -ltmva
+LDLIBS=$(shell root-config --libs) -lTMVA
 CFLAGS = `root-config --cflags --libs`
 
 EXECUTABLE = main
