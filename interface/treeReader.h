@@ -113,6 +113,7 @@ class treeReader {
         Double_t        _3dIP[nL_max];   
         Double_t        _3dIPSig[nL_max];   
         Float_t         _lElectronMva[nL_max];   
+        Float_t         _lElectronMvaHZZ[nL_max];   
         Bool_t          _lElectronPassEmu[nL_max];   //[_nLight]
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
@@ -217,13 +218,13 @@ class treeReader {
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
-        bool jetIsClean(const unsigned);
-        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true);
-        unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&);
+        bool jetIsClean(const unsigned, bool);
+        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool nonpromptSample = false);
+        unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&, bool);
         double deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept);
         bool bTaggedDeepCSV(const unsigned unc, const unsigned wp = 1);
         bool bTaggedCSVv2(const unsigned uncm, const unsigned wp = 1);
-        unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1);
+        unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1, bool nonpromptSample = false);
         double HTCalc(const std::vector<unsigned>& ind);
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &);
         int getElectronNumber(const std::vector<unsigned>& ind);
@@ -254,7 +255,8 @@ class treeReader {
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        const double dataLumi = 35.9;                                          //in units of 1/fb
+        //const double dataLumi = 35.9;                                          //in units of 1/fb
+        const double dataLumi = 38.7;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
@@ -350,6 +352,7 @@ class treeReader {
         TBranch        *b__3dIP;   
         TBranch        *b__3dIPSig;   
         TBranch        *b__lElectronMva;   
+        TBranch        *b__lElectronMvaHZZ;   
         TBranch        *b__lElectronPassEmu;   //!
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!

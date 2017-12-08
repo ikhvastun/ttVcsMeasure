@@ -57,7 +57,7 @@ void treeReader::Analyze(){
   //gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   //readSamples("samples_ttWtraining.txt");
-  readSamples("samples_ttW.txt");
+  readSamples("samples_ttZ_2017data.txt");
   //readSamples("nonpromptMCForCT.txt");
   setTDRStyle(); 
   
@@ -127,7 +127,10 @@ void treeReader::Analyze(){
           bool printAddInfo = false;
           //if(_eventNb != 2901696869) continue;
 
-          if(!(_HLT_Ele27_WPTight_Gsf || _HLT_IsoMu24 || _HLT_IsoTkMu24)) continue;
+          if(!isData)
+            if(!(_HLT_Ele27_WPTight_Gsf || _HLT_IsoMu24 || _HLT_IsoTkMu24)) continue;
+          else
+            if(!(_HLT_Ele35_WPTight_Gsf || _HLT_IsoMu27)) continue;
 
           std::vector<unsigned> indTight, indFake;
           //select leptons
@@ -198,8 +201,8 @@ void treeReader::Analyze(){
           double ptZ = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets);
-          nBLoc = nBJets(0, false, true, 1);
+          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
+          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ);
 
           HTLoc = HTCalc(indJets);
@@ -210,15 +213,17 @@ void treeReader::Analyze(){
           }
 
           
+          double mt1 = 9999;
           if(leptonSelectionAnalysis == 3){
             
+              /*
             if(nJLoc < 3) continue;
             if(nBLoc < 1) continue;
             if(dMZ > 10) continue;
+            */
             
 
             // WZ CR
-            /*
             if(dMZ > 10) continue;
 
             if(nBLoc != 0) continue;
@@ -234,11 +239,9 @@ void treeReader::Analyze(){
             TLorentzVector l0p4;
             l0p4.SetPtEtaPhiE(ptCorrV[leptThirdIndex].first, _lEta[third], _lPhi[third], _lE[third] * ptCorrV[leptThirdIndex].first / _lPt[third]);
 
-            double mt1;
             mt1 = mtCalc(l0p4, _met, _metPhi);
 
-            if(mt1 < 50) continue;
-            */
+            //if(mt1 < 50) continue;
 
             // ttbar CR
             //if(!(dMZ == 999999 || !((dMZ < 10) || (nBLoc < 1)))) continue;
@@ -420,6 +423,11 @@ void treeReader::Analyze(){
           }
           */
 
+          distribs[4].vectorHisto[samCategory].Fill(TMath::Min(mt1,varMax[4]-0.1),weight);
+
+          if(leptonSelectionAnalysis == 3)
+            if(mt1 < 50) continue;
+
           distribs[12].vectorHisto[samCategory].Fill(TMath::Min(mvaVL,varMax[12]-0.001),weight);
 
           int mvaValueRegion = -999;
@@ -458,6 +466,15 @@ void treeReader::Analyze(){
           distribs[16].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[16]-0.1),weight);
           distribs[17].vectorHisto[samCategory].Fill(TMath::Min(ptZ,varMax[17]-0.1),weight);
           distribs[18].vectorHisto[samCategory].Fill(TMath::Min(ptNonZ,varMax[18]-0.1),weight);
+
+          if(nLocEle == 3)
+            distribs[19].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[19]-0.1),weight);
+          if(nLocEle == 2)
+            distribs[20].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[20]-0.1),weight);
+          if(nLocEle == 1)
+            distribs[21].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[21]-0.1),weight);
+          if(nLocEle == 0)
+            distribs[22].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[22]-0.1),weight);
 
           if(SRID3L(nJLoc, nBLoc) == 8)
             myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
@@ -543,9 +560,9 @@ void treeReader::Analyze(){
 
   double scale_num = 1.6;
   
-  TCanvas* plot[11];
+  TCanvas* plot[16];
       
-  for(int i = 0; i < 11; i++){
+  for(int i = 0; i < 16; i++){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
@@ -583,7 +600,22 @@ void treeReader::Analyze(){
   plot[10]->cd();
   showHist(plot[10],distribs[18],"","Non-Z lepton p_{T} [GeV]","Events",scale_num, mtleg);
 
-  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ"};
+  plot[11]->cd();
+  showHist(plot[11],distribs[4],"","m_{T}^{W} [GeV]","Events",scale_num, mtleg);
+
+  plot[12]->cd();
+  showHist(plot[12],distribs[19],"","M(ll) in 3e [GeV]","Events",scale_num, mtleg);
+
+  plot[13]->cd();
+  showHist(plot[13],distribs[20],"","M(ll) in 2e1mu [GeV]","Events",scale_num, mtleg);
+
+  plot[14]->cd();
+  showHist(plot[14],distribs[21],"","M(ll) in 1e2mu [GeV]","Events",scale_num, mtleg);
+
+  plot[15]->cd();
+  showHist(plot[15],distribs[22],"","M(ll) in 3mu [GeV]","Events",scale_num, mtleg);
+
+  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu"};
   int countPlot = 0;
   for(auto & i : namesForSaveFiles){
     plot[countPlot]->SaveAs("plotsForSave/" + i + ".pdf");

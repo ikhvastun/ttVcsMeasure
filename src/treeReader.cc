@@ -32,7 +32,8 @@ void treeReader::readSamples(const std::string& list){
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/92X/codeFromWillem/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/92X/codeFromWillem/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);
@@ -75,8 +76,12 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lumiBlock", &_lumiBlock, &b__lumiBlock);
     fChain->SetBranchAddress("_eventNb", &_eventNb, &b__eventNb);
     fChain->SetBranchAddress("_nVertex", &_nVertex, &b__nVertex);    
-    /*
-    if(isData){         //Temporarily only store 2017 triggers for data, to be updated when 2017 MC is available
+
+    fChain->SetBranchAddress("_HLT_Ele27_WPTight_Gsf", &_HLT_Ele27_WPTight_Gsf, &b__HLT_Ele27_WPTight_Gsf);
+    fChain->SetBranchAddress("_HLT_IsoMu24", &_HLT_IsoMu24, &b__HLT_IsoMu24);
+    fChain->SetBranchAddress("_HLT_IsoTkMu24", &_HLT_IsoTkMu24, &b__HLT_IsoTkMu24);
+    
+     if(isData){         //Temporarily only store 2017 triggers for data, to be updated when 2017 MC is available
         fChain->SetBranchAddress("_2017_e", &_2017_e, &b__2017_e);
         fChain->SetBranchAddress("_HLT_Ele35_WPTight_Gsf", &_HLT_Ele35_WPTight_Gsf, &b__HLT_Ele35_WPTight_Gsf);
         fChain->SetBranchAddress("_HLT_Ele35_WPTight_Gsf_prescale", &_HLT_Ele35_WPTight_Gsf_prescale, &b__HLT_Ele35_WPTight_Gsf_prescale);
@@ -134,7 +139,6 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale", &_HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale, &b__HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale);
         fChain->SetBranchAddress("_TripleMu_12_10_5", &_TripleMu_12_10_5, &b__TripleMu_12_10_5);
     }
-    */
     fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
     fChain->SetBranchAddress("_nL", &_nL, &b__nL);
     fChain->SetBranchAddress("_nMu", &_nMu, &b__nMu);
@@ -153,6 +157,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_3dIP", _3dIP, &b__3dIP);
     fChain->SetBranchAddress("_3dIPSig", _3dIPSig, &b__3dIPSig);
     fChain->SetBranchAddress("_lElectronMva", _lElectronMva, &b__lElectronMva);
+    fChain->SetBranchAddress("_lElectronMvaHZZ", _lElectronMvaHZZ, &b__lElectronMvaHZZ);
     fChain->SetBranchAddress("_lElectronPassEmu", _lElectronPassEmu, &b__lElectronPassEmu);
     fChain->SetBranchAddress("_lElectronPassConvVeto", _lElectronPassConvVeto, &b__lElectronPassConvVeto);
     fChain->SetBranchAddress("_lElectronChargeConst", _lElectronChargeConst, &b__lElectronChargeConst);
@@ -238,11 +243,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
     }
 
-    fChain->SetBranchAddress("_HLT_Ele27_WPTight_Gsf", &_HLT_Ele27_WPTight_Gsf, &b__HLT_Ele27_WPTight_Gsf);
-    fChain->SetBranchAddress("_HLT_IsoMu24", &_HLT_IsoMu24, &b__HLT_IsoMu24);
-    fChain->SetBranchAddress("_HLT_IsoTkMu24", &_HLT_IsoTkMu24, &b__HLT_IsoTkMu24);
     
-
 }
 
 void treeReader::setOutputTree(TTree* outputTree, const bool isData){
