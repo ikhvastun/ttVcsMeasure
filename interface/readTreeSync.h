@@ -174,7 +174,7 @@ int nBins[nVars] = {
 
 
 // Lepton SF
-TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
+TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_2017data_2016MC_41p9fb.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
 
 TFile *lepSF_ele_file = TFile::Open("leptonSF/scaleFactorsAll.root","READ");

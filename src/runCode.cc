@@ -126,40 +126,45 @@ void treeReader::Analyze(){
           if(!is_in) continue;
           */
 
-          bool printAddInfo = false;
+          //bool printAddInfo = false;
+          
           //if(_eventNb != 1492195608) continue;
+          /*
           if(printAddInfo){
             cout << "################################################################" << endl;
             cout << "Event number: " << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
           }
+          */
+
+          //
+          //if(!_2017_mm) continue;
+          if(isData){
+              _passMETFilters = _Flag_HBHENoiseFilter && _Flag_HBHENoiseIsoFilter && _Flag_EcalDeadCellTriggerPrimitiveFilter && _Flag_goodVertices && _Flag_eeBadScFilter && _Flag_globalTightHalo2016Filter && _Flag_BadPFMuonFilter && _Flag_BadChargedCandidateFilter;
+              if(!_passMETFilters) continue;
+          }
 
           /*
-          if(!isData)
-            if(!(_HLT_Ele27_WPTight_Gsf || _HLT_IsoMu24 || _HLT_IsoTkMu24)) continue;
-          else
-            if(!(_HLT_Ele35_WPTight_Gsf || _HLT_IsoMu27)) continue;
-            */
-          if(!_2017_mm) continue;
-          _passMETFilters = _Flag_HBHENoiseFilter && _Flag_HBHENoiseIsoFilter && _Flag_EcalDeadCellTriggerPrimitiveFilter && _Flag_goodVertices && _Flag_eeBadScFilter && _Flag_globalTightHalo2016Filter && _Flag_BadPFMuonFilter && _Flag_BadChargedCandidateFilter;
           if(printAddInfo){
             cout << "Filter info: " << _passMETFilters << " " << _Flag_HBHENoiseFilter << " " << _Flag_HBHENoiseIsoFilter << " " << _Flag_EcalDeadCellTriggerPrimitiveFilter << " " << _Flag_goodVertices << " " << _Flag_eeBadScFilter << " " << _Flag_globalTightHalo2016Filter << " " << _Flag_BadPFMuonFilter << " " << _Flag_BadChargedCandidateFilter << endl;
           }
+          */
 
-          myfile << _runNb << " " << _lumiBlock << " " << _eventNb << " " << _met << " " << _passMETFilters << endl;
+          //myfile << _runNb << " " << _lumiBlock << " " << _eventNb << " " << _met << " " << _passMETFilters << endl;
 
           std::vector<unsigned> ind;
-          //select leptons
           const unsigned lCount = selectLep(ind);
 
+          /*
           if(printAddInfo)
             cout << "number of leptons: " << lCount << endl;
+            */
 
-          //used for main analysis
           if(lCount != 2) continue;
 
           int samCategory = sam;
-
           int nLocEle = getElectronNumber(ind);
+
+          if(nLocEle != 0) continue;
 
           if(!passPtCuts2L(ind)) continue;
 
@@ -171,16 +176,18 @@ void treeReader::Analyze(){
           double ptNonZ = 999999;
 
           nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
-          double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ);
+          //nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
+          //double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ);
 
-          HTLoc = HTCalc(indJets);
+          //HTLoc = HTCalc(indJets);
           
+          /*
           if(printAddInfo){
             cout << "number of jets/bjets/deltaMZ: " << nJLoc << " " << nBLoc << " " << dMZ << endl;
           }
+          */
 
-          if(dMZ > 10) continue;
+          //if(dMZ > 10) continue;
           if(nJLoc != 0) continue;
 
           double dataMCSF = 1.;
@@ -188,16 +195,17 @@ void treeReader::Analyze(){
           double lepSFUp = 1.;
           double lepSFDown = 1.;
 
-          
+          /*
           double tempValue = (double) rand() / (RAND_MAX);
           int leptonFileDicision = -99;
 
           if(tempValue < 20./35.9) leptonFileDicision = 0;
           else leptonFileDicision = 1;  
+          */
 
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data"){
 
-            dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nTrueInt));
+            dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nVertex));
               
             /*
             for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
@@ -212,8 +220,6 @@ void treeReader::Analyze(){
           
           dataMCSF *= lepSF;
           weight = weight * dataMCSF;
-          
-
           
           /*
           double btagSF_event = 1.;
@@ -273,10 +279,11 @@ void treeReader::Analyze(){
           */
           
 
+          /*
           if(printAddInfo){
             cout << "This event passes all selection criteria" << endl;
-            //cout << "total weight is: " << weight << endl;
           }
+          */
           
           /*
           if(_met > 200){
@@ -286,8 +293,6 @@ void treeReader::Analyze(){
 
           distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
           distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
-
-          //cout << "Lepton events: " << _lPt[ind.at(0)] << " " << _lPt[ind.at(1)] << " " << _lPt[ind.at(2)] << endl;
       }
 
       std::cout << std::endl;

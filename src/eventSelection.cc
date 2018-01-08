@@ -166,8 +166,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = ptFake(_lPt[i], _ptRatio[i], _lFlavor[i], _leptonMvaTTH[i], _lPOGMedium[i]);
-        ptMap.push_back({ptcor, i});
+        ptMap.push_back({_lPt[i], i});
         
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
@@ -178,12 +177,9 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
 
-    if(ptMap[0].first < 25 && _lFlavor[ptMap[0].second] == 1) return false;
-    if(ptMap[1].first < 25 && _lFlavor[ptMap[1].second] == 1) return false;
+    if(ptMap[0].first < 25) return false;
+    if(ptMap[1].first < 15) return false;
 
-    if(ptMap[0].first < 40 && _lFlavor[ptMap[0].second] == 0) return false;
-    if(ptMap[1].first < 27 && _lFlavor[ptMap[1].second] == 0) return false;
-       
     return true;
 }
 
