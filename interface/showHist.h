@@ -35,6 +35,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetBottomMargin(0.02);
     pad1->Draw();
     pad1->cd();
+    pad1->SetLogy();
     
     double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
     double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
@@ -44,7 +45,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].SetTitle(title.c_str());
     distribs.vectorHisto[dataSample].GetXaxis()->SetTitle(titleX.c_str());
     distribs.vectorHisto[dataSample].GetYaxis()->SetTitle(titleY.c_str());
-    distribs.vectorHisto[dataSample].SetMinimum(0.01);
+    distribs.vectorHisto[dataSample].SetMinimum(0.5);
     distribs.vectorHisto[dataSample].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
     distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.01);
 
@@ -69,10 +70,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     //TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     //setex1->Draw();
 
+    /*
     distribs.vectorHistoTotalUnc.SetFillStyle(3005);
     distribs.vectorHistoTotalUnc.SetFillColor(kGray+2);
     distribs.vectorHistoTotalUnc.SetMarkerStyle(1);
     distribs.vectorHistoTotalUnc.Draw("e2same");
+    */
 
     //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     //setex2->Draw();
@@ -82,99 +85,9 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     leg->Draw("same");
     CMS_lumi( pad1, iPeriod, iPos );
 
-    if(titleX == "M_{T}^{3rd} [GeV]"){
-        TLine *line2 = new TLine(50, 0, 50, 900);
-        line2->SetLineStyle(2);
-        line2->Draw("same");
-
-        TLatex mtWcut;
-        mtWcut.SetNDC();
-        mtWcut.SetTextAngle(0);
-        mtWcut.SetTextColor(kBlack);  
-
-        mtWcut.SetTextFont(42);
-        mtWcut.SetTextAlign(31); 
-        mtWcut.SetTextSize(0.06);    
-        mtWcut.DrawLatex(0.62, 0.6,"M_{T}^{3rd} > 50");
-    }
-
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
-
-/*
-    if(titleX=="BDT score"){
-        TLine *line2 = new TLine(0, 0, 0, 30);
-        line2->SetLineStyle(2);
-        line2->Draw("same");
-
-        TLatex mtWcut;
-        mtWcut.SetNDC();
-        mtWcut.SetTextAngle(0);
-        mtWcut.SetTextColor(kBlack);  
-
-        mtWcut.SetTextFont(42);
-        mtWcut.SetTextAlign(31); 
-        mtWcut.SetTextSize(0.06);    
-        mtWcut.DrawLatex(0.62, 0.6,"BDT > 0");
-    }
-*/
-
-
-    if(titleX=="monetplot"){
-
-        distribs.vectorHisto[dataSample].GetXaxis()->SetTitleSize(0.07);
-        distribs.vectorHisto[dataSample].GetXaxis()->SetTitleOffset(0.8);
-        distribs.vectorHisto[dataSample].GetXaxis()->SetTitle("N_{jets}");
-        //pad1->SetLeftMargin(0.07);
-        //hist->GetXaxis()->SetTitleOffset(0.6);
-
-        TLine *line2 = new TLine(2.5, 0, 2.5, 125);
-        line2->SetLineStyle(2);
-        line2->Draw("same");
-
-        TLine *line3 = new TLine(5.5, 0, 5.5, 125);
-        line3->SetLineStyle(2);
-        line3->Draw("same");
-
-        /*
-        TLine *line4 = new TLine(14.5, 0, 14.5, 20);
-        line4->SetLineStyle(2);
-        line4->Draw("same");
-        */
-
-        TLatex MMregionBDT1;
-        MMregionBDT1.SetNDC();
-        MMregionBDT1.SetTextAngle(0);
-        MMregionBDT1.SetTextColor(kBlack);  
-
-        MMregionBDT1.SetTextFont(42);
-        MMregionBDT1.SetTextAlign(31); 
-        MMregionBDT1.SetTextSize(0.05);    
-        MMregionBDT1.DrawLatex(0.35, 0.56,"N_{b} = 0");
-
-        TLatex MMregionBDT2;
-        MMregionBDT2.SetNDC();
-        MMregionBDT2.SetTextAngle(0);
-        MMregionBDT2.SetTextColor(kBlack);  
-
-        MMregionBDT2.SetTextFont(42);
-        MMregionBDT2.SetTextAlign(31); 
-        MMregionBDT2.SetTextSize(0.05);    
-        MMregionBDT2.DrawLatex(0.64, 0.56,"N_{b} = 1");
-
-        TLatex PPregionBDT1;
-        PPregionBDT1.SetNDC();
-        PPregionBDT1.SetTextAngle(0);
-        PPregionBDT1.SetTextColor(kBlack);  
-
-        PPregionBDT1.SetTextFont(42);
-        PPregionBDT1.SetTextAlign(31); 
-        PPregionBDT1.SetTextSize(0.05);    
-        PPregionBDT1.DrawLatex(0.91, 0.56,"N_{b} > 1");
-        
-    }
-
 
     if(xPad == 0) return;
 

@@ -33,7 +33,8 @@ void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
     //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/92X/codeFromWillem/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuple_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);
@@ -77,16 +78,20 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_eventNb", &_eventNb, &b__eventNb);
     fChain->SetBranchAddress("_nVertex", &_nVertex, &b__nVertex);    
 
+    /*
     fChain->SetBranchAddress("_HLT_Ele27_WPTight_Gsf", &_HLT_Ele27_WPTight_Gsf, &b__HLT_Ele27_WPTight_Gsf);
     fChain->SetBranchAddress("_HLT_IsoMu24", &_HLT_IsoMu24, &b__HLT_IsoMu24);
     fChain->SetBranchAddress("_HLT_IsoTkMu24", &_HLT_IsoTkMu24, &b__HLT_IsoTkMu24);
+    */
     
      if(isData){         //Temporarily only store 2017 triggers for data, to be updated when 2017 MC is available
+         /*
         fChain->SetBranchAddress("_2017_e", &_2017_e, &b__2017_e);
         fChain->SetBranchAddress("_HLT_Ele35_WPTight_Gsf", &_HLT_Ele35_WPTight_Gsf, &b__HLT_Ele35_WPTight_Gsf);
         fChain->SetBranchAddress("_HLT_Ele35_WPTight_Gsf_prescale", &_HLT_Ele35_WPTight_Gsf_prescale, &b__HLT_Ele35_WPTight_Gsf_prescale);
         fChain->SetBranchAddress("_HLT_Ele40_WPTight_Gsf", &_HLT_Ele40_WPTight_Gsf, &b__HLT_Ele40_WPTight_Gsf);
         fChain->SetBranchAddress("_HLT_Ele40_WPTight_Gsf_prescale", &_HLT_Ele40_WPTight_Gsf_prescale, &b__HLT_Ele40_WPTight_Gsf_prescale);
+        */
         fChain->SetBranchAddress("_2017_ee", &_2017_ee, &b__2017_ee);
         fChain->SetBranchAddress("_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350", &_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350, &b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350);
         fChain->SetBranchAddress("_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale", &_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale, &b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale);
@@ -94,6 +99,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_prescale", &_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_prescale, &b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_prescale);
         fChain->SetBranchAddress("_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", &_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ, &b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ);
         fChain->SetBranchAddress("_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale", &_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale, &b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale);
+        /*
         fChain->SetBranchAddress("_2017_eee", &_2017_eee, &b__2017_eee);
         fChain->SetBranchAddress("_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL", &_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL, &b__HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL);
         fChain->SetBranchAddress("_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_prescale", &_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_prescale, &b__HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_prescale);
@@ -114,6 +120,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale", &_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale, &b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale);
         fChain->SetBranchAddress("_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ", &_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ, &b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ);
         fChain->SetBranchAddress("_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale", &_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale, &b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale);
+        */
         fChain->SetBranchAddress("_2017_mm", &_2017_mm, &b__2017_mm);
         fChain->SetBranchAddress("_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", &_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, &b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL);
         fChain->SetBranchAddress("_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale", &_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale, &b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale);
@@ -127,6 +134,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale", &_HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale, &b__HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale);
         fChain->SetBranchAddress("_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8", &_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8, &b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8);
         fChain->SetBranchAddress("_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale", &_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale, &b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale);
+        /*
         fChain->SetBranchAddress("_2017_mme", &_2017_mme, &b__2017_mme);
         fChain->SetBranchAddress("_HLT_DiMu9_Ele9_CaloIdL_TrackIdL", &_HLT_DiMu9_Ele9_CaloIdL_TrackIdL, &b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL);
         fChain->SetBranchAddress("_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_prescale", &_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_prescale, &b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL_prescale);
@@ -138,8 +146,18 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_TripleMu_5_3_3_Mass3p8to60_DZ", &_HLT_TripleMu_5_3_3_Mass3p8to60_DZ, &b__HLT_TripleMu_5_3_3_Mass3p8to60_DZ);
         fChain->SetBranchAddress("_HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale", &_HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale, &b__HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale);
         fChain->SetBranchAddress("_TripleMu_12_10_5", &_TripleMu_12_10_5, &b__TripleMu_12_10_5);
+        */
     }
     fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
+    fChain->SetBranchAddress("_Flag_HBHENoiseFilter", &_Flag_HBHENoiseFilter, &b__Flag_HBHENoiseFilter);
+    fChain->SetBranchAddress("_Flag_HBHENoiseIsoFilter", &_Flag_HBHENoiseIsoFilter, &b__Flag_HBHENoiseIsoFilter);
+    fChain->SetBranchAddress("_Flag_EcalDeadCellTriggerPrimitiveFilter", &_Flag_EcalDeadCellTriggerPrimitiveFilter, &b__Flag_EcalDeadCellTriggerPrimitiveFilter);
+    fChain->SetBranchAddress("_Flag_goodVertices", &_Flag_goodVertices, &b__Flag_goodVertices);
+    fChain->SetBranchAddress("_Flag_eeBadScFilter", &_Flag_eeBadScFilter, &b__Flag_eeBadScFilter);
+    //fChain->SetBranchAddress("_Flag_globalTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
+    fChain->SetBranchAddress("_Flag_globalSuperTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
+    fChain->SetBranchAddress("_Flag_BadPFMuonFilter", &_Flag_BadPFMuonFilter, &b__Flag_BadPFMuonFilter);
+    fChain->SetBranchAddress("_Flag_BadChargedCandidateFilter", &_Flag_BadChargedCandidateFilter, &b__Flag_BadChargedCandidateFilter);
     fChain->SetBranchAddress("_nL", &_nL, &b__nL);
     fChain->SetBranchAddress("_nMu", &_nMu, &b__nMu);
     fChain->SetBranchAddress("_nEle", &_nEle, &b__nEle);
@@ -147,7 +165,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     //fChain->SetBranchAddress("_nTau", &_nTau, &b__nTau);
     fChain->SetBranchAddress("_lPt", _lPt, &b__lPt);
     fChain->SetBranchAddress("_lEta", _lEta, &b__lEta);
-    fChain->SetBranchAddress("_lEtaSC", _lEtaSC, &b__lEtaSC);
+    //fChain->SetBranchAddress("_lEtaSC", _lEtaSC, &b__lEtaSC);
     fChain->SetBranchAddress("_lPhi", _lPhi, &b__lPhi);
     fChain->SetBranchAddress("_lE", _lE, &b__lE);
     fChain->SetBranchAddress("_lFlavor", _lFlavor, &b__lFlavor);
@@ -156,6 +174,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_dz", _dz, &b__dz);
     fChain->SetBranchAddress("_3dIP", _3dIP, &b__3dIP);
     fChain->SetBranchAddress("_3dIPSig", _3dIPSig, &b__3dIPSig);
+    /*
     fChain->SetBranchAddress("_lElectronMva", _lElectronMva, &b__lElectronMva);
     fChain->SetBranchAddress("_lElectronMvaHZZ", _lElectronMvaHZZ, &b__lElectronMvaHZZ);
     fChain->SetBranchAddress("_lElectronPassEmu", _lElectronPassEmu, &b__lElectronPassEmu);
@@ -170,7 +189,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lEwkLoose", _lEwkLoose, &b__lEwkLoose);
     fChain->SetBranchAddress("_lEwkFO", _lEwkFO, &b__lEwkFO);
     fChain->SetBranchAddress("_lEwkTight", _lEwkTight, &b__lEwkTight);
-    fChain->SetBranchAddress("_lPOGVeto", _lPOGVeto, &b__lPOGVeto);
+    */
+    //fChain->SetBranchAddress("_lPOGVeto", _lPOGVeto, &b__lPOGVeto);
     fChain->SetBranchAddress("_lPOGLoose", _lPOGLoose, &b__lPOGLoose);
     fChain->SetBranchAddress("_lPOGMedium", _lPOGMedium, &b__lPOGMedium);
     fChain->SetBranchAddress("_lPOGTight", _lPOGTight, &b__lPOGTight);
@@ -184,24 +204,30 @@ void treeReader::initTree(TTree *tree, const bool isData)
     //fChain->SetBranchAddress("_tauVTightMvaNew", _tauVTightMvaNew, &b__tauVTightMvaNew);
     //fChain->SetBranchAddress("_tauVTightMvaOld", _tauVTightMvaOld, &b__tauVTightMvaOld);
     fChain->SetBranchAddress("_relIso", _relIso, &b__relIso);
-    //fChain->SetBranchAddress("_relIso0p4Mu", _relIso0p4Mu, &b__relIso0p4Mu);
+    fChain->SetBranchAddress("_relIso0p4Mu", _relIso0p4Mu, &b__relIso0p4Mu);
+    /*
     fChain->SetBranchAddress("_miniIso", _miniIso, &b__miniIso);
     fChain->SetBranchAddress("_miniIsoCharged", _miniIsoCharged, &b__miniIsoCharged);
     fChain->SetBranchAddress("_ptRel", _ptRel, &b__ptRel);
     fChain->SetBranchAddress("_ptRatio", _ptRatio, &b__ptRatio);
+    */
     fChain->SetBranchAddress("_closestJetCsvV2", _closestJetCsvV2, &b__closestJetCsvV2);
     fChain->SetBranchAddress("_closestJetDeepCsv_b", _closestJetDeepCsv_b, &b__closestJetDeepCsv_b);
     fChain->SetBranchAddress("_closestJetDeepCsv_bb", _closestJetDeepCsv_bb, &b__closestJetDeepCsv_bb);
+    /*
     fChain->SetBranchAddress("_selectedTrackMult", _selectedTrackMult, &b__selectedTrackMult);
     fChain->SetBranchAddress("_lMuonSegComp", _lMuonSegComp, &b__lMuonSegComp);
     fChain->SetBranchAddress("_lMuonTrackPt", _lMuonTrackPt, &b__lMuonTrackPt);
     fChain->SetBranchAddress("_lMuonTrackPtErr", _lMuonTrackPtErr, &b__lMuonTrackPtErr);
+    */
     fChain->SetBranchAddress("_nJets", &_nJets, &b__nJets);
     fChain->SetBranchAddress("_jetPt", _jetPt, &b__jetPt);
+    /*
     fChain->SetBranchAddress("_jetPt_JECUp", _jetPt_JECUp, &b__jetPt_JECUp);
     fChain->SetBranchAddress("_jetPt_JECDown", _jetPt_JECDown, &b__jetPt_JECDown);
     fChain->SetBranchAddress("_jetPt_JERUp", _jetPt_JERUp, &b__jetPt_JERUp);
     fChain->SetBranchAddress("_jetPt_JERDown", _jetPt_JERDown, &b__jetPt_JERDown);
+    */
     fChain->SetBranchAddress("_jetEta", _jetEta, &b__jetEta);
     fChain->SetBranchAddress("_jetPhi", _jetPhi, &b__jetPhi);
     fChain->SetBranchAddress("_jetE", _jetE, &b__jetE);
@@ -213,15 +239,19 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetHadronFlavor", _jetHadronFlavor, &b__jetHadronFlavor);
     fChain->SetBranchAddress("_jetId", _jetId, &b__jetId);
     fChain->SetBranchAddress("_met", &_met, &b__met);
+    fChain->SetBranchAddress("_metPhi", &_metPhi, &b__metPhi);
+    fChain->SetBranchAddress("_rawmet", &_rawmet, &b__rawmet);
+    fChain->SetBranchAddress("_rawmetPhi", &_rawmetPhi, &b__rawmetPhi);
+    /*
     fChain->SetBranchAddress("_metJECDown", &_metJECDown, &b__metJECDown);
     fChain->SetBranchAddress("_metJECUp", &_metJECUp, &b__metJECUp);
     fChain->SetBranchAddress("_metUnclDown", &_metUnclDown, &b__metUnclDown);
     fChain->SetBranchAddress("_metUnclUp", &_metUnclUp, &b__metUnclUp);
-    fChain->SetBranchAddress("_metPhi", &_metPhi, &b__metPhi);
     fChain->SetBranchAddress("_metPhiJECDown", &_metPhiJECDown, &b__metPhiJECDown);
     fChain->SetBranchAddress("_metPhiJECUp", &_metPhiJECUp, &b__metPhiJECUp);
     fChain->SetBranchAddress("_metPhiUnclDown", &_metPhiUnclDown, &b__metPhiUnclDown);
     fChain->SetBranchAddress("_metPhiUnclUp", &_metPhiUnclUp, &b__metPhiUnclUp);
+    */
 
     if(!isData){
         fChain->SetBranchAddress("_weight", &_weight, &b__weight);

@@ -92,8 +92,6 @@ void getFRmaps(vector<TH2D> & fakeMaps){
 
 void initdistribs(std::vector<std::string> & namesOfSamples){
 
-
-    
     for(unsigned int i = 0; i < distribs.size(); i++){
       TString name = Form("varST_%d",i);
       //distribs[i].colsStack = std::move(THStack(name,varN[i]));
@@ -141,37 +139,6 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }
-
-    
-    for(auto & histo: distribs[indexFlavour].vectorHisto) {
-      for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetLabelSize(0.1);
-      histo.GetXaxis()->SetTitleSize(0.25);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
-      distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-    }
-
-
-    for(auto & histo: distribs[indexSR].vectorHisto) {
-      
-      for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
-      distribs[indexSR].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-    }
-
 
 }
 

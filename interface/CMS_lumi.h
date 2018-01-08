@@ -16,8 +16,8 @@ const float cmsTextFont   = 61;  // default is helvetic-bold
 
 const bool writeExtraText = true;
 //TString extraText   = "       Supplementary (Simulation)";
-//const TString extraText   = "       Preliminary";
-const TString extraText   = "";
+const TString extraText   = "       Preliminary";
+//const TString extraText   = "";
 const float extraTextFont = 52;  // default is helvetica-italics
 
 // text sizes and text offsets with respect to the top frame
@@ -35,7 +35,7 @@ const float relExtraDY = 1.2;
 const float extraOverCmsTextSize  = 0.76;
 
 //const TString lumi_13TeV = "35.9 fb^{-1}";
-const TString lumi_13TeV = "38.7 fb^{-1}";
+const TString lumi_13TeV = "41.9 fb^{-1}";
 const TString lumi_8TeV  = "19.7 fb^{-1}";
 const TString lumi_7TeV  = "5.1 fb^{-1}";
 const TString lumi_sqrtS = "";

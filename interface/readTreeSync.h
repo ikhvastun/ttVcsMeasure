@@ -138,56 +138,38 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
+const int nVars  = 9;
 
-const int nVars  = 23;
-
- TString varN[nVars] = {
-    "p_{T}^{leading} [GeV]", "p_{T}^{sub-leading} [GeV]", "p_{T}^{trailing} [GeV]",
-    "M_{T}^{leading} [GeV]", "M_{T}^{trailing} [GeV]", 
-    "R_{trail lep}^{jet}",
-    "E_{T}^{miss}", "H_{T}", "N_{jets}", "N_{b jets}", "Jet p_{T}^{leading} [GeV]","Jet p_{T}^{trailing} [GeV]",
-    "BDTG", "PU",
-    "flavour",
-    "SR",
-    "m_{ll} [GeV]", "p_{T}^{Z} [GeV]", "Non-Z lepton p_{T} [GeV]",
-    "m_{ll} [GeV]", "m_{ll} [GeV]", "m_{ll} [GeV]", "m_{ll} [GeV]" 
-    }; 
-
+TString varN[nVars] = {
+    "Raw E_{T}^{miss}", "Type I E_{T}^{miss}", 
+    "u_{para}", "u_{perp}", 
+    "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", 
+    "#eta^{leading} [GeV]", "#eta^{trailing} [GeV]", 
+    "NPV"
+}; 
 
 double varMin[nVars] = {
-    0, 0, 0,
-    0, 0,
-    0, 
-    0, 0, 1.5, -0.5, 30, 30, 
-    -1, 0, 
-    0.5,
-    -0.5,
-    81., 0, 0,
-    81., 81., 81., 81.
-  };
+    0, 0, 
+    -200, -200, 
+    0, 0, 
+    -2.5, -2.5, 
+    0,
+};
     
 double varMax[nVars] = {
-    300,200, 200,
-    300,200,
-    3,
-    400, 1000, 7.5, 5.5, 420, 300, 
-    1, 50, 
-    leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5),
-    leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5),
-    101., 400, 180,
-    101, 101, 101, 101
+    300, 300,
+    200, 200, 
+    100, 100, 
+    2.5, 2.5, 
+    70,
 };
     
 int nBins[nVars] = {
-    20, 20, 20,
-    30, 20,
-    30,
-    10, 10, 6, 6, 13, 18, 
-    10, 25,
-    leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (static_cast<int>(flavourLabelOptionsFor3L.size())) ,
-    leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size()),
-    10, 16, 12,
-    10, 10, 10, 10
+    60, 60,
+    80, 80, 
+    100, 100, 
+    50, 50, 
+    70,
 };
 
 

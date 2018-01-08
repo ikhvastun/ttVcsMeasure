@@ -33,23 +33,9 @@ void treeReader::setConePt(){
 bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
 
-    if(!lepIsFOGood(l)) return false;
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
-    if(_leptonMvaTTH[l] < 0.9) return false;
+    if(!_lPOGTight[l]) return false;
+    if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) return false;
 
-    if(leptonSelection == 2){
-
-        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
-        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-
-        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
-    }
-    /*
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) continue;
-    if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) continue;
-    if(fabs(_3dIPSig[l]) > 4) continue;
-    */
     return true;
 }
 
@@ -302,7 +288,8 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
         double ptcor1 = ptFake(_lPt[ind.at(l0)], _ptRatio[ind.at(l0)], _lFlavor[ind.at(l0)], _leptonMvaTTH[ind.at(l0)], _lPOGMedium[ind.at(l0)]);
         //cout << "l0 is " << ind.at(l0) << endl;
         
-        l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
+        //l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
+        l0p4.SetPtEtaPhiE(_lPt[ind.at(l0)],_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)]);          
         for(unsigned l1 = l0; l1 < ind.size(); l1++){
             double ptcor2 = ptFake(_lPt[ind.at(l1)], _ptRatio[ind.at(l1)], _lFlavor[ind.at(l1)], _leptonMvaTTH[ind.at(l1)], _lPOGMedium[ind.at(l1)]);
             //cout << "l1 is " << ind.at(l1) << endl;
@@ -313,7 +300,8 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
             //cout << "check the charge of 2 leptons: " << _lCharge[ind.at(l0)] << " " << _lCharge[ind.at(l1)] << " " << (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) << endl;
 
             if (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) {
-                l1p4.SetPtEtaPhiE(ptcor2 ,_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)] * ptcor2 / _lPt[ind.at(l1)]);
+                //l1p4.SetPtEtaPhiE(ptcor2 ,_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)] * ptcor2 / _lPt[ind.at(l1)]);
+                l1p4.SetPtEtaPhiE(_lPt[ind.at(l1)],_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)]);
                 l1p4+=l0p4;
                 double mdiL = l1p4.M();
                 
@@ -399,6 +387,11 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "WZ") return 51;
     if(name == "ZZ") return 8;
     if(name == "rare") return 8;
+
+    if(name == "DY") return kBlue-9;
+    if(name == "Diboson") return 98; 
+    if(name == "Triboson") return 8;
+    if(name == "Top") return 91; 
 
     return kBlack;
 }

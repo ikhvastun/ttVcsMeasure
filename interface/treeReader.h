@@ -96,6 +96,14 @@ class treeReader {
         Int_t           _HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale;
         Bool_t          _TripleMu_12_10_5;
         Bool_t          _passMETFilters;
+        Bool_t          _Flag_HBHENoiseFilter;
+        Bool_t          _Flag_HBHENoiseIsoFilter;
+        Bool_t          _Flag_EcalDeadCellTriggerPrimitiveFilter;
+        Bool_t          _Flag_goodVertices;
+        Bool_t          _Flag_eeBadScFilter;
+        Bool_t          _Flag_globalTightHalo2016Filter;
+        Bool_t          _Flag_BadPFMuonFilter;
+        Bool_t          _Flag_BadChargedCandidateFilter;
         UChar_t         _nL;
         UChar_t         _nMu;
         UChar_t         _nEle;
@@ -171,11 +179,13 @@ class treeReader {
         UInt_t          _jetHadronFlavor[nJets_max];   
         UInt_t          _jetId[nJets_max];   
         Double_t        _met;
+        Double_t        _metPhi;
+        Double_t        _rawmet;
+        Double_t        _rawmetPhi;
         Double_t        _metJECDown;
         Double_t        _metJECUp;
         Double_t        _metUnclDown;
         Double_t        _metUnclUp;
-        Double_t        _metPhi;
         Double_t        _metPhiJECDown;
         Double_t        _metPhiJECUp;
         Double_t        _metPhiUnclDown;
@@ -256,7 +266,7 @@ class treeReader {
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         //const double dataLumi = 35.9;                                          //in units of 1/fb
-        const double dataLumi = 38.7;                                          //in units of 1/fb
+        const double dataLumi = 41.9;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
@@ -335,6 +345,14 @@ class treeReader {
         TBranch        *b__HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale;   
         TBranch        *b__TripleMu_12_10_5;   
         TBranch        *b__passMETFilters;   
+        TBranch        *b__Flag_HBHENoiseFilter;   //!
+        TBranch        *b__Flag_HBHENoiseIsoFilter;   //!
+        TBranch        *b__Flag_EcalDeadCellTriggerPrimitiveFilter;   //!
+        TBranch        *b__Flag_goodVertices;   //!
+        TBranch        *b__Flag_eeBadScFilter;   //!
+        TBranch        *b__Flag_globalTightHalo2016Filter;   //!
+        TBranch        *b__Flag_BadPFMuonFilter;   //!
+        TBranch        *b__Flag_BadChargedCandidateFilter;   //!
         TBranch        *b__nL;   
         TBranch        *b__nMu;   
         TBranch        *b__nEle;   
@@ -410,11 +428,13 @@ class treeReader {
         TBranch        *b__jetHadronFlavor;   
         TBranch        *b__jetId;   
         TBranch        *b__met;   
+        TBranch        *b__metPhi;   
+        TBranch        *b__rawmet;   
+        TBranch        *b__rawmetPhi;   
         TBranch        *b__metJECDown;   
         TBranch        *b__metJECUp;   
         TBranch        *b__metUnclDown;   
         TBranch        *b__metUnclUp;   
-        TBranch        *b__metPhi;   
         TBranch        *b__metPhiJECDown;   
         TBranch        *b__metPhiJECUp;   
         TBranch        *b__metPhiUnclDown;   
