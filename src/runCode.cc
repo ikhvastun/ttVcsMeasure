@@ -6,6 +6,7 @@
 #include "TStyle.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TF1.h"
 #include "TH1.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -56,9 +57,9 @@ void treeReader::Analyze(){
   setTDRStyle();
   //gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
+  //readSamples("samples_Zll_2017data.txt");
   readSamples("samples_Zll_2017data.txt");
   //readSamples("test.txt");
-  setTDRStyle(); 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -89,10 +90,11 @@ void treeReader::Analyze(){
      return;
   }
   */
-  std::set<ULong64_t> eventsList = {1492195608, 146025307, 508933991, 321197298, 277740241, 892590768, 26652538, 315966641, 320474674, 59566750, 66424217, 144766203, 252985782, 65013805, 133493915, 102651335, 455363823, 111273860, 373187240, 239729165, 239078987, 195340703, 1856389, 461581059, 506460369, 656450946, 184079568, 963204027, 963441575, 336829296, 115879231, 41506348, 640566084, 78165014, 1255495340, 64807712, 2666356, 107674345, 529788719, 293132512, 39548847, 267438002, 55582650, 111863351, 1061848933, 217235889, 562481829, 704561987, 480406039, 744805798, 202616779, 327142299, 167976892, 391402062, 327599224, 503087687, 98671267, 198248356, 90666260, 406200233, 272203871, 163786055, 253703343, 142520294, 382842138, 405922138, 111982906, 210867535, 135955294, 252681643, 1150234279, 1103452740, 1262721932, 36893531, 312773489, 253682178, 450349644, 37685662, 38382410, 400846856, 552906843, 82761276, 664083895, 325380020, 585216792, 102898869, 18194142, 637834750, 573681949, 318118288, 529995837, 144910725, 14517387, 226434855, 192484572, 1617293625, 196222566, 75686784, 1147847462, 108502231, 1534207907, 1306527199, 131111757, 48742638, 131076926, 385195332, 694375811, 384522728, 894287433, 370558190, 21779924, 1099098547, 898202951, 1216158608, 253240568, 963202886, 367361713, 587481963, 115793233, 322860364, 211654778, 1206592648, 1655550800, 1350511364, 1695619142, 1754680495, 267327098, 1110306499, 5545114, 27071751, 211503876, 3377288405, 55721552, 618991682, 1117123544, 142703839, 517934154, 834180370, 1371104318, 1269000161, 2763422568, 1083197265, 1444157466, 1421307868, 1027796765, 1861225520, 1372234311, 172620241, 1040650747, 342353721, 234086389, 236104091, 76206227, 204990413, 39938667, 191786789, 325353201, 183963204, 158559514, 96976446, 157532648, 73280873, 97907529, 197833912, 697733424, 418136939, 305060877, 1273299716, 778786389, 131142593, 842492785, 332241563, 760618473, 244050843, 675289609, 694369509, 1053432589, 1266575101, 598168272, 638247408, 14814758, 1151944380, 1301114924, 101525287, 274827271, 1041988330, 321245229, 390563015, 508574825, 344972376, 522431310, 221056243, 40355959, 409853777, 200561756, 74081286, 89251178, 119661967, 207168464, 58509301, 251183962, 28591491, 30036062, 1124290562, 289965738, 1090947268, 699472740, 75939013, 411070835, 536170736, 144462225, 528847863, 260371307, 202531851, 1106760047, 82655785, 773526112, 248826088, 83999606, 297716316, 18276366, 1085186745, 372661440, 729677885, 1318455870};             
 
-  std::ofstream myfile;
-  myfile.open("myevents.txt");
+  //std::set<ULong64_t> eventsList = {1492195608, 146025307, 508933991, 321197298, 277740241, 892590768, 26652538, 315966641, 320474674, 59566750, 66424217, 144766203, 252985782, 65013805, 133493915, 102651335, 455363823, 111273860, 373187240, 239729165, 239078987, 195340703, 1856389, 461581059, 506460369, 656450946, 184079568, 963204027, 963441575, 336829296, 115879231, 41506348, 640566084, 78165014, 1255495340, 64807712, 2666356, 107674345, 529788719, 293132512, 39548847, 267438002, 55582650, 111863351, 1061848933, 217235889, 562481829, 704561987, 480406039, 744805798, 202616779, 327142299, 167976892, 391402062, 327599224, 503087687, 98671267, 198248356, 90666260, 406200233, 272203871, 163786055, 253703343, 142520294, 382842138, 405922138, 111982906, 210867535, 135955294, 252681643, 1150234279, 1103452740, 1262721932, 36893531, 312773489, 253682178, 450349644, 37685662, 38382410, 400846856, 552906843, 82761276, 664083895, 325380020, 585216792, 102898869, 18194142, 637834750, 573681949, 318118288, 529995837, 144910725, 14517387, 226434855, 192484572, 1617293625, 196222566, 75686784, 1147847462, 108502231, 1534207907, 1306527199, 131111757, 48742638, 131076926, 385195332, 694375811, 384522728, 894287433, 370558190, 21779924, 1099098547, 898202951, 1216158608, 253240568, 963202886, 367361713, 587481963, 115793233, 322860364, 211654778, 1206592648, 1655550800, 1350511364, 1695619142, 1754680495, 267327098, 1110306499, 5545114, 27071751, 211503876, 3377288405, 55721552, 618991682, 1117123544, 142703839, 517934154, 834180370, 1371104318, 1269000161, 2763422568, 1083197265, 1444157466, 1421307868, 1027796765, 1861225520, 1372234311, 172620241, 1040650747, 342353721, 234086389, 236104091, 76206227, 204990413, 39938667, 191786789, 325353201, 183963204, 158559514, 96976446, 157532648, 73280873, 97907529, 197833912, 697733424, 418136939, 305060877, 1273299716, 778786389, 131142593, 842492785, 332241563, 760618473, 244050843, 675289609, 694369509, 1053432589, 1266575101, 598168272, 638247408, 14814758, 1151944380, 1301114924, 101525287, 274827271, 1041988330, 321245229, 390563015, 508574825, 344972376, 522431310, 221056243, 40355959, 409853777, 200561756, 74081286, 89251178, 119661967, 207168464, 58509301, 251183962, 28591491, 30036062, 1124290562, 289965738, 1090947268, 699472740, 75939013, 411070835, 536170736, 144462225, 528847863, 260371307, 202531851, 1106760047, 82655785, 773526112, 248826088, 83999606, 297716316, 18276366, 1085186745, 372661440, 729677885, 1318455870};             
+
+  //std::ofstream myfile;
+  //myfile.open("myevents.txt");
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
@@ -103,7 +105,7 @@ void treeReader::Analyze(){
       //if(leptonSelectionAnalysis == 3)
       //  if(std::get<0>(samples[sam]) == "chargeMisID") continue;
 
-      //if(std::get<0>(samples[sam]) != "data") continue;
+      if(std::get<0>(samples[sam]) != "data") continue;
     
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -119,7 +121,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 5000) break;
+          //if(it > 500000) break;
           
           /*
           const bool is_in = eventsList.find(_eventNb) != eventsList.end();
@@ -137,10 +139,13 @@ void treeReader::Analyze(){
           */
 
           //
-          //if(!_2017_mm) continue;
+          
           if(isData){
-              _passMETFilters = _Flag_HBHENoiseFilter && _Flag_HBHENoiseIsoFilter && _Flag_EcalDeadCellTriggerPrimitiveFilter && _Flag_goodVertices && _Flag_eeBadScFilter && _Flag_globalTightHalo2016Filter && _Flag_BadPFMuonFilter && _Flag_BadChargedCandidateFilter;
+              // should be used for Muon Prompt Reco
+              //_passMETFilters = _Flag_HBHENoiseFilter && _Flag_HBHENoiseIsoFilter && _Flag_EcalDeadCellTriggerPrimitiveFilter && _Flag_goodVertices && _Flag_eeBadScFilter && _Flag_globalTightHalo2016Filter && _Flag_BadPFMuonFilter && _Flag_BadChargedCandidateFilter;
+              
               if(!_passMETFilters) continue;
+              if(!_2017_ee) continue;
           }
 
           /*
@@ -164,7 +169,7 @@ void treeReader::Analyze(){
           int samCategory = sam;
           int nLocEle = getElectronNumber(ind);
 
-          if(nLocEle != 0) continue;
+          if(nLocEle != 2) continue;
 
           if(!passPtCuts2L(ind)) continue;
 
@@ -172,12 +177,13 @@ void treeReader::Analyze(){
 
           unsigned third = -9999;
           double mll = 99999;
-          double ptZ = 999999;
+          double pt_Z = 999999;
+          double phi_Z = 999999;
           double ptNonZ = 999999;
 
           nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
           //nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
-          //double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ);
+          double dMZ = deltaMZ(ind, third, mll, pt_Z, ptNonZ, phi_Z);
 
           //HTLoc = HTCalc(indJets);
           
@@ -188,7 +194,7 @@ void treeReader::Analyze(){
           */
 
           //if(dMZ > 10) continue;
-          if(nJLoc != 0) continue;
+          //if(nJLoc == 0) continue;
 
           double dataMCSF = 1.;
           double lepSF = 1.;
@@ -291,8 +297,46 @@ void treeReader::Analyze(){
           }
           */
 
+          double uPara =     ((( -_met*TMath::Cos(_metPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Cos( phi_Z )+(- _met* TMath::Sin(_metPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Sin( phi_Z ))/pt_Z + pt_Z);
+          double uPara_raw = ((( -_rawmet*TMath::Cos(_rawmetPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Cos( phi_Z )+(- _rawmet* TMath::Sin(_rawmetPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Sin( phi_Z ))/pt_Z + pt_Z);
+            
+          double uPerp =     ((( -_met*TMath::Cos(_metPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Sin( phi_Z )-(- _met* TMath::Sin(_metPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Cos( phi_Z ))/pt_Z);
+          double uPerp_raw = ((( -_rawmet*TMath::Cos(_rawmetPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Sin( phi_Z )-(- _rawmet* TMath::Sin(_rawmetPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Cos( phi_Z ))/pt_Z);
+            
+
           distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
           distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
+          
+          distribs[2].vectorHisto[samCategory].Fill(TMath::Min(uPara,varMax[2]-0.001), weight);
+          distribs[3].vectorHisto[samCategory].Fill(TMath::Min(uPerp,varMax[3]-0.001), weight);
+
+          distribs[4].vectorHisto[samCategory].Fill(TMath::Min(_lPt[ind.at(0)],varMax[4]-0.001), weight);
+          distribs[5].vectorHisto[samCategory].Fill(TMath::Min(_lPt[ind.at(1)],varMax[5]-0.001), weight);
+
+          distribs[6].vectorHisto[samCategory].Fill(TMath::Min(_lEta[ind.at(0)],varMax[6]-0.001), weight);
+          distribs[7].vectorHisto[samCategory].Fill(TMath::Min(_lEta[ind.at(1)],varMax[7]-0.001), weight);
+
+          distribs[8].vectorHisto[samCategory].Fill(TMath::Min(double(_nVertex),varMax[8]-0.001), weight);
+          
+          if(pt_Z < 18) continue;
+          //continue;
+          int binForPtZ = 0;
+          for(int i = 0; i < nQt; i++){
+            if(pt_Z < qtBins[i]){
+              binForPtZ = i - 1;
+              break;
+            }
+          }
+
+          histMetCorr[binForPtZ]->Fill((uPara - pt_Z) / pt_Z);
+          histMetUnCorr[binForPtZ]->Fill((uPara_raw - pt_Z) / pt_Z);
+
+          sigmaParUnCorr[binForPtZ]->Fill(uPara_raw);
+          sigmaPerpUnCorr[binForPtZ]->Fill(uPerp_raw);
+
+          sigmaParCorr[binForPtZ]->Fill(uPara);
+          sigmaPerpCorr[binForPtZ]->Fill(uPerp);
+
       }
 
       std::cout << std::endl;
@@ -300,15 +344,8 @@ void treeReader::Analyze(){
       std::cout << std::endl;
   }
 
-  fileDummy->cd();
-  signalTree->Write();
-  bkgTree->Write();
-
-  fileDummy->Close();
-  //return;
-
-  TLegend* mtleg = new TLegend(0.45,0.89,0.95,0.77); 
-  mtleg->SetNColumns(3);
+  TLegend* mtleg = new TLegend(0.77,0.89,0.95,0.62); 
+  //mtleg->SetNColumns(1);
   mtleg->SetFillColor(0);
   mtleg->SetFillStyle(0);
   mtleg->SetBorderSize(0);
@@ -317,6 +354,7 @@ void treeReader::Analyze(){
   
   mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
   int count = 0;
+  
   for (std::vector<std::string>::iterator it = samplesOrderNames.begin()+1; it != samplesOrderNames.end(); it++) {
         count++;
         if(samplesOrderNames.at(count) == "ttH") continue;
@@ -327,14 +365,6 @@ void treeReader::Analyze(){
         mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
   }
   
-  /*
-  Color_t color = kBlack;
-  setStackColors(color, 0);
-  color = kBlue-9;
-  setStackColors(color, 1);
-  mtleg->AddEntry(&distribs[0].vectorHisto[0],"MC observed","lep"); 
-  mtleg->AddEntry(&distribs[0].vectorHisto[1],"Tight-to-loose prediction","f"); //data
-  */
 
   for (int i=0; i!=nVars; ++i)  {
     
@@ -372,9 +402,9 @@ void treeReader::Analyze(){
 
   double scale_num = 1.6;
   
-  TCanvas* plot[2];
+  TCanvas* plot[9];
       
-  for(int i = 0; i < 2; i++){
+  for(int i = 0; i < 9; i++){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
@@ -384,16 +414,213 @@ void treeReader::Analyze(){
   plot[1]->cd();
   showHist(plot[1],distribs[1],"","Type I E_{T}^{miss} [GeV]","Events / " + std::to_string(int((varMax[1] - varMin[1])/nBins[1])) + " GeV",scale_num, mtleg);
 
-  vector<TString> namesForSaveFiles = {"rawmet", "met"};
+  plot[2]->cd();
+  showHist(plot[2],distribs[2],"","u_{||} + q_{T} [GeV]","Events / " + std::to_string(int((varMax[2] - varMin[2])/nBins[2])) + " GeV",scale_num, mtleg);
+    
+  plot[3]->cd();
+  showHist(plot[3],distribs[3],"","u_{#perp}   [GeV]","Events / " + std::to_string(int((varMax[3] - varMin[3])/nBins[3])) + " GeV",scale_num, mtleg);
+
+  plot[4]->cd();
+  showHist(plot[4],distribs[4],"","p_{T}^{leading} [GeV]","Events / " + std::to_string(int((varMax[4] - varMin[4])/nBins[4])) + " GeV",scale_num, mtleg);
+    
+  plot[5]->cd();
+  showHist(plot[5],distribs[5],"","p_{T}^{trailing} [GeV]","Events / " + std::to_string(int((varMax[5] - varMin[5])/nBins[5])) + " GeV",scale_num, mtleg);
+    
+  plot[6]->cd();
+  showHist(plot[6],distribs[6],"","#eta_{T}^{leading} [GeV]","Events / " + std::to_string(int((varMax[6] - varMin[6])/nBins[6])) + " GeV",scale_num, mtleg);
+    
+  plot[7]->cd();
+  showHist(plot[7],distribs[7],"","#eta_{T}^{trailing} [GeV]","Events / " + std::to_string(int((varMax[7] - varMin[7])/nBins[7])) + " GeV",scale_num, mtleg);
+    
+  plot[8]->cd();
+  showHist(plot[8],distribs[8],"","NPV","Events",scale_num, mtleg);
+
+  /*
+  vector<TString> namesForSaveFiles = {"rawmet", "met", "upara", "uperp", "ptlead", "pttrail", "etalead", "etatrail", "npv"};
   int countPlot = 0;
   for(auto & i : namesForSaveFiles){
     plot[countPlot]->SaveAs("plotsForSave/" + i + ".pdf");
     countPlot++;
   }
-  //plot[8]->cd();
-  //drawSystUnc(plot[8], distribs[15], 8);
-  
-  //fillDatacards(distribs[15], samplesOrderNames, samplesOrder);
+  */
+
+
+  TCanvas * c1 = new TCanvas("c1", "c1");
+  c1->Divide(5,5);
+
+  TH1D * scaleChoice[2];
+  TH1D * resChoice[2][2];
+  for(int i = 0; i < 2; i++){
+    scaleChoice[i] = new TH1D(Form("scaleChoice_%d", i), Form("scaleChoice_%d", i), nQt - 1, qtBins);
+    for(int j = 0; j < 2; j++)
+      resChoice[i][j] = new TH1D(Form("resChoice_%d_%d", i, j), Form("resChoice_%d_%d", i, j), nQt - 1, qtBins);
+  }
+
+
+    TF1 * f1 = new TF1("f1", "[0] * TMath::Voigt(x - [1], [2], [3], 4) + [4] * x + [5]"   );
+
+    f1->SetParameters(histMetCorr[0]->Integral(), histMetCorr[0]->GetMean(), histMetCorr[0]->GetRMS(), 0.25);
+
+    for(int i = 0; i < 25; i++){
+
+      c1->cd(i+1);
+      histMetCorr[i]->Draw();
+      histMetCorr[i]->Fit(f1, "", "", histMetCorr[i]->GetMean() - 4 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMean() + 4 * histMetCorr[i]->GetRMS());
+      histMetCorr[i]->GetXaxis()->SetRangeUser(histMetCorr[i]->GetMean() - 7 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMean() + 7 * histMetCorr[i]->GetRMS());
+     
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+      TLatex latex;
+      latex.DrawLatex(histMetCorr[i]->GetMean() + 3 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(histMetCorr[i]->GetMean() + 3 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
+      
+      scaleChoice[0]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+      scaleChoice[0]->SetBinError(i+1, -1 * f1->GetParError(1));
+    }
+
+    TCanvas * c2 = new TCanvas("c2", "c2");
+    c2->Divide(5,5);
+
+
+    f1->SetParameters(histMetUnCorr[0]->Integral(), histMetUnCorr[0]->GetMean(), histMetUnCorr[0]->GetRMS(), 0.25);
+
+    for(int i = 0; i < 25; i++){
+      
+      //f1->SetParameters(histMetUnCorr[i]->Integral(), histMetUnCorr[i]->GetMean(), histMetUnCorr[i]->GetRMS(), 0.1);
+      c2->cd(i+1);
+      histMetUnCorr[i]->Draw();
+      histMetUnCorr[i]->Fit(f1, "", "", histMetUnCorr[i]->GetMean() - 4 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMean() + 4 * histMetUnCorr[i]->GetRMS());
+      histMetUnCorr[i]->GetXaxis()->SetRangeUser(histMetUnCorr[i]->GetMean() - 7 * histMetCorr[i]->GetRMS(), histMetUnCorr[i]->GetMean() + 7 * histMetCorr[i]->GetRMS());
+      
+      TLatex latex;
+      latex.DrawLatex(histMetUnCorr[i]->GetMean() + 3 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(histMetUnCorr[i]->GetMean() + 3 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
+      
+      scaleChoice[1]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+      scaleChoice[1]->SetBinError(i+1, -1 * f1->GetParError(1));
+
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+    }
+
+    TCanvas * c3 = new TCanvas("c3", "c3");
+    c3->Divide(5,5);
+
+
+    f1->SetParameters(sigmaPerpCorr[0]->Integral(), sigmaPerpCorr[0]->GetMean(), sigmaPerpCorr[0]->GetRMS());
+    for(int i = 0; i < 25; i++){
+      c3->cd(i+1);
+      sigmaPerpCorr[i]->Draw();
+      sigmaPerpCorr[i]->Fit(f1, "", "", sigmaPerpCorr[i]->GetMean() - 4 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMean() + 4 * sigmaPerpCorr[i]->GetRMS());
+
+      TLatex latex;
+      latex.DrawLatex(sigmaPerpCorr[i]->GetMean() + 3 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(sigmaPerpCorr[i]->GetMean() + 3 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+      
+
+      resChoice[0][0]->SetBinContent(i+1, f1->GetParameter(2));
+      resChoice[0][0]->SetBinError(i+1, f1->GetParError(2));
+
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+    }
+
+    TCanvas * c4 = new TCanvas("c4", "c4");
+    c4->Divide(5,5);
+
+
+    f1->SetParameters(sigmaParCorr[0]->Integral(), sigmaParCorr[0]->GetMean(), sigmaParCorr[0]->GetRMS());
+    for(int i = 0; i < 25; i++){
+      c4->cd(i+1);
+      sigmaParCorr[i]->Draw();
+      sigmaParCorr[i]->Fit(f1, "", "", sigmaParCorr[i]->GetMean() - 4 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMean() + 4 * sigmaParCorr[i]->GetRMS());
+      
+      TLatex latex;
+      latex.DrawLatex(sigmaParCorr[i]->GetMean() + 3 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(sigmaParCorr[i]->GetMean() + 3 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+      
+
+      resChoice[0][1]->SetBinContent(i+1, f1->GetParameter(2));
+      resChoice[0][1]->SetBinError(i+1, f1->GetParError(2));
+
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+    }
+
+    TCanvas * c5 = new TCanvas("c5", "c5");
+    c5->Divide(5,5);
+
+
+    f1->SetParameters(sigmaPerpUnCorr[0]->Integral(), sigmaPerpUnCorr[0]->GetMean(), sigmaPerpUnCorr[0]->GetRMS());
+    for(int i = 0; i < 25; i++){
+
+      c5->cd(i+1);
+      sigmaPerpUnCorr[i]->Draw();
+      sigmaPerpUnCorr[i]->Fit(f1, "", "", sigmaPerpUnCorr[i]->GetMean() - 4 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMean() + 4 * sigmaPerpUnCorr[i]->GetRMS());
+
+      TLatex latex;
+      latex.DrawLatex(sigmaPerpUnCorr[i]->GetMean() + 3 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(sigmaPerpUnCorr[i]->GetMean() + 3 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+      
+      resChoice[1][0]->SetBinContent(i+1, f1->GetParameter(2));
+      resChoice[1][0]->SetBinError(i+1, f1->GetParError(2));
+
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+    }
+
+    TCanvas * c6 = new TCanvas("c6", "c6");
+    c6->Divide(5,5);
+
+
+    f1->SetParameters(sigmaParUnCorr[0]->Integral(), sigmaParUnCorr[0]->GetMean(), sigmaParUnCorr[0]->GetRMS());
+    for(int i = 0; i < 25; i++){
+
+      c6->cd(i+1);
+      sigmaParUnCorr[i]->Draw();
+      sigmaParUnCorr[i]->Fit(f1, "", "", sigmaParUnCorr[i]->GetMean() - 4 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMean() + 4 * sigmaParUnCorr[i]->GetRMS());
+      
+      TLatex latex;
+      latex.DrawLatex(sigmaParUnCorr[i]->GetMean() + 3 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+      TLatex latex2;
+      latex2.DrawLatex(sigmaParUnCorr[i]->GetMean() + 3 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+      
+
+      resChoice[1][1]->SetBinContent(i+1, f1->GetParameter(2));
+      resChoice[1][1]->SetBinError(i+1, f1->GetParError(2));
+
+      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+    }
+
+    TCanvas * c7 = new TCanvas("c7", "c7");
+    scaleChoice[0]->Draw();
+    scaleChoice[0]->SaveAs("scale/cor/scaleEl.root");
+
+    TCanvas * c8 = new TCanvas("c8", "c8");
+    scaleChoice[1]->Draw();
+    
+    scaleChoice[1]->SaveAs("scale/uncor/scaleEl.root");
+
+    resChoice[0][0]->SaveAs("scale/cor/sigmaPerpEl.root");
+    resChoice[0][1]->SaveAs("scale/cor/sigmaParEl.root");
+
+    resChoice[1][0]->SaveAs("scale/uncor/sigmaPerpEl.root");
+    resChoice[1][1]->SaveAs("scale/uncor/sigmaParEl.root");
+
+    return;
+
 }
 
 int main(int argc, char *argv[]){

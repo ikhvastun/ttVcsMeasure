@@ -272,4 +272,19 @@ Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertra
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
 
-#endif 
+const int nQt = 26;
+const double qtBins[nQt] = {18., 24., 30., 38., 46., 52., 60, 68, 76, 84, 92, 100, 115, 130, 150, 175, 200, 225, 250, 275, 305, 335, 365, 400, 440, 500};
+
+TH1D * histPhiZCorr[25];
+TH1D * histPhiZUnCorr[25];
+
+TH1D * histMetCorr[25];
+TH1D * histMetUnCorr[25];
+
+TH1D * sigmaParUnCorr[25];
+TH1D * sigmaPerpUnCorr[25];
+
+TH1D * sigmaParCorr[25];
+TH1D * sigmaPerpCorr[25];
+
+#endif

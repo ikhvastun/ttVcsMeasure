@@ -32,8 +32,8 @@ void treeReader::readSamples(const std::string& list){
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/92X/codeFromWillem/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuple_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuple_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
@@ -101,17 +101,19 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale", &_HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale, &b__HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale);
         fChain->SetBranchAddress("_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8", &_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8, &b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8);
         fChain->SetBranchAddress("_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale", &_HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale, &b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale);
+
+        fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
+        fChain->SetBranchAddress("_Flag_HBHENoiseFilter", &_Flag_HBHENoiseFilter, &b__Flag_HBHENoiseFilter);
+        fChain->SetBranchAddress("_Flag_HBHENoiseIsoFilter", &_Flag_HBHENoiseIsoFilter, &b__Flag_HBHENoiseIsoFilter);
+        fChain->SetBranchAddress("_Flag_EcalDeadCellTriggerPrimitiveFilter", &_Flag_EcalDeadCellTriggerPrimitiveFilter, &b__Flag_EcalDeadCellTriggerPrimitiveFilter);
+        fChain->SetBranchAddress("_Flag_goodVertices", &_Flag_goodVertices, &b__Flag_goodVertices);
+        fChain->SetBranchAddress("_Flag_eeBadScFilter", &_Flag_eeBadScFilter, &b__Flag_eeBadScFilter);
+        //fChain->SetBranchAddress("_Flag_globalTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
+        fChain->SetBranchAddress("_Flag_globalSuperTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
+        fChain->SetBranchAddress("_Flag_BadPFMuonFilter", &_Flag_BadPFMuonFilter, &b__Flag_BadPFMuonFilter);
+        fChain->SetBranchAddress("_Flag_BadChargedCandidateFilter", &_Flag_BadChargedCandidateFilter, &b__Flag_BadChargedCandidateFilter);
+
     }
-    fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
-    fChain->SetBranchAddress("_Flag_HBHENoiseFilter", &_Flag_HBHENoiseFilter, &b__Flag_HBHENoiseFilter);
-    fChain->SetBranchAddress("_Flag_HBHENoiseIsoFilter", &_Flag_HBHENoiseIsoFilter, &b__Flag_HBHENoiseIsoFilter);
-    fChain->SetBranchAddress("_Flag_EcalDeadCellTriggerPrimitiveFilter", &_Flag_EcalDeadCellTriggerPrimitiveFilter, &b__Flag_EcalDeadCellTriggerPrimitiveFilter);
-    fChain->SetBranchAddress("_Flag_goodVertices", &_Flag_goodVertices, &b__Flag_goodVertices);
-    fChain->SetBranchAddress("_Flag_eeBadScFilter", &_Flag_eeBadScFilter, &b__Flag_eeBadScFilter);
-    //fChain->SetBranchAddress("_Flag_globalTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
-    fChain->SetBranchAddress("_Flag_globalSuperTightHalo2016Filter", &_Flag_globalTightHalo2016Filter, &b__Flag_globalTightHalo2016Filter);
-    fChain->SetBranchAddress("_Flag_BadPFMuonFilter", &_Flag_BadPFMuonFilter, &b__Flag_BadPFMuonFilter);
-    fChain->SetBranchAddress("_Flag_BadChargedCandidateFilter", &_Flag_BadChargedCandidateFilter, &b__Flag_BadChargedCandidateFilter);
 
     fChain->SetBranchAddress("_nL", &_nL, &b__nL);
     fChain->SetBranchAddress("_nMu", &_nMu, &b__nMu);
@@ -173,8 +175,6 @@ void treeReader::initTree(TTree *tree, const bool isData)
     if(!isData){
         fChain->SetBranchAddress("_weight", &_weight, &b__weight);
         fChain->SetBranchAddress("_nTrueInt", &_nTrueInt, &b__nTrueInt);
-        fChain->SetBranchAddress("_gen_lMomPdg", _gen_lMomPdg, &b__gen_lMomPdg);
-        fChain->SetBranchAddress("_gen_lIsPrompt", _gen_lIsPrompt, &b__gen_lIsPrompt);
         fChain->SetBranchAddress("_lIsPrompt", _lIsPrompt, &b__lIsPrompt);
         fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
     }

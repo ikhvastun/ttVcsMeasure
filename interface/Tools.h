@@ -140,6 +140,20 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
+    
+    for(int i = 0; i < 25; i++){
+
+       histMetCorr[i] = new TH1D(Form("histMetCorr_%d", i), Form("histMetCorr_%d", i), 300, -3, 3);
+       histMetUnCorr[i] = new TH1D(Form("histMetUnCorr_%d", i), Form("histMetUnCorr_%d", i), 300, -3, 3);
+
+       sigmaParUnCorr[i] = new TH1D(Form("sigmaParUnCorr_%d", i), Form("sigmaParUnCorr_%d", i), 40, -200, 200);
+       sigmaPerpUnCorr[i] = new TH1D(Form("sigmaPerpUnCorr_%d", i), Form("sigmaPerpUnCorr_%d", i), 40, -200, 200);
+
+       sigmaParCorr[i] = new TH1D(Form("sigmaParCorr_%d", i), Form("sigmaParCorr_%d", i), 40, -200, 200);
+       sigmaPerpCorr[i] = new TH1D(Form("sigmaPerpCorr_%d", i), Form("sigmaPerpCorr_%d", i), 40, -200, 200);
+    
+    }
+
 }
 
 

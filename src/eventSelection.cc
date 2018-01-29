@@ -274,7 +274,7 @@ double treeReader::deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept)
     return deltaRloc;
 }
 
-double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, double & mll, double & ptZ, double & ptNonZ){
+double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, double & mll, double & ptZ, double & ptNonZ, double & phiZ){
                         
     TLorentzVector l0p4, l1p4;
 
@@ -310,6 +310,8 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                         deltaMZ = fabs(mdiL - 91.2);
                         mll = mdiL;
                         ptZ = l1p4.Pt();
+                        phiZ = l1p4.Phi();
+                        
                         if(leptonSelection == 3){
                             for(auto & lepThird : ind){
                                 if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;

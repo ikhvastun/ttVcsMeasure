@@ -236,7 +236,7 @@ class treeReader {
         bool bTaggedCSVv2(const unsigned uncm, const unsigned wp = 1);
         unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1, bool nonpromptSample = false);
         double HTCalc(const std::vector<unsigned>& ind);
-        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &);
+        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &);
         int getElectronNumber(const std::vector<unsigned>& ind);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
