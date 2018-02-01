@@ -25,7 +25,7 @@ using Output::distribs;
 using Output::DistribsAll;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false){   
  
     double xPad = 0.25; // 0.25
 
@@ -35,7 +35,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetBottomMargin(0.02);
     pad1->Draw();
     pad1->cd();
-    pad1->SetLogy();
+    if(plotLog)
+        pad1->SetLogy();
     
     double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
     double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
@@ -70,13 +71,11 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     //TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     //setex1->Draw();
 
-    /*
     distribs.vectorHistoTotalUnc.SetFillStyle(3005);
     distribs.vectorHistoTotalUnc.SetFillColor(kGray+2);
     distribs.vectorHistoTotalUnc.SetMarkerStyle(1);
     distribs.vectorHistoTotalUnc.Draw("e2same");
-    */
-
+    
     //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     //setex2->Draw();
 
@@ -147,12 +146,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(2);
-    uncHistoCopy->SetMinimum(0.);
+    uncHistoCopy->SetMaximum(1.5);
+    uncHistoCopy->SetMinimum(0.5);
     uncHistoCopy->SetMarkerStyle(20);
     uncHistoCopy->SetMarkerSize(0.2);
 
-    dataCopyGraph->SetMarkerSize(1);
+    dataCopyGraph->SetMarkerSize(0.5);
      
     uncHistoCopy->Draw("axis");
 
@@ -171,6 +170,110 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     pad2->Update();
 }
+
+void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false){
+    
+    double xPad = 0.25; // 0.25
+
+    TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
+    pad1->SetTopMargin(0.07);
+    if(xPad != 0)
+        pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+    pad1->cd();
+    if(plotLog)
+        pad1->SetLogy();
+    
+    double xmin = distribs.histDataEras[runB].GetXaxis()->GetXmin();
+    double xmax = distribs.histDataEras[runB].GetXaxis()->GetXmax();
+    //pad1->DrawFrame(xmin, -0.1, xmax, 1.1);
+    
+    distribs.histDataEras[runB].SetMarkerSize(1);
+    distribs.histDataEras[runB].SetTitle(title.c_str());
+    distribs.histDataEras[runB].GetXaxis()->SetTitle(titleX.c_str());
+    distribs.histDataEras[runB].GetYaxis()->SetTitle(titleY.c_str());
+    distribs.histDataEras[runB].SetMinimum(0.5);
+    //distribs.histDataEras[runB].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
+    distribs.histDataEras[runB].GetXaxis()->SetLabelOffset(0.01);
+
+    //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
+    //setex2->Draw();
+
+    distribs.histDataEras[runB].Draw("E0");
+    distribs.histDataEras[runCDE].Scale(distribs.histDataEras[runB].Integral()  / distribs.histDataEras[runCDE].Integral());
+    distribs.histDataEras[runCDE].SetMarkerColor(kRed);
+    distribs.histDataEras[runCDE].SetLineColor(kRed);
+    distribs.histDataEras[runCDE].Draw("E0same");
+    distribs.histDataEras[runF].Scale(distribs.histDataEras[runB].Integral() / distribs.histDataEras[runF].Integral());
+    distribs.histDataEras[runF].SetMarkerColor(kBlue);
+    distribs.histDataEras[runF].SetLineColor(kBlue);
+    distribs.histDataEras[runF].Draw("E0same");
+
+    leg->Draw("same");
+    CMS_lumi( pad1, iPeriod, iPos );
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
+    if(xPad == 0) return;
+
+    
+    c1->cd();
+
+    TPad *pad2 = new TPad("pad2","pad2",0,0,1,xPad);
+    
+    pad2->SetBottomMargin((1.-xPad)/xPad*0.13);
+    pad2->SetTopMargin(0.06);
+
+    pad2->Draw();
+    pad2->RedrawAxis();
+    pad2->cd();
+
+    TH1D * dataB = (TH1D*)distribs.histDataEras[runB].Clone("dataB");
+    TH1D * dataCDE = (TH1D*)distribs.histDataEras[runCDE].Clone("dataCDE");
+    TH1D * dataF = (TH1D*)distribs.histDataEras[runF].Clone("dataF");
+    
+   
+
+    dataB->SetTitle("");
+    dataB->GetXaxis()->SetTitle(titleX.c_str());
+    dataB->GetYaxis()->SetTitle("run X / run B");
+
+    dataB->GetXaxis()->SetRangeUser(xmin, xmax);
+
+    dataB->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
+    dataB->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataB->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataB->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    dataB->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+
+    dataB->SetMaximum(1.5);
+    dataB->SetMinimum(0.5);
+    dataB->SetMarkerStyle(20);
+
+    dataCDE->SetMarkerSize(0.5);
+    dataF->SetMarkerSize(0.5);
+     
+    dataB->Draw("axis");
+
+    TLine *line = new TLine(xmin, 1, xmax, 1);
+    line->SetLineStyle(2);
+    
+    line->Draw("same");
+
+    dataCDE->Divide(dataB);
+    dataF->Divide(dataB);
+    dataCDE->Draw("psame");
+    dataF->Draw("psame");
+
+    line->Draw("same");
+
+
+    pad2->Update();
+    
+}
+
 
 void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
 

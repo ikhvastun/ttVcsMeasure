@@ -100,6 +100,16 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
       distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
 
+      name = Form("varHistEra_%d_0",i);
+      distribs[i].histDataEras[0] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+      name = Form("varHistEra_%d_1",i);
+      distribs[i].histDataEras[1] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+      name = Form("varHistEra_%d_2",i);
+      distribs[i].histDataEras[2] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+
       for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
         distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));

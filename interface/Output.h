@@ -10,6 +10,8 @@ namespace Output{
   		TH1D vectorHistoTotalUnc;
   		std::vector<TH1D> vectorHistoUp;
   		std::vector<TH1D> vectorHistoDown;
+
+  		TH1D histDataEras[3];
   		THStack stack;
 	};
 

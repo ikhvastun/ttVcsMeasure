@@ -11,6 +11,10 @@ const int leptonSelectionAnalysis = 3;
 //std::vector<int> distribsOrder = { 5, 16, 17, 18, 19, 20, 21, 22, 23, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 8, 6, 7};
 const int nSamples = 100;
 const int dataSample = 0;
+
+const int runB = 0;
+const int runCDE = 1;
+const int runF = 2;
 //int uncertaintySample = distribsOrder.size() + 1; // +1 for data
 
 /*
@@ -138,14 +142,14 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 9;
+const int nVars  = 10;
 
 TString varN[nVars] = {
     "Raw E_{T}^{miss}", "Type I E_{T}^{miss}", 
     "u_{para}", "u_{perp}", 
     "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", 
     "#eta^{leading} [GeV]", "#eta^{trailing} [GeV]", 
-    "NPV"
+    "NPV", "mll"
 }; 
 
 double varMin[nVars] = {
@@ -153,7 +157,7 @@ double varMin[nVars] = {
     -200, -200, 
     0, 0, 
     -2.5, -2.5, 
-    0,
+    0, 81,
 };
     
 double varMax[nVars] = {
@@ -161,7 +165,7 @@ double varMax[nVars] = {
     200, 200, 
     100, 100, 
     2.5, 2.5, 
-    70,
+    90, 101
 };
     
 int nBins[nVars] = {
@@ -169,12 +173,12 @@ int nBins[nVars] = {
     80, 80, 
     100, 100, 
     50, 50, 
-    70,
+    90, 40
 };
 
 
 // Lepton SF
-TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_2017data_2016MC_41p9fb.root","READ"); // PU reweighing
+TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_2017data_2017MC_41p9fb_nRecoVertices_mm.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
 
 TFile *lepSF_ele_file = TFile::Open("leptonSF/scaleFactorsAll.root","READ");
