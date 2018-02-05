@@ -25,7 +25,7 @@ using Output::distribs;
 using Output::DistribsAll;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false){   
  
     double xPad = 0.25; // 0.25
 
@@ -64,6 +64,15 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     //setex2->Draw();
+
+    TH1* hist = NULL;
+    if(normalizedToData){
+        for(int i = 0; i < distribs.stack.GetStack()->GetEntries(); i++){
+            hist = dynamic_cast<TH1*>(distribs.stack.GetStack()->At(i));
+            TH1D *stackCopyMCrew = (TH1D*)(distribs.stack.GetStack()->Last());
+            hist->Scale(distribs.vectorHisto[dataSample].Integral() / stackCopyMCrew->Integral());
+        }
+    }
 
     distribs.vectorHisto[dataSample].Draw("E0");
     distribs.stack.Draw("histsame");
