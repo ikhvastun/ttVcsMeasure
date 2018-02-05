@@ -30,46 +30,103 @@ void treeReader::setConePt(){
     }
 }
 
+/*
+bool treeReader::lepIsGood(const unsigned l){
+    if(!lepIsLoose(l)) return false;
+    //if(_closestJetCsvV2[l] > 0.8484) return false;
+    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
+    if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
+    return true;
+}
+*/
+
 bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
+    if(!lepIsFOGood(l)) return false;
+    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
+    if(_leptonMvaTTH[l] < 0.9) return false;
 
-    if(!_lPOGTight[l]) return false;
-    if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) return false;
+    /*
+    if(leptonSelection == 2){
+
+        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
+    }
+    */
+    return true;
+}
+
+bool treeReader::lepIsFOGood(const unsigned l){
+    // what is used in leptonMVA analysis
+    if(!lepIsLoose(l)) return false;
+    if(_closestJetCsvV2[l] > 0.8484) return false;
+
+    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
+    if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
+
+    /*
+    if(leptonSelection == 2){
+        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+
+        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+
+    }
+    */
+    
+    if(_leptonMvaTTH[l] < 0.9){
+
+        if(_lFlavor[l] == 0 && _lElectronMvaHZZ[l] <= 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7) return false;
+        
+        if(_ptRatio[l] <= 0.5) return false;
+        if(_closestJetCsvV2[l] >= 0.3) return false;
+        if(_lFlavor[l] == 1 && _lMuonSegComp[l] <= 0.3) return false; 
+    }
 
     return true;
 }
 
-
-bool treeReader::lepIsFOGood(const unsigned l){
-    // what is used in leptonMVA analysis
-
-    if(!_lEwkLoose[l]) return false;
-    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
-    if(_closestJetCsvV2[l] > 0.8484) return false;
-
-    // this should be done with electronMVAHZZ (0, 0, 0.7) cuts
-    if(_lFlavor[l] == 0){
-        
-        if(fabs(_lEta[l]) < 0.8 && _lElectronMvaHZZ[l] <  0)         return false;
-        else if (fabs(_lEta[l]) < 1.479 && _lElectronMvaHZZ[l] <  0)   return false;
-        else if (fabs(_lEta[l]) < 2.5 && _lElectronMvaHZZ[l] <  0.7) return false;
-
+bool treeReader::elePassVLooseMvaIDSUSY(const unsigned ind){
+    if(_lFlavor[ind] != 0) return true;
+    static const double gpCuts[3][2] = { {-0.48,-0.85}, {-0.67, -0.91}, {-0.49, -0.83} };
+    static const double hzzCuts[3] = {0.46, -0.03, 0.06};
+    unsigned eta = (fabs(_lEta[ind]) >= 0.8) + (fabs(_lEta[ind]) > 1.479);
+    if(_lPt[ind] > 10){
+        return _lElectronMva[ind] > std::min( gpCuts[eta][0], std::max(gpCuts[eta][1], gpCuts[eta][0] + (gpCuts[eta][1] - gpCuts[eta][0])*0.1*(_lPt[ind] - 15.) ) );
+    } else{
+        return _lElectronMvaHZZ[ind] > hzzCuts[eta];
     }
-    
-        
-    if(leptonSelection == 2){
-        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-    }
+}
 
-    
-    if(_leptonMvaTTH[l] < 0.9){
-
-        if(_lFlavor[l] == 1 && (_ptRatio[l] > 0.5 && _closestJetCsvV2[l] < 0.3 && _lMuonSegComp[l] > 0.3)) return true;
-        else if (_lFlavor[l] == 0 && (_ptRatio[l] > 0.5 && _closestJetCsvV2[l] < 0.3)) return true;
-        else return false;
+bool treeReader::eleIsClean(const unsigned ind){
+    TLorentzVector ele;
+    ele.SetPtEtaPhiE(_lPt[ind], _lEta[ind], _lPhi[ind], _lE[ind]);
+    for(unsigned m = 0; m < _nMu; ++m){
+        if(lepIsLoose(m)){
+            TLorentzVector mu;
+            mu.SetPtEtaPhiE(_lPt[m], _lEta[m], _lPhi[m], _lE[m]);
+            if(ele.DeltaR(mu) < 0.05) return false;
+        }
     }
-    
-    
+    return true;
+}
+
+bool treeReader::lepIsLoose(const unsigned ind){
+    // this is where potentially the discrepancy can come from
+    //if(_closestJetCsvV2[ind] > 0.8484) return false;
+
+    if(_lFlavor[ind] == 2) return false;  //don't consider taus here
+    if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
+    if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
+    if(fabs(_dxy[ind]) >= 0.05) return false;
+    if(fabs(_dz[ind]) >= 0.1) return false;
+    if(_3dIPSig[ind] >= 8) return false;
+    if(_miniIso[ind] >= 0.4) return false;
+    if(_lFlavor[ind] == 1){
+        if(!_lPOGLoose[ind]) return false;
+    } else if(_lFlavor[ind] == 0){
+        if(_lElectronMissingHits[ind] > 1) return false;
+        if(!elePassVLooseMvaIDSUSY(ind)) return false;
+    }
     return true;
 }
 
@@ -96,18 +153,18 @@ unsigned treeReader::selectLep(std::vector<unsigned>& ind){
     return lCount;	
 }
 
-unsigned treeReader::selectFakeLep(std::vector<unsigned>& ind){
+unsigned treeReader::selectLooseLep(std::vector<unsigned>& ind){
     //setConePt(); REMOVE CONE CORRECTION UNTIL MOVING TO FR
     unsigned lCount = 0;
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
         //cout << "lepton info: " << _lPt[l] << " " << _lEwkLoose[l] << " " << _leptonMvaTTH[l] << endl;
-        if(lepIsFOGood(l)){
+        if(lepIsLoose(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
     }
-    if(lCount < 2) return 0;
+    //if(lCount < 2) return 0;
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
     for(unsigned l = 0; l < lCount; ++l){
         ind.push_back(ptMap[l].second);
@@ -187,7 +244,7 @@ bool treeReader::jetIsClean(const unsigned ind, bool nonpromptSample){
     TLorentzVector jet;	
     jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]);
     for(unsigned l = 0; l < _nLight; ++l){
-        if((nonpromptSample && lepIsFOGood(l)) || (!nonpromptSample && lepIsGood(l))){ // cleaning with FO objects
+        if(!nonpromptSample && lepIsLoose(l)){ // cleaning with FO objects
             TLorentzVector lep;
             lep.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
             //cout << "jet lepton cleaning is going on, delta R is: " << lep.DeltaR(jet) << endl;
@@ -357,6 +414,7 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
     bool leptIsP = false;
     TLorentzVector l0reco;
     l0reco.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
+    //cout << "let's match, number of gen leptons: " << _gen_nL << endl;
     for(unsigned i = 0; i < _gen_nL; i++){
         TLorentzVector l0gen;
         //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
@@ -389,7 +447,9 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "DY") return kBlue-9;
     if(name == "Diboson") return 98; 
     if(name == "Triboson") return 8;
-    if(name == "Top") return 91; 
+    if(name == "TopPr") return 91; 
+    if(name == "TopNonPr") return 51; 
+    if(name == "tW") return kRed-10;
 
     return kBlack;
 }

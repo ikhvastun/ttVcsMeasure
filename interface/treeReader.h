@@ -225,6 +225,7 @@ class treeReader {
         bool lepIsTight(const unsigned);
         unsigned selectLep(std::vector<unsigned>&);
         unsigned selectFakeLep(std::vector<unsigned>&);
+        unsigned selectLooseLep(std::vector<unsigned>&);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
@@ -241,6 +242,10 @@ class treeReader {
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
+
+        bool elePassVLooseMvaIDSUSY(const unsigned ind);
+        bool eleIsClean(const unsigned ind);
+        bool lepIsLoose(const unsigned ind);
 
         Color_t assignColor(std::string & name);
 
@@ -265,8 +270,8 @@ class treeReader {
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        //const double dataLumi = 35.9;                                          //in units of 1/fb
-        const double dataLumi = 41.9;                                          //in units of 1/fb
+        const double dataLumi = 35.9;                                          //in units of 1/fb
+        //const double dataLumi = 41.9;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   

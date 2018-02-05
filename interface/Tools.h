@@ -141,18 +141,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
     }
 
     
-    for(int i = 0; i < 25; i++){
-
-       histMetCorr[i] = new TH1D(Form("histMetCorr_%d", i), Form("histMetCorr_%d", i), 300, -3, 3);
-       histMetUnCorr[i] = new TH1D(Form("histMetUnCorr_%d", i), Form("histMetUnCorr_%d", i), 300, -3, 3);
-
-       sigmaParUnCorr[i] = new TH1D(Form("sigmaParUnCorr_%d", i), Form("sigmaParUnCorr_%d", i), 40, -200, 200);
-       sigmaPerpUnCorr[i] = new TH1D(Form("sigmaPerpUnCorr_%d", i), Form("sigmaPerpUnCorr_%d", i), 40, -200, 200);
-
-       sigmaParCorr[i] = new TH1D(Form("sigmaParCorr_%d", i), Form("sigmaParCorr_%d", i), 40, -200, 200);
-       sigmaPerpCorr[i] = new TH1D(Form("sigmaPerpCorr_%d", i), Form("sigmaPerpCorr_%d", i), 40, -200, 200);
     
-    }
 
 }
 
@@ -245,77 +234,6 @@ float getBTagSF(int btagFileDicision, float var, int jf, float eta, float pt, fl
    return sf;      
 }
 
-void addBranchToBDTTreeVariables(){
-    signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    signalTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    signalTree->Branch("_met", &MET, "_met/D");
-
-    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-    signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    signalTree->Branch("mt", &mtHighest, "mt/D");
-    signalTree->Branch("mtlow", &mtLowest, "mtlow/D");
-
-    signalTree->Branch("leadpt", &leadpt, "leadpt/D");
-    signalTree->Branch("trailpt", &trailpt, "trailpt/D");
-    signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
-    signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-
-
-    bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    bkgTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    bkgTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    bkgTree->Branch("_met", &MET, "_met/D");
-
-    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-    bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    bkgTree->Branch("mt", &mtHighest, "mt/D");
-    bkgTree->Branch("mtlow", &mtLowest, "mtlow/D");
-
-    bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
-    bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
-    bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");  
-    bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-}
-
-void addVariablesToBDT(){
-
-    reader->AddVariable( "HTLoc", &userHTLoc ); 
-    reader->AddVariable( "nJLoc", &usernJLoc );
-    reader->AddVariable( "nBLoc", &usernBLoc );
-    reader->AddVariable( "_met", &user_met );
-    reader->AddVariable( "minDeltaR", &userminDeltaR );
-    reader->AddVariable( "mt", &usermt );
-    reader->AddVariable( "mtlow", &usermtlow );
-    reader->AddVariable( "leadpt", &userleadpt );
-    reader->AddVariable( "trailpt", &usertrailpt );
-    reader->AddVariable( "leadingJetPt", &userleadingjetpt );
-    reader->AddVariable( "trailJetPt", &usertrailjetpt );  
-
-    TString dir    = "ttWvsttbarMC_LeptonMVA_0p9/weights/";
-    TString prefix = "TMVAClassification";
-      
-    TString methodName = TString("BDTG") + TString(" method");
-    TString weightfile = dir + prefix + TString("_") + TString("BDTG") + TString(".weights.xml");
-    reader->BookMVA( methodName, weightfile ); 
-}
-
-void fillBDTvariables(vector<Float_t> & varForBDT){
-
-    usernJLoc = varForBDT.at(0);
-    usernBLoc = varForBDT.at(1);
-    userHTLoc = varForBDT.at(2);
-    user_met = varForBDT.at(3);
-    userminDeltaR = varForBDT.at(4);
-    userleadpt = varForBDT.at(5);
-    usertrailpt = varForBDT.at(6);
-    usermt = varForBDT.at(7);
-    usermtlow = varForBDT.at(8);            
-    userleadingjetpt = varForBDT.at(9);
-    usertrailjetpt = varForBDT.at(10);
-}
 
 
 double mtCalc(TLorentzVector Vect, double MET, double MET_Phi){
@@ -337,13 +255,35 @@ void setStackColors(Color_t & color, int sam){
 
 
 /*
-std::map<std::string, unsigned> pair_to_map(std::vector<std::string> & a, std::vector<unsigned> b)
-{
-    std::map<std::string, unsigned> my_map;
-    for (unsigned i = 0; i < a.size(); ++i)
-    {
-        my_map[a] = b;
-    }
-    return my_map;
+void addBranchToBDTTreeVariables(){
+
+    signalTree->Branch("pt", &LepGood_pt, "pt/D");
+    signalTree->Branch("eta", &LepGood_eta, "eta/D");
+    //signalTree->Branch("lepSelTrackMult", &LepGood_jetNDauChargedMVASel, "trackMult/D");
+    signalTree->Branch("miniIsoCharged", &LepGood_miniRelIsoCharged, "miniIsoCharged/D");
+    signalTree->Branch("miniIsoNeutral", &LepGood_miniRelIsoNeutral, "miniIsoNeutral/D");
+    signalTree->Branch("ptrel", &LepGood_jetPtRelv2, "ptrel/D");
+    signalTree->Branch("ptratio", &LepGood_jetPtRatio, "ptratio/D");
+    signalTree->Branch("jetBtagCSV", &LepGood_jetBTagCSV, "btagCSV/D");
+    signalTree->Branch("sip3d", &LepGood_sip3d, "sip3d/D");
+    signalTree->Branch("dxy", &LepGood_dxy, "dxy/D");
+    signalTree->Branch("dz", &LepGood_dz, "dz/D");
+    signalTree->Branch("segmComp", &LepGood_segmentCompatibility, "segmComp/D");
+    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+
+    bkgTree->Branch("pt", &LepGood_pt, "pt/D");
+    bkgTree->Branch("eta", &LepGood_eta, "eta/D");
+    //bkgTree->Branch("lepSelTrackMult", &LepGood_jetNDauChargedMVASel, "trackMult/D");
+    bkgTree->Branch("miniIsoCharged", &LepGood_miniRelIsoCharged, "miniIsoCharged/D");
+    bkgTree->Branch("miniIsoNeutral", &LepGood_miniRelIsoNeutral, "miniIsoNeutral/D");
+    bkgTree->Branch("ptrel", &LepGood_jetPtRelv2, "ptrel/D");
+    bkgTree->Branch("ptratio", &LepGood_jetPtRatio, "ptratio/D");
+    bkgTree->Branch("jetBtagCSV", &LepGood_jetBTagCSV, "btagCSV/D");
+    bkgTree->Branch("sip3d", &LepGood_sip3d, "sip3d/D");
+    bkgTree->Branch("dxy", &LepGood_dxy, "dxy/D");
+    bkgTree->Branch("dz", &LepGood_dz, "dz/D");
+    bkgTree->Branch("segmComp", &LepGood_segmentCompatibility, "segmComp/D");
+    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+
 }
 */

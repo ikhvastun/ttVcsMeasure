@@ -25,7 +25,7 @@ using Output::distribs;
 using Output::DistribsAll;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false){   
  
     double xPad = 0.25; // 0.25
 
@@ -35,7 +35,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetBottomMargin(0.02);
     pad1->Draw();
     pad1->cd();
-    pad1->SetLogy();
+    if(plotInLog)
+        pad1->SetLogy();
     
     double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
     double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
@@ -147,12 +148,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(2);
-    uncHistoCopy->SetMinimum(0.);
+    uncHistoCopy->SetMaximum(1.5);
+    uncHistoCopy->SetMinimum(0.5);
     uncHistoCopy->SetMarkerStyle(20);
     uncHistoCopy->SetMarkerSize(0.2);
 
-    dataCopyGraph->SetMarkerSize(1);
+    dataCopyGraph->SetMarkerSize(0.5);
      
     uncHistoCopy->Draw("axis");
 

@@ -138,43 +138,75 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 9;
+const int nVars  = 22;
 
 TString varN[nVars] = {
-    "Raw E_{T}^{miss}", "Type I E_{T}^{miss}", 
-    "u_{para}", "u_{perp}", 
+    "Type I E_{T}^{miss}", 
     "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", 
     "#eta^{leading} [GeV]", "#eta^{trailing} [GeV]", 
-    "NPV"
+    "NPV",
+
+    "mll",
+    "closestJetCSVv2", 
+    "dxy", "dz", "SIP3D",
+    "ptratio", "ptrel",
+    "electron HZZ MVA", "electron GP MVA", "SUSY lepton MVA", "TTH lepton MVA",
+    "miniIso", "miniIsoCharged",
+    "nJets", "nBJets",
+    "muon segment comp"
 }; 
 
 double varMin[nVars] = {
-    0, 0, 
-    -200, -200, 
+    0, 
     0, 0, 
     -2.5, -2.5, 
     0,
+
+    81.,
+    0., 
+    0., 0., 0.,
+    0., 0.,
+    -1, -1, -1, -1,
+    0., 0., 
+    0, 0, 
+    0
 };
     
 double varMax[nVars] = {
-    300, 300,
-    200, 200, 
+    300,
     100, 100, 
     2.5, 2.5, 
     70,
+
+    101.,
+    1., 
+    0.05, 0.1, 8, 
+    2, 200,
+    1., 1., 1., 1.,
+    0.4, 0.4,
+    8, 8, 
+    1
 };
     
 int nBins[nVars] = {
-    60, 60,
-    80, 80, 
+    60,
     100, 100, 
     50, 50, 
     70,
+
+    40,
+    40, 
+    40, 40, 40,
+    80, 100,
+    40, 40, 40, 40,
+    20, 20,
+    8, 8,
+    20
 };
 
 
 // Lepton SF
-TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_2017data_2016MC_41p9fb.root","READ"); // PU reweighing
+TFile *file_dataMC = TFile::Open("pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
 
 TFile *lepSF_ele_file = TFile::Open("leptonSF/scaleFactorsAll.root","READ");
@@ -243,10 +275,7 @@ TH2D* h_btagEff[3] = {
 }; 
 
 // trees for BDT
-TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );   
-TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
-TTree* signalTree = new TTree("signalTree","signalTree");
-TTree* bkgTree = new TTree("bkgTree","bkgTree");
+TMVA::Reader *reader = new TMVA::Reader( "!Color:!SilesignalTreent" );   
 
 double _weightEventInTree;
     
@@ -265,26 +294,11 @@ double HTLoc;
 double MET;
 
 Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertrailpt, userleadingjetpt, usertrailjetpt, userminDeltaR, usernJLoc, usernBLoc;
-
+Float_t LepGood_pt, LepGood_eta, LepGood_jetNDauChargedMVASel, LepGood_miniRelIsoCharged, LepGood_miniRelIsoNeutral,  LepGood_jetPtRelv2, LepGood_jetPtRatio,  LepGood_jetBTagCSV, LepGood_sip3d, LepGood_dxy, LepGood_dz, LepGood_segmentCompatibility, LepGood_mvaIdSpring15;
 
 // For FR
 
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
-
-const int nQt = 26;
-const double qtBins[nQt] = {18., 24., 30., 38., 46., 52., 60, 68, 76, 84, 92, 100, 115, 130, 150, 175, 200, 225, 250, 275, 305, 335, 365, 400, 440, 500};
-
-TH1D * histPhiZCorr[25];
-TH1D * histPhiZUnCorr[25];
-
-TH1D * histMetCorr[25];
-TH1D * histMetUnCorr[25];
-
-TH1D * sigmaParUnCorr[25];
-TH1D * sigmaPerpUnCorr[25];
-
-TH1D * sigmaParCorr[25];
-TH1D * sigmaPerpCorr[25];
 
 #endif
