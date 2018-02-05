@@ -1,2 +1,2 @@
 # ttVcsMeasure
-ttV cross section measurement with 2016/2017 data
+this branch has been reserved for lepton MVA study
