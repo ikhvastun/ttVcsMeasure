@@ -421,8 +421,10 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
         //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
         if(l0reco.DeltaR(l0gen) < 0.1){
-            if(_gen_lIsPrompt[i])
+            //cout << "lepton is matched to " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i] << endl;
+            if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){ //  && _lFlavor[l] == _gen_lFlavor[i]
                 leptIsP = true;
+            }
         }
     }
     

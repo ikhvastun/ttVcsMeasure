@@ -122,6 +122,8 @@ class treeReader {
         Double_t        _3dIPSig[nL_max];   
         Float_t         _lElectronMva[nL_max];   
         Float_t         _lElectronMvaHZZ[nL_max];   
+        Float_t         _lElectronMvaFall17NoIso[nL_max];   
+        Float_t         _lElectronMvaFall17Iso[nL_max];   
         Bool_t          _lElectronPassEmu[nL_max];   //[_nLight]
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
@@ -376,6 +378,8 @@ class treeReader {
         TBranch        *b__3dIPSig;   
         TBranch        *b__lElectronMva;   
         TBranch        *b__lElectronMvaHZZ;   
+        TBranch        *b__lElectronMvaFall17NoIso;   
+        TBranch        *b__lElectronMvaFall17Iso;   
         TBranch        *b__lElectronPassEmu;   //!
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!
