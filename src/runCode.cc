@@ -142,7 +142,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 50000) break;
+          //if(it > 1000000) break;
           //cout << "NEW EVENT" << endl;
           
           /*
@@ -328,9 +328,20 @@ void treeReader::Analyze(){
           */
 
           for(auto & i : indLoose){
-            if(std::get<0>(samples[sam]) == "signal" && leptonIsPrompt(i) && _lFlavor[i] == 0){ //  &&  && _lIsPrompt[i]
+            //bool isTruePrompt = _lIsPrompt[i] || (_lProvenance[i] == 0) || (_lProvenance[i] > 100);
+            //if(_3dIPSig[i] < 4) continue;
+            bool isTruePrompt = leptonIsPrompt(i) && !leptonIsFromPromptTau(i);
+            if(std::get<0>(samples[sam]) == "signal" && isTruePrompt && _lFlavor[i] == 0){ // leptonIsPrompt(i)
             
                 //std::cout << "Let's debug: " << std::get<0>(samples[sam])  << " " << leptonIsPrompt(i) << " " << _lPt[i] << " " << _lEta[i] << std::endl;
+                /*
+                if(_3dIPSig[i] > 4){
+                    cout << "NEW EVENT" << endl;
+                    //cout << "info about promptness: " << isTruePrompt << " " << (_lProvenanceCompressed[i] == 0) << " " << _lProvenanceCompressed[i] << endl;
+                    cout << "info about lepton (fl/isPr/closeTau/matchID/mom): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << leptonIsFromPromptTau(i) << " " << _lMatchPdgId[i]  << endl;
+                    cout << "more info(sip3D): " << _3dIPSig[i] << endl;
+                }
+                */
 
                 //cout << "info about electron: " << leptonIsPrompt(i) << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << endl;
                 pt = (Float_t)_lPt[i];
@@ -352,9 +363,18 @@ void treeReader::Analyze(){
                 signalTree.Fill();
             }
 
-            if(std::get<0>(samples[sam]) == "background" && !leptonIsPrompt(i) && _lFlavor[i] == 0){ //  &&  !_lIsPrompt[i]   && !_lIsPrompt[i] && _lFlavor[i] == 0
+            isTruePrompt = leptonIsPrompt(i);
+            if(std::get<0>(samples[sam]) == "background" && !isTruePrompt && _lFlavor[i] == 0){ //  &&  !_lIsPrompt[i]   && !_lIsPrompt[i] && _lFlavor[i] == 0,  && !(_lIsPrompt[i] && _lProvenanceCompressed[i] == 0) 
             
-                //cout << "info about lepton: " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << _lIsPrompt[i] << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << endl;
+                /*
+                if(_ptRatio[i] == 1){
+                    cout << "NEW EVENT" << endl;
+                    cout << "info about promptness: " << isTruePrompt << " " << (_lProvenanceCompressed[i] == 0) << " " << _lProvenanceCompressed[i] << endl;
+                    cout << "info about lepton (fl/isPr/isPrW/ptRatio/matchID/mom): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << _lIsPrompt[i] << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << " " << _gen_lMomPdg[i] << endl;
+                    cout << "more info(sip3D): " << _3dIPSig[i] << endl;
+                }
+                */
+
                 pt = (Float_t)_lPt[i];
                 eta = (Float_t)_lEta[i];
                 trackMult = (Int_t)_selectedTrackMult[i];
@@ -372,6 +392,7 @@ void treeReader::Analyze(){
                 if(eleMVA != eleMVA) continue;
                 //LepGood_mvaIdSpring15;
                 bkgTree.Fill();
+
             }
           }
           
