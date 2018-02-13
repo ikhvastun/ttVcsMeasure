@@ -8,65 +8,11 @@ const int nFlavors = 2;
 
 const int leptonSelectionAnalysis = 3;
 
-//std::vector<int> distribsOrder = { 5, 16, 17, 18, 19, 20, 21, 22, 23, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 8, 6, 7};
 const int nSamples = 100;
 const int dataSample = 0;
-//int uncertaintySample = distribsOrder.size() + 1; // +1 for data
-
-/*
-TString names[nSamples] = {
-    "Data",
-    "t#bar{t}W", 
-    "Nonprompt", "Nonprompt", "Nonprompt", "Nonprompt",
-    "Charge mis-ID",
-    "t#bar{t}Z", "t#bar{t}Z",
-    "t(#bar{t})H", 
-    "t(#bar{t})X", "TTX", "TTX", "TTX", "TTX",
-    "WZ",
-    "ZZ", 
-    "Rare", "Rare", "Rare", "Rare", "Rare", "Rare", "Rare",
-    //
-};
-*/
-
-/*
-Color_t colsStack[nSamples+1] = {
-      kBlack,
-      98,      
-      kBlue-9, kBlue-9, kBlue-9, kBlue-9, 
-      kMagenta-7,
-      91, 91, 
-      kRed-10, kRed-10, kRed-10, kRed-10, kRed-10, kRed-10,
-      51, 
-      8, 8, 8, 8, 8, 8, 8, 8,
-      //
-
-};
-*/
-
-/*
-double systematicsLeptonID[nSamples] = {
-      0.,
-      0.04,
-      0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04,  
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04 
-
-};
-*/
-
-
-//std::vector<int> distribsOrderForLegend = { 5, 17, 10, 15, 1, 8, 6};
-
-//std::vector<int> distribsOrderForLegend = { 17, 10, 15, 1, 8, 6};
-
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
-
 
 struct BinLabelOptions{
   int index;
@@ -75,7 +21,6 @@ struct BinLabelOptions{
 
 std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
 
-      
       {1, "2j"},
       {2, "3j1b"},
       {3, "3j>1b"},
@@ -206,23 +151,23 @@ int nBins[nVars] = {
 
 
 // Lepton SF
-TFile *file_dataMC = TFile::Open("pileUpReweighing/puw_nTrueInt_Moriond2017_36p5fb_Summer16_central.root","READ"); // PU reweighing
+TFile *file_dataMC = TFile::Open("data/pileUpReweighing/puw_nTrueInt_Moriond2017_36p5fb_Summer16_central.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
 
-TFile *lepSF_ele_file = TFile::Open("leptonSF/scaleFactorsAll.root","READ");
+TFile *lepSF_ele_file = TFile::Open("data/leptonSF/scaleFactorsAll.root","READ");
 
-TFile * recoToLoose_leptonSF_mu1 = TFile::Open("leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu2 = TFile::Open("leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu3 = TFile::Open("leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
+TFile * recoToLoose_leptonSF_mu1 = TFile::Open("data/leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
+TFile * recoToLoose_leptonSF_mu2 = TFile::Open("data/leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
+TFile * recoToLoose_leptonSF_mu3 = TFile::Open("data/leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
 
-TFile *lepSF_mu_trackBF = TFile::Open("leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
-TFile *lepSF_mu_trackGH = TFile::Open("leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
+TFile *lepSF_mu_trackBF = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
+TFile *lepSF_mu_trackGH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
 
-TFile *electronTrack = TFile::Open("leptonSF/egammaEffi.txt_EGM2D.root","READ");
+TFile *electronTrack = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root","READ");
 
-TFile *lepSF_el_LeptonMVAfile = TFile::Open("leptonSF/scaleFactors.root","READ");
+TFile *lepSF_el_LeptonMVAfile = TFile::Open("data/leptonSF/scaleFactors.root","READ");
 //TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("leptonSF/lepMVAEffSF_el_3l.root","READ");
-TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("leptonSF/lepMVAEffSF_mu_2lss.root","READ") : TFile::Open("leptonSF/lepMVAEffSF_mu_3l.root","READ");
+TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_mu_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_mu_3l.root","READ");
 
 
 TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
@@ -251,8 +196,8 @@ TH2F* lepSFMapsMuon[4] = {
 
 // btag SF
 BTagCalibration calib_csvv2[2] {
-  {"CSVv2BF", "btagSF/CSVv2_Moriond17_B_F.csv"},
-  {"CSVv2GH", "btagSF/CSVv2_Moriond17_G_H.csv"},
+  {"CSVv2BF", "data/btagSF/CSVv2_Moriond17_B_F.csv"},
+  {"CSVv2GH", "data/btagSF/CSVv2_Moriond17_G_H.csv"},
 };
 
 const std::vector<std::string> otherSysTypes={"up_hf", "down_hf", "up_lf", "down_lf"};
@@ -267,7 +212,7 @@ BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_RESHAPING, "central", o
 
 };
 
-TFile *file_btagEff = TFile::Open("btagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
+TFile *file_btagEff = TFile::Open("data/btagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
 TH2D* h_btagEff[3] = {
     (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_udsg"), 
     (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_c"),
@@ -297,7 +242,6 @@ Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertra
 Float_t LepGood_pt, LepGood_eta, LepGood_jetNDauChargedMVASel, LepGood_miniRelIsoCharged, LepGood_miniRelIsoNeutral,  LepGood_jetPtRelv2, LepGood_jetPtRatio,  LepGood_jetBTagCSV, LepGood_sip3d, LepGood_dxy, LepGood_dz, LepGood_segmentCompatibility, LepGood_mvaIdSpring15;
 
 // For FR
-
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
 

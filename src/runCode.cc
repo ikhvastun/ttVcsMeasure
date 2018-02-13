@@ -59,7 +59,7 @@ void treeReader::Analyze(){
   //read samples and cross sections from txt file
   //readSamples("samples_ttbar_emu_2017data.txt");
   //readSamples("samples_Zll_2017data.txt");
-  readSamples("samples_LeptonMVAtraining_2017MC.txt");
+  readSamples("data/samples_LeptonMVAtraining_2017MC.txt");
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -142,7 +142,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 1000000) break;
+          if(it > 10000) break;
           //cout << "NEW EVENT" << endl;
           
           /*
