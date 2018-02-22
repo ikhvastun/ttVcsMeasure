@@ -1,0 +1,17 @@
+data    MuonEG.root                                                           1
+DY      DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root                         6025.2
+Diboson WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root                                     6.204
+Diboson ZZTo2L2Nu_13TeV_powheg_pythia8.root                                                  0.564
+Diboson ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root                                     3.542
+Diboson WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root                                4.42965
+Diboson ZZTo4L_13TeV_powheg_pythia8.root                                                     1.256
+Diboson WWTo2L2Nu_13TeV-powheg.root                                                          12.178
+Triboson ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root                                        0.01398
+Triboson WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root                                        0.1651
+Triboson WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root                                     0.2086
+Triboson WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root                                        0.05565
+Top ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1.root     136.02
+Top ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1.root 80.95
+Top ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1.root                      35.85
+Top ST_s-channel_4f_InclusiveDecays_13TeV-amcatnlo-pythia8.root                              3.36
+Top TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root                                88.287

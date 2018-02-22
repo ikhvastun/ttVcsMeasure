@@ -122,6 +122,8 @@ class treeReader {
         Double_t        _3dIPSig[nL_max];   
         Float_t         _lElectronMva[nL_max];   
         Float_t         _lElectronMvaHZZ[nL_max];   
+        Float_t         _lElectronMvaFall17NoIso[nL_max];
+        Float_t         _lElectronMvaFall17Iso[nL_max];
         Bool_t          _lElectronPassEmu[nL_max];   //[_nLight]
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
@@ -149,6 +151,7 @@ class treeReader {
         Bool_t          _tauVTightMvaOld[nL_max];   
         Double_t        _relIso[nL_max];   
         Double_t        _relIso0p4Mu[nL_max];
+        Double_t        _relIso0p4[nL_max];
         Double_t        _miniIso[nL_max];   
         Double_t        _miniIsoCharged[nL_max];   
         Double_t        _ptRel[nL_max];   
@@ -162,6 +165,8 @@ class treeReader {
         Double_t        _lMuonTrackPtErr[nL_max];   //[_nMu]
         Bool_t          _lIsPrompt[nL_max];   
         Int_t           _lMatchPdgId[nL_max];   
+        UInt_t          _lProvenance[9];   //[_nL]
+        UInt_t          _lProvenanceCompressed[9];   //[_nL]
         UChar_t         _nJets;
         Double_t        _jetPt[nJets_max];   
         Double_t        _jetPt_JECUp[nJets_max];   
@@ -222,6 +227,8 @@ class treeReader {
         void setConePt();
         bool lepIsGood(const unsigned);
         bool lepIsFOGood(const unsigned);
+        bool lepIsGood_TTV(const unsigned);
+        bool lepIsFOGood_TTV(const unsigned);
         bool lepIsTight(const unsigned);
         unsigned selectLep(std::vector<unsigned>&);
         unsigned selectFakeLep(std::vector<unsigned>&);
@@ -242,6 +249,7 @@ class treeReader {
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
+        bool leptonIsFromPromptTau(const unsigned & l);
 
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);
@@ -376,6 +384,8 @@ class treeReader {
         TBranch        *b__3dIPSig;   
         TBranch        *b__lElectronMva;   
         TBranch        *b__lElectronMvaHZZ;   
+        TBranch        *b__lElectronMvaFall17NoIso;
+        TBranch        *b__lElectronMvaFall17Iso;
         TBranch        *b__lElectronPassEmu;   //!
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!
@@ -403,6 +413,7 @@ class treeReader {
         TBranch        *b__tauVTightMvaOld;   
         TBranch        *b__relIso;   
         TBranch        *b__relIso0p4Mu;
+        TBranch        *b__relIso0p4;
         TBranch        *b__miniIso;   
         TBranch        *b__miniIsoCharged;   
         TBranch        *b__ptRel;   
@@ -416,6 +427,8 @@ class treeReader {
         TBranch        *b__lMuonTrackPtErr;   //!
         TBranch        *b__lIsPrompt;   
         TBranch        *b__lMatchPdgId;   
+        TBranch        *b__lProvenance;   //!
+        TBranch        *b__lProvenanceCompressed;   //!
         TBranch        *b__nJets;   
         TBranch        *b__jetPt;   
         TBranch        *b__jetPt_JECUp;   

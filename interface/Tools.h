@@ -287,3 +287,74 @@ void addBranchToBDTTreeVariables(){
 
 }
 */
+
+void addVariablesToBDT(){
+
+    readerLeptonMVAele->AddVariable( "pt", &user_pt); 
+    readerLeptonMVAele->AddVariable( "eta", &user_eta); 
+    readerLeptonMVAele->AddVariable( "trackMult", &user_trackMult); 
+    readerLeptonMVAele->AddVariable( "miniIsoCharged", &user_miniIsoCharged); 
+    readerLeptonMVAele->AddVariable( "miniIsoNeutral", &user_miniIsoNeutral); 
+    readerLeptonMVAele->AddVariable( "ptrel", &user_ptrel); 
+    readerLeptonMVAele->AddVariable( "min(ptratio,1.5)", &user_ptratio); 
+    readerLeptonMVAele->AddVariable( "relIso0p3", &user_relIso);
+    readerLeptonMVAele->AddVariable( "max(jetbtagCSV,0)", &user_jetBtagCSV); 
+    readerLeptonMVAele->AddVariable( "sip3d", &user_sip3d); 
+    //readerLeptonMVAele->AddVariable( "log(abs(dxy))", &user_dxy); 
+    //readerLeptonMVAele->AddVariable( "log(abs(dz))", &user_dz); 
+    readerLeptonMVAele->AddVariable( "eleMVA", &user_eleMVA); 
+
+    readerLeptonMVAmu->AddVariable( "pt", &user_pt); 
+    readerLeptonMVAmu->AddVariable( "eta", &user_eta); 
+    readerLeptonMVAmu->AddVariable( "trackMult", &user_trackMult); 
+    readerLeptonMVAmu->AddVariable( "miniIsoCharged", &user_miniIsoCharged); 
+    readerLeptonMVAmu->AddVariable( "miniIsoNeutral", &user_miniIsoNeutral); 
+    readerLeptonMVAmu->AddVariable( "ptrel", &user_ptrel); 
+    readerLeptonMVAmu->AddVariable( "min(ptratio,1.5)", &user_ptratio); 
+    readerLeptonMVAmu->AddVariable( "relIso0p3", &user_relIso);
+    readerLeptonMVAmu->AddVariable( "max(jetbtagCSV,0)", &user_jetBtagCSV); 
+    readerLeptonMVAmu->AddVariable( "sip3d", &user_sip3d); 
+    //readerLeptonMVAmu->AddVariable( "log(abs(dxy))", &user_dxy); 
+    //readerLeptonMVAmu->AddVariable( "log(abs(dz))", &user_dz); 
+    readerLeptonMVAmu->AddVariable( "segmComp", &user_segmComp); 
+
+    //TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2017MC/ele_withoutIsoReq_removePromptFromTaus/dataset/weights/"; 
+    //TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2017MC/muon_removePromptFromTaus/dataset/weights/"; 
+
+    //TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/";  // _removePromptFromTaus
+    //TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/"; 
+
+    TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_deepcsv/dataset/weights/";
+    TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3_deepcsv/dataset/weights/";
+
+    TString prefix = "TMVAClassification";
+      
+    TString methodName = TString("BDTG") + TString(" method");
+    TString weightfile = dirEle + prefix + TString("_") + TString("BDTG") + TString(".weights.xml");
+    readerLeptonMVAele->BookMVA( methodName, weightfile ); 
+
+    weightfile = dirMu + prefix + TString("_") + TString("BDTG") + TString(".weights.xml");
+    readerLeptonMVAmu->BookMVA( methodName, weightfile ); 
+
+} 
+
+void fillBDTvariables(vector<Float_t> & varForBDT, int flavor){
+
+    user_pt =  varForBDT.at(0);
+    user_eta = varForBDT.at(1);
+    user_trackMult = varForBDT.at(2);
+    user_miniIsoCharged = varForBDT.at(3);
+    user_miniIsoNeutral = varForBDT.at(4);
+    user_ptrel = varForBDT.at(5);
+    user_ptratio = varForBDT.at(6);
+    user_relIso = varForBDT.at(7);
+    user_jetBtagCSV = varForBDT.at(8);
+    user_sip3d = varForBDT.at(9);
+    user_dxy = varForBDT.at(10);
+    user_dz = varForBDT.at(11);
+    if(flavor == 0)
+       user_eleMVA = varForBDT.at(12);
+    if(flavor == 1)
+       user_segmComp = varForBDT.at(12);
+}
+

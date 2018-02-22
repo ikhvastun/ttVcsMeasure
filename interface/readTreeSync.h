@@ -8,61 +8,9 @@ const int nFlavors = 2;
 
 const int leptonSelectionAnalysis = 3;
 
-//std::vector<int> distribsOrder = { 5, 16, 17, 18, 19, 20, 21, 22, 23, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 8, 6, 7};
 const int nSamples = 100;
 const int dataSample = 0;
 //int uncertaintySample = distribsOrder.size() + 1; // +1 for data
-
-/*
-TString names[nSamples] = {
-    "Data",
-    "t#bar{t}W", 
-    "Nonprompt", "Nonprompt", "Nonprompt", "Nonprompt",
-    "Charge mis-ID",
-    "t#bar{t}Z", "t#bar{t}Z",
-    "t(#bar{t})H", 
-    "t(#bar{t})X", "TTX", "TTX", "TTX", "TTX",
-    "WZ",
-    "ZZ", 
-    "Rare", "Rare", "Rare", "Rare", "Rare", "Rare", "Rare",
-    //
-};
-*/
-
-/*
-Color_t colsStack[nSamples+1] = {
-      kBlack,
-      98,      
-      kBlue-9, kBlue-9, kBlue-9, kBlue-9, 
-      kMagenta-7,
-      91, 91, 
-      kRed-10, kRed-10, kRed-10, kRed-10, kRed-10, kRed-10,
-      51, 
-      8, 8, 8, 8, 8, 8, 8, 8,
-      //
-
-};
-*/
-
-/*
-double systematicsLeptonID[nSamples] = {
-      0.,
-      0.04,
-      0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04,  
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04 
-
-};
-*/
-
-
-//std::vector<int> distribsOrderForLegend = { 5, 17, 10, 15, 1, 8, 6};
-
-//std::vector<int> distribsOrderForLegend = { 17, 10, 15, 1, 8, 6};
-
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
@@ -276,6 +224,8 @@ TH2D* h_btagEff[3] = {
 
 // trees for BDT
 TMVA::Reader *reader = new TMVA::Reader( "!Color:!SilesignalTreent" );   
+TMVA::Reader *readerLeptonMVAele = new TMVA::Reader( "!Color:!Silent" );  
+TMVA::Reader *readerLeptonMVAmu = new TMVA::Reader( "!Color:!Silent" );  
 
 double _weightEventInTree;
     
@@ -293,12 +243,17 @@ int nBLoc;
 double HTLoc;
 double MET;
 
-Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertrailpt, userleadingjetpt, usertrailjetpt, userminDeltaR, usernJLoc, usernBLoc;
-Float_t LepGood_pt, LepGood_eta, LepGood_jetNDauChargedMVASel, LepGood_miniRelIsoCharged, LepGood_miniRelIsoNeutral,  LepGood_jetPtRelv2, LepGood_jetPtRatio,  LepGood_jetBTagCSV, LepGood_sip3d, LepGood_dxy, LepGood_dz, LepGood_segmentCompatibility, LepGood_mvaIdSpring15;
-
 // For FR
 
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
+
+double passedPrompt_TTV[2][2];
+double passedNonPrompt_TTV[2][2];
+double passedPrompt[2][2][800];
+double passedNonPrompt[2][2][800];
+int nPoints = 800;
+
+Float_t user_pt, user_eta, user_trackMult,  user_miniIsoCharged, user_miniIsoNeutral, user_ptrel, user_ptratio, user_jetBtagCSV, user_sip3d, user_dxy, user_dz, user_segmComp, user_eleMVA, user_relIso;
 
 #endif
