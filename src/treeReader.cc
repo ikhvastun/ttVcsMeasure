@@ -33,7 +33,8 @@ void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
     //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_checkLeptonMVA/2017MC/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  // ttbar_emu/
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_checkLeptonMVA/ttbar_emu/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  //  onZ_dilep/
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_checkLeptonMVA/onZ_dilep/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  //  onZ_dilep/
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
@@ -149,6 +150,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
 
     fChain->SetBranchAddress("_relIso", _relIso, &b__relIso);
     fChain->SetBranchAddress("_relIso0p4Mu", _relIso0p4Mu, &b__relIso0p4Mu);
+    fChain->SetBranchAddress("_relIso0p4", _relIso0p4, &b__relIso0p4);
     fChain->SetBranchAddress("_miniIso", _miniIso, &b__miniIso);
     fChain->SetBranchAddress("_miniIsoCharged", _miniIsoCharged, &b__miniIsoCharged);
     fChain->SetBranchAddress("_ptRel", _ptRel, &b__ptRel);

@@ -122,7 +122,8 @@ bool treeReader::lepIsLoose(const unsigned ind){
     if(_3dIPSig[ind] >= 8) return false;
     if(_miniIso[ind] >= 0.4) return false;
     if(_lFlavor[ind] == 1){
-        if(!_lPOGLoose[ind]) return false;
+        //if(!_lPOGLoose[ind]) return false;
+        if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!elePassVLooseMvaIDSUSY(ind)) return false;
@@ -472,6 +473,7 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "DY") return kBlue-9;
     if(name == "Diboson") return 98; 
     if(name == "Triboson") return 8;
+    if(name == "Top") return 91; 
     if(name == "TopPr") return 91; 
     if(name == "TopNonPr") return 51; 
     if(name == "tW") return kRed-10;

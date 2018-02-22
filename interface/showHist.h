@@ -67,11 +67,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     TH1* hist = NULL;
     if(normalizedToData){
+        TH1D *stackCopyMCrew = (TH1D*)(distribs.stack.GetStack()->Last());
         for(int i = 0; i < distribs.stack.GetStack()->GetEntries(); i++){
             hist = dynamic_cast<TH1*>(distribs.stack.GetStack()->At(i));
-            TH1D *stackCopyMCrew = (TH1D*)(distribs.stack.GetStack()->Last());
             hist->Scale(distribs.vectorHisto[dataSample].Integral() / stackCopyMCrew->Integral());
         }
+        //distribs.vectorHistoTotalUnc.Scale(distribs.vectorHisto[dataSample].Integral());
     }
 
     distribs.vectorHisto[dataSample].Draw("E0");

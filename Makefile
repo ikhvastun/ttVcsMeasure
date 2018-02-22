@@ -1,4 +1,4 @@
-CXX=g++
+CXX=g++ -O3
 RM=rm -f
 CPPFLAGS=-std=c++0x -g $(shell root-config --cflags)
 LDFLAGS=-g $(shell root-config --ldflags)

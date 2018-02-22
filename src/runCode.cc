@@ -57,9 +57,9 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("samples_ttbar_emu_2017data.txt");
-  //readSamples("samples_Zll_2017data.txt");
-  readSamples("data/samples_LeptonMVAtraining_2017MC.txt");
+  //readSamples("data/samples_ttbar_emu_2016data.txt");
+  readSamples("data/samples_Zll_2016data.txt");
+  //readSamples("data/samples_LeptonMVAtraining_2017MC.txt");
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -78,42 +78,7 @@ void treeReader::Analyze(){
   readerBtag[1][2].load(calib_csvv2[1], BTagEntry::FLAV_UDSG, "iterativefit");
   */
 
-  TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
-  TTree signalTree("signalTree","signalTree");
-  TTree bkgTree("bkgTree","bkgTree");
-  
-  //addBranchToBDTTreeVariables();
-  double pt, eta, miniIsoCharged, miniIsoNeutral, ptrel, ptratio, jetbtagCSV, sip3d, dxy, dz, segmComp, eleMVA;
-  int trackMult;
-  signalTree.Branch("pt", &pt, "pt/D");
-  signalTree.Branch("eta", &eta, "eta/D");
-  signalTree.Branch("trackMult", &trackMult, "trackMult/I");
-  signalTree.Branch("miniIsoCharged", &miniIsoCharged, "miniIsoCharged/D");
-  signalTree.Branch("miniIsoNeutral", &miniIsoNeutral, "miniIsoNeutral/D");
-  signalTree.Branch("ptrel", &ptrel, "ptrel/D");
-  signalTree.Branch("ptratio", &ptratio, "ptratio/D");
-  signalTree.Branch("jetbtagCSV", &jetbtagCSV, "jetbtagCSV/D");
-  signalTree.Branch("sip3d", &sip3d, "sip3d/D");
-  signalTree.Branch("dxy", &dxy, "dxy/D");
-  signalTree.Branch("dz", &dz, "dz/D");
-  //signalTree.Branch("segmComp", &segmComp, "segmComp/D");
-  signalTree.Branch("eleMVA", &eleMVA, "eleMVA/D");
-  signalTree.Branch("weight", &weight, "weight/D");
-
-  bkgTree.Branch("pt", &pt, "pt/D");
-  bkgTree.Branch("eta", &eta, "eta/D");
-  bkgTree.Branch("trackMult", &trackMult, "trackMult/I");
-  bkgTree.Branch("miniIsoCharged", &miniIsoCharged, "miniIsoCharged/D");
-  bkgTree.Branch("miniIsoNeutral", &miniIsoNeutral, "miniIsoNeutral/D");
-  bkgTree.Branch("ptrel", &ptrel, "ptrel/D");
-  bkgTree.Branch("ptratio", &ptratio, "ptratio/D");
-  bkgTree.Branch("jetbtagCSV", &jetbtagCSV, "jetbtagCSV/D");
-  bkgTree.Branch("sip3d", &sip3d, "sip3d/D");
-  bkgTree.Branch("dxy", &dxy, "dxy/D");
-  bkgTree.Branch("dz", &dz, "dz/D");
-  //bkgTree.Branch("segmComp", &segmComp, "segmComp/D");
-  bkgTree.Branch("eleMVA", &eleMVA, "eleMVA/D");
-  bkgTree.Branch("weight", &weight, "weight/D");
+  addVariablesToBDT();
 
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
@@ -125,7 +90,7 @@ void treeReader::Analyze(){
       //if(leptonSelectionAnalysis == 3)
       //  if(std::get<0>(samples[sam]) == "chargeMisID") continue;
 
-      if(std::get<0>(samples[sam]) == "data") continue;
+      //if(std::get<0>(samples[sam]) == "data") continue;
       //if(std::get<0>(samples[sam]) != "background") continue;
     
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
@@ -142,7 +107,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          if(it > 10000) break;
+          //if(it > 10000) break;
           //cout << "NEW EVENT" << endl;
           
           /*
@@ -187,14 +152,15 @@ void treeReader::Analyze(){
             cout << "number of leptons: " << lCount << endl;
             */
 
-          /*
+          //if(lCountLoose != 2) continue;
+          //if(_lCharge[indLoose.at(0)] * _lCharge[indLoose.at(1)] < 0) continue;
           if(lCountLoose != 2) continue;
-          if(_lCharge[indLoose.at(0)] * _lCharge[indLoose.at(1)] < 0) continue;
-          */
-          if(lCountLoose < 1) continue;
 
           int samCategory = sam;
           int nLocEle = getElectronNumber(indLoose);
+          int nLocMu = lCountLoose - nLocEle;
+          if(nLocEle != 2) continue;
+          //if(nLocMu != 2) continue;
 
           /*
           if(nLocEle < 1) continue;
@@ -202,7 +168,7 @@ void treeReader::Analyze(){
           if(nLocMu < 1) continue;
           */
 
-          //if(!passPtCuts2L(indLoose)) continue;
+          if(!passPtCuts2L(indLoose)) continue;
 
           std::vector<unsigned> indJets;
 
@@ -214,7 +180,7 @@ void treeReader::Analyze(){
 
           nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
           nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
-          //double dMZ = deltaMZ(ind, third, mll, pt_Z, ptNonZ, phi_Z);
+          double dMZ = deltaMZ(indLoose, third, mll, pt_Z, ptNonZ, phi_Z);
 
           //HTLoc = HTCalc(indJets);
           
@@ -224,7 +190,7 @@ void treeReader::Analyze(){
           }
           */
 
-          //if(dMZ > 10) continue;
+          if(dMZ > 10) continue;
           
           /*
           if(nJLoc < 2) continue;
@@ -252,11 +218,11 @@ void treeReader::Analyze(){
           else leptonFileDicision = 1;  
           */
 
-          /*
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data"){
 
             dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nTrueInt));
               
+          /*
             for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
 
               lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 0, leptonFileDicision);
@@ -264,8 +230,8 @@ void treeReader::Analyze(){
               lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 1, leptonFileDicision);
               lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], -1, leptonFileDicision);
             }
-          }
           */
+          }
           
           dataMCSF *= lepSF;
           weight = weight * dataMCSF;
@@ -328,76 +294,14 @@ void treeReader::Analyze(){
           */
 
           for(auto & i : indLoose){
-            //bool isTruePrompt = _lIsPrompt[i] || (_lProvenance[i] == 0) || (_lProvenance[i] > 100);
-            //if(_3dIPSig[i] < 4) continue;
-            bool isTruePrompt = leptonIsPrompt(i) && !leptonIsFromPromptTau(i);
-            if(std::get<0>(samples[sam]) == "signal" && isTruePrompt && _lFlavor[i] == 0){ // leptonIsPrompt(i)
-            
-                //std::cout << "Let's debug: " << std::get<0>(samples[sam])  << " " << leptonIsPrompt(i) << " " << _lPt[i] << " " << _lEta[i] << std::endl;
-                /*
-                if(_3dIPSig[i] > 4){
-                    cout << "NEW EVENT" << endl;
-                    //cout << "info about promptness: " << isTruePrompt << " " << (_lProvenanceCompressed[i] == 0) << " " << _lProvenanceCompressed[i] << endl;
-                    cout << "info about lepton (fl/isPr/closeTau/matchID/mom): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << leptonIsFromPromptTau(i) << " " << _lMatchPdgId[i]  << endl;
-                    cout << "more info(sip3D): " << _3dIPSig[i] << endl;
-                }
-                */
-
-                //cout << "info about electron: " << leptonIsPrompt(i) << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << endl;
-                pt = (Float_t)_lPt[i];
-                eta = (Float_t)_lEta[i];
-                trackMult = (Int_t)_selectedTrackMult[i];
-                miniIsoCharged = (Float_t)_miniIsoCharged[i];
-                miniIsoNeutral = (Float_t)(_miniIso[i] - _miniIsoCharged[i]);
-                ptrel = (Float_t)_ptRel[i]; 
-                ptratio = (Float_t)_ptRatio[i];
-                jetbtagCSV = (Float_t)_closestJetCsvV2[i];
-                sip3d = (Float_t)_3dIPSig[i];
-                dxy = (Float_t)_dxy[i];
-                dz = (Float_t)_dz[i];
-                //segmComp = (Float_t)_lMuonSegComp[i];
-                //eleMVA = (Float_t)_lElectronMvaHZZ[i];
-                eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
-                if(eleMVA != eleMVA) continue;
-                //LepGood_mvaIdSpring15;
-                signalTree.Fill();
-            }
-
-            isTruePrompt = leptonIsPrompt(i);
-            if(std::get<0>(samples[sam]) == "background" && !isTruePrompt && _lFlavor[i] == 0){ //  &&  !_lIsPrompt[i]   && !_lIsPrompt[i] && _lFlavor[i] == 0,  && !(_lIsPrompt[i] && _lProvenanceCompressed[i] == 0) 
-            
-                /*
-                if(_ptRatio[i] == 1){
-                    cout << "NEW EVENT" << endl;
-                    cout << "info about promptness: " << isTruePrompt << " " << (_lProvenanceCompressed[i] == 0) << " " << _lProvenanceCompressed[i] << endl;
-                    cout << "info about lepton (fl/isPr/isPrW/ptRatio/matchID/mom): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << _lIsPrompt[i] << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << " " << _gen_lMomPdg[i] << endl;
-                    cout << "more info(sip3D): " << _3dIPSig[i] << endl;
-                }
-                */
-
-                pt = (Float_t)_lPt[i];
-                eta = (Float_t)_lEta[i];
-                trackMult = (Int_t)_selectedTrackMult[i];
-                miniIsoCharged = (Float_t)_miniIsoCharged[i];
-                miniIsoNeutral = (Float_t)(_miniIso[i] - _miniIsoCharged[i]);
-                ptrel = (Float_t)_ptRel[i]; 
-                ptratio = (Float_t)_ptRatio[i];
-                jetbtagCSV = (Float_t)_closestJetCsvV2[i];
-                sip3d = (Float_t)_3dIPSig[i];
-                dxy = (Float_t)_dxy[i];
-                dz = (Float_t)_dz[i];
-                //segmComp = (Float_t)_lMuonSegComp[i];
-                //eleMVA = (Float_t)_lElectronMvaHZZ[i];
-                eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
-                if(eleMVA != eleMVA) continue;
-                //LepGood_mvaIdSpring15;
-                bkgTree.Fill();
-
-            }
+            double mvaVL = -999.;
+            vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)_lEta[i], (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_relIso[i], (Float_t)_ptRatio[i], (Float_t)_closestJetCsvV2[i], (Float_t)_3dIPSig[i], (Float_t)_dxy[i], (Float_t)_dz[i], _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
+            fillBDTvariables(varForBDT, _lFlavor[i]);
+            mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
+            _leptonMvaSUSY[i] = mvaVL;
           }
-          
 
-          /*
+
           distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[0]-0.1),weight);
           
           distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_lPt[indLoose.at(0)],varMax[1]-0.001), weight);
@@ -412,12 +316,16 @@ void treeReader::Analyze(){
         
           for(auto & i : indLoose){
             //if(lepIsGood(i)) continue;
+            //if(i == indLoose.at(0)) continue;
+            //if(_lFlavor[i] == 1) continue;
             distribs[7].vectorHisto[samCategory].Fill(TMath::Min(double(_closestJetCsvV2[i]),varMax[7]-0.001), weight);
             distribs[8].vectorHisto[samCategory].Fill(TMath::Min(double(_dxy[i]),varMax[8]-0.001), weight);
             distribs[9].vectorHisto[samCategory].Fill(TMath::Min(double(_dz[i]),varMax[9]-0.001), weight);
             distribs[10].vectorHisto[samCategory].Fill(TMath::Min(double(_3dIPSig[i]),varMax[10]-0.001), weight);
             distribs[11].vectorHisto[samCategory].Fill(TMath::Min(double(_ptRatio[i]),varMax[11]-0.001), weight);
             distribs[12].vectorHisto[samCategory].Fill(TMath::Min(double(_ptRel[i]),varMax[12]-0.001), weight);
+            distribs[23].vectorHisto[samCategory].Fill(TMath::Min(double(_relIso[i]),varMax[23]-0.001), weight);
+
             if(_lFlavor[i] == 0){
                 distribs[13].vectorHisto[samCategory].Fill(TMath::Min(double(_lElectronMvaHZZ[i]),varMax[13]-0.001), weight);
                 distribs[14].vectorHisto[samCategory].Fill(TMath::Min(double(_lElectronMva[i]),varMax[14]-0.001), weight);
@@ -426,12 +334,13 @@ void treeReader::Analyze(){
             distribs[16].vectorHisto[samCategory].Fill(TMath::Min(double(_leptonMvaTTH[i]),varMax[16]-0.001), weight);
             distribs[17].vectorHisto[samCategory].Fill(TMath::Min(double(_miniIso[i]),varMax[17]-0.001), weight);
             distribs[18].vectorHisto[samCategory].Fill(TMath::Min(double(_miniIsoCharged[i]),varMax[18]-0.001), weight);
-            if(_lFlavor[i] == 1)
+            if(_lFlavor[i] == 1){
                 distribs[21].vectorHisto[samCategory].Fill(TMath::Min(double(_lMuonSegComp[i]),varMax[21]-0.001), weight);
+                distribs[22].vectorHisto[samCategory].Fill(TMath::Min(double(_relIso0p4Mu[i]),varMax[22]-0.001), weight);
+            }
          }
          distribs[19].vectorHisto[samCategory].Fill(TMath::Min(double(nJLoc),varMax[19]-0.001), weight);
          distribs[20].vectorHisto[samCategory].Fill(TMath::Min(double(nBLoc),varMax[20]-0.001), weight);
-         */
 
       }
 
@@ -440,12 +349,13 @@ void treeReader::Analyze(){
       std::cout << std::endl;
   }
 
+  /*
   fileDummy->cd();
   signalTree.Write();
   bkgTree.Write();
 
   fileDummy->Close();
-  return;
+  */
 
   TLegend* mtleg = new TLegend(0.77,0.89,0.95,0.62); 
   //mtleg->SetNColumns(1);
@@ -511,16 +421,16 @@ void treeReader::Analyze(){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
-  vector<std::string> figNames = {"Type I E_{T}^{miss} [GeV]", "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", "#eta_{T}^{leading} [GeV]", "#eta_{T}^{trailing} [GeV]", "NPV", "M_{ll} [GeV]", "closestJetCSVv2", "dxy", "dz", "SIP3D", "ptratio", "ptrel","electron HZZ MVA","electron GP MVA", "SUSY lepton MVA", "TTH lepton MVA", "miniIso", "miniIsoCharged", "nJets", "nBJets", "muon segment comp"};  
-  vector<TString> namesForSaveFiles = {"met", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll", "closejetcsv", "dxy", "dz", "sip3d", "ptratio", "ptrel", "electronMVAHZZ", "electronMVA", "leptonMVASUSY", "leptonMVATTH", "miniIso", "miniIsoChar", "njets", "nbjets", "muonSegmComp"};
+  vector<std::string> figNames = {"Type I E_{T}^{miss} [GeV]", "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", "#eta_{T}^{leading} [GeV]", "#eta_{T}^{trailing} [GeV]", "NPV", "M_{ll} [GeV]", "closestJetCSVv2", "dxy", "dz", "SIP3D", "ptratio", "ptrel","electron HZZ MVA","electron GP MVA", "SUSY lepton MVA", "TTH lepton MVA", "miniIso", "miniIsoCharged", "nJets", "nBJets", "muon segment comp", "relIso0p4", "relIso0p3"};  
+  vector<TString> namesForSaveFiles = {"met", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll", "closejetcsv", "dxy", "dz", "sip3d", "ptratio", "ptrel", "electronMVAHZZ", "electronMVA", "leptonMVASUSY", "leptonMVATTH", "miniIso", "miniIsoChar", "njets", "nbjets", "muonSegmComp", "relIso0p4", "relIso0p3"};
 
   for(int varPlot = 0; varPlot < nVars; varPlot++){
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events / " + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot])), scale_num, mtleg);
+    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, false); // + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".png");
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events / " + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot])), scale_num, mtleg, true);
+    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, false); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.png");
   }

@@ -83,7 +83,7 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 22;
+const int nVars  = 24;
 
 TString varN[nVars] = {
     "Type I E_{T}^{miss}", 
@@ -98,7 +98,8 @@ TString varN[nVars] = {
     "electron HZZ MVA", "electron GP MVA", "SUSY lepton MVA", "TTH lepton MVA",
     "miniIso", "miniIsoCharged",
     "nJets", "nBJets",
-    "muon segment comp"
+    "muon segment comp", "relIso0p4", 
+    "relIso0p3"
 }; 
 
 double varMin[nVars] = {
@@ -114,6 +115,7 @@ double varMin[nVars] = {
     -1, -1, -1, -1,
     0., 0., 
     0, 0, 
+    0, 0,
     0
 };
     
@@ -130,6 +132,7 @@ double varMax[nVars] = {
     1., 1., 1., 1.,
     0.4, 0.4,
     8, 8, 
+    1, 1,
     1
 };
     
@@ -146,7 +149,8 @@ int nBins[nVars] = {
     40, 40, 40, 40,
     20, 20,
     8, 8,
-    20
+    20, 25,
+    25
 };
 
 
@@ -220,7 +224,10 @@ TH2D* h_btagEff[3] = {
 }; 
 
 // trees for BDT
-TMVA::Reader *reader = new TMVA::Reader( "!Color:!SilesignalTreent" );   
+TMVA::Reader *reader = new TMVA::Reader( "!Color:!SilesignalTreent" );
+TMVA::Reader *readerLeptonMVAele = new TMVA::Reader( "!Color:!Silent" );
+TMVA::Reader *readerLeptonMVAmu = new TMVA::Reader( "!Color:!Silent" );
+
 
 double _weightEventInTree;
     
@@ -244,5 +251,7 @@ Float_t LepGood_pt, LepGood_eta, LepGood_jetNDauChargedMVASel, LepGood_miniRelIs
 // For FR
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
+
+Float_t user_pt, user_eta, user_trackMult,  user_miniIsoCharged, user_miniIsoNeutral, user_ptrel, user_ptratio, user_jetBtagCSV, user_sip3d, user_dxy, user_dz, user_segmComp, user_eleMVA, user_relIso;
 
 #endif
