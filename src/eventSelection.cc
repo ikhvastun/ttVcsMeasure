@@ -122,10 +122,8 @@ bool treeReader::lepIsLoose(const unsigned ind){
     if(_3dIPSig[ind] >= 8) return false;
     if(_miniIso[ind] >= 0.4) return false;
     if(_lFlavor[ind] == 1){
-        // used in ttH
-        //if(!_lPOGLoose[ind]) return false;
-        // what we are going to use both in ttW, ttZ, tZq
-        if(!_lPOGMedium[ind]) return false;
+        if(!_lPOGLoose[ind]) return false;
+        //if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;

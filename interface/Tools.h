@@ -324,8 +324,8 @@ void addVariablesToBDT(){
     //TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/";  // _removePromptFromTaus
     //TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/"; 
 
-    TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_deepcsv/dataset/weights/";
-    TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3_deepcsv/dataset/weights/";
+    TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_removeElectronMVAcuts_addTriggerEmuOnLoose/dataset/weights/";
+    TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3/dataset/weights/";
 
     TString prefix = "TMVAClassification";
       
