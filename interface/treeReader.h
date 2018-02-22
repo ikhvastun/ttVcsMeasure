@@ -151,6 +151,10 @@ class treeReader {
         Bool_t          _tauVTightMvaOld[nL_max];   
         Double_t        _relIso[nL_max];   
         Double_t        _relIso0p4Mu[nL_max];
+        Double_t        _relIso0p4[nL_max];
+        Double_t        _relIso0p6[nL_max];
+        Double_t        _relIso0p8[nL_max];
+        Double_t        _relIso1p0[nL_max];
         Double_t        _miniIso[nL_max];   
         Double_t        _miniIsoCharged[nL_max];   
         Double_t        _ptRel[nL_max];   
@@ -410,6 +414,10 @@ class treeReader {
         TBranch        *b__tauVTightMvaOld;   
         TBranch        *b__relIso;   
         TBranch        *b__relIso0p4Mu;
+        TBranch        *b__relIso0p4;
+        TBranch        *b__relIso0p6;
+        TBranch        *b__relIso0p8;
+        TBranch        *b__relIso1p0;
         TBranch        *b__miniIso;   
         TBranch        *b__miniIsoCharged;   
         TBranch        *b__ptRel;   

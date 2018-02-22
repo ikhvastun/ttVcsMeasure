@@ -122,10 +122,14 @@ bool treeReader::lepIsLoose(const unsigned ind){
     if(_3dIPSig[ind] >= 8) return false;
     if(_miniIso[ind] >= 0.4) return false;
     if(_lFlavor[ind] == 1){
-        if(!_lPOGLoose[ind]) return false;
+        // used in ttH
+        //if(!_lPOGLoose[ind]) return false;
+        // what we are going to use both in ttW, ttZ, tZq
+        if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
-        if(!elePassVLooseMvaIDSUSY(ind)) return false;
+        if(!_lElectronPassEmu[ind]) return false;
+        //if(!elePassVLooseMvaIDSUSY(ind)) return false;
     }
     return true;
 }
@@ -420,8 +424,8 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
         //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
         //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
-        if(l0reco.DeltaR(l0gen) < 0.1){
-            //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid/provenance) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << " " << _lProvenance[l]<< " " << _lProvenanceCompressed[l] << endl;
+        if(l0reco.DeltaR(l0gen) < 1.0){
+            //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << endl;
             if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){ //  && _lFlavor[l] == _gen_lFlavor[i]
                 leptIsP = true;
             }

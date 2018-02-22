@@ -59,7 +59,7 @@ void treeReader::Analyze(){
   //read samples and cross sections from txt file
   //readSamples("samples_ttbar_emu_2017data.txt");
   //readSamples("samples_Zll_2017data.txt");
-  readSamples("data/samples_LeptonMVAtraining_2017MC.txt");
+  readSamples("data/samples_LeptonMVAtraining.txt");
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -83,7 +83,7 @@ void treeReader::Analyze(){
   TTree bkgTree("bkgTree","bkgTree");
   
   //addBranchToBDTTreeVariables();
-  double pt, eta, miniIsoCharged, miniIsoNeutral, ptrel, ptratio, jetbtagCSV, sip3d, dxy, dz, segmComp, eleMVA;
+  double pt, eta, miniIsoCharged, miniIsoNeutral, ptrel, ptratio, relIso0p3,  relIso0p4, relIso0p6, relIso0p8, relIso1p0, jetbtagCSV, sip3d, dxy, dz, segmComp, eleMVA;
   int trackMult;
   signalTree.Branch("pt", &pt, "pt/D");
   signalTree.Branch("eta", &eta, "eta/D");
@@ -92,6 +92,11 @@ void treeReader::Analyze(){
   signalTree.Branch("miniIsoNeutral", &miniIsoNeutral, "miniIsoNeutral/D");
   signalTree.Branch("ptrel", &ptrel, "ptrel/D");
   signalTree.Branch("ptratio", &ptratio, "ptratio/D");
+  signalTree.Branch("relIso0p3", &relIso0p3, "relIso0p3/D");
+  signalTree.Branch("relIso0p4", &relIso0p4, "relIso0p4/D");
+  signalTree.Branch("relIso0p6", &relIso0p6, "relIso0p6/D");
+  signalTree.Branch("relIso0p8", &relIso0p8, "relIso0p8/D");
+  signalTree.Branch("relIso1p0", &relIso1p0, "relIso1p0/D");
   signalTree.Branch("jetbtagCSV", &jetbtagCSV, "jetbtagCSV/D");
   signalTree.Branch("sip3d", &sip3d, "sip3d/D");
   signalTree.Branch("dxy", &dxy, "dxy/D");
@@ -107,6 +112,11 @@ void treeReader::Analyze(){
   bkgTree.Branch("miniIsoNeutral", &miniIsoNeutral, "miniIsoNeutral/D");
   bkgTree.Branch("ptrel", &ptrel, "ptrel/D");
   bkgTree.Branch("ptratio", &ptratio, "ptratio/D");
+  bkgTree.Branch("relIso0p3", &relIso0p3, "relIso0p3/D");
+  bkgTree.Branch("relIso0p4", &relIso0p4, "relIso0p4/D");
+  bkgTree.Branch("relIso0p6", &relIso0p6, "relIso0p6/D");
+  bkgTree.Branch("relIso0p8", &relIso0p8, "relIso0p8/D");
+  bkgTree.Branch("relIso1p0", &relIso1p0, "relIso1p0/D");
   bkgTree.Branch("jetbtagCSV", &jetbtagCSV, "jetbtagCSV/D");
   bkgTree.Branch("sip3d", &sip3d, "sip3d/D");
   bkgTree.Branch("dxy", &dxy, "dxy/D");
@@ -142,7 +152,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          if(it > 10000) break;
+          //if(it > 50000) break;
           //cout << "NEW EVENT" << endl;
           
           /*
@@ -152,7 +162,7 @@ void treeReader::Analyze(){
 
           //bool printAddInfo = false;
           
-          //if(_eventNb != 1492195608) continue;
+          //if(_eventNb != 226623239) continue;
           /*
           if(printAddInfo){
             cout << "################################################################" << endl;
@@ -330,7 +340,8 @@ void treeReader::Analyze(){
           for(auto & i : indLoose){
             //bool isTruePrompt = _lIsPrompt[i] || (_lProvenance[i] == 0) || (_lProvenance[i] > 100);
             //if(_3dIPSig[i] < 4) continue;
-            bool isTruePrompt = leptonIsPrompt(i) && !leptonIsFromPromptTau(i);
+            //bool isTruePrompt = leptonIsPrompt(i) && !leptonIsFromPromptTau(i);
+            bool isTruePrompt = _lIsPrompt[i] && _lProvenance[i] != 1;
             if(std::get<0>(samples[sam]) == "signal" && isTruePrompt && _lFlavor[i] == 0){ // leptonIsPrompt(i)
             
                 //std::cout << "Let's debug: " << std::get<0>(samples[sam])  << " " << leptonIsPrompt(i) << " " << _lPt[i] << " " << _lEta[i] << std::endl;
@@ -351,27 +362,34 @@ void treeReader::Analyze(){
                 miniIsoNeutral = (Float_t)(_miniIso[i] - _miniIsoCharged[i]);
                 ptrel = (Float_t)_ptRel[i]; 
                 ptratio = (Float_t)_ptRatio[i];
-                jetbtagCSV = (Float_t)_closestJetCsvV2[i];
+                relIso0p3 = (Float_t)_relIso[i];
+                relIso0p4 = (Float_t)_relIso0p4Mu[i];
+                relIso0p6 = (Float_t)_relIso0p6[i];
+                relIso0p8 = (Float_t)_relIso0p8[i];
+                relIso1p0 = (Float_t)_relIso1p0[i];
+                //jetbtagCSV = (Float_t)_closestJetCsvV2[i];
+                jetbtagCSV = (Float_t)_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i];
                 sip3d = (Float_t)_3dIPSig[i];
                 dxy = (Float_t)_dxy[i];
                 dz = (Float_t)_dz[i];
                 //segmComp = (Float_t)_lMuonSegComp[i];
                 //eleMVA = (Float_t)_lElectronMvaHZZ[i];
-                eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
+                eleMVA = (Float_t)_lElectronMva[i];
+                //eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
                 if(eleMVA != eleMVA) continue;
                 //LepGood_mvaIdSpring15;
                 signalTree.Fill();
             }
 
-            isTruePrompt = leptonIsPrompt(i);
-            if(std::get<0>(samples[sam]) == "background" && !isTruePrompt && _lFlavor[i] == 0){ //  &&  !_lIsPrompt[i]   && !_lIsPrompt[i] && _lFlavor[i] == 0,  && !(_lIsPrompt[i] && _lProvenanceCompressed[i] == 0) 
+            //isTruePrompt = leptonIsPrompt(i);
+            isTruePrompt = _lProvenanceCompressed[i] == 0;
+            if(std::get<0>(samples[sam]) == "background" && !isTruePrompt && _lFlavor[i] == 0){ //  &&  !_lIsPrompt[i]  
             
                 /*
-                if(_ptRatio[i] == 1){
-                    cout << "NEW EVENT" << endl;
-                    cout << "info about promptness: " << isTruePrompt << " " << (_lProvenanceCompressed[i] == 0) << " " << _lProvenanceCompressed[i] << endl;
-                    cout << "info about lepton (fl/isPr/isPrW/ptRatio/matchID/mom): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << _lIsPrompt[i] << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << " " << _gen_lMomPdg[i] << endl;
-                    cout << "more info(sip3D): " << _3dIPSig[i] << endl;
+                if(leptonIsPrompt(i) != (_lProvenanceCompressed[i] == 0)){
+                    cout << "NEW EVENT " << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
+                    cout << "info about lepton (fl/isPr/isPrW/ptRatio/matchID/provenance): " << _lFlavor[i] << " " << leptonIsPrompt(i) << " " << _lIsPrompt[i] << " " << _ptRatio[i] << " " << _lMatchPdgId[i] << " " << _lProvenance[i] << " " << _lProvenanceCompressed[i] << endl;
+                    cout << "more info(pt/sip3D): " << _lPt[i] << " " << _3dIPSig[i] << endl;
                 }
                 */
 
@@ -382,13 +400,20 @@ void treeReader::Analyze(){
                 miniIsoNeutral = (Float_t)(_miniIso[i] - _miniIsoCharged[i]);
                 ptrel = (Float_t)_ptRel[i]; 
                 ptratio = (Float_t)_ptRatio[i];
-                jetbtagCSV = (Float_t)_closestJetCsvV2[i];
+                relIso0p3 = (Float_t)_relIso[i];
+                relIso0p4 = (Float_t)_relIso0p4Mu[i];
+                relIso0p6 = (Float_t)_relIso0p6[i];
+                relIso0p8 = (Float_t)_relIso0p8[i];
+                relIso1p0 = (Float_t)_relIso1p0[i];
+                //jetbtagCSV = (Float_t)_closestJetCsvV2[i];
+                jetbtagCSV = (Float_t)_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i];
                 sip3d = (Float_t)_3dIPSig[i];
                 dxy = (Float_t)_dxy[i];
                 dz = (Float_t)_dz[i];
                 //segmComp = (Float_t)_lMuonSegComp[i];
                 //eleMVA = (Float_t)_lElectronMvaHZZ[i];
-                eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
+                eleMVA = (Float_t)_lElectronMva[i];
+                //eleMVA = (Float_t)_lElectronMvaFall17Iso[i];
                 if(eleMVA != eleMVA) continue;
                 //LepGood_mvaIdSpring15;
                 bkgTree.Fill();
