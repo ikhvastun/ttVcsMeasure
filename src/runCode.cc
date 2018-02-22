@@ -144,6 +144,7 @@ void treeReader::Analyze(){
                 
                 for(int cut = 0; cut < nPoints; cut++){
                     //if(_leptonMvaTTH[i] > -1 + 2. / nPoints * cut){
+                    if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
                     if(mvaVL > -1 + 2. / nPoints * cut){
                         if(_lPt[i] < 25)
                             passedPrompt[_lFlavor[i]][0][cut] += 1;
@@ -164,6 +165,7 @@ void treeReader::Analyze(){
             if(std::get<0>(samples[sam]) == "background" && !isTruePrompt){ // && !leptonIsPrompt(i) 
             
                 for(int cut = 0; cut < nPoints; cut++){
+                    if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
                     //if(_leptonMvaTTH[i] > -1 + 2. / nPoints * cut){
                     if(mvaVL > -1 + 2. / nPoints * cut){
                         if(_lPt[i] < 25)
