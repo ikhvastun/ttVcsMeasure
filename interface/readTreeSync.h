@@ -86,71 +86,38 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 22;
+const int nVars  = 2;
 
 TString varN[nVars] = {
-    "Type I E_{T}^{miss}", 
-    "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", 
-    "#eta^{leading} [GeV]", "#eta^{trailing} [GeV]", 
-    "NPV",
-
-    "mll",
-    "closestJetCSVv2", 
-    "dxy", "dz", "SIP3D",
-    "ptratio", "ptrel",
-    "electron HZZ MVA", "electron GP MVA", "SUSY lepton MVA", "TTH lepton MVA",
-    "miniIso", "miniIsoCharged",
-    "nJets", "nBJets",
-    "muon segment comp"
+    "pt corr ele", "pt corr mu"
 }; 
 
 double varMin[nVars] = {
-    0, 
     0, 0, 
-    -2.5, -2.5, 
-    0,
-
-    81.,
-    0., 
-    0., 0., 0.,
-    0., 0.,
-    -1, -1, -1, -1,
-    0., 0., 
-    0, 0, 
-    0
 };
     
 double varMax[nVars] = {
-    300,
     100, 100, 
-    2.5, 2.5, 
-    70,
-
-    101.,
-    1., 
-    0.05, 0.1, 8, 
-    2, 200,
-    1., 1., 1., 1.,
-    0.4, 0.4,
-    8, 8, 
-    1
 };
     
 int nBins[nVars] = {
-    60,
-    100, 100, 
-    50, 50, 
-    70,
-
-    40,
-    40, 
-    40, 40, 40,
-    80, 100,
-    40, 40, 40, 40,
     20, 20,
-    8, 8,
-    20
 };
+
+const int nVars2D  = 4;
+
+double varMin2D[2] = {
+    0, 0
+};
+    
+double varMax2D[2] = {
+    200, 200
+};
+    
+int nBins2D[2] = {
+    100, 100
+};
+
 
 
 // Lepton SF
@@ -245,8 +212,11 @@ double MET;
 
 // For FR
 
-const int nPt = 6;
-const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
+const int nPt = 7;
+const double ptBins[nPt] = {10., 15., 20., 30., 45., 65., 100.};
+
+const int nEta = 4;
+double etaBins[2][nEta] = {{0., 0.8, 1.442, 2.5}, {0., 1.2, 2.1, 2.4}};
 
 double passedPrompt_TTV[2][2];
 double passedNonPrompt_TTV[2][2];

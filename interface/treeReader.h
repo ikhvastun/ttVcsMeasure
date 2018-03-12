@@ -39,6 +39,7 @@ class treeReader {
         Int_t           _gen_lCharge[gen_nL_max];   
         Int_t           _gen_lMomPdg[gen_nL_max];   
         Bool_t          _gen_lIsPrompt[gen_nL_max];   
+        Double_t        _gen_partonPt[gen_nL_max];
         Bool_t          _2017_e;
         Bool_t          _HLT_Ele35_WPTight_Gsf;
         Int_t           _HLT_Ele35_WPTight_Gsf_prescale;
@@ -130,6 +131,7 @@ class treeReader {
         UInt_t          _lElectronMissingHits[nL_max];   //[_nLight]  
         Double_t        _leptonMvaSUSY[nL_max];   //[_nLight]
         Double_t        _leptonMvaTTH[nL_max];   //[_nLight]
+        Double_t        _leptonMvatZqTTV[nL_max];
         Bool_t          _lHNLoose[nL_max];   
         Bool_t          _lHNFO[nL_max];   
         Bool_t          _lHNTight[nL_max];   
@@ -301,6 +303,7 @@ class treeReader {
         TBranch        *b__gen_lCharge;   
         TBranch        *b__gen_lMomPdg;   
         TBranch        *b__gen_lIsPrompt;   
+        TBranch        *b__gen_partonPt;
         TBranch        *b__2017_e;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf_prescale;   
@@ -392,6 +395,7 @@ class treeReader {
         TBranch        *b__lElectronMissingHits;   //! 
         TBranch        *b__leptonMvaSUSY;   //!
         TBranch        *b__leptonMvaTTH;   //! 
+        TBranch        *b__leptonMvatZqTTV;   //! 
         TBranch        *b__lHNLoose;   
         TBranch        *b__lHNFO;   
         TBranch        *b__lHNTight;   

@@ -22,7 +22,9 @@ const int iPos =0;
 using namespace std;
 
 using Output::distribs;
+using Output::distribs2D;
 using Output::DistribsAll;
+using Output::DistribsAll2D;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
 void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false){   
@@ -157,8 +159,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(1.5);
-    uncHistoCopy->SetMinimum(0.5);
+    uncHistoCopy->SetMaximum(0.2);
+    uncHistoCopy->SetMinimum(0.0);
     uncHistoCopy->SetMarkerStyle(20);
     uncHistoCopy->SetMarkerSize(0.2);
 
@@ -252,5 +254,19 @@ void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
     pad2->Update();
     
 }   
+
+void showHist2D(TVirtualPad* c1, DistribsAll & distribs){   
+ 
+    c1->cd();
+    TPad *pad1 = new TPad("pad1","pad1",0,0,1,1);
+    pad1->SetRightMargin(0.07);
+    TH2D * passed = (TH2D*)distribs.vectorHisto2D[0].Clone("passed");
+    TH2D * all    = (TH2D*)distribs.vectorHisto2D[1].Clone("all");
+    passed->Divide(all);
+    passed->Draw("etextcolz");
+    //distribs2D.vectorHisto[0].Draw("colz");
+    return;
+
+} 
 
 #endif  // showHist

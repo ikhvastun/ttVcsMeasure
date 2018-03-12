@@ -33,7 +33,7 @@ void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
     //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_checkLeptonMVA/samplesForTraining/2016MC/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  // 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_FR/ttbar/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  // 
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
@@ -142,6 +142,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lElectronMissingHits", _lElectronMissingHits, &b__lElectronMissingHits);
     fChain->SetBranchAddress("_leptonMvaSUSY", _leptonMvaSUSY, &b__leptonMvaSUSY);
     fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvaTTH, &b__leptonMvaTTH);
+    fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
 
     fChain->SetBranchAddress("_lPOGLoose", _lPOGLoose, &b__lPOGLoose);
     fChain->SetBranchAddress("_lPOGMedium", _lPOGMedium, &b__lPOGMedium);
@@ -214,6 +215,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_gen_lMomPdg", _gen_lMomPdg, &b__gen_lMomPdg);
         fChain->SetBranchAddress("_gen_lIsPrompt", _gen_lIsPrompt, &b__gen_lIsPrompt);
         fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
+        fChain->SetBranchAddress("_gen_partonPt", _gen_partonPt, &b__gen_partonPt);
         fChain->SetBranchAddress("_lProvenance", _lProvenance, &b__lProvenance);
         fChain->SetBranchAddress("_lProvenanceCompressed", _lProvenanceCompressed, &b__lProvenanceCompressed);
     }

@@ -49,6 +49,7 @@ using namespace tools;
 
 Errors LastError::lasterror = Errors::UNKNOWN;
 using Output::distribs;
+using Output::distribs2D;
 
 void treeReader::Analyze(){
 
@@ -57,26 +58,10 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("samples_ttbar_emu_2017data.txt");
-  //readSamples("samples_Zll_2017data.txt");
-  readSamples("data/samples_LeptonMVAtraining.txt"); // 
+  readSamples("data/samples_FOtuning.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
-  /*
-  cout << "string before quiting the program" << endl;
-  return ;
-  */
-
-  /*
-  readerBtag[0][0].load(calib_csvv2[0], BTagEntry::FLAV_B, "iterativefit");
-  readerBtag[0][1].load(calib_csvv2[0], BTagEntry::FLAV_C, "iterativefit");
-  readerBtag[0][2].load(calib_csvv2[0], BTagEntry::FLAV_UDSG, "iterativefit");
-
-  readerBtag[1][0].load(calib_csvv2[1], BTagEntry::FLAV_B, "iterativefit");
-  readerBtag[1][1].load(calib_csvv2[1], BTagEntry::FLAV_C, "iterativefit");
-  readerBtag[1][2].load(calib_csvv2[1], BTagEntry::FLAV_UDSG, "iterativefit");
-  */
 
   addVariablesToBDT();
 
@@ -86,11 +71,6 @@ void treeReader::Analyze(){
       Color_t color = assignColor(std::get<0>(samples[sam]));
       setStackColors(color, sam);
 
-      //if(leptonSelectionAnalysis == 3)
-      //  if(std::get<0>(samples[sam]) == "chargeMisID") continue;
-
-      if(std::get<0>(samples[sam]) == "data") continue;
-    
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
       for(long unsigned it = 0; it < nEntries; ++it){
@@ -105,7 +85,7 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 30000) break;
+          //if(it > 100000) break;
           
           std::vector<unsigned> ind, indLoose;
           const unsigned lCount = selectLep(ind);
@@ -113,7 +93,7 @@ void treeReader::Analyze(){
 
           if(lCountLoose < 1) continue;
 
-          int samCategory = sam;
+          int featureCategory = -99;
           int nLocEle = getElectronNumber(indLoose);
 
           std::vector<unsigned> indJets;
@@ -135,57 +115,26 @@ void treeReader::Analyze(){
             //(Float_t)_closestJetCsvV2[i], 
             (Float_t)_3dIPSig[i], (Float_t)_dxy[i], (Float_t)_dz[i], _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
             fillBDTvariables(varForBDT, _lFlavor[i]);
-            mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
+            mvaVL =  _leptonMvatZqTTV[i];
+            //mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
 
-            //bool isTruePrompt = leptonIsPrompt(i);
-            bool isTruePrompt = _lIsPrompt[i] && _lProvenance[i] != 1;
+            //if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
+            if(_lProvenanceCompressed[i] == 0) continue;
+            if (mvaVL > 0.85) featureCategory = 0;
+            else if (mvaVL > -0.8) featureCategory = 1;
+            else continue;
 
-            if(std::get<0>(samples[sam]) == "signal" && isTruePrompt){
-                
-                for(int cut = 0; cut < nPoints; cut++){
-                    //if(_leptonMvaTTH[i] > -1 + 2. / nPoints * cut){
-                    if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
-                    if(mvaVL > -1 + 2. / nPoints * cut){
-                        if(_lPt[i] < 25)
-                            passedPrompt[_lFlavor[i]][0][cut] += 1;
-                        if(_lPt[i] > 25)
-                            passedPrompt[_lFlavor[i]][1][cut] += 1;
-                    }
-                }
-                if(lepIsGood_TTV(i)){
-                    if(_lPt[i] < 25)
-                        passedPrompt_TTV[_lFlavor[i]][0] += 1;
-                    if(_lPt[i] > 25)
-                         passedPrompt_TTV[_lFlavor[i]][1] += 1;
-                }
-            }
-
-            //isTruePrompt = leptonIsPrompt(i);
-            isTruePrompt = _lProvenanceCompressed[i] == 0;
-            if(std::get<0>(samples[sam]) == "background" && !isTruePrompt){ // && !leptonIsPrompt(i) 
-            
-                for(int cut = 0; cut < nPoints; cut++){
-                    if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
-                    //if(_leptonMvaTTH[i] > -1 + 2. / nPoints * cut){
-                    if(mvaVL > -1 + 2. / nPoints * cut){
-                        if(_lPt[i] < 25)
-                            passedNonPrompt[_lFlavor[i]][0][cut] += 1;
-                        if(_lPt[i] > 25)
-                            passedNonPrompt[_lFlavor[i]][1][cut] += 1;
-                    }
-                }
-                if(lepIsGood_TTV(i)){
-                    if(_lPt[i] < 25)
-                        passedNonPrompt_TTV[_lFlavor[i]][0] += 1;
-                    if(_lPt[i] > 25)
-                        passedNonPrompt_TTV[_lFlavor[i]][1] += 1;
-                }
+            //if(_gen_partonPt[i] == 0) continue;
+            distribs[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
+            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
+            if(featureCategory == 1){
+                //distribs2D.vectorHisto[0].Fill(double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))), double(_lPt[i] / _ptRatio[i]));
+                //distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] / _ptRatio[i]));
+                distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))));
+                //std::cout << "ptWithRelIso/ptWithClosJetPt: " << double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))) << " " << double(_lPt[i] / _ptRatio[i]) << std::endl;
             }
           }
           
-
-          
-
       }
 
       std::cout << std::endl;
@@ -193,50 +142,91 @@ void treeReader::Analyze(){
       std::cout << std::endl;
   }
 
-  double pointsToDrawPrompt[2][2][nPoints-1];
-  double pointsToDrawNonPrompt[2][2][nPoints-1];
-  std::vector<int> flavorsNumber = {0, 1};
-  std::vector<int> ptRanges = {0, 1};
-  for(auto & flavour : flavorsNumber){
-     for(auto & ptRange : ptRanges){
-        for(int point = 0; point < nPoints; point++){
-            if(point == 0) continue;
-            pointsToDrawNonPrompt[flavour][ptRange][point-1] = passedNonPrompt[flavour][ptRange][point] / passedNonPrompt[flavour][ptRange][0];
-            pointsToDrawPrompt[flavour][ptRange][point-1] = passedPrompt[flavour][ptRange][point] / passedPrompt[flavour][ptRange][0];
+  TLegend* mtleg = new TLegend(0.77,0.89,0.95,0.62);
+  //mtleg->SetNColumns(1);
+  mtleg->SetFillColor(0);
+  mtleg->SetFillStyle(0);
+  mtleg->SetBorderSize(0);
+  mtleg->SetTextFont(42);
+
+
+  //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
+  int count = 0;
+
+  for (std::vector<std::string>::iterator it = samplesOrderNames.begin(); it != samplesOrderNames.end(); it++) {
+
+        cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
+
+        mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
+        count++;
+  }
+
+  for (int i=0; i!=nVars; ++i)  {
+
+    //cout << "The sample size is " << samples.size() << endl;
+    for (int sam=0; sam != samples.size(); ++sam){
+      if(std::get<0>(samples[sam]) == "data") continue;
+
+      // is used in MC CT
+      //if(sam == 0) continue;
+
+      //cout << "the sample is added: " << std::get<0>(samples[sam]) << endl;
+      distribs[i].vectorHistoTotalUnc.Add(&distribs[i].vectorHisto[sam]);
+    }
+
+    for (int ibin = 1; ibin!=nBins[i]+1; ++ibin) {
+      //get syst. uncertainty band:
+      double err = 0.;
+      for (int sam=0; sam != samples.size(); ++sam) {
+        if(std::get<0>(samples[sam]) == "data") continue;
+        // is used in MC CT
+        //if(sam == 0) continue;
+        if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){
+          err += TMath::Power(distribs[i].vectorHisto[sam].GetBinError(ibin), 2); //  + TMath::Power(distribs[i].vectorHisto[sam].GetBinContent(ibin) * systematicsLeptonID[sam], 2)
         }
-        passedNonPrompt_TTV[flavour][ptRange] = passedNonPrompt_TTV[flavour][ptRange] / passedNonPrompt[flavour][ptRange][0];
-        passedPrompt_TTV[flavour][ptRange] = passedPrompt_TTV[flavour][ptRange] /  passedPrompt[flavour][ptRange][0];
+        else{
+          err += 0;
+        }
+      }
+
+      err = sqrt(err);
+      distribs[i].vectorHistoTotalUnc.SetBinError(ibin, err);
     }
+
   }
 
-  TGraph* gr[2][2]; // = new TGraph(nPoints-1,pointsToDrawNonPrompt[fl][ptr],pointsToDrawPrompt[fl][ptr]);
-  TCanvas *cROC = new TCanvas("cROC","cROC");
-  TFile f("plotsForSave/eleCurve.root","RECREATE");
-  cROC->Divide(2,2);
-  for(int fl = 0; fl < 2; fl++){
-    for(int ptr = 0; ptr < 2; ptr++){
-        cROC->cd(2 * fl + ptr + 1);
-        gPad->SetLogx();
-        gPad->SetGridx();
-        gPad->SetGridy();
-        TString name = Form("graph_%d_%d",fl,ptr);
-        gr[fl][ptr] = new TGraph(nPoints-1,pointsToDrawNonPrompt[fl][ptr],pointsToDrawPrompt[fl][ptr]);
-        gr[fl][ptr]->SetTitle(name);
-        gr[fl][ptr]->SetName(name);
-        gr[fl][ptr]->SetLineWidth(3);
-        gr[fl][ptr]->Draw("AC");
-        gr[fl][ptr]->Write();
-    }
+  double scale_num = 1.6;
+
+  TCanvas* plot[nVars];
+  TCanvas* plot2D[nVars];
+
+  for(int i = 0; i < nVars; i++) plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
+  for(int i = 0; i < 2; i++) plot2D[i] = new TCanvas(Form("plot_2D_%d", i),"",500,450);
+
+  vector<std::string> figNames = {"ptCorrEle", "ptCorrMuon"};
+  vector<TString> namesForSaveFiles = {"ptCorrEle", "ptCorrMuon"};
+
+  for(int varPlot = 0; varPlot < nVars; varPlot++){
+    plot[varPlot]->cd();
+    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, false); // + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
+    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".png");
+    plot[varPlot]->cd();
+    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, false); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
+    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.png");
   }
-  f.Close();
-  //cROC->SaveAs("plotsForSave/eleCurve.root");
 
-
-  cout << "Efficiency for POG ID: " << endl;
-  cout << "     electrons: pt < 25 -> (" << passedNonPrompt_TTV[0][0] << "," << passedPrompt_TTV[0][0] << ")" << endl;
-  cout << "     electrons: pt > 25 -> (" << passedNonPrompt_TTV[0][1] << "," << passedPrompt_TTV[0][1] << ")" << endl;
-  cout << "     muons: pt < 25 -> (" << passedNonPrompt_TTV[1][0] << "," << passedPrompt_TTV[1][0] << ")" << endl;
-  cout << "     mouns: pt > 25 -> (" << passedNonPrompt_TTV[1][1] << "," << passedPrompt_TTV[1][1] << ")" << endl;
+  /*
+  showHist2D(plot2D[0],distribs2D); 
+  plot2D[0]->SaveAs("plotsForSave/correlation.pdf");
+  plot2D[0]->SaveAs("plotsForSave/correlation.png");
+  plot2D[0]->SaveAs("plotsForSave/correlation.root");
+  */
+  showHist2D(plot2D[0],distribs[0]); 
+  plot2D[0]->SaveAs("plotsForSave/eleFR.root");
+  showHist2D(plot2D[1],distribs[1]); 
+  plot2D[1]->SaveAs("plotsForSave/muFR.root");
 
   return;
 

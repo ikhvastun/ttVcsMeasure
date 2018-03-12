@@ -115,15 +115,16 @@ bool treeReader::lepIsLoose(const unsigned ind){
     //if(_closestJetCsvV2[ind] > 0.8484) return false;
 
     if(_lFlavor[ind] == 2) return false;  //don't consider taus here
-    if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
+    //if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
+    if(_lPt[ind] <= 10) return false;
     if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
     if(fabs(_dxy[ind]) >= 0.05) return false;
     if(fabs(_dz[ind]) >= 0.1) return false;
     if(_3dIPSig[ind] >= 8) return false;
     if(_miniIso[ind] >= 0.4) return false;
     if(_lFlavor[ind] == 1){
-        if(!_lPOGLoose[ind]) return false;
-        //if(!_lPOGMedium[ind]) return false;
+        //if(!_lPOGLoose[ind]) return false;
+        if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;
@@ -586,8 +587,8 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "DY") return kBlue-9;
     if(name == "Diboson") return 98; 
     if(name == "Triboson") return 8;
-    if(name == "TopPr") return 91; 
-    if(name == "TopNonPr") return 51; 
+    if(name == "tight") return 91; 
+    if(name == "loose") return 51; 
     if(name == "tW") return kRed-10;
 
     return kBlack;

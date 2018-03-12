@@ -140,8 +140,15 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
-    
-    
+    TString name = Form("var2D");
+    distribs2D.vectorHisto[0] = std::move(TH2D(name,name+";",nBins2D[0],varMin2D[0],varMax2D[0],nBins2D[1],varMin2D[1],varMax2D[1]));
+
+    name = Form("FRele");
+    distribs[0].vectorHisto2D[0] = std::move(TH2D(name,           name+";",nPt-1, ptBins, nEta-1, etaBins[0]));
+    distribs[0].vectorHisto2D[1] = std::move(TH2D(name + "passed",name+";",nPt-1, ptBins, nEta-1, etaBins[0]));
+    name = Form("FRmu");
+    distribs[1].vectorHisto2D[0] = std::move(TH2D(name,           name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
+    distribs[1].vectorHisto2D[1] = std::move(TH2D(name + "passed",name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
 
 }
 
@@ -324,8 +331,8 @@ void addVariablesToBDT(){
     //TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/";  // _removePromptFromTaus
     //TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/"; 
 
-    TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_removeElectronMVAcuts_addTriggerEmuOnLoose/dataset/weights/";
-    TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3/dataset/weights/";
+    TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_ptGR10/dataset/weights/";
+    TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3_ptGR10/dataset/weights/";
 
     TString prefix = "TMVAClassification";
       
