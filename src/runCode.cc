@@ -95,13 +95,14 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          if(it > 10000) break;
+          //if(it > 500000) break;
           
           std::vector<unsigned> ind, indLoose;
           const unsigned lCountLoose = selectLooseLep(indLoose);
 
           if(lCountLoose != 2) continue;
           if(!passPtCuts2L(indLoose)) continue;
+          if(_lCharge[indLoose.at(0)] * _lCharge[indLoose.at(1)] < 0) continue;
 
           int nLocEle = getElectronNumber(indLoose);
 
@@ -113,21 +114,20 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          //nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          //nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
+          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
+          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
           //double dMZ = deltaMZ(ind, third, mll, pt_Z, ptNonZ, phi_Z);
+          if (nJLoc < 2) continue;
+          if(_met < 30) continue;
+          if(nBLoc < 1) continue;
 
           int featureCategory = 0;
           for(auto & i : indLoose){
-            if (_leptonMvatZqTTV[i] < -0.8) continue;
-            if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
-
             if (_leptonMvatZqTTV[i] > 0.85) featureCategory += 1;
-
           }
         
           double FRloc = 1.;
-          if(featureCategory != 2){ 
+          if(featureCategory < 2){ 
 
             int nFakeLepCounter = 0;
 
@@ -135,8 +135,7 @@ void treeReader::Analyze(){
               if (_leptonMvatZqTTV[i] > 0.85) continue;
 
               // used in ttV
-              double leptFakePtCorr = 0.85 * _lPt[i] / _ptRatio[i];
-              cout << "info: " << _lFlavor[i] << " " << _lEta[i] << " " << leptFakePtCorr << endl;
+              double leptFakePtCorr = _lPt[i] / _ptRatio[i];
               double FRloc_loc = fakeMaps.at(_lFlavor[i]).GetBinContent(fakeMaps.at(_lFlavor[i]).FindBin(TMath::Min(leptFakePtCorr,100-1.), fabs(_lEta[i])));
 
               //FRloc *= FRloc_loc/(1.-FRloc_loc);
@@ -147,12 +146,11 @@ void treeReader::Analyze(){
 
             FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
           }
-          continue;
 
           weight = weight * FRloc;  
 
-          distribs[0].vectorHisto[featureCategory == 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[0]-0.1),weight);
-          distribs[1].vectorHisto[featureCategory == 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[1]-0.1),weight);
+          distribs[0].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[0]-0.1),weight);
+          distribs[1].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[1]-0.1),weight);
           
       }
 
@@ -197,7 +195,7 @@ void treeReader::Analyze(){
       //get syst. uncertainty band:
       double err = 0.;
       for (int sam=0; sam != samples.size(); ++sam) {
-        if(std::get<0>(samples[sam]) == "data") continue;
+        if(std::get<0>(samples[sam]) == "tight") continue;
         // is used in MC CT
         //if(sam == 0) continue;
         if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){

@@ -68,7 +68,7 @@ void getFRmaps(vector<TH2D> & fakeMaps){
     for (int i=0; i!=nFlavors; ++i){
 
       fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_ttbarMC.root","READ");
-      TH2D * tempPtr = (TH2D*) (fakerate->Get(("plot_2D_" + std::to_string(i)).c_str()));
+      TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 
       if(tempPtr != NULL){
         fakeMaps.push_back(*tempPtr);

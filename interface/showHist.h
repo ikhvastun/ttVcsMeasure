@@ -48,7 +48,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].SetTitle(title.c_str());
     distribs.vectorHisto[dataSample].GetXaxis()->SetTitle(titleX.c_str());
     distribs.vectorHisto[dataSample].GetYaxis()->SetTitle(titleY.c_str());
-    distribs.vectorHisto[dataSample].SetMinimum(0.5);
+    distribs.vectorHisto[dataSample].SetMinimum(0.01);
     distribs.vectorHisto[dataSample].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
     distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.01);
 
@@ -58,7 +58,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     }
     
 
-    if(title == "log"){
+    if(plotInLog){
       distribs.vectorHisto[dataSample].SetTitle("");
       distribs.vectorHisto[dataSample].SetMinimum(0.5);
       distribs.vectorHisto[dataSample].SetMaximum(1000.);
@@ -159,7 +159,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(0.2);
+    uncHistoCopy->SetMaximum(2.0);
     uncHistoCopy->SetMinimum(0.0);
     uncHistoCopy->SetMarkerStyle(20);
     uncHistoCopy->SetMarkerSize(0.2);
@@ -255,7 +255,7 @@ void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
     
 }   
 
-void showHist2D(TVirtualPad* c1, DistribsAll & distribs){   
+void showHist2D(TVirtualPad* c1, DistribsAll & distribs, int flavour = 0){   
  
     c1->cd();
     TPad *pad1 = new TPad("pad1","pad1",0,0,1,1);
@@ -264,6 +264,7 @@ void showHist2D(TVirtualPad* c1, DistribsAll & distribs){
     TH2D * all    = (TH2D*)distribs.vectorHisto2D[1].Clone("all");
     passed->Divide(all);
     passed->Draw("etextcolz");
+    passed->SaveAs("plotsForSave/" + flavorsString[flavour] + "FR.root");
     //distribs2D.vectorHisto[0].Draw("colz");
     return;
 
