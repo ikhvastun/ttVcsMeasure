@@ -125,8 +125,8 @@ void treeReader::Analyze(){
             else continue;
 
             //if(_gen_partonPt[i] == 0) continue;
-            distribs[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
+            distribs[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
+            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
             if(featureCategory == 1){
                 //distribs2D.vectorHisto[0].Fill(double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))), double(_lPt[i] / _ptRatio[i]));
                 //distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] / _ptRatio[i]));
