@@ -255,7 +255,7 @@ void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
     
 }   
 
-void showHist2D(TVirtualPad* c1, DistribsAll & distribs){   
+void showHist2D(TVirtualPad* c1, DistribsAll & distribs, int flavour = 0){   
  
     c1->cd();
     TPad *pad1 = new TPad("pad1","pad1",0,0,1,1);
@@ -264,6 +264,7 @@ void showHist2D(TVirtualPad* c1, DistribsAll & distribs){
     TH2D * all    = (TH2D*)distribs.vectorHisto2D[1].Clone("all");
     passed->Divide(all);
     passed->Draw("etextcolz");
+    passed->SaveAs("plotsForSave/" + flavorsString[flavour] + "FR.root");
     //distribs2D.vectorHisto[0].Draw("colz");
     return;
 

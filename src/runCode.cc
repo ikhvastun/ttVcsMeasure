@@ -223,10 +223,10 @@ void treeReader::Analyze(){
   plot2D[0]->SaveAs("plotsForSave/correlation.png");
   plot2D[0]->SaveAs("plotsForSave/correlation.root");
   */
-  showHist2D(plot2D[0],distribs[0]); 
-  plot2D[0]->SaveAs("plotsForSave/eleFR.root");
-  showHist2D(plot2D[1],distribs[1]); 
-  plot2D[1]->SaveAs("plotsForSave/muFR.root");
+  showHist2D(plot2D[0],distribs[0], 0); 
+  //plot2D[0]->SaveAs("plotsForSave/eleFR.root");
+  showHist2D(plot2D[1],distribs[1], 1); 
+  //plot2D[1]->SaveAs("plotsForSave/muFR.root");
 
   return;
 
