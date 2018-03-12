@@ -130,6 +130,7 @@ bool treeReader::lepIsLoose(const unsigned ind){
         if(!_lElectronPassEmu[ind]) return false;
         //if(!elePassVLooseMvaIDSUSY(ind)) return false;
     }
+    if(_leptonMvatZqTTV[ind] < -0.8) return false;
     return true;
 }
 
@@ -338,8 +339,8 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        ptMap.push_back({_lPt[i], i});
-        
+        double ptcor = _leptonMvatZqTTV[i] > 0.85 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i];
+        ptMap.push_back({ptcor, i});
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
 
@@ -349,7 +350,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
 
-    if(ptMap[0].first < 25) return false;
+    if(ptMap[0].first < 15) return false;
     if(ptMap[1].first < 15) return false;
 
     return true;

@@ -89,7 +89,7 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
 const int nVars  = 2;
 
 TString varN[nVars] = {
-    "pt corr ele", "pt corr mu"
+    "pt corr lead", "pt corr sublead"
 }; 
 
 double varMin[nVars] = {
@@ -97,7 +97,7 @@ double varMin[nVars] = {
 };
     
 double varMax[nVars] = {
-    100, 100, 
+    200, 200, 
 };
     
 int nBins[nVars] = {

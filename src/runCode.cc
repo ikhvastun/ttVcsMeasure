@@ -63,6 +63,16 @@ void treeReader::Analyze(){
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
 
+  LastError::lasterror = Errors::UNKNOWN;
+
+  vector<TH2D> fakeMaps;
+  getFRmaps(fakeMaps);
+
+  if(LastError::lasterror != Errors::OK){
+     cout << "FR maps not found" << endl;
+     return;
+  }
+
   addVariablesToBDT();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
@@ -85,15 +95,14 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 100000) break;
+          if(it > 10000) break;
           
           std::vector<unsigned> ind, indLoose;
-          const unsigned lCount = selectLep(ind);
           const unsigned lCountLoose = selectLooseLep(indLoose);
 
-          if(lCountLoose < 1) continue;
+          if(lCountLoose != 2) continue;
+          if(!passPtCuts2L(indLoose)) continue;
 
-          int featureCategory = -99;
           int nLocEle = getElectronNumber(indLoose);
 
           std::vector<unsigned> indJets;
@@ -104,36 +113,46 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
+          //nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
+          //nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
           //double dMZ = deltaMZ(ind, third, mll, pt_Z, ptNonZ, phi_Z);
 
+          int featureCategory = 0;
           for(auto & i : indLoose){
-            double mvaVL = -999.;
-            vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)_lEta[i], (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_ptRatio[i], (Float_t)_relIso[i], 
-            (Float_t)(_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i]),
-            //(Float_t)_closestJetCsvV2[i], 
-            (Float_t)_3dIPSig[i], (Float_t)_dxy[i], (Float_t)_dz[i], _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
-            fillBDTvariables(varForBDT, _lFlavor[i]);
-            mvaVL =  _leptonMvatZqTTV[i];
-            //mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
+            if (_leptonMvatZqTTV[i] < -0.8) continue;
+            if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
 
-            //if(_lFlavor[i] == 1 && !_lPOGMedium[i]) continue;
-            if(_lProvenanceCompressed[i] == 0) continue;
-            if (mvaVL > 0.85) featureCategory = 0;
-            else if (mvaVL > -0.8) featureCategory = 1;
-            else continue;
+            if (_leptonMvatZqTTV[i] > 0.85) featureCategory += 1;
 
-            //if(_gen_partonPt[i] == 0) continue;
-            distribs[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
-            if(featureCategory == 1){
-                //distribs2D.vectorHisto[0].Fill(double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))), double(_lPt[i] / _ptRatio[i]));
-                //distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] / _ptRatio[i]));
-                distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))));
-                //std::cout << "ptWithRelIso/ptWithClosJetPt: " << double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))) << " " << double(_lPt[i] / _ptRatio[i]) << std::endl;
-            }
           }
+        
+          double FRloc = 1.;
+          if(featureCategory != 2){ 
+
+            int nFakeLepCounter = 0;
+
+            for(auto & i : indLoose){
+              if (_leptonMvatZqTTV[i] > 0.85) continue;
+
+              // used in ttV
+              double leptFakePtCorr = 0.85 * _lPt[i] / _ptRatio[i];
+              cout << "info: " << _lFlavor[i] << " " << _lEta[i] << " " << leptFakePtCorr << endl;
+              double FRloc_loc = fakeMaps.at(_lFlavor[i]).GetBinContent(fakeMaps.at(_lFlavor[i]).FindBin(TMath::Min(leptFakePtCorr,100-1.), fabs(_lEta[i])));
+
+              //FRloc *= FRloc_loc/(1.-FRloc_loc);
+              FRloc = FRloc_loc;
+              nFakeLepCounter++;
+
+            }
+
+            FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
+          }
+          continue;
+
+          weight = weight * FRloc;  
+
+          distribs[0].vectorHisto[featureCategory == 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[0]-0.1),weight);
+          distribs[1].vectorHisto[featureCategory == 2 ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[1]-0.1),weight);
           
       }
 
@@ -203,8 +222,8 @@ void treeReader::Analyze(){
   for(int i = 0; i < nVars; i++) plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   for(int i = 0; i < 2; i++) plot2D[i] = new TCanvas(Form("plot_2D_%d", i),"",500,450);
 
-  vector<std::string> figNames = {"ptCorrEle", "ptCorrMuon"};
-  vector<TString> namesForSaveFiles = {"ptCorrEle", "ptCorrMuon"};
+  vector<std::string> figNames = {"ptCorrLead", "ptCorrTrail"};
+  vector<TString> namesForSaveFiles = {"ptCorrLead", "ptCorrTrail"};
 
   for(int varPlot = 0; varPlot < nVars; varPlot++){
     plot[varPlot]->cd();
@@ -216,17 +235,6 @@ void treeReader::Analyze(){
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.png");
   }
-
-  /*
-  showHist2D(plot2D[0],distribs2D); 
-  plot2D[0]->SaveAs("plotsForSave/correlation.pdf");
-  plot2D[0]->SaveAs("plotsForSave/correlation.png");
-  plot2D[0]->SaveAs("plotsForSave/correlation.root");
-  */
-  showHist2D(plot2D[0],distribs[0]); 
-  plot2D[0]->SaveAs("plotsForSave/eleFR.root");
-  showHist2D(plot2D[1],distribs[1]); 
-  plot2D[1]->SaveAs("plotsForSave/muFR.root");
 
   return;
 

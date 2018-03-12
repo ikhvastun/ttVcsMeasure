@@ -63,18 +63,13 @@ int SRID3L (int njets, int nbjets) {
 
 void getFRmaps(vector<TH2D> & fakeMaps){
 
-    //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis_withMVATTH/FRmaps/FR_data_ttH_mva.root","READ");
     TFile *fakerate = NULL;
-    
 
     for (int i=0; i!=nFlavors; ++i){
 
-      fakerate = TFile::Open("FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
-      TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
+      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_ttbarMC.root","READ");
+      TH2D * tempPtr = (TH2D*) (fakerate->Get(("plot_2D_" + std::to_string(i)).c_str()));
 
-      //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_data_comb" + additionalString[i]));
-      //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_QCD")); //  + additionalString[i]
-      
       if(tempPtr != NULL){
         fakeMaps.push_back(*tempPtr);
       }
