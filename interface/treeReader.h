@@ -113,6 +113,7 @@ class treeReader {
         Double_t        _3dIP[nL_max];   
         Double_t        _3dIPSig[nL_max];   
         Float_t         _lElectronMva[nL_max];   
+        Float_t         _lElectronMvaHZZ[nL_max];   
         Bool_t          _lElectronPassEmu[nL_max];   //[_nLight]
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
@@ -227,6 +228,9 @@ class treeReader {
         double HTCalc(const std::vector<unsigned>& ind);
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &);
         int getElectronNumber(const std::vector<unsigned>& ind);
+        bool elePassVLooseMvaIDSUSY(const unsigned ind);
+        bool eleIsClean(const unsigned ind);
+        bool lepIsLoose(const unsigned ind);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
@@ -234,6 +238,7 @@ class treeReader {
         Color_t assignColor(std::string & name);
 
         double ptFake(double lpt, double ptratio, int flavour, double mvaTTHvalue, bool mediumIdPassed);
+        double ptFakeStIso(double lpt, int flavor, double isolation);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -350,6 +355,7 @@ class treeReader {
         TBranch        *b__3dIP;   
         TBranch        *b__3dIPSig;   
         TBranch        *b__lElectronMva;   
+        TBranch        *b__lElectronMvaHZZ;
         TBranch        *b__lElectronPassEmu;   //!
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!

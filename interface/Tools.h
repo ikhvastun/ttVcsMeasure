@@ -63,18 +63,21 @@ int SRID3L (int njets, int nbjets) {
 
 void getFRmaps(vector<TH2D> & fakeMaps){
 
-    //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis_withMVATTH/FRmaps/FR_data_ttH_mva.root","READ");
+    //TFile *fakerate = TFile::Open("FRmaps/FR_data_ttH_mva.root","READ");
     TFile *fakerate = NULL;
-    
 
     for (int i=0; i!=nFlavors; ++i){
 
-      fakerate = TFile::Open("FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
-      TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
+      //fakerate = TFile::Open("FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
+      //TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
 
       //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_data_comb" + additionalString[i]));
       //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_QCD")); //  + additionalString[i]
       
+      // for ttW
+      fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/FRmaps_ttW/fakerate_" + flavorsString[i] +"_data_ttW.root","READ");
+      TH2D * tempPtr = (TH2D*)fakerate->Get(flavorsString[i]+ "_FR_");
+
       if(tempPtr != NULL){
         fakeMaps.push_back(*tempPtr);
       }
@@ -84,11 +87,43 @@ void getFRmaps(vector<TH2D> & fakeMaps){
       }
 
     }
+
+    LastError::lasterror = Errors::OK;
+
+}
+
+/*
+void getFRmapsForTTZ(vector<vector<TH2D>> & fakeMaps){
+
+    for(int j = 0; j!=2; ++j){
+
+      vector<TH2D> fakeMapsTemp;
       
+      for (int i=0; i!=nFlavors; ++i){
+
+        //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_data_ttZ_GH_90to150fit.root","READ"); // tuned
+        TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_data_ttZ" + eraRuns[j] + "_tuned_tuned.root","READ");
+        //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_QCD_ttZ_test.root","READ");
+        
+        //TH2D * tempPtr = (TH2D*) (fakerate->Get(flavorsStringFull[i]+ "_map_corr"));
+        TH2D * tempPtr = (TH2D*) (fakerate->Get(flavorsString[i]+ "_FR_data_low"));
+        //TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
+        if(tempPtr != NULL){
+          fakeMapsTemp.push_back(*tempPtr);
+        }
+        else{
+          LastError::lasterror = Errors::FRmapsReturnNULL;
+          return;
+        }
+        
+      }
+      fakeMaps.push_back(fakeMapsTemp);
+    }
+
     LastError::lasterror = Errors::OK;
     
 }
-
+*/
 
 void initdistribs(std::vector<std::string> & namesOfSamples){
 
@@ -192,7 +227,7 @@ int flavourCategory3L(int nLocEle){
 float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision){
 
     float lepSF = 1.;
-
+    
     if(flavour == 0){
       TH2F * hist = lepSFMapsElectron[0];
       int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
@@ -200,7 +235,7 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
 
       
-      for(int sfFile = 4; sfFile < 5; sfFile++){
+      for(int sfFile = 1; sfFile < 5; sfFile++){
         TH2F *hist = lepSFMapsElectron[sfFile];
         ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
         etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
@@ -224,7 +259,30 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       } 
         
     }
+    
 
+    /*
+    if(flavour == 0){
+      lepSF *= lepSFMaps[0]->GetBinContent(lepSFMaps[0]->FindBin(std::min(double(pt), 199.), TMath::Abs(eta)));
+      if(pt > 25){
+        lepSF *= lepSFMaps1D[2]->Eval(eta);
+      }
+    }
+
+    int leptonFileDicision = 0;
+    if(eraDecision == 0)
+      leptonFileDicision = 3;
+    else
+      leptonFileDicision = 5;
+                
+    if(flavour == 1){
+      lepSF *= lepSFMaps1D[int((leptonFileDicision-3)/2)]->Eval(eta);
+      if(pt > 20){
+        lepSF *= lepSFMaps[leptonFileDicision]->GetBinContent(lepSFMaps[3]->FindBin(std::min(double(pt), 119.), TMath::Abs(eta)));
+        lepSF *= lepSFMaps[leptonFileDicision+1]->GetBinContent(lepSFMaps[4]->FindBin(std::min(double(pt), 119.), TMath::Abs(eta)));
+      }
+    }
+    */
     return lepSF;
 }
 
@@ -302,18 +360,31 @@ void addBranchToBDTTreeVariables(){
 void addVariablesToBDT(){
 
     reader->AddVariable( "HTLoc", &userHTLoc ); 
-    reader->AddVariable( "nJLoc", &usernJLoc );
+    
+    // not used in ttH
+    //reader->AddVariable( "nJLoc", &usernJLoc );
+    
     reader->AddVariable( "nBLoc", &usernBLoc );
     reader->AddVariable( "_met", &user_met );
     reader->AddVariable( "minDeltaR", &userminDeltaR );
-    reader->AddVariable( "mt", &usermt );
+
+    // not used in ttH
+    //reader->AddVariable( "mt", &usermt );
+    
     reader->AddVariable( "mtlow", &usermtlow );
     reader->AddVariable( "leadpt", &userleadpt );
     reader->AddVariable( "trailpt", &usertrailpt );
     reader->AddVariable( "leadingJetPt", &userleadingjetpt );
-    reader->AddVariable( "trailJetPt", &usertrailjetpt );  
 
-    TString dir    = "ttWvsttbarMC_LeptonMVA_0p9/weights/";
+    // not used in ttH
+    //reader->AddVariable( "trailJetPt", &usertrailjetpt );  
+
+    // the one used for leptonMVA
+    TString dir    = "MVAtrainings/ttWvsttbarMC_LeptonMVA_0p9/dataset/weights/"; 
+
+    // used for cut based
+    //TString dir    = "/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis/ttWvsttbar_MC_newJEC_fixed/weights/";
+    
     TString prefix = "TMVAClassification";
       
     TString methodName = TString("BDTG") + TString(" method");

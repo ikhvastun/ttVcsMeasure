@@ -19,7 +19,7 @@ void fillString(ofstream & file, vector<double> & str);
 vector<double> formEmptyString(int);
 void fillExperUnc(ofstream &, vector<std::string> & );
 
-std::vector<double> experUnc      = {1.025,  1.01, 1.03, (leptonSelectionAnalysis == 2 ? 1.03 : 1.04), 1.01}; // 1.01,  1.01,    1.01,    1.01,  1.01};
+std::vector<double> experUnc      = {1.025,  1.01, 1.03, (leptonSelectionAnalysis == 2 ? 1.06 : 1.08), 1.01}; // Didar's proposal is to use 6% for 2L, 8% for 3L, skype chat 12 Dec 2017, from Tom's map I got 3% for 2L, 4% for 3L
 std::vector<TString> experUncName = {"lumi", "PU", "trigger", "LeptonId", "JER", }; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
@@ -181,7 +181,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
         for(int i = 0; i < nCategories-1; i++){ // here -1 we don't consider data
           datastrVector.push_back(datastr);
           processNumberVector.push_back(std::to_string(i));
-          rateVector.push_back((hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1) > 0 ? hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1) : 0.0001));
+          rateVector.push_back((hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1) < 0.01 ? 0.01 : hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1)));
         }
         
         fillString(fileout, datastrVector);
@@ -275,7 +275,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
         fileout << ("fake     lnN ");
         newString = formEmptyString(numberOfBKG + 1);
         for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "nonpromptData")
+          if(nameOfProcessesForDatacard.at(i) == "nonpromptData" || nameOfProcessesForDatacard.at(i) == "nonprompt")
             newString[i] = 1.3;
         }
         fillString(fileout, newString);
@@ -364,7 +364,7 @@ void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatac
   for(int i = 0; i < experUnc.size(); i++){
     file << experUncName.at(i) << "      lnN  ";
     for(int statInd = 0; statInd < nameOfProcessesForDatacard.size(); statInd++){
-      if(nameOfProcessesForDatacard.at(statInd) == "nonpromptData")
+      if(nameOfProcessesForDatacard.at(statInd) == "nonpromptData" || nameOfProcessesForDatacard.at(statInd) == "nonprompt")
         file << "-" << '\t' ;
       else if (nameOfProcessesForDatacard.at(statInd) == "chargeMisID")
         file << "-" << '\t' ;

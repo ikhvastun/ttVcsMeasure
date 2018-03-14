@@ -57,7 +57,7 @@ void treeReader::Analyze(){
   //gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   //readSamples("samples_ttWtraining.txt");
-  readSamples("samples_ttW.txt");
+  readSamples("samples_ttW_NPdd.txt");
   //readSamples("nonpromptMCForCT.txt");
   setTDRStyle(); 
   
@@ -79,6 +79,10 @@ void treeReader::Analyze(){
   vector<TH2D> fakeMaps;
   getFRmaps(fakeMaps);
 
+  //vector<vector<TH2D>> fakeMaps;
+  //getFRmapsForTTZ(fakeMaps);
+
+
   if(LastError::lasterror != Errors::OK){
      cout << "FR maps not found" << endl;
      return;
@@ -92,7 +96,6 @@ void treeReader::Analyze(){
   }
 
 
-
   std::ofstream myfile;
   myfile.open("myevents.txt");
 
@@ -102,10 +105,14 @@ void treeReader::Analyze(){
       Color_t color = assignColor(std::get<0>(samples[sam]));
       setStackColors(color, sam);
 
-      //if(leptonSelectionAnalysis == 3)
-      //  if(std::get<0>(samples[sam]) == "chargeMisID") continue;
+      if(std::get<0>(samples[sam]) != "nonpromptData") continue;
 
-      //if(std::get<0>(samples[sam]) != "nonpromptData") continue;
+      if(leptonSelectionAnalysis == 3)
+        if(std::get<0>(samples[sam]) == "chargeMisID") continue;
+
+      //if(std::get<0>(samples[sam]) != "nonprompt" && std::get<0>(samples[sam]) != "ttW") continue;
+
+      //double onZCount = 0, offZCount = 0;
     
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -124,10 +131,11 @@ void treeReader::Analyze(){
           GetEntry(it);
           //if(it > 5000) break;
 
+          //if(_eventNb != 443151131) continue;
           bool printAddInfo = false;
-          //if(_eventNb != 2901696869) continue;
-
+          
           if(!(_HLT_Ele27_WPTight_Gsf || _HLT_IsoMu24 || _HLT_IsoTkMu24)) continue;
+          if(!(_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || _HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || _HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ || _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ)) continue;
 
           std::vector<unsigned> indTight, indFake;
           //select leptons
@@ -140,18 +148,23 @@ void treeReader::Analyze(){
           std::vector<unsigned> ind;
           //used for main analysis
           if(std::get<0>(samples[sam]) != "nonpromptData"){
+            // for Willem in 3L selection and is used for ttW in ss2L (used in previous round of analysis, removed in new)
+            //if(lCountFake != leptonSelectionAnalysis) continue;
+            
             if(lCount != leptonSelectionAnalysis) continue;
             for(auto & i : indTight)
-            ind.push_back(i);
+              ind.push_back(i);
           }
           else{
             if(lCountFake != leptonSelectionAnalysis) continue;
             if(lCount >= leptonSelectionAnalysis) continue;
             for(auto & i : indFake)
-            ind.push_back(i);
+              ind.push_back(i);
           }
 
           int samCategory = sam;
+
+
 
           // for CT
           /*
@@ -173,17 +186,17 @@ void treeReader::Analyze(){
           //cout << "new event#################" << endl;
 
           bool allLeptonsArePrompt = true;
-
           
           if(std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "nonpromptData")
             allLeptonsArePrompt = promptLeptons(ind);
           
           if(std::get<0>(samples[sam]) == "chargeMisID" && !allLeptonsArePrompt) continue;
-          //if(std::get<0>(samples[sam]) == "nonprompt" && allLeptonsArePrompt) continue; // works just for MC
+          if(std::get<0>(samples[sam]) == "nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
-          if((std::get<0>(samples[sam]) == "ttZ" || std::get<0>(samples[sam]) == "ttX" || std::get<0>(samples[sam]) == "WZ" || std::get<0>(samples[sam]) == "rare") && !allLeptonsArePrompt) continue;
+          if((std::get<0>(samples[sam]) == "ttW" || std::get<0>(samples[sam]) == "ttH" || std::get<0>(samples[sam]) == "ttZ" || std::get<0>(samples[sam]) == "ttX" || std::get<0>(samples[sam]) == "WZ" || std::get<0>(samples[sam]) == "ZZ" || std::get<0>(samples[sam]) == "rare") && !allLeptonsArePrompt) continue;
 
           int nLocEle = getElectronNumber(ind);
+
 
 
           if(leptonSelectionAnalysis == 3)
@@ -209,46 +222,74 @@ void treeReader::Analyze(){
             cout << endl;
           }
 
+
           
           if(leptonSelectionAnalysis == 3){
             
-            if(nJLoc < 3) continue;
-            if(nBLoc < 1) continue;
-            if(dMZ > 10) continue;
+            // ttZ selection
+            //if(nJLoc < 2) continue;
+            //if(nBLoc < 1) continue;
+            //if(dMZ > 10) continue;
             
+            //if(false) continue;
 
             // WZ CR
-            /*
+            
             if(dMZ > 10) continue;
 
             if(nBLoc != 0) continue;
             if(_met < 30) continue;
 
-            int leptThirdIndex = -999;
-
-            for(int leptThird = 0; leptThird < ptCorrV.size(); leptThird++){
-              if(ptCorrV[leptThird].second == third)
-                leptThirdIndex = leptThird;
-            }
-
             TLorentzVector l0p4;
-            l0p4.SetPtEtaPhiE(ptCorrV[leptThirdIndex].first, _lEta[third], _lPhi[third], _lE[third] * ptCorrV[leptThirdIndex].first / _lPt[third]);
+            l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
 
             double mt1;
             mt1 = mtCalc(l0p4, _met, _metPhi);
 
             if(mt1 < 50) continue;
-            */
+            
 
             // ttbar CR
             //if(!(dMZ == 999999 || !((dMZ < 10) || (nBLoc < 1)))) continue;
+
+            // DY CR
+            /*
+            if(dMZ > 10) continue;
+
+            TLorentzVector l0p4;
+            l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
+
+            double mt1;
+            mt1 = mtCalc(l0p4, _met, _metPhi);
+
+            
+            if(_met > 30) continue;
+            if(mt1 > 30) continue;
+            if(nJLoc > 1) continue;
+            if(nBLoc > 0) continue;
+            */
+
+            // for Willem 
+            //if(!(dMZ == 999999)) continue;
+
+            // for Willem 2
+            //if(dMZ < 15) onZCount += weight;
+            //else offZCount += weight;
           }
           
           
           if(leptonSelectionAnalysis == 2){
             if(nJLoc < 2) continue;
             if(nBLoc < 1) continue;
-            if(nLocEle == 2 && dMZ < 10) continue;
+
+            TLorentzVector l0p4, l1p4;
+            l0p4.SetPtEtaPhiE(ptCorrV[0].first, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * ptCorrV[0].first / _lPt[ind.at(0)]);
+            l1p4.SetPtEtaPhiE(ptCorrV[1].first, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * ptCorrV[1].first / _lPt[ind.at(1)]);
+
+            double ele_mll = (l0p4+l1p4).M();
+
+            if(ele_mll < 12) continue;   
+            if(ele_mll > 76 && ele_mll < 106 && nLocEle == 2) continue;
             if(_met < 30) continue;
           }
 
@@ -266,18 +307,23 @@ void treeReader::Analyze(){
           if(tempValue < 20./35.9) leptonFileDicision = 0;
           else leptonFileDicision = 1;  
 
+          
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data"){
 
             dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nTrueInt));
+
+            if(std::get<0>(samples[sam]) != "nonprompt"){
               
-            for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
+              for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
 
-              lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 0, leptonFileDicision);
+                lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 0, leptonFileDicision);
 
-              lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 1, leptonFileDicision);
-              lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], -1, leptonFileDicision);
+                lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 1, leptonFileDicision);
+                lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], -1, leptonFileDicision);
+              }
             }
           }
+          
           
           dataMCSF *= lepSF;
           weight = weight * dataMCSF;
@@ -299,6 +345,7 @@ void treeReader::Analyze(){
           else
             btagFileDicision = 1;  
 
+          
           for(unsigned int i = 0; i < nJLoc; ++i){
 
             int j = indJets.at(i);
@@ -336,6 +383,7 @@ void treeReader::Analyze(){
             }
 
           }
+          
 
           weight = weight * btagSF_event;
           
@@ -343,14 +391,21 @@ void treeReader::Analyze(){
           
           double FRloc = 1.;
 
+          
+          //maps for ttW
           if(std::get<0>(samples[sam]) == "nonpromptData"){ 
 
             int nFakeLepCounter = 0;
 
-            for(int i = 0; i < lCountFake; i++){
+            for(int i = 0; i < ind.size(); i++){
               if(lepIsGood(ind.at(i))) continue;    
-              double leptFakePtCorr = ptFake(_lPt[ind.at(i)], _ptRatio[ind.at(i)], _lFlavor[ind.at(i)], _leptonMvaTTH[ind.at(i)], _lPOGMedium[ind.at(i)]);
-              double FRloc_loc = fakeMaps.at(_lFlavor[ind.at(i)]).GetBinContent(fakeMaps.at(_lFlavor[ind.at(i)]).FindBin(TMath::Min(leptFakePtCorr,ptBins[nPt-1]-1.), fabs(_lEta[ind.at(i)])));
+              // used in ttH
+              //double leptFakePtCorr = ptFake(_lPt[ind.at(i)], _ptRatio[ind.at(i)], _lFlavor[ind.at(i)], _leptonMvaTTH[ind.at(i)], _lPOGMedium[ind.at(i)]);
+              //double FRloc_loc = fakeMaps.at(_lFlavor[ind.at(i)]).GetBinContent(fakeMaps.at(_lFlavor[ind.at(i)]).FindBin(TMath::Min(leptFakePtCorr,ptBins[nPt-1]-1.), fabs(_lEta[ind.at(i)])));
+
+              // used in ttV
+              double leptFakePtCorr = ptFakeStIso(_lPt[ind.at(i)], _lFlavor[ind.at(i)], _lFlavor[ind.at(i)] ? _relIso0p4Mu[ind.at(i)] : _relIso[ind.at(i)]);
+              double FRloc_loc = fakeMaps.at(_lFlavor[ind.at(i)]).GetBinContent(fakeMaps.at(_lFlavor[ind.at(i)]).FindBin(TMath::Min(leptFakePtCorr,60-1.), fabs(_lEta[ind.at(i)])));
 
               FRloc *= FRloc_loc/(1.-FRloc_loc);
               //FRloc *= FRloc_loc;
@@ -360,6 +415,28 @@ void treeReader::Analyze(){
 
             FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
           }
+          
+
+          /*
+          if(std::get<0>(samples[sam]) == "nonpromptData"){ 
+
+            int runEraEvents = (_runNb <= 278808) ? 0 : 1;
+            int nFakeLepCounter = 0;
+            for(int i = 0; i < ind.size(); i++){
+              if(lepIsGood(ind.at(i))) continue;    
+              
+              double leptFakePtCorr = ptFakeStIso(_lPt[ind.at(i)], _lFlavor[ind.at(i)], _lFlavor[ind.at(i)] ? _relIso0p4Mu[ind.at(i)] : _relIso[ind.at(i)]);
+              double FRloc_loc = fakeMaps.at(runEraEvents).at(_lFlavor[ind.at(i)]).GetBinContent(fakeMaps.at(runEraEvents).at(_lFlavor[ind.at(i)]).FindBin(TMath::Min(leptFakePtCorr,60.-1.), fabs(_lEta[ind.at(i)])));
+              
+              FRloc *= FRloc_loc/(1.-FRloc_loc);
+              nFakeLepCounter++;
+
+            }
+
+            FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
+          }
+          */
+
 
           if(printAddInfo){
             cout << "the FR is: " << FRloc << endl;
@@ -400,18 +477,20 @@ void treeReader::Analyze(){
             MET = _met;
 
             /*
-            _weightEventInTree = TMath::Abs(weight);
-            if(std::get<0>(samples[sam]) == "TTW")
+            _weightEventInTree = weight;
+            if(std::get<0>(samples[sam]) == "ttW")
               signalTree->Fill();
             else if(std::get<0>(samples[sam]) == "nonprompt")
               bkgTree->Fill();
             */
-
+            
+            
             vector<Float_t> varForBDT = {(Float_t)nJLoc, (Float_t)nBLoc, (Float_t)HTLoc, (Float_t)MET, (Float_t)minDeltaR, (Float_t)leadpt, (Float_t)trailpt, (Float_t)mtHighest, (Float_t)mtLowest, (Float_t) leadingJetPt, (Float_t) trailJetPt};
-
             fillBDTvariables(varForBDT);
+            0
 
-            mvaVL = reader->EvaluateMVA( "BDTG method"           );
+            //if(mvaVL > 0) continue;
+            
           }
 
           /*
@@ -459,15 +538,24 @@ void treeReader::Analyze(){
           distribs[17].vectorHisto[samCategory].Fill(TMath::Min(ptZ,varMax[17]-0.1),weight);
           distribs[18].vectorHisto[samCategory].Fill(TMath::Min(ptNonZ,varMax[18]-0.1),weight);
 
-          if(SRID3L(nJLoc, nBLoc) == 8)
+          distribs[19].vectorHisto[samCategory].Fill(TMath::Min(_leptonMvaTTH[ind.at(0)],varMax[19]-0.0001),weight);
+          distribs[20].vectorHisto[samCategory].Fill(TMath::Min(_leptonMvaTTH[ind.at(1)],varMax[20]-0.0001),weight);
+          if(leptonSelectionAnalysis > 2)
+            distribs[21].vectorHisto[samCategory].Fill(TMath::Min(_leptonMvaTTH[ind.at(2)],varMax[21]-0.0001),weight);
+
+          //if(SRID3L(nJLoc, nBLoc) == 8)
+          int nLocMu = leptonSelectionAnalysis - nLocEle;
+          //if(nLocMu == 2)
             myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
           
           //cout << "Lepton events: " << _lPt[ind.at(0)] << " " << _lPt[ind.at(1)] << " " << _lPt[ind.at(2)] << endl;
       }
 
-      std::cout << std::endl;
+      cout << endl;
       cout << "Total number of events: " << distribs[0].vectorHisto[sam].Integral() << endl;
-      std::cout << std::endl;
+      //cout << "fraction of events on-Z = " << onZCount/(offZCount + onZCount)*100 << "%" << endl;
+      //cout << "fraction of events off-Z = " << offZCount/(offZCount + onZCount)*100 << "%" << endl;
+      cout << endl;
   }
 
   fileDummy->cd();
@@ -495,6 +583,7 @@ void treeReader::Analyze(){
 
         cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
 
+        if(leptonSelectionAnalysis == 3 && samplesOrderNames.at(count) == "chargeMisID") continue;
         mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
   }
   
@@ -543,9 +632,9 @@ void treeReader::Analyze(){
 
   double scale_num = 1.6;
   
-  TCanvas* plot[11];
+  TCanvas* plot[14];
       
-  for(int i = 0; i < 11; i++){
+  for(int i = 0; i < 14; i++){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
@@ -583,15 +672,25 @@ void treeReader::Analyze(){
   plot[10]->cd();
   showHist(plot[10],distribs[18],"","Non-Z lepton p_{T} [GeV]","Events",scale_num, mtleg);
 
-  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ"};
+  plot[11]->cd();
+  showHist(plot[11],distribs[19],"","lepton MVA for lead lepton","Events",scale_num, mtleg);
+
+  plot[12]->cd();
+  showHist(plot[12],distribs[20],"","lepton MVA for sub-lead lepton","Events",scale_num, mtleg);
+
+  plot[13]->cd();
+  showHist(plot[13],distribs[21],"","lepton MVA for trailing lepton","Events",scale_num, mtleg);
+  
+  vector<TString> namesForSaveFiles = {"ptlead", "ptsublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ"};
   int countPlot = 0;
   for(auto & i : namesForSaveFiles){
-    plot[countPlot]->SaveAs("plotsForSave/" + i + ".pdf");
+    //if(i != "SR")
+      plot[countPlot]->SaveAs("plotsForSave/" + i + ".pdf");
     countPlot++;
   }
+  
   //plot[8]->cd();
   //drawSystUnc(plot[8], distribs[15], 8);
-  
 
   fillDatacards(distribs[15], samplesOrderNames, samplesOrder);
 }
