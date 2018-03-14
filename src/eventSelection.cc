@@ -83,21 +83,16 @@ bool treeReader::lepIsFOGood(const unsigned l){
     
     if(_lPt[l] < 10) return false;
 
-    if(leptonSelection == 2){
-        if(_lFlavor[l] == 0 && _relIso[l] > 1.0) return false;
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.6) return false;
-    }
+    if(!_lEwkLoose[l]) return false;
+    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
+    if(_closestJetCsvV2[l] > 0.8484) return false;
 
-    if(leptonSelection == 3){
-        if(_lFlavor[l] == 0 && _relIso[l] > 0.7) return false;
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.7) return false;
-    }
-
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
-
-    if(fabs(_3dIPSig[l]) > 4) return false;
-
+    // this should be done with electronMVAHZZ (0, 0, 0.7) cuts
     if(_lFlavor[l] == 0){
+        
+        if(fabs(_lEta[l]) < 0.8 && _lElectronMvaHZZ[l] <  0)         return false;
+        else if (fabs(_lEta[l]) < 1.479 && _lElectronMvaHZZ[l] <  0)   return false;
+        else if (fabs(_lEta[l]) < 2.5 && _lElectronMvaHZZ[l] <  0.7) return false;
 
        double looseMVAloose[3];
 
@@ -154,7 +149,6 @@ bool treeReader::lepIsFOGood(const unsigned l){
 
         if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
         if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-
     }
     
     if(_leptonMvaTTH[l] < leptonMVACut_flavor[_lFlavor[l]]){
@@ -328,11 +322,11 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     return true;
 }
 
-bool treeReader::jetIsClean(const unsigned ind){
+bool treeReader::jetIsClean(const unsigned ind, bool nonpromptSample){
     TLorentzVector jet;	
     jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]);
     for(unsigned l = 0; l < _nLight; ++l){
-        if(lepIsFOGood(l)){ // cleaning with FO objects
+        if((nonpromptSample && lepIsFOGood(l)) || (!nonpromptSample && lepIsGood(l))){ // cleaning with FO objects
             TLorentzVector lep;
             lep.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
             //cout << "jet lepton cleaning is going on, delta R is: " << lep.DeltaR(jet) << endl;
@@ -342,7 +336,7 @@ bool treeReader::jetIsClean(const unsigned ind){
     return true;
 }
 
-bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean){
+bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool nonpromptSample){
     //cout << "jet info (pt/eta/csv/unc/clean): " << _jetPt[ind] << " " << _jetEta[ind] << " " << _jetCsvV2[ind] << " " << unc << " " << clean << endl; 
     if(fabs(_jetEta[ind]) > 2.4) return false;
     //cout << "still here" << endl; 
@@ -356,14 +350,14 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
         default: ;
     }
     //cout << "jet info (pt/eta/csv): " << _jetPt[ind] << " " << _jetEta[ind] << " " << _jetCsvV2[ind] << endl; 
-    return !clean || jetIsClean(ind);
+    return !clean || jetIsClean(ind, nonpromptSample);
 }
 
-unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind){
+unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool nonpromptSample){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
         //cout << "jet info (pt/eta/csv): " << _jetPt[j] << " " << _jetEta[j] << " " << _jetCsvV2[j] << endl; 
-        if(jetIsGood(j, 30, unc, clean)) {
+        if(jetIsGood(j, 30, unc, clean, nonpromptSample)) {
             //cout << "this jet passes selection" << endl;
             ++nJets;
             ind.push_back(j);
@@ -382,11 +376,11 @@ bool treeReader::bTaggedCSVv2(const unsigned ind, const unsigned wp){
     return _jetCsvV2[ind] > bTagWP[wp];
 }
 
-unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool clean, const unsigned wp){
+unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool clean, const unsigned wp, bool nonpromptSample){
     unsigned nbJets = 0;
     //cout << "nbjets calculation is starting here >>>>>>>>>>>>>>> " << endl;
     for(unsigned j = 0; j < _nJets; ++j){
-        if(jetIsGood(j, 30, unc, clean)){
+        if(jetIsGood(j, 30, unc, clean, nonpromptSample)){
             
             if(deepCSV && bTaggedDeepCSV(j, wp)) ++nbJets;
             else if(bTaggedCSVv2(j, wp)) ++nbJets;

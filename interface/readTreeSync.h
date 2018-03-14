@@ -6,7 +6,7 @@
 
 const int nFlavors = 2;
 
-const int leptonSelectionAnalysis = 2;
+const int leptonSelectionAnalysis = 3;
 
 //std::vector<int> distribsOrder = { 5, 16, 17, 18, 19, 20, 21, 22, 23, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 8, 6, 7};
 const int nSamples = 100;
@@ -139,7 +139,7 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
     };
 
 
-const int nVars  = 22;
+const int nVars  = 23;
 
  TString varN[nVars] = {
     "p_{T}^{leading} [GeV]", "p_{T}^{sub-leading} [GeV]", "p_{T}^{trailing} [GeV]",
@@ -150,7 +150,7 @@ const int nVars  = 22;
     "flavour",
     "SR",
     "m_{ll} [GeV]", "p_{T}^{Z} [GeV]", "Non-Z lepton p_{T} [GeV]",
-    "lepton MVA 1", "lepton MVA 2", "lepton MVA 3"
+    "m_{ll} [GeV]", "m_{ll} [GeV]", "m_{ll} [GeV]", "m_{ll} [GeV]" 
     }; 
 
 
@@ -163,7 +163,7 @@ double varMin[nVars] = {
     0.5,
     -0.5,
     81., 0, 0,
-    0.5, 0.5, 0.5
+    81., 81., 81., 81.
   };
     
 double varMax[nVars] = {
@@ -175,7 +175,7 @@ double varMax[nVars] = {
     leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5),
     leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5),
     101., 400, 180,
-    1, 1, 1,
+    101, 101, 101, 101
 };
     
 int nBins[nVars] = {
@@ -187,7 +187,7 @@ int nBins[nVars] = {
     leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (static_cast<int>(flavourLabelOptionsFor3L.size())) ,
     leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size()),
     10, 16, 12,
-    20, 20, 20
+    10, 10, 10, 10
 };
 
 
