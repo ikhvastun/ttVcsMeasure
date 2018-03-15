@@ -171,7 +171,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     pad2->Update();
 }
 
-void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false){
+void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false, int runEra = 0){
     
     double xPad = 0.25; // 0.25
 
@@ -184,22 +184,27 @@ void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string 
     if(plotLog)
         pad1->SetLogy();
     
-    double xmin = distribs.histDataEras[runB].GetXaxis()->GetXmin();
-    double xmax = distribs.histDataEras[runB].GetXaxis()->GetXmax();
+    double xmin = distribs.histDataEras[runEra][0].GetXaxis()->GetXmin();
+    double xmax = distribs.histDataEras[runEra][0].GetXaxis()->GetXmax();
     //pad1->DrawFrame(xmin, -0.1, xmax, 1.1);
     
-    distribs.histDataEras[runB].SetMarkerSize(1);
-    distribs.histDataEras[runB].SetTitle(title.c_str());
-    distribs.histDataEras[runB].GetXaxis()->SetTitle(titleX.c_str());
-    distribs.histDataEras[runB].GetYaxis()->SetTitle(titleY.c_str());
-    distribs.histDataEras[runB].SetMinimum(0.5);
+    distribs.histDataEras[runEra][0].SetMarkerSize(1);
+    distribs.histDataEras[runEra][0].SetTitle(title.c_str());
+    distribs.histDataEras[runEra][0].GetXaxis()->SetTitle(titleX.c_str());
+    distribs.histDataEras[runEra][0].GetYaxis()->SetTitle(titleY.c_str());
+    distribs.histDataEras[runEra][0].SetMinimum(0.5);
     //distribs.histDataEras[runB].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
-    distribs.histDataEras[runB].GetXaxis()->SetLabelOffset(0.01);
+    distribs.histDataEras[runEra][0].GetXaxis()->SetLabelOffset(0.01);
 
     //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     //setex2->Draw();
 
-    distribs.histDataEras[runB].Draw("E0");
+    distribs.histDataEras[runEra][0].Draw("E0");
+    //distribs.histDataEras[runEra][1].Scale(distribs.histDataEras[runEra][0].Integral()  / distribs.histDataEras[runEra][1].Integral());
+    distribs.histDataEras[runEra][1].SetMarkerColor(kRed);
+    distribs.histDataEras[runEra][1].SetLineColor(kRed);
+    distribs.histDataEras[runEra][1].Draw("E0same");
+    /*
     distribs.histDataEras[runCDE].Scale(distribs.histDataEras[runB].Integral()  / distribs.histDataEras[runCDE].Integral());
     distribs.histDataEras[runCDE].SetMarkerColor(kRed);
     distribs.histDataEras[runCDE].SetLineColor(kRed);
@@ -208,7 +213,7 @@ void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string 
     distribs.histDataEras[runF].SetMarkerColor(kBlue);
     distribs.histDataEras[runF].SetLineColor(kBlue);
     distribs.histDataEras[runF].Draw("E0same");
-
+    */
     leg->Draw("same");
     CMS_lumi( pad1, iPeriod, iPos );
 
@@ -230,42 +235,42 @@ void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string 
     pad2->RedrawAxis();
     pad2->cd();
 
+    /*
     TH1D * dataB = (TH1D*)distribs.histDataEras[runB].Clone("dataB");
     TH1D * dataCDE = (TH1D*)distribs.histDataEras[runCDE].Clone("dataCDE");
     TH1D * dataF = (TH1D*)distribs.histDataEras[runF].Clone("dataF");
-    
+    */
+    TH1D * dataReReco = (TH1D*)distribs.histDataEras[runEra][0].Clone("dataReReco");
+    TH1D * dataPromptReco = (TH1D*)distribs.histDataEras[runEra][1].Clone("dataPromptReco");
    
 
-    dataB->SetTitle("");
-    dataB->GetXaxis()->SetTitle(titleX.c_str());
-    dataB->GetYaxis()->SetTitle("run X / run B");
+    dataReReco->SetTitle("");
+    dataReReco->GetXaxis()->SetTitle(titleX.c_str());
+    dataReReco->GetYaxis()->SetTitle("Prompt / ReReco");
 
-    dataB->GetXaxis()->SetRangeUser(xmin, xmax);
+    dataReReco->GetXaxis()->SetRangeUser(xmin, xmax);
 
-    dataB->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
-    dataB->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    dataB->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    dataB->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    dataB->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    dataReReco->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
+    dataReReco->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataReReco->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataReReco->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    dataReReco->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    dataB->SetMaximum(1.5);
-    dataB->SetMinimum(0.5);
-    dataB->SetMarkerStyle(20);
+    dataReReco->SetMaximum(1.5);
+    dataReReco->SetMinimum(0.5);
+    dataReReco->SetMarkerStyle(20);
 
-    dataCDE->SetMarkerSize(0.5);
-    dataF->SetMarkerSize(0.5);
+    dataPromptReco->SetMarkerSize(0.5);
      
-    dataB->Draw("axis");
+    dataReReco->Draw("axis");
 
     TLine *line = new TLine(xmin, 1, xmax, 1);
     line->SetLineStyle(2);
     
     line->Draw("same");
 
-    dataCDE->Divide(dataB);
-    dataF->Divide(dataB);
-    dataCDE->Draw("psame");
-    dataF->Draw("psame");
+    dataPromptReco->Divide(dataReReco);
+    dataPromptReco->Draw("psame");
 
     line->Draw("same");
 

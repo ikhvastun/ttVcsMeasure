@@ -11,7 +11,7 @@ namespace Output{
   		std::vector<TH1D> vectorHistoUp;
   		std::vector<TH1D> vectorHistoDown;
 
-  		TH1D histDataEras[3];
+  		TH1D histDataEras[3][2];
   		THStack stack;
 	};
 

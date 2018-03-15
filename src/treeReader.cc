@@ -31,15 +31,21 @@ void treeReader::readSamples(const std::string& list){
 
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
+    isDataPrompt = std::get<0>(samples[currentSample]) == "dataPrompt";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    if(isData)
+        sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2017ReReco_JECv6/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    else if(isDataPrompt)
+        sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2017PromptReco/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    else
+        sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2018MoriondMC_JECv6//"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuple_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
-    initTree(fChain, isData || isDataNonprompt);
+    initTree(fChain, isData || isDataNonprompt || isDataPrompt);
     nEntries = fChain->GetEntries();
-    if(!isData && !isDataNonprompt){
+    if(!isData && !isDataNonprompt && !isDataPrompt){
         TH1D* hCounter = new TH1D("hCounter", "Events counter", 1, 0, 1);
         hCounter->Read("hCounter"); 
         scale = std::get<2>(samples[currentSample])*dataLumi*1000/hCounter->GetBinContent(1);       //xSec*lumi divided by number of events
@@ -62,7 +68,7 @@ void treeReader::GetEntry(long unsigned entry)
     if (!fChain) return;
     fChain->GetEntry(entry);
     //Set up correct weights
-    if(!isData && !isDataNonprompt) weight = _weight*scale; //MC
+    if(!isData && !isDataNonprompt && !isDataPrompt) weight = _weight*scale; //MC
     else weight = 1;                               //data
 }
 

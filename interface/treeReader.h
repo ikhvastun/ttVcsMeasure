@@ -261,12 +261,13 @@ class treeReader {
         std::vector<std::string> samplesOrderNames;
         int leptonSelection;
         bool isData = false;
+        bool isDataPrompt = false;
         bool isDataNonprompt = false;
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         //const double dataLumi = 35.9;                                          //in units of 1/fb
-        const double dataLumi = 41.9;                                          //in units of 1/fb
+        const double dataLumi = 4.8;           // 41.9                               //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
