@@ -35,13 +35,13 @@ const float relExtraDY = 1.2;
 const float extraOverCmsTextSize  = 0.76;
 
 //const TString lumi_13TeV = "35.9 fb^{-1}";
-const TString lumi_13TeV = "4.8 fb^{-1}"; // 41.9
+//const TString lumi_13TeV = "41.9 fb^{-1}"; // 41.9
 const TString lumi_8TeV  = "19.7 fb^{-1}";
 const TString lumi_7TeV  = "5.1 fb^{-1}";
 const TString lumi_sqrtS = "";
 
 const bool drawLogo      = false;
 
-void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10 );
+void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10, TString lumi_13TeV = "41.9 fb^{-1}" );
 
 #endif  // CMSlumi_H

@@ -104,8 +104,8 @@ void treeReader::Analyze(){
 
       //if(std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "DY") continue; // PU reco reweigning 
 
-      //if(std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "dataPrompt") continue;
-    
+      //if(std::get<0>(samples[sam]) != "Top") continue; 
+
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
       for(long unsigned it = 0; it < nEntries; ++it){
@@ -120,21 +120,26 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 50000) break;
-          if(std::get<0>(samples[sam]) == "data" && _runNb > 299329) continue; // run B (<= 299329) -> 4.8, run F -> 13.5, run CDE (>=304911) -> 23.1
+          //if(it > 10000) break;
+          //if(std::get<0>(samples[sam]) == "data" && _runNb > 299329) continue; // run B (<= 299329) -> 4.8, run F -> 13.5, run CDE (>=304911) -> 23.1
           //if(std::get<0>(samples[sam]) == "data" && (_runNb <= 299329 || _runNb > 304826)) continue; // run B (<= 299329) -> 4.8, run CDE (>=304911) -> 23.1, run F -> 13.5
           //if(std::get<0>(samples[sam]) == "data" && _runNb < 304826) continue; // run B (<= 299329) -> 4.8, run F -> 13.5, run CDE (>=304911) -> 23.1
-          /*
-          if(_runNb < 299329){
-            runBin = 0;
-          }
-          else if(_runNb < 304826){
-            runBin = 1;
+          
+          int runBin = -999;
+          if(isData){
+            if(_runNb < 299329) runBin = 0;
+            else if(_runNb < 304826) runBin = 1;
+            else runBin = 2;
           }
           else{
-            runBin = 2;
+            double tempValue = ((double) rand() / (RAND_MAX));
+            if(tempValue < 0.11455847)
+              runBin = 0;
+            else if (tempValue < 0.55131265 + 0.11455847)
+              runBin = 1;
+            else 
+              runBin = 2;
           }
-          */
           
           /*
           const bool is_in = eventsList.find(_eventNb) != eventsList.end();
@@ -158,7 +163,7 @@ void treeReader::Analyze(){
               //_passMETFilters = _Flag_HBHENoiseFilter && _Flag_HBHENoiseIsoFilter && _Flag_EcalDeadCellTriggerPrimitiveFilter && _Flag_goodVertices && _Flag_eeBadScFilter && _Flag_globalTightHalo2016Filter && _Flag_BadPFMuonFilter && _Flag_BadChargedCandidateFilter;
               
               if(!_passMETFilters) continue;
-              if(!_2017_mm) continue;
+              if(!_passTrigger_ee) continue;
           }
 
           /*
@@ -182,7 +187,7 @@ void treeReader::Analyze(){
           int samCategory = sam;
           int nLocEle = getElectronNumber(ind);
 
-          if(nLocEle != 0) continue;
+          if(nLocEle != 2) continue;
 
           if(!passPtCuts2L(ind)) continue;
 
@@ -226,9 +231,10 @@ void treeReader::Analyze(){
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "dataPrompt"){
 
             //dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nVertex));
+            
             if(_nTrueInt < 10) dataMCSF = 0.;
-            dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nTrueInt));
-            /*
+            dataMCSF = h_dataMC[runBin]->GetBinContent(h_dataMC[runBin]->GetXaxis()->FindBin(_nTrueInt));
+            /*  
             for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
 
               lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 0, leptonFileDicision);
@@ -239,6 +245,7 @@ void treeReader::Analyze(){
             */
             
           }
+          
           
           
           dataMCSF *= lepSF;
@@ -314,18 +321,34 @@ void treeReader::Analyze(){
           }
           */
 
-          double uPara =     ((( -_met*TMath::Cos(_metPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Cos( phi_Z )+(- _met* TMath::Sin(_metPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Sin( phi_Z ))/pt_Z + pt_Z);
-          double uPara_raw = ((( -_rawmet*TMath::Cos(_rawmetPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Cos( phi_Z )+(- _rawmet* TMath::Sin(_rawmetPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Sin( phi_Z ))/pt_Z + pt_Z);
+          double uPara =     paraCalc(_met, _metPhi, phi_Z, pt_Z);
+          double uPara_raw = paraCalc(_rawmet, _rawmetPhi, phi_Z, pt_Z);
             
-          double uPerp =     ((( -_met*TMath::Cos(_metPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Sin( phi_Z )-(- _met* TMath::Sin(_metPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Cos( phi_Z ))/pt_Z);
-          double uPerp_raw = ((( -_rawmet*TMath::Cos(_rawmetPhi )  - pt_Z * TMath::Cos( phi_Z))* pt_Z*TMath::Sin( phi_Z )-(- _rawmet* TMath::Sin(_rawmetPhi )- pt_Z*TMath::Sin(phi_Z ))* pt_Z*TMath::Cos( phi_Z ))/pt_Z);
+          double uPerp =     perpCalc(_met, _metPhi, phi_Z, pt_Z);
+          double uPerp_raw = perpCalc(_rawmet, _rawmetPhi, phi_Z, pt_Z);
             
-
-          distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
-          distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
           
+          distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
+          
+          distribs[0].vectorHistoUp[samCategory].FillUnc(_rawmetJECUp, _rawmetJetResUp, _rawmetUnclUp, varMax[0], weight);
+          distribs[0].vectorHistoDown[samCategory].FillUnc(_rawmetJECDown, _rawmetJetResDown, _rawmetUnclDown, varMax[0], weight);
+
+
+          distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
+
+          distribs[1].vectorHistoUp[samCategory].FillUnc(_metJECUp, _metJetResUp, _metUnclUp, varMax[1], weight);
+          distribs[1].vectorHistoDown[samCategory].FillUnc(_metJECDown, _metJetResDown, _metUnclDown, varMax[1], weight);
+
           distribs[2].vectorHisto[samCategory].Fill(TMath::Min(uPara,varMax[2]-0.001), weight);
+
+          distribs[2].vectorHistoUp[samCategory].FillUnc(paraCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), paraCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), paraCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[2], weight);
+          distribs[2].vectorHistoDown[samCategory].FillUnc(paraCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), paraCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), paraCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
+
+
           distribs[3].vectorHisto[samCategory].Fill(TMath::Min(uPerp,varMax[3]-0.001), weight);
+          distribs[3].vectorHistoUp[samCategory].FillUnc(perpCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), perpCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), perpCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[3], weight);
+          distribs[3].vectorHistoDown[samCategory].FillUnc(perpCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), perpCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), perpCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[3], weight);
+
 
           distribs[4].vectorHisto[samCategory].Fill(TMath::Min(_lPt[ind.at(0)],varMax[4]-0.001), weight);
           distribs[5].vectorHisto[samCategory].Fill(TMath::Min(_lPt[ind.at(1)],varMax[5]-0.001), weight);
@@ -337,18 +360,48 @@ void treeReader::Analyze(){
 
           distribs[9].vectorHisto[samCategory].Fill(TMath::Min(mll,varMax[9]-0.001), weight);
 
-          /*
-          int runBin = -999;
-          if(_runNb < 299329){
-            runBin = 0;
-          }
-          else if(_runNb < 304826){
-            runBin = 1;
-          }
-          else{
-            runBin = 2;
-          }
+          distribs[10].vectorHisto[samCategory].Fill(TMath::Min(_met_sm,varMax[10]-0.1),weight);
 
+          distribs[10].vectorHistoUp[samCategory].FillUnc(_metJECUp_sm, _metJetResUp_sm, _metUnclUp_sm, varMax[10], weight);
+          distribs[10].vectorHistoDown[samCategory].FillUnc(_metJECDown_sm, _metJetResDown_sm, _metUnclDown_sm, varMax[10], weight);
+
+          
+
+          distribs[0].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
+          
+          distribs[0].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(_rawmetJECUp, _rawmetJetResUp, _rawmetUnclUp, varMax[0], weight);
+          distribs[0].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(_rawmetJECDown, _rawmetJetResDown, _rawmetUnclDown, varMax[0], weight);
+
+          distribs[1].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
+          
+          distribs[1].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(_metJECUp, _metJetResUp, _metUnclUp, varMax[1], weight);
+          distribs[1].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(_metJECDown, _metJetResDown, _metUnclDown, varMax[1], weight);
+
+          distribs[2].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(uPara,varMax[2]-0.001), weight);
+          distribs[2].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(paraCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), paraCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), paraCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[2], weight);
+          distribs[2].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(paraCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), paraCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), paraCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
+
+          distribs[3].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(uPerp,varMax[3]-0.001), weight);
+          distribs[3].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(perpCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), perpCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), perpCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[2], weight);
+          distribs[3].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(perpCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), perpCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), perpCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
+
+
+          distribs[4].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_lPt[ind.at(0)],varMax[4]-0.001), weight);
+          distribs[5].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_lPt[ind.at(1)],varMax[5]-0.001), weight);
+
+          distribs[6].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_lEta[ind.at(0)],varMax[6]-0.001), weight);
+          distribs[7].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_lEta[ind.at(1)],varMax[7]-0.001), weight);
+
+          distribs[8].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(double(_nVertex),varMax[8]-0.001), weight);
+
+          distribs[9].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(mll,varMax[9]-0.001), weight);
+
+          distribs[10].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_met_sm,varMax[10]-0.1),weight);
+          
+          distribs[10].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(_metJECUp_sm, _metJetResUp_sm, _metUnclUp_sm, varMax[10], weight);
+          distribs[10].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(_metJECDown_sm, _metJetResDown_sm, _metUnclDown_sm, varMax[10], weight);
+
+          /*
 
           distribs[0].histDataEras[runBin][samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
           distribs[1].histDataEras[runBin][samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
@@ -377,15 +430,20 @@ void treeReader::Analyze(){
             }
           }
 
-          histMetCorr[binForPtZ]->Fill((uPara - pt_Z) / pt_Z);
-          histMetUnCorr[binForPtZ]->Fill((uPara_raw - pt_Z) / pt_Z);
+          histMetCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill((uPara - pt_Z) / pt_Z, weight);
+          histMetUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill((uPara_raw - pt_Z) / pt_Z, weight);
+          histMetCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill((uPara - pt_Z) / pt_Z, weight);
+          histMetUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill((uPara_raw - pt_Z) / pt_Z, weight);
 
-          sigmaParUnCorr[binForPtZ]->Fill(uPara_raw);
-          sigmaPerpUnCorr[binForPtZ]->Fill(uPerp_raw);
+          sigmaParUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill(uPara_raw, weight);
+          sigmaPerpUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill(uPerp_raw, weight);
+          sigmaParUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill(uPara_raw, weight);
+          sigmaPerpUnCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill(uPerp_raw, weight);
 
-          sigmaParCorr[binForPtZ]->Fill(uPara);
-          sigmaPerpCorr[binForPtZ]->Fill(uPerp);
-
+          sigmaParCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill(uPara, weight);
+          sigmaPerpCorr[binForPtZ][samCategory == 0 ? 0 : 1][runBin]->Fill(uPerp, weight);
+          sigmaParCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill(uPara, weight);
+          sigmaPerpCorr[binForPtZ][samCategory == 0 ? 0 : 1][3]->Fill(uPerp, weight);
       }
 
       std::cout << std::endl;
@@ -433,14 +491,14 @@ void treeReader::Analyze(){
       double err = 0.;
       for (int sam=0; sam != samples.size(); ++sam) {
         if(std::get<0>(samples[sam]) == "data") continue;
-        // is used in MC CT 
-        //if(sam == 0) continue;
-        if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){
-          err += TMath::Power(distribs[i].vectorHisto[sam].GetBinError(ibin), 2); //  + TMath::Power(distribs[i].vectorHisto[sam].GetBinContent(ibin) * systematicsLeptonID[sam], 2)
-        }
-        else{
-          err += 0;
-        }
+           
+          if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){
+            err += TMath::Power(distribs[i].vectorHisto[sam].GetBinError(ibin), 2); //  + TMath::Power(distribs[i].vectorHisto[sam].GetBinContent(ibin) * systematicsLeptonID[sam], 2)
+          }
+          else{
+            err += 0;
+          }
+          
       }
             
       err = sqrt(err);
@@ -449,6 +507,7 @@ void treeReader::Analyze(){
 
   }
 
+  
   double scale_num = 1.6;
 
   TCanvas* plot[nVars];
@@ -457,20 +516,34 @@ void treeReader::Analyze(){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
-
-  vector<std::string> figNames = {"Raw E_{T}^{miss} [GeV]", "Type I E_{T}^{miss} [GeV]", "u_{||} + q_{T} [GeV]", "u_{#perp}   [GeV]", "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", "#eta_{T}^{leading} [GeV]", "#eta_{T}^{trailing} [GeV]", "NPV", "M_{ll} [GeV]"};
-  vector<TString> namesForSaveFiles = {"rawmet", "met", "upara", "uperp", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll"};
-
   
+  vector<std::string> figNames = {"Raw E_{T}^{miss} [GeV]", "Type I E_{T}^{miss} [GeV]", "u_{||} + q_{T} [GeV]", "u_{#perp}   [GeV]", "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", "#eta_{T}^{leading} [GeV]", "#eta_{T}^{trailing} [GeV]", "NPV", "M_{ll} [GeV]", "E_{T}^{miss} smeared [GeV]"};
+  vector<TString> namesForSaveFiles = {"rawmet", "met", "upara", "uperp", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll", "metSM"};
+  vector<TString> runEraNames = {"B", "CDE", "F"};
+
   for(int varPlot = 0; varPlot < nVars; varPlot++){
+    //if(varPlot != 1) continue;
     plot[varPlot]->cd();
     showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/nonlog/" + namesForSaveFiles.at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/nonlog/" + namesForSaveFiles.at(varPlot) + ".png");
     plot[varPlot]->cd();
     showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.png");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/log/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/log/" + namesForSaveFiles.at(varPlot) + "Log.png");
+
+    
+    for(int runEra = 0; runEra < 3; runEra++){
+        plot[varPlot]->cd();
+        showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, runEra); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/nonlog/" + namesForSaveFiles.at(varPlot) + ".pdf");
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/nonlog/" + namesForSaveFiles.at(varPlot) + ".png");
+        plot[varPlot]->cd();
+        showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, runEra); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/log/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/log/" + namesForSaveFiles.at(varPlot) + "Log.png");
+    }
+    
   }
   
 
@@ -511,10 +584,12 @@ void treeReader::Analyze(){
   //distribs[8].vectorHisto[1].Scale(1./distribs[8].vectorHisto[1].Integral());
 
   //distribs[8].vectorHisto[dataSample].Scale(1./distribs[8].vectorHisto[dataSample].Integral());
-
+  /*
   TH1F *puReweign = (TH1F*)distribs[8].vectorHisto[dataSample].Clone("puw");
   TH1F *puReweignMC = (TH1F*)distribs[8].vectorHisto[1].Clone("MC"); // 1 stands for DY sample
 
+  puReweign->Scale(1./puReweign->Integral());
+  puReweignMC->Scale(1./puReweignMC->Integral());
   puReweign->Divide(puReweignMC);
 
   TCanvas *cRewCanvs = new TCanvas("cRewCanvs", "cRewCanvs");
@@ -522,184 +597,260 @@ void treeReader::Analyze(){
   puReweign->Draw();
   puReweign->Write();
   file->Close();
+  */
+  //return;
 
-  return;
 
-
-  TCanvas * c1 = new TCanvas("c1", "c1");
-  c1->Divide(5,5);
-
-  TH1D * scaleChoice[2];
-  TH1D * resChoice[2][2];
+  
+  
+  
+  TH1D * scaleChoice[2][2][4];
+  TH1D * resChoice[2][2][2][4];
   for(int i = 0; i < 2; i++){
-    scaleChoice[i] = new TH1D(Form("scaleChoice_%d", i), Form("scaleChoice_%d", i), nQt - 1, qtBins);
-    for(int j = 0; j < 2; j++)
-      resChoice[i][j] = new TH1D(Form("resChoice_%d_%d", i, j), Form("resChoice_%d_%d", i, j), nQt - 1, qtBins);
+    for(int k = 0; k < 2; k++){
+      for(int l = 0; l < 4; l++){
+        scaleChoice[i][k][l] = new TH1D(Form("scaleChoice_%d_%d_%d", i, k, l), Form("scaleChoice_%d_%d_%d", i, k, l), nQt - 1, qtBins);
+        for(int j = 0; j < 2; j++)
+          resChoice[i][j][k][l] = new TH1D(Form("resChoice_%d_%d_%d_%d", i, j, k, l), Form("resChoice_%d_%d_%d_%d", i, j, k, l), nQt - 1, qtBins);
+      }
+    }
   }
 
+  TF1 * f1 = new TF1("f1", "[0] * TMath::Voigt(x - [1], [2], [3], 4) + [4] * x + [5]"   );
+  for(int runEra = 0; runEra < 4; runEra++){
 
-    TF1 * f1 = new TF1("f1", "[0] * TMath::Voigt(x - [1], [2], [3], 4) + [4] * x + [5]"   );
-
-    f1->SetParameters(histMetCorr[0]->Integral(), histMetCorr[0]->GetMean(), histMetCorr[0]->GetRMS(), 0.25);
-
-    for(int i = 0; i < 25; i++){
-
-      c1->cd(i+1);
-      histMetCorr[i]->Draw();
-      histMetCorr[i]->Fit(f1, "", "", histMetCorr[i]->GetMean() - 4 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMean() + 4 * histMetCorr[i]->GetRMS());
-      histMetCorr[i]->GetXaxis()->SetRangeUser(histMetCorr[i]->GetMean() - 7 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMean() + 7 * histMetCorr[i]->GetRMS());
-     
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
-      TLatex latex;
-      latex.DrawLatex(histMetCorr[i]->GetMean() + 3 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
-
-      TLatex latex2;
-      latex2.DrawLatex(histMetCorr[i]->GetMean() + 3 * histMetCorr[i]->GetRMS(), histMetCorr[i]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
+    TCanvas * c1[2];
+    for(int j = 0; j < 2; j++){
+      c1[j] = new TCanvas(Form("c1_%d", j), Form("c1_%d", j));
+      f1->SetParameters(histMetCorr[0][j][runEra]->Integral(), histMetCorr[0][j][runEra]->GetMean(), histMetCorr[0][j][runEra]->GetRMS(), 0.1);
+      c1[j]->Divide(5,5);
+      for(int i = 0; i < 25; i++){
+        c1[j]->cd(i+1);
       
-      scaleChoice[0]->SetBinContent(i+1, -1 * f1->GetParameter(1));
-      scaleChoice[0]->SetBinError(i+1, -1 * f1->GetParError(1));
+        histMetCorr[i][j][runEra]->Draw("hist");
+        f1->SetParLimits(3, 0, 1);
+        histMetCorr[i][j][runEra]->Fit(f1, "", "", histMetCorr[i][j][runEra]->GetMean() - 4 * histMetCorr[i][j][runEra]->GetRMS(), histMetCorr[i][j][runEra]->GetMean() + 4 * histMetCorr[i][j][runEra]->GetRMS());
+        histMetCorr[i][j][runEra]->GetXaxis()->SetRangeUser(histMetCorr[i][j][runEra]->GetMean() - 7 * histMetCorr[i][j][runEra]->GetRMS(), histMetCorr[i][j][runEra]->GetMean() + 7 * histMetCorr[i][j][runEra]->GetRMS());
+        //f1->Draw("same");
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+
+        TLatex latex;
+        latex.DrawLatex(histMetCorr[i][j][runEra]->GetMean() + 3 * histMetCorr[i][j][runEra]->GetRMS(), histMetCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+        TLatex latex2;
+        latex2.DrawLatex(histMetCorr[i][j][runEra]->GetMean() + 3 * histMetCorr[i][j][runEra]->GetRMS(), histMetCorr[i][j][runEra]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
+        
+        scaleChoice[0][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+        scaleChoice[0][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
+      }
+      c1[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleCorr.pdf");
+      c1[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleCorr.png");
     }
 
-    TCanvas * c2 = new TCanvas("c2", "c2");
-    c2->Divide(5,5);
+    TCanvas * c2[2];
 
+    for(int j = 0; j < 2; j++){
 
-    f1->SetParameters(histMetUnCorr[0]->Integral(), histMetUnCorr[0]->GetMean(), histMetUnCorr[0]->GetRMS(), 0.25);
+      c2[j] = new TCanvas(Form("c2_%d", j), Form("c2_%d", j));
+      f1->SetParameters(histMetUnCorr[0][j][runEra]->Integral(), histMetUnCorr[0][j][runEra]->GetMean(), histMetUnCorr[0][j][runEra]->GetRMS(), 0.1);
+      c2[j]->Divide(5,5);
 
-    for(int i = 0; i < 25; i++){
+      for(int i = 0; i < 25; i++){
+        c2[j]->cd(i+1);
+
+        histMetUnCorr[i][j][runEra]->Draw("hist");
+        f1->SetParLimits(3, 0, 1);
+        histMetUnCorr[i][j][runEra]->Fit(f1, "", "", histMetUnCorr[i][j][runEra]->GetMean() - 4 * histMetUnCorr[i][j][runEra]->GetRMS(), histMetUnCorr[i][j][runEra]->GetMean() + 4 * histMetUnCorr[i][j][runEra]->GetRMS());
+        histMetUnCorr[i][j][runEra]->GetXaxis()->SetRangeUser(histMetUnCorr[i][j][runEra]->GetMean() - 7 * histMetCorr[i][j][runEra]->GetRMS(), histMetUnCorr[i][j][runEra]->GetMean() + 7 * histMetCorr[i][j][runEra]->GetRMS());
+        //f1->Draw("same");
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
       
-      //f1->SetParameters(histMetUnCorr[i]->Integral(), histMetUnCorr[i]->GetMean(), histMetUnCorr[i]->GetRMS(), 0.1);
-      c2->cd(i+1);
-      histMetUnCorr[i]->Draw();
-      histMetUnCorr[i]->Fit(f1, "", "", histMetUnCorr[i]->GetMean() - 4 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMean() + 4 * histMetUnCorr[i]->GetRMS());
-      histMetUnCorr[i]->GetXaxis()->SetRangeUser(histMetUnCorr[i]->GetMean() - 7 * histMetCorr[i]->GetRMS(), histMetUnCorr[i]->GetMean() + 7 * histMetCorr[i]->GetRMS());
-      
-      TLatex latex;
-      latex.DrawLatex(histMetUnCorr[i]->GetMean() + 3 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+        TLatex latex;
+        latex.DrawLatex(histMetUnCorr[i][j][runEra]->GetMean() + 3 * histMetUnCorr[i][j][runEra]->GetRMS(), histMetUnCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
 
-      TLatex latex2;
-      latex2.DrawLatex(histMetUnCorr[i]->GetMean() + 3 * histMetUnCorr[i]->GetRMS(), histMetUnCorr[i]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
-      
-      scaleChoice[1]->SetBinContent(i+1, -1 * f1->GetParameter(1));
-      scaleChoice[1]->SetBinError(i+1, -1 * f1->GetParError(1));
+        TLatex latex2;
+        latex2.DrawLatex(histMetUnCorr[i][j][runEra]->GetMean() + 3 * histMetUnCorr[i][j][runEra]->GetRMS(), histMetUnCorr[i][j][runEra]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
+        
+        scaleChoice[1][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+        scaleChoice[1][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
 
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
+      }
+      c2[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleUnCorr.pdf");
+      c2[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleUnCorr.png");
     }
 
-    TCanvas * c3 = new TCanvas("c3", "c3");
-    c3->Divide(5,5);
-
-
-    f1->SetParameters(sigmaPerpCorr[0]->Integral(), sigmaPerpCorr[0]->GetMean(), sigmaPerpCorr[0]->GetRMS());
-    for(int i = 0; i < 25; i++){
-      c3->cd(i+1);
-      sigmaPerpCorr[i]->Draw();
-      sigmaPerpCorr[i]->Fit(f1, "", "", sigmaPerpCorr[i]->GetMean() - 4 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMean() + 4 * sigmaPerpCorr[i]->GetRMS());
-
-      TLatex latex;
-      latex.DrawLatex(sigmaPerpCorr[i]->GetMean() + 3 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
-
-      TLatex latex2;
-      latex2.DrawLatex(sigmaPerpCorr[i]->GetMean() + 3 * sigmaPerpCorr[i]->GetRMS(), sigmaPerpCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
-      
-
-      resChoice[0][0]->SetBinContent(i+1, f1->GetParameter(2));
-      resChoice[0][0]->SetBinError(i+1, f1->GetParError(2));
-
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
-    }
-
-    TCanvas * c4 = new TCanvas("c4", "c4");
-    c4->Divide(5,5);
-
-
-    f1->SetParameters(sigmaParCorr[0]->Integral(), sigmaParCorr[0]->GetMean(), sigmaParCorr[0]->GetRMS());
-    for(int i = 0; i < 25; i++){
-      c4->cd(i+1);
-      sigmaParCorr[i]->Draw();
-      sigmaParCorr[i]->Fit(f1, "", "", sigmaParCorr[i]->GetMean() - 4 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMean() + 4 * sigmaParCorr[i]->GetRMS());
-      
-      TLatex latex;
-      latex.DrawLatex(sigmaParCorr[i]->GetMean() + 3 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
-
-      TLatex latex2;
-      latex2.DrawLatex(sigmaParCorr[i]->GetMean() + 3 * sigmaParCorr[i]->GetRMS(), sigmaParCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
-      
-
-      resChoice[0][1]->SetBinContent(i+1, f1->GetParameter(2));
-      resChoice[0][1]->SetBinError(i+1, f1->GetParError(2));
-
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
-    }
-
-    TCanvas * c5 = new TCanvas("c5", "c5");
-    c5->Divide(5,5);
-
-
-    f1->SetParameters(sigmaPerpUnCorr[0]->Integral(), sigmaPerpUnCorr[0]->GetMean(), sigmaPerpUnCorr[0]->GetRMS());
-    for(int i = 0; i < 25; i++){
-
-      c5->cd(i+1);
-      sigmaPerpUnCorr[i]->Draw();
-      sigmaPerpUnCorr[i]->Fit(f1, "", "", sigmaPerpUnCorr[i]->GetMean() - 4 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMean() + 4 * sigmaPerpUnCorr[i]->GetRMS());
-
-      TLatex latex;
-      latex.DrawLatex(sigmaPerpUnCorr[i]->GetMean() + 3 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
-
-      TLatex latex2;
-      latex2.DrawLatex(sigmaPerpUnCorr[i]->GetMean() + 3 * sigmaPerpUnCorr[i]->GetRMS(), sigmaPerpUnCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
-      
-      resChoice[1][0]->SetBinContent(i+1, f1->GetParameter(2));
-      resChoice[1][0]->SetBinError(i+1, f1->GetParError(2));
-
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
-    }
-
-    TCanvas * c6 = new TCanvas("c6", "c6");
-    c6->Divide(5,5);
-
-
-    f1->SetParameters(sigmaParUnCorr[0]->Integral(), sigmaParUnCorr[0]->GetMean(), sigmaParUnCorr[0]->GetRMS());
-    for(int i = 0; i < 25; i++){
-
-      c6->cd(i+1);
-      sigmaParUnCorr[i]->Draw();
-      sigmaParUnCorr[i]->Fit(f1, "", "", sigmaParUnCorr[i]->GetMean() - 4 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMean() + 4 * sigmaParUnCorr[i]->GetRMS());
-      
-      TLatex latex;
-      latex.DrawLatex(sigmaParUnCorr[i]->GetMean() + 3 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
-
-      TLatex latex2;
-      latex2.DrawLatex(sigmaParUnCorr[i]->GetMean() + 3 * sigmaParUnCorr[i]->GetRMS(), sigmaParUnCorr[i]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
-      
-
-      resChoice[1][1]->SetBinContent(i+1, f1->GetParameter(2));
-      resChoice[1][1]->SetBinError(i+1, f1->GetParError(2));
-
-      f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
-
-    }
-
-    TCanvas * c7 = new TCanvas("c7", "c7");
-    scaleChoice[0]->Draw();
-    scaleChoice[0]->SaveAs("scale/cor/scaleEl.root");
-
-    TCanvas * c8 = new TCanvas("c8", "c8");
-    scaleChoice[1]->Draw();
     
-    scaleChoice[1]->SaveAs("scale/uncor/scaleEl.root");
+    TCanvas * c3[2];
+    
+    for(int j = 0; j < 2; j++){
 
-    resChoice[0][0]->SaveAs("scale/cor/sigmaPerpEl.root");
-    resChoice[0][1]->SaveAs("scale/cor/sigmaParEl.root");
+      c3[j] = new TCanvas(Form("c3_%d", j), Form("c3_%d", j));
+      f1->SetParameters(sigmaPerpCorr[0][j][runEra]->Integral(), sigmaPerpCorr[0][j][runEra]->GetMean(), sigmaPerpCorr[0][j][runEra]->GetRMS());
+      c3[j]->Divide(5,5);
 
-    resChoice[1][0]->SaveAs("scale/uncor/sigmaPerpEl.root");
-    resChoice[1][1]->SaveAs("scale/uncor/sigmaParEl.root");
+      for(int i = 0; i < 25; i++){
+        c3[j]->cd(i+1);
+        sigmaPerpCorr[i][j][runEra]->Draw();
+        f1->SetParLimits(3, 0, 1);
+        sigmaPerpCorr[i][j][runEra]->Fit(f1, "", "", sigmaPerpCorr[i][j][runEra]->GetMean() - 4 * sigmaPerpCorr[i][j][runEra]->GetRMS(), sigmaPerpCorr[i][j][runEra]->GetMean() + 4 * sigmaPerpCorr[i][j][runEra]->GetRMS());
 
+        TLatex latex;
+        latex.DrawLatex(sigmaPerpCorr[i][j][runEra]->GetMean() + 3 * sigmaPerpCorr[i][j][runEra]->GetRMS(), sigmaPerpCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+        TLatex latex2;
+        latex2.DrawLatex(sigmaPerpCorr[i][j][runEra]->GetMean() + 3 * sigmaPerpCorr[i][j][runEra]->GetRMS(), sigmaPerpCorr[i][j][runEra]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+        
+
+        resChoice[0][0][j][runEra]->SetBinContent(i+1, f1->GetParameter(2));
+        resChoice[0][0][j][runEra]->SetBinError(i+1, f1->GetParError(2));
+
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+      }
+      c3[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaPerpCorr.pdf");
+      c3[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaPerpCorr.png");
+    }
+
+    TCanvas * c4[2];
+
+    for(int j = 0; j < 2; j++){
+
+      c4[j] = new TCanvas(Form("c4_%d", j), Form("c4_%d", j));
+      f1->SetParameters(sigmaParCorr[0][j][runEra]->Integral(), sigmaParCorr[0][j][runEra]->GetMean(), sigmaParCorr[0][j][runEra]->GetRMS());
+      c4[j]->Divide(5,5);
+
+    
+      for(int i = 0; i < 25; i++){
+        c4[j]->cd(i+1);
+        sigmaParCorr[i][j][runEra]->Draw();
+        f1->SetParLimits(3, 0, 1);
+        sigmaParCorr[i][j][runEra]->Fit(f1, "", "", sigmaParCorr[i][j][runEra]->GetMean() - 4 * sigmaParCorr[i][j][runEra]->GetRMS(), sigmaParCorr[i][j][runEra]->GetMean() + 4 * sigmaParCorr[i][j][runEra]->GetRMS());
+        
+        TLatex latex;
+        latex.DrawLatex(sigmaParCorr[i][j][runEra]->GetMean() + 3 * sigmaParCorr[i][j][runEra]->GetRMS(), sigmaParCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+        TLatex latex2;
+        latex2.DrawLatex(sigmaParCorr[i][j][runEra]->GetMean() + 3 * sigmaParCorr[i][j][runEra]->GetRMS(), sigmaParCorr[i][j][runEra]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+        
+
+        resChoice[0][1][j][runEra]->SetBinContent(i+1, f1->GetParameter(2));
+        resChoice[0][1][j][runEra]->SetBinError(i+1, f1->GetParError(2));
+
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+      }
+      c4[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaParCorr.pdf");
+      c4[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaParCorr.png");
+    }
+
+    TCanvas * c5[2];
+
+    for(int j = 0; j < 2; j++){
+
+      c5[j] = new TCanvas(Form("c5_%d", j), Form("c5_%d", j));
+      f1->SetParameters(sigmaPerpUnCorr[0][j][runEra]->Integral(), sigmaPerpUnCorr[0][j][runEra]->GetMean(), sigmaPerpUnCorr[0][j][runEra]->GetRMS());
+      c5[j]->Divide(5,5);
+    
+      for(int i = 0; i < 25; i++){
+
+        c5[j]->cd(i+1);
+        sigmaPerpUnCorr[i][j][runEra]->Draw();
+        f1->SetParLimits(3, 0, 1);
+        sigmaPerpUnCorr[i][j][runEra]->Fit(f1, "", "", sigmaPerpUnCorr[i][j][runEra]->GetMean() - 4 * sigmaPerpUnCorr[i][j][runEra]->GetRMS(), sigmaPerpUnCorr[i][j][runEra]->GetMean() + 4 * sigmaPerpUnCorr[i][j][runEra]->GetRMS());
+
+        TLatex latex;
+        latex.DrawLatex(sigmaPerpUnCorr[i][j][runEra]->GetMean() + 3 * sigmaPerpUnCorr[i][j][runEra]->GetRMS(), sigmaPerpUnCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+        TLatex latex2;
+        latex2.DrawLatex(sigmaPerpUnCorr[i][j][runEra]->GetMean() + 3 * sigmaPerpUnCorr[i][j][runEra]->GetRMS(), sigmaPerpUnCorr[i][j][runEra]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+        
+        resChoice[1][0][j][runEra]->SetBinContent(i+1, f1->GetParameter(2));
+        resChoice[1][0][j][runEra]->SetBinError(i+1, f1->GetParError(2));
+
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+      }
+      c5[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaPerpUnCorr.pdf");
+      c5[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaPerpUnCorr.png");
+    }
+
+    TCanvas * c6[2];
+    for(int j = 0; j < 2; j++){
+
+      c6[j] = new TCanvas(Form("c6_%d", j), Form("c6_%d", j));
+      f1->SetParameters(sigmaParUnCorr[0][j][runEra]->Integral(), sigmaParUnCorr[0][j][runEra]->GetMean(), sigmaParUnCorr[0][j][runEra]->GetRMS());
+      c6[j]->Divide(5,5);
+    
+      for(int i = 0; i < 25; i++){
+
+        c6[j]->cd(i+1);
+        sigmaParUnCorr[i][j][runEra]->Draw();
+        f1->SetParLimits(3, 0, 1);
+        sigmaParUnCorr[i][j][runEra]->Fit(f1, "", "", sigmaParUnCorr[i][j][runEra]->GetMean() - 4 * sigmaParUnCorr[i][j][runEra]->GetRMS(), sigmaParUnCorr[i][j][runEra]->GetMean() + 4 * sigmaParUnCorr[i][j][runEra]->GetRMS());
+        
+        TLatex latex;
+        latex.DrawLatex(sigmaParUnCorr[i][j][runEra]->GetMean() + 3 * sigmaParUnCorr[i][j][runEra]->GetRMS(), sigmaParUnCorr[i][j][runEra]->GetMaximum() / 2, Form("\\chi^{2} / ndf = %.1f/%i", f1->GetChisquare(), f1->GetNDF()));
+
+        TLatex latex2;
+        latex2.DrawLatex(sigmaParUnCorr[i][j][runEra]->GetMean() + 3 * sigmaParUnCorr[i][j][runEra]->GetRMS(), sigmaParUnCorr[i][j][runEra]->GetMaximum() / 3, Form("sigma = %.1f", f1->GetParameter(2)));
+        
+
+        resChoice[1][1][j][runEra]->SetBinContent(i+1, f1->GetParameter(2));
+        resChoice[1][1][j][runEra]->SetBinError(i+1, f1->GetParError(2));
+
+        f1->SetParameters(f1->GetParameter(0), f1->GetParameter(1), f1->GetParameter(2), f1->GetParameter(3), f1->GetParameter(4), f1->GetParameter(5));
+      }
+
+      c6[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaParUnCorr.pdf");
+      c6[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "sigmaParUnCorr.png");
+    }
+  }
+
+  
+  TCanvas * cScale[2][4];
+  for(int runEra = 0; runEra < 4; runEra++){
+    
+    TLegend * leg = new TLegend(0.2, 0.7, 0.5, 0.9);
+    leg->AddEntry(scaleChoice[0][0][runEra], "data", "lep");
+    leg->AddEntry(scaleChoice[0][1][runEra], "MC", "lep");
+    leg->SetFillColor(0);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetTextFont(42);
+
+    for(int i = 0; i < 2; i++){
+      cScale[i][runEra] = new TCanvas(Form("cScale_%d_%d", i, runEra), Form("cScale_%d_%d", i, runEra));
+      scaleChoice[i][0][runEra]->GetXaxis()->SetTitle("q_{T} [GeV]");
+      scaleChoice[i][0][runEra]->GetYaxis()->SetTitle("-<u_{||}>/<q_{T}>");
+      scaleChoice[i][0][runEra]->GetYaxis()->SetRangeUser((i == 0 ? 0.95 : 0.8), (i == 0 ? 1.05 : 1.0));
+      scaleChoice[i][0][runEra]->Draw();
+      scaleChoice[i][1][runEra]->SetLineColor(kRed);
+      scaleChoice[i][1][runEra]->SetMarkerColor(kRed);
+      scaleChoice[i][1][runEra]->Draw("same");
+      leg->Draw("same");
+      scaleChoice[i][0][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "scale" + (TString)(i == 0 ? "Cor" : "UnCor") + "Data.root");
+      scaleChoice[i][1][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "scale" + (TString)(i == 0 ? "Cor" : "UnCor") + "MC.root");
+      //cScale[i][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "scale" + (TString)(i == 0 ? "Cor" : "UnCor") +".pdf");
+      //cScale[i][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "scale" + (TString)(i == 0 ? "Cor" : "UnCor") +".png");
+    
+    }
+    
+    TCanvas * cRes[2][2][4];
+    for(int i = 0; i < 2; i++){
+      for(int j = 0; j < 2; j++){
+        cRes[i][j][runEra] = new TCanvas(Form("cRes_%d_%d_%d", i, j,runEra), Form("cRes_%d_%d_%d", i, j,runEra));
+        resChoice[i][j][0][runEra]->GetXaxis()->SetTitle("q_{T} [GeV]");
+        resChoice[i][j][0][runEra]->GetYaxis()->SetTitle("#sigma(u_{" + (TString)(j == 0 ? "#perp}  " : "||}") + ") [GeV]");
+        resChoice[i][j][0][runEra]->Draw();
+        resChoice[i][j][1][runEra]->SetLineColor(kRed);
+        resChoice[i][j][1][runEra]->SetMarkerColor(kRed);
+        resChoice[i][j][1][runEra]->Draw("same");
+        leg->Draw("same");
+        resChoice[i][j][0][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "sigma" + (TString)(j == 0 ? "Perp" : "Par") + (i == 0 ? "Cor" : "UnCor") + "Data.root");
+        resChoice[i][j][1][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "sigma" + (TString)(j == 0 ? "Perp" : "Par") + (i == 0 ? "Cor" : "UnCor") + "MC.root");
+        //cRes[i][j][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "sigma" + (TString)(j == 0 ? "Perp" : "Par")  + (TString)(i == 0 ? "Cor" : "UnCor") +".pdf");
+        //cRes[i][j][runEra]->SaveAs("scale/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + "sigma" + (TString)(j == 0 ? "Perp" : "Par")  + (TString)(i == 0 ? "Cor" : "UnCor") +".png");
+    
+      }
+    }
+  }
     return;
 
 }

@@ -102,7 +102,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
       for(unsigned int j = 0; j < 3; j++){
         for(unsigned int k = 0; k < 2; k++){
-          name = Form("varHistEra_%d_%d_%d",i, j, k);
+          name = Form("varDataEra_%d_%d_%d",i, j, k);
           distribs[i].histDataEras[j][k] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
         }
       }
@@ -112,11 +112,30 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         name = Form("var_%d_%d",i,j);
         distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
 
-        name = Form("varUp_%d_%d",i,j);
-        distribs[i].vectorHistoUp[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+        for(unsigned int k = 0; k < 3; k++){
+          name = Form("varUp_%d_%d_%d",i,j,k);
+          distribs[i].vectorHistoUp[j].unc[k] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
 
-        name = Form("varDown_%d_%d",i,j);
-        distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+          name = Form("varDown_%d_%d_%d",i,j,k);
+          distribs[i].vectorHistoDown[j].unc[k] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+        }
+
+        
+        for(unsigned int k = 0; k < 3; k++){
+          name = Form("varHistEra_%d_%d_%d",i,j,k);
+          distribs[i].vectorHistoEras[j].runEras[k] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+          for(unsigned int l = 0; l < 3; l++){
+            name = Form("varHistEraUp_%d_%d_%d_%d",i,j,k,l);
+            distribs[i].vectorHistoEras[j].runErasUncUp[k].unc[l] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+            name = Form("varHistEraDown_%d_%d_%d_%d",i,j,k,l);
+            distribs[i].vectorHistoEras[j].runErasUncDown[k].unc[l] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+
+          }
+
+        }
+        
         
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
         /*
@@ -133,33 +152,28 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
-    // 0 - fakes, 1-2 ttZ, 3-WZ, 4--21 -rares, 22 - data
-
-    
     for (unsigned int i=0; i!=distribs.size();++i) {
-      /*
-      for(unsigned int j = 1; j != distribsOrder.size(); j++){
-        distribs[i].stack.Add(&distribs[i].vectorHisto[distribsOrder[j]]);
-      }
-      */
+
       for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
-      //for(unsigned int j = distribs.size()-1; j != 0; j--){
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }
-
+    
     
     for(int i = 0; i < 25; i++){
+      for(int j = 0; j < 2; j++){
+        for(int k = 0; k < 4; k++){
 
-       histMetCorr[i] = new TH1D(Form("histMetCorr_%d", i), Form("histMetCorr_%d", i), 300, -3, 3);
-       histMetUnCorr[i] = new TH1D(Form("histMetUnCorr_%d", i), Form("histMetUnCorr_%d", i), 300, -3, 3);
+         histMetCorr[i][j][k] = new TH1D(Form("histMetCorr_%d_%d_%d", i, j, k), Form("histMetCorr_%d_%d_%d", i, j, k), 300, -3, 3);
+         histMetUnCorr[i][j][k] = new TH1D(Form("histMetUnCorr__%d%d_%d", i, j, k), Form("histMetUnCorr_%d_%d_%d", i, j, k), 300, -3, 3);
 
-       sigmaParUnCorr[i] = new TH1D(Form("sigmaParUnCorr_%d", i), Form("sigmaParUnCorr_%d", i), 40, -200, 200);
-       sigmaPerpUnCorr[i] = new TH1D(Form("sigmaPerpUnCorr_%d", i), Form("sigmaPerpUnCorr_%d", i), 40, -200, 200);
+         sigmaParUnCorr[i][j][k] = new TH1D(Form("sigmaParUnCorr_%d_%d_%d", i, j, k), Form("sigmaParUnCorr_%d_%d_%d", i, j, k), 40, -200, 200);
+         sigmaPerpUnCorr[i][j][k] = new TH1D(Form("sigmaPerpUnCorr_%d_%d_%d", i, j, k), Form("sigmaPerpUnCorr_%d_%d_%d", i, j, k), 40, -200, 200);
 
-       sigmaParCorr[i] = new TH1D(Form("sigmaParCorr_%d", i), Form("sigmaParCorr_%d", i), 40, -200, 200);
-       sigmaPerpCorr[i] = new TH1D(Form("sigmaPerpCorr_%d", i), Form("sigmaPerpCorr_%d", i), 40, -200, 200);
-    
+         sigmaParCorr[i][j][k] = new TH1D(Form("sigmaParCorr_%d_%d_%d", i, j, k), Form("sigmaParCorr_%d_%d_%d", i, j, k), 40, -200, 200);
+         sigmaPerpCorr[i][j][k] = new TH1D(Form("sigmaPerpCorr_%d_%d_%d", i, j, k), Form("sigmaPerpCorr_%d_%d_%d", i, j, k), 40, -200, 200);
+        }
+      }
     }
 
 }
@@ -339,10 +353,22 @@ void setStackColors(Color_t & color, int sam){
         distribs[i].vectorHisto[sam].SetLineColor(color);
         distribs[i].vectorHisto[sam].SetFillColor(color);
         distribs[i].vectorHisto[sam].SetMarkerColor(color);
+
+        for(unsigned int k = 0; k < 3; k++){
+          distribs[i].vectorHistoEras[sam].runEras[k].SetLineColor(color);
+          distribs[i].vectorHistoEras[sam].runEras[k].SetFillColor(color);
+          distribs[i].vectorHistoEras[sam].runEras[k].SetLineColor(color);
+        }
     }
 }
 
+double paraCalc(double &met, double &metPhi, double &phiZ, double &ptZ){
+    return ((( -met*TMath::Cos(metPhi )  - ptZ * TMath::Cos( phiZ))* ptZ*TMath::Cos( phiZ )+(- met* TMath::Sin(metPhi )- ptZ*TMath::Sin(phiZ ))* ptZ*TMath::Sin( phiZ ))/ptZ + ptZ);
+}
 
+double perpCalc(double &met, double &metPhi, double &phiZ, double &ptZ){
+    return ((( -met*TMath::Cos(metPhi )  - ptZ * TMath::Cos( phiZ))* ptZ*TMath::Sin( phiZ )-(- met* TMath::Sin(metPhi )- ptZ*TMath::Sin(phiZ ))* ptZ*TMath::Cos( phiZ ))/ptZ);
+}
 
 /*
 std::map<std::string, unsigned> pair_to_map(std::vector<std::string> & a, std::vector<unsigned> b)

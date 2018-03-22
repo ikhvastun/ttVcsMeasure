@@ -8,65 +8,12 @@ const int nFlavors = 2;
 
 const int leptonSelectionAnalysis = 3;
 
-//std::vector<int> distribsOrder = { 5, 16, 17, 18, 19, 20, 21, 22, 23, 9, 10, 11, 12, 13, 14, 15, 1, 2, 3, 4, 8, 6, 7};
-const int nSamples = 100;
+const int nSamples = 20;
 const int dataSample = 0;
 
 const int runB = 0;
 const int runCDE = 1;
 const int runF = 2;
-//int uncertaintySample = distribsOrder.size() + 1; // +1 for data
-
-/*
-TString names[nSamples] = {
-    "Data",
-    "t#bar{t}W", 
-    "Nonprompt", "Nonprompt", "Nonprompt", "Nonprompt",
-    "Charge mis-ID",
-    "t#bar{t}Z", "t#bar{t}Z",
-    "t(#bar{t})H", 
-    "t(#bar{t})X", "TTX", "TTX", "TTX", "TTX",
-    "WZ",
-    "ZZ", 
-    "Rare", "Rare", "Rare", "Rare", "Rare", "Rare", "Rare",
-    //
-};
-*/
-
-/*
-Color_t colsStack[nSamples+1] = {
-      kBlack,
-      98,      
-      kBlue-9, kBlue-9, kBlue-9, kBlue-9, 
-      kMagenta-7,
-      91, 91, 
-      kRed-10, kRed-10, kRed-10, kRed-10, kRed-10, kRed-10,
-      51, 
-      8, 8, 8, 8, 8, 8, 8, 8,
-      //
-
-};
-*/
-
-/*
-double systematicsLeptonID[nSamples] = {
-      0.,
-      0.04,
-      0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04,  
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 
-      0.04, 
-      0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04 
-
-};
-*/
-
-
-//std::vector<int> distribsOrderForLegend = { 5, 17, 10, 15, 1, 8, 6};
-
-//std::vector<int> distribsOrderForLegend = { 17, 10, 15, 1, 8, 6};
-
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
@@ -142,14 +89,15 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 10;
+const int nVars  = 11;
 
 TString varN[nVars] = {
     "Raw E_{T}^{miss}", "Type I E_{T}^{miss}", 
     "u_{para}", "u_{perp}", 
     "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", 
     "#eta^{leading} [GeV]", "#eta^{trailing} [GeV]", 
-    "NPV", "mll"
+    "NPV", "mll",
+    "E_{T}^{miss} smeared"
 }; 
 
 double varMin[nVars] = {
@@ -158,6 +106,7 @@ double varMin[nVars] = {
     0, 0, 
     -2.5, -2.5, 
     0, 81,
+    0
 };
     
 double varMax[nVars] = {
@@ -165,7 +114,8 @@ double varMax[nVars] = {
     200, 200, 
     100, 100, 
     2.5, 2.5, 
-    90, 101
+    90, 101,
+    300
 };
     
 int nBins[nVars] = {
@@ -173,13 +123,20 @@ int nBins[nVars] = {
     80, 80, 
     100, 100, 
     50, 50, 
-    90, 40
+    90, 40,
+    60
 };
 
-
+double weightMC[3] = {4.8, 23.1, 13.5};
 // Lepton SF
-TFile *file_dataMC = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_4p8fb_nTrueVertices_nTrueVgr10.root","READ"); // PU reweighing
-TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
+TFile *file_dataMC_runB = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_4p8fb_nTrueVertices_nTrueVgr10.root","READ"); // PU reweighing
+TFile *file_dataMC_runCDE = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_23p1fb_nTrueVertices_nTrueVgr10.root","READ");
+TFile *file_dataMC_runF = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_13p5fb_nTrueVertices_nTrueVgr10.root","READ");
+
+TH1D *h_dataMC[3] = {(TH1D*)file_dataMC_runB->Get("puw"), 
+                     (TH1D*)file_dataMC_runCDE->Get("puw"),
+                     (TH1D*)file_dataMC_runF->Get("puw")
+                   }; 
 
 TFile *lepSF_ele_file = TFile::Open("data/leptonSF/scaleFactorsAll.root","READ");
 
@@ -279,16 +236,16 @@ const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
 const int nQt = 26;
 const double qtBins[nQt] = {18., 24., 30., 38., 46., 52., 60, 68, 76, 84, 92, 100, 115, 130, 150, 175, 200, 225, 250, 275, 305, 335, 365, 400, 440, 500};
 
-TH1D * histPhiZCorr[25];
-TH1D * histPhiZUnCorr[25];
+TH1D * histPhiZCorr[25][2][4];
+TH1D * histPhiZUnCorr[25][2][4];
 
-TH1D * histMetCorr[25];
-TH1D * histMetUnCorr[25];
+TH1D * histMetCorr[25][2][4];
+TH1D * histMetUnCorr[25][2][4];
 
-TH1D * sigmaParUnCorr[25];
-TH1D * sigmaPerpUnCorr[25];
+TH1D * sigmaParUnCorr[25][2][4];
+TH1D * sigmaPerpUnCorr[25][2][4];
 
-TH1D * sigmaParCorr[25];
-TH1D * sigmaPerpCorr[25];
+TH1D * sigmaParCorr[25][2][4];
+TH1D * sigmaPerpCorr[25][2][4];
 
 #endif

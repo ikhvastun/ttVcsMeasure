@@ -44,7 +44,7 @@ class treeReader {
         Int_t           _HLT_Ele35_WPTight_Gsf_prescale;
         Bool_t          _HLT_Ele40_WPTight_Gsf;
         Int_t           _HLT_Ele40_WPTight_Gsf_prescale;
-        Bool_t          _2017_ee;
+        Bool_t          _passTrigger_ee;
         Bool_t          _HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350;
         Int_t           _HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale;
         Bool_t          _HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL;
@@ -71,7 +71,7 @@ class treeReader {
         Int_t           _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale;
         Bool_t          _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ;
         Int_t           _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale;
-        Bool_t          _2017_mm;
+        Bool_t          _passTrigger_mm;
         Bool_t          _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL;
         Int_t           _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale;
         Bool_t          _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ;
@@ -178,18 +178,55 @@ class treeReader {
         Double_t        _jetDeepCsv_bb[nJets_max];   
         UInt_t          _jetHadronFlavor[nJets_max];   
         UInt_t          _jetId[nJets_max];   
+        
         Double_t        _met;
         Double_t        _metPhi;
-        Double_t        _rawmet;
-        Double_t        _rawmetPhi;
+
         Double_t        _metJECDown;
         Double_t        _metJECUp;
+        Double_t        _metJetResDown;
+        Double_t        _metJetResUp;
         Double_t        _metUnclDown;
         Double_t        _metUnclUp;
+
         Double_t        _metPhiJECDown;
         Double_t        _metPhiJECUp;
+        Double_t        _metPhiJetResDown;
+        Double_t        _metPhiJetResUp;
         Double_t        _metPhiUnclDown;
-        Double_t        _metPhiUnclUp;  
+        Double_t        _metPhiUnclUp; 
+
+        Double_t        _rawmet;
+        Double_t        _rawmetJECDown;
+        Double_t        _rawmetJECUp;
+        Double_t        _rawmetJetResDown;
+        Double_t        _rawmetJetResUp;
+        Double_t        _rawmetUnclDown;
+        Double_t        _rawmetUnclUp;
+
+        Double_t        _rawmetPhi;
+        Double_t        _rawmetPhiJECDown;
+        Double_t        _rawmetPhiJECUp;
+        Double_t        _rawmetPhiJetResDown;
+        Double_t        _rawmetPhiJetResUp;
+        Double_t        _rawmetPhiUnclDown;
+        Double_t        _rawmetPhiUnclUp;
+
+        Double_t        _met_sm;                                                                              //met kinematics
+        Double_t        _metJECDown_sm;
+        Double_t        _metJECUp_sm;
+        Double_t        _metJetResDown_sm;
+        Double_t        _metJetResUp_sm;
+        Double_t        _metUnclDown_sm;
+        Double_t        _metUnclUp_sm;
+
+        Double_t        _metPhi_sm;
+        Double_t        _metPhiJECDown_sm;
+        Double_t        _metPhiJECUp_sm;
+        Double_t        _metPhiJetResDown_sm;
+        Double_t        _metPhiJetResUp_sm;
+        Double_t        _metPhiUnclDown_sm;
+        Double_t        _metPhiUnclUp_sm; 
 
         Bool_t          _HLT_Ele27_WPTight_Gsf;
         Bool_t          _HLT_IsoMu24;
@@ -267,7 +304,7 @@ class treeReader {
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         //const double dataLumi = 35.9;                                          //in units of 1/fb
-        const double dataLumi = 4.8;           // 41.9                               //in units of 1/fb
+        const double dataLumi = 41.9;           // 41.9                               //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
@@ -294,7 +331,7 @@ class treeReader {
         TBranch        *b__HLT_Ele35_WPTight_Gsf_prescale;   
         TBranch        *b__HLT_Ele40_WPTight_Gsf;   
         TBranch        *b__HLT_Ele40_WPTight_Gsf_prescale;   
-        TBranch        *b__2017_ee;   
+        TBranch        *b__passTrigger_ee;   
         TBranch        *b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350;   
         TBranch        *b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale;   
         TBranch        *b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL;   
@@ -321,7 +358,7 @@ class treeReader {
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale;   
-        TBranch        *b__2017_mm;   
+        TBranch        *b__passTrigger_mm;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ;   
@@ -428,18 +465,50 @@ class treeReader {
         TBranch        *b__jetDeepCsv_bb;   
         TBranch        *b__jetHadronFlavor;   
         TBranch        *b__jetId;   
-        TBranch        *b__met;   
-        TBranch        *b__metPhi;   
-        TBranch        *b__rawmet;   
-        TBranch        *b__rawmetPhi;   
-        TBranch        *b__metJECDown;   
-        TBranch        *b__metJECUp;   
-        TBranch        *b__metUnclDown;   
-        TBranch        *b__metUnclUp;   
-        TBranch        *b__metPhiJECDown;   
-        TBranch        *b__metPhiJECUp;   
-        TBranch        *b__metPhiUnclDown;   
-        TBranch        *b__metPhiUnclUp;   
+       
+       TBranch        *b__met;   //!
+       TBranch        *b__metJECDown;   //!
+       TBranch        *b__metJECUp;   //!
+       TBranch        *b__metJetResDown;   //!
+       TBranch        *b__metJetResUp;   //!
+       TBranch        *b__metUnclDown;   //!
+       TBranch        *b__metUnclUp;   //!
+       TBranch        *b__metPhi;   //!
+       TBranch        *b__metPhiJECDown;   //!
+       TBranch        *b__metPhiJECUp;   //!
+       TBranch        *b__metPhiJetResDown;   //!
+       TBranch        *b__metPhiJetResUp;   //!
+       TBranch        *b__metPhiUnclDown;   //!
+       TBranch        *b__metPhiUnclUp;   //!
+    
+       TBranch        *b__rawmetPhi;
+       TBranch        *b__rawmetPhiJECDown;   //!
+       TBranch        *b__rawmetPhiJECUp;   //!
+       TBranch        *b__rawmetPhiJetResDown;   //!
+       TBranch        *b__rawmetPhiJetResUp;   //!
+       TBranch        *b__rawmetPhiUnclDown;   //!
+       TBranch        *b__rawmetPhiUnclUp;   //!
+       TBranch        *b__rawmet;   //!
+       TBranch        *b__rawmetJECDown;   //!
+       TBranch        *b__rawmetJECUp;   //!
+       TBranch        *b__rawmetJetResDown;   //!
+       TBranch        *b__rawmetJetResUp;   //!
+       TBranch        *b__rawmetUnclDown;   //!
+       TBranch        *b__rawmetUnclUp;   //!
+       TBranch        *b__met_sm;   //!
+       TBranch        *b__metJECDown_sm;   //!
+       TBranch        *b__metJECUp_sm;   //!
+       TBranch        *b__metJetResDown_sm;   //!
+       TBranch        *b__metJetResUp_sm;   //!
+       TBranch        *b__metUnclDown_sm;   //!
+       TBranch        *b__metUnclUp_sm;   //!
+       TBranch        *b__metPhi_sm;   //!
+       TBranch        *b__metPhiJECDown_sm;   //!
+       TBranch        *b__metPhiJECUp_sm;   //!
+       TBranch        *b__metPhiJetResDown_sm;   //!
+       TBranch        *b__metPhiJetResUp_sm;   //!
+       TBranch        *b__metPhiUnclDown_sm;   //!
+       TBranch        *b__metPhiUnclUp_sm;   //!
 
         TBranch        *b__HLT_Ele27_WPTight_Gsf;   //!
         TBranch        *b__HLT_Ele27_WPTight_Gsf_prescale;   //!

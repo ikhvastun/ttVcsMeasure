@@ -2,7 +2,7 @@
 #include <iostream>
 
 void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX )
+CMS_lumi( TPad* pad, int iPeriod, int iPosX, TString lumi_13TeV )
 {            
   bool outOfFrame    = false;
   if( iPosX/10==0 ) 
