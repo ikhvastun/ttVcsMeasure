@@ -15,7 +15,6 @@ const int dataSample = 0;
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
 
-
 struct BinLabelOptions{
   int index;
   std::string labelSR;
@@ -23,7 +22,6 @@ struct BinLabelOptions{
 
 std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
 
-      
       {1, "2j"},
       {2, "3j1b"},
       {3, "3j>1b"},
@@ -67,7 +65,6 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor2L = {
       
-      
       {1, "#mu^{-}#mu^{-}"},
       {2, "#mu^{-}e^{-}"},
       {3, "e^{-}e^{-}"},
@@ -86,22 +83,32 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
     };
 
-const int nVars  = 2;
-
+//kinematical variables to check
+const int nVars = 19;
 TString varN[nVars] = {
-    "pt corr lead", "pt corr sublead"
-}; 
+    "M_{T}^{leading} (GeV)","E_{T}^{miss} (GeV)","H_{T} (GeV)","N_{jets}","N_{b jets}",
+    "p_{T}^{leading} (GeV)","p_{T}^{subleading} (GeV)","p_{T}^{trailing} (GeV)","#eta^{l1}", "#eta^{l2}", "#eta^{l3}",
+    "m_{ll} (GeV)", "SR", "dilep", "M_{T}^{trailing} (GeV)", "jet p_{T}^{leading} (GeV)", "jet p_{T}^{trailing} (GeV)", "min #Delta R(jet, trailing lepton)",
+    "MVA score"
+};
+double varMax[nVars] = {
+    200,210,660,6.5,4.5,
+    205,100,105,2.5,2.5, 2.5,
+    200,22.5,leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5), 200, 300, 200, 3,
+    1
+};
 
 double varMin[nVars] = {
-    0, 0, 
+    0,30,60,1.5,-0.5,
+    25,0,25,-2.5, -2.5, -2.5,
+    0,-0.5,0.5, 0, 30., 30., 0.4,
+    -1
 };
-    
-double varMax[nVars] = {
-    200, 200, 
-};
-    
 int nBins[nVars] = {
-    20, 20,
+    20,9,10,5,5,
+    18,20,8,10,10, 10,
+    20,23,leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (static_cast<int>(flavourLabelOptionsFor3L.size())), 20, 27, 17, 13,
+    20
 };
 
 const int nVars2D  = 4;

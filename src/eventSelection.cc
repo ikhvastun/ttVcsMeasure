@@ -126,11 +126,25 @@ bool treeReader::lepIsLoose(const unsigned ind){
         //if(!_lPOGLoose[ind]) return false;
         if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
+        //if(_lElectronMva[ind] <= 0.2 + (fabs(_lEta[ind]) >= 1.479)*0.5) return false;
+        if(_lElectronMvaFall17NoIso[ind] < 0.8) return false;
+        //if(_lElectronMvaFall17NoIso[ind] <= 0.2 + (fabs(_lEta[ind]) >= 1.479)*0.5) return false;
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;
         //if(!elePassVLooseMvaIDSUSY(ind)) return false;
+        if(!_lElectronPassConvVeto[ind]) return false;
+        if(_lElectronMissingHits[ind] != 0) return false;
+        // used only in ss2l analysis 
+        if(leptonSelection == 2){
+            if(!_lElectronChargeConst[ind]) return false;
+        }
     }
-    if(_leptonMvatZqTTV[ind] < -0.8) return false;
+    //if(_leptonMvatZqTTV[ind] < 0.8 && (_ptRatio[ind] < 0.5 || _closestJetCsvV2[ind] > 0.25)) return false;
+    //if(_leptonMvatZqTTV[ind] < 0.4 && (_ptRatio[ind] < 0.5 || (_closestJetDeepCsv_bb[ind] + _closestJetDeepCsv_b[ind] > 0.5))) return false;
+    if(_leptonMvatZqTTV[ind] < 0.4){
+        if(_ptRatio[ind] < 0.5) return false;
+        //if(_ptRatio[ind] < 0.5 || (_closestJetDeepCsv_bb[ind] + _closestJetDeepCsv_b[ind] > 0.15)) return false;
+    }
     return true;
 }
 
@@ -280,7 +294,7 @@ unsigned treeReader::selectLooseLep(std::vector<unsigned>& ind){
             ptMap.push_back({_lPt[l], l});
         }
     }
-    //if(lCount < 2) return 0;
+    if(lCount < 2) return 0;
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
     for(unsigned l = 0; l < lCount; ++l){
         ind.push_back(ptMap[l].second);
@@ -316,7 +330,7 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = ptFake(_lPt[i], _ptRatio[i], _lFlavor[i], _leptonMvaTTH[i], _lPOGMedium[i]);
+        double ptcor = _leptonMvatZqTTV[i] > 0.4 ? _lPt[i] : 0.9 * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
         
     }
@@ -328,8 +342,8 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
    
-    if(ptMap[0].first < 40) return false;
-    if(ptMap[1].first < 20) return false;
+    if(ptMap[0].first < 10) return false;
+    if(ptMap[1].first < 10) return false;
     if(ptMap[2].first < 10) return false;
 
     return true;
@@ -339,7 +353,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = _leptonMvatZqTTV[i] > 0.85 ? _lPt[i] : 0.85 * _lPt[i] / _ptRatio[i];
+        double ptcor = _leptonMvatZqTTV[i] > 0.6 ? _lPt[i] : 0.8 * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
@@ -350,8 +364,8 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
 
-    if(ptMap[0].first < 15) return false;
-    if(ptMap[1].first < 15) return false;
+    if(ptMap[0].first < 10) return false;
+    if(ptMap[1].first < 10) return false;
 
     return true;
 }
@@ -401,7 +415,8 @@ unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<uns
 }
 
 bool treeReader::bTaggedDeepCSV(const unsigned ind, const unsigned wp){
-    static const double bTagWP[3] = {0.2219, 0.6324,  0.8958};
+    //static const double bTagWP[3] = {0.2219, 0.6324,  0.8958};
+    static const double bTagWP[3] = {0.1522, 0.4941,  0.8001};
     return (_jetDeepCsv_b[ind] + _jetDeepCsv_bb[ind]) > bTagWP[wp];
 }
 
@@ -454,13 +469,15 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
     double deltaMZ = 999999.;
 
     for (unsigned l0 = 0; l0 < ind.size(); l0++) {
-        double ptcor1 = ptFake(_lPt[ind.at(l0)], _ptRatio[ind.at(l0)], _lFlavor[ind.at(l0)], _leptonMvaTTH[ind.at(l0)], _lPOGMedium[ind.at(l0)]);
+        //double ptcor1 = ptFake(_lPt[ind.at(l0)], _ptRatio[ind.at(l0)], _lFlavor[ind.at(l0)], _leptonMvaTTH[ind.at(l0)], _lPOGMedium[ind.at(l0)]);
+        double ptcor1 = _leptonMvatZqTTV[ind.at(l0)] > 0.4 ? _lPt[ind.at(l0)] : 0.9 * _lPt[ind.at(l0)] / _ptRatio[ind.at(l0)];
         //cout << "l0 is " << ind.at(l0) << endl;
         
-        //l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
-        l0p4.SetPtEtaPhiE(_lPt[ind.at(l0)],_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)]);          
+        l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
+        //l0p4.SetPtEtaPhiE(_lPt[ind.at(l0)],_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)]);          
         for(unsigned l1 = l0; l1 < ind.size(); l1++){
-            double ptcor2 = ptFake(_lPt[ind.at(l1)], _ptRatio[ind.at(l1)], _lFlavor[ind.at(l1)], _leptonMvaTTH[ind.at(l1)], _lPOGMedium[ind.at(l1)]);
+            //double ptcor2 = ptFake(_lPt[ind.at(l1)], _ptRatio[ind.at(l1)], _lFlavor[ind.at(l1)], _leptonMvaTTH[ind.at(l1)], _lPOGMedium[ind.at(l1)]);
+            double ptcor2 = _leptonMvatZqTTV[ind.at(l1)] > 0.4 ? _lPt[ind.at(l1)] : 0.9 * _lPt[ind.at(l1)] / _ptRatio[ind.at(l1)];
             //cout << "l1 is " << ind.at(l1) << endl;
             
             if(ind.at(l0) == ind.at(l1)) continue;
@@ -469,8 +486,8 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
             //cout << "check the charge of 2 leptons: " << _lCharge[ind.at(l0)] << " " << _lCharge[ind.at(l1)] << " " << (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) << endl;
 
             if (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) {
-                //l1p4.SetPtEtaPhiE(ptcor2 ,_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)] * ptcor2 / _lPt[ind.at(l1)]);
-                l1p4.SetPtEtaPhiE(_lPt[ind.at(l1)],_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)]);
+                l1p4.SetPtEtaPhiE(ptcor2 ,_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)] * ptcor2 / _lPt[ind.at(l1)]);
+                //l1p4.SetPtEtaPhiE(_lPt[ind.at(l1)],_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)]);
                 l1p4+=l0p4;
                 double mdiL = l1p4.M();
                 
@@ -536,7 +553,7 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
         //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
         //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
-        if(l0reco.DeltaR(l0gen) < 1.0){
+        if(l0reco.DeltaR(l0gen) < 0.1){
             //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << endl;
             if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){ //  && _lFlavor[l] == _gen_lFlavor[i]
                 leptIsP = true;

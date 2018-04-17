@@ -1,5 +1,5 @@
-const unsigned int indexSR = 15;
-const unsigned int indexFlavour = 14; 
+const unsigned int indexSR = 12;
+const unsigned int indexFlavour = 13; 
 
 #include "errors.h"
 #include "../interface/treeReader.h"
@@ -67,7 +67,7 @@ void getFRmaps(vector<TH2D> & fakeMaps){
 
     for (int i=0; i!=nFlavors; ++i){
 
-      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_ttbarMC.root","READ");
+      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR.root","READ");
       TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 
       if(tempPtr != NULL){
@@ -145,19 +145,46 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
     distribs[1].vectorHisto2D[0] = std::move(TH2D(name,           name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
     distribs[1].vectorHisto2D[1] = std::move(TH2D(name + "passed",name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
 
+    for(auto & histo: distribs[indexFlavour].vectorHisto) {
+        for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
+            histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+        }
+
+        histo.GetXaxis()->SetLabelSize(0.1);
+        histo.GetXaxis()->SetTitleSize(0.25);
+        histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
+        distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+    }
+    distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetLabelSize(0.1);
+    distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetTitleSize(0.25);
+    distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetLabelOffset(0.02);
+
+    for(auto & histo: distribs[indexSR].vectorHisto) {
+      
+      for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
 }
 
 
 int flavourCategory2L(int nLocEle, int chargesTwoLepton){
   
-  return 1 + nLocEle + 3 * (chargesTwoLepton > 0 ? 1 : 0);
+  return 1+nLocEle + 3 * (chargesTwoLepton > 0 ? 1 : 0);
 
 }
 
 
 int flavourCategory3L(int nLocEle){
   
-  return 1 + nLocEle;
+  return 1+nLocEle;
 
 }
 

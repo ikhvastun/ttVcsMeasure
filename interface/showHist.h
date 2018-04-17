@@ -149,7 +149,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetXaxis()->SetTitle(titleX.c_str());
     if(titleX == "trilep")
       uncHistoCopy->GetXaxis()->SetTitle("");
-    uncHistoCopy->GetYaxis()->SetTitle("data/pred");
+    uncHistoCopy->GetYaxis()->SetTitle("obs/pred");
 
     uncHistoCopy->GetXaxis()->SetRangeUser(xmin, xmax);
 
@@ -178,7 +178,19 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     line->SetLineStyle(2);
     
     line->Draw("same");
-    uncHistoCopy->Draw("e2same");
+    //uncHistoCopy->Draw("e2same");
+    TH1D * histErr = (TH1D*)distribs.vectorHistoTotalUnc.Clone("histErr");
+    for(int i = 1; i < histErr->GetNbinsX() + 1; i++){
+      histErr->SetBinContent(i, 1.);
+      histErr->SetBinError(i, TMath::Sqrt(0.3 * 0.3 + distribs.vectorHistoTotalUnc.GetBinError(i) * distribs.vectorHistoTotalUnc.GetBinError(i) / distribs.vectorHistoTotalUnc.GetBinContent(i) / distribs.vectorHistoTotalUnc.GetBinContent(i)));
+    }
+
+
+    histErr->SetFillStyle(3005);
+    histErr->SetFillColor(kGray+2);
+    histErr->SetMarkerStyle(1);
+    histErr->Draw("e2same");
+
     dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
 
     pad2->Update();
