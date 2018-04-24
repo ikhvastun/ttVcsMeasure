@@ -80,6 +80,9 @@ void treeReader::initTree(TTree *tree, const bool isData)
      if(isData){         //Temporarily only store 2017 triggers for data, to be updated when 2017 MC is available
         
         fChain->SetBranchAddress("_2017_ee", &_2017_ee, &b__2017_ee);
+        fChain->SetBranchAddress("_2017_em", &_2017_em, &b__2017_em);
+        fChain->SetBranchAddress("_2017_e", &_2017_e, &b__2017_e);
+        fChain->SetBranchAddress("_2017_m", &_2017_m, &b__2017_m);
         fChain->SetBranchAddress("_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350", &_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350, &b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350);
         fChain->SetBranchAddress("_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale", &_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale, &b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale);
         fChain->SetBranchAddress("_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", &_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL, &b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL);

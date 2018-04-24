@@ -54,6 +54,8 @@ using Output::distribs2D;
 void treeReader::Analyze(){
 
   leptonSelection = leptonSelectionAnalysis;
+  magicFactor = magicFactorAnalysis;
+  leptonMVAcut = leptonMVAcutAnalysis;
   //Set CMS plotting style
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
@@ -84,6 +86,11 @@ void treeReader::Analyze(){
       setStackColors(color, sam);
 
       //if(std::get<0>(samples[sam]) == "loose") continue; // valid only for 2017 in ss2L
+      if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue; // valid only for 2017 in ss2L
+      if(std::get<1>(samples[sam]).find("TTToSemiLeptonic") != std::string::npos ) continue; // valid only for 2017 in ss2L
+      //if(std::get<1>(samples[sam]).find("TTTo2L2Nu") != std::string::npos ) continue; // valid only for 2017 in ss2L
+      
+      
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -101,18 +108,21 @@ void treeReader::Analyze(){
           GetEntry(it);
           //if(it > 100000) break;
           
-          std::vector<unsigned> ind, indLoose;
-          const unsigned lCountLoose = selectLooseLep(indLoose);
+          std::vector<unsigned> ind, indFO;
+          const unsigned lCountFO = selectFOLep(indFO);
 
-          //if(lCountLoose != 2) continue;
+          //if(lCountFO != 2) continue;
           //if(!passPtCuts2L(indLoose)) continue;
           //if(_lCharge[indLoose.at(0)] * _lCharge[indLoose.at(1)] < 0) continue;
-
-          if(lCountLoose != 3) continue;
-          if(!passPtCuts3L(indLoose)) continue;
           
-          int nLocEle = getElectronNumber(indLoose);
-          //if(nLocEle != 3) continue;
+          //if(!(_2017_e || _2017_m || _2017_ee || _2017_em || _2017_mm)) continue;
+          //cout << "decision: " << _2017_ee << " " << _2017_mm << " " << _2017_em << " " << _2017_e << " " << _2017_m << endl;
+
+          if(lCountFO < 3) continue;
+          if(!passPtCuts3L(indFO)) continue;
+          
+          int nLocEle = getElectronNumber(indFO);
+          //if(nLocEle != 0) continue;
 
           std::vector<unsigned> indJets;
 
@@ -122,21 +132,10 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          nBLoc = nBJets(0, true, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
-          double dMZ = deltaMZ(indLoose, third, mll, pt_Z, ptNonZ, phi_Z);
-          HTLoc = HTCalc(indJets);
-
-          if (nJLoc < 2) continue;
-          //if(_met < 30) continue;
-          //if(nBLoc != 2) continue;
-          //if(dMZ > 20) continue;
-          if(mll < 12) continue;
-
           int featureCategory = 0;
           int promptCategory = 0;
-          for(auto & i : indLoose){
-            if (_leptonMvatZqTTV[i] > 0.4) featureCategory += 1;
+          for(auto & i : indFO){
+            if (lepIsGood(i)) featureCategory += 1;
             if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) promptCategory += 1;
             //if(leptonIsPrompt(i)) promptCategory += 1;
             /*
@@ -150,18 +149,25 @@ void treeReader::Analyze(){
           //cout << "prompt cat: " <<promptCategory << endl;
           //if(promptCategory == 2)
           //    cout << _runNb << " " << _lumiBlock << " " << _eventNb << endl; 
-          //if(promptCategory > 1) continue;
+          
+          if(promptCategory > 2) continue;
+          //if(featureCategory < 2) continue;
+          if(featureCategory > 3) continue;
           double FRloc = 1.;
+
+          //if(featureCategory == 3 && !eventChargeConsistent(indFO)) continue;
           //if(featureCategory < 2){ 
           if(featureCategory < 3){ 
 
             int nFakeLepCounter = 0;
 
-            for(auto & i : indLoose){
-              if (_leptonMvatZqTTV[i] > 0.4) continue;
+            for(auto & i : indFO){
+              //if (_leptonMvatZqTTV[i] > leptonMVAcut) continue;
+              if(lepIsGood(i)) continue;
+              if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) continue;
 
               // used in ttV
-              const double magicNumber = 0.9;
+              const double magicNumber = magicFactor;
               double leptFakePtCorr = magicNumber * _lPt[i] / _ptRatio[i];
               double FRloc_loc = fakeMaps.at(_lFlavor[i]).GetBinContent(fakeMaps.at(_lFlavor[i]).FindBin(TMath::Min(leptFakePtCorr,100-1.), fabs(_lEta[i])));
 
@@ -177,6 +183,17 @@ void treeReader::Analyze(){
           //cout << "FRloc is: " << FRloc << endl;
 
           weight = weight * FRloc;  
+
+          nJLoc = nJets(0, true, indJets, featureCategory < leptonSelectionAnalysis);
+          nBLoc = nBJets(0, true, true, 1, featureCategory < leptonSelectionAnalysis);
+          double dMZ = deltaMZ(indFO, third, mll, pt_Z, ptNonZ, phi_Z);
+          HTLoc = HTCalc(indJets);
+
+          //if (nJLoc < 2) continue;
+          //if(_met < 30) continue;
+          //if(nBLoc != 2) continue;
+          //if(dMZ > 10) continue;
+          //if(mll < 12) continue;
 
           //distribs[0].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(TMath::Min(mtHighest,varMax[0]-0.1), weight);
           distribs[1].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(_met,varMax[1]-0.1), weight);
@@ -194,7 +211,7 @@ void treeReader::Analyze(){
           distribs[11].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(mll,varMax[11]-0.1), weight);
           //distribs[12].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(SRID(nJLoc, nBLoc, mvaValueRegion, _charges[maxPtInd]), FRloc*scale*_weight);
           if(leptonSelectionAnalysis == 2)
-            distribs[13].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(flavourCategory2L(nLocEle, _lCharge[indLoose.at(0)]), weight);
+            distribs[13].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(flavourCategory2L(nLocEle, _lCharge[indFO.at(0)]), weight);
           if(leptonSelectionAnalysis == 3)
             distribs[13].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(flavourCategory3L(nLocEle), weight);
 

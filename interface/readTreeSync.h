@@ -10,10 +10,12 @@ const int leptonSelectionAnalysis = 3;
 
 const int nSamples = 100;
 const int dataSample = 0;
-//int uncertaintySample = distribsOrder.size() + 1; // +1 for data
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
+
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4;
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85;
 
 struct BinLabelOptions{
   int index;
@@ -92,21 +94,21 @@ TString varN[nVars] = {
     "MVA score"
 };
 double varMax[nVars] = {
-    200,210,660,6.5,4.5,
-    205,100,105,2.5,2.5, 2.5,
+    200,200,400,6.5,4.5,
+    205,100,100,2.5,2.5, 2.5,
     200,22.5,leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5), 200, 300, 200, 3,
     1
 };
 
 double varMin[nVars] = {
-    0,30,60,1.5,-0.5,
-    25,0,25,-2.5, -2.5, -2.5,
+    0,0,0,-0.5,-0.5,
+    25,0,0,-2.5, -2.5, -2.5,
     0,-0.5,0.5, 0, 30., 30., 0.4,
     -1
 };
 int nBins[nVars] = {
-    20,9,10,5,5,
-    18,20,8,10,10, 10,
+    20,20,10,7,5,
+    18,20,10,10,10, 10,
     20,23,leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (static_cast<int>(flavourLabelOptionsFor3L.size())), 20, 27, 17, 13,
     20
 };

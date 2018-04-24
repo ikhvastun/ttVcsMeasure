@@ -235,6 +235,7 @@ class treeReader {
         unsigned selectLep(std::vector<unsigned>&);
         unsigned selectFakeLep(std::vector<unsigned>&);
         unsigned selectLooseLep(std::vector<unsigned>&);
+        unsigned selectFOLep(std::vector<unsigned>&);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
@@ -248,6 +249,7 @@ class treeReader {
         double HTCalc(const std::vector<unsigned>& ind);
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &);
         int getElectronNumber(const std::vector<unsigned>& ind);
+        bool eventChargeConsistent(const std::vector<unsigned>& ind);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
@@ -275,6 +277,8 @@ class treeReader {
         std::vector<unsigned> samplesOrder;
         std::vector<std::string> samplesOrderNames;
         int leptonSelection;
+        double leptonMVAcut;
+        double magicFactor;
         bool isData = false;
         bool isDataNonprompt = false;
         double scale = 0;
