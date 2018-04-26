@@ -8,10 +8,9 @@ bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
     if(!lepIsFOGood(l)) return false;
     if(_leptonMvatZqTTV[l] < leptonMVAcut) return false;
-
-    if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
-    if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-    if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+    //if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+    //if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+    //if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
 
     /*
     if(leptonSelection == 2){
@@ -38,8 +37,11 @@ bool treeReader::lepIsFOGood(const unsigned l){
 
     if(_leptonMvatZqTTV[l] < leptonMVAcut){
         if(_ptRatio[l] < 0.3) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.4941) return false;
-        if(_lFlavor[l] == 0 && _lElectronMvaFall17NoIso[l] < -0.9 + (fabs(_lEta[l]) >= 1.479)*0.0) return false;
+        //if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.4941) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.2) return false;
+        if(_lFlavor[l] == 0 && _lElectronMvaFall17NoIso[l] < -0.0 + (fabs(_lEta[l]) >= 1.479)*0.3) return false;
+        //if(_lFlavor[l] == 1 && _lMuonSegComp[l] < 0.8) return false;
+        //if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
         //if(_lFlavor[l] == 0 && (leptonSelection == 2 ? (_lElectronMvaFall17NoIso[l] < 0.2 + (fabs(_lEta[l]) >= 1.479)*0.5) : (_lElectronMvaFall17NoIso[l] < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7))) return false;
     }
 
@@ -81,6 +83,8 @@ bool treeReader::lepIsLoose(const unsigned ind){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;
     }
+    //if(_lFlavor[ind] == 0 && !_lElectronPassConvVeto[ind]) return false;
+    //if(_lFlavor[ind] == 0 && _lElectronMissingHits[ind] != 0) return false;
     return true;
 }
 
@@ -110,6 +114,7 @@ unsigned treeReader::selectFOLep(std::vector<unsigned>& ind){
     for(unsigned l = 0; l < _nLight; ++l){
         //cout << "lepton info: " << _lPt[l] << " " << _lEwkLoose[l] << " " << _leptonMvaTTH[l] << endl;
         if(lepIsFOGood(l)){
+        //if(lepIsLoose(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
@@ -331,6 +336,17 @@ bool treeReader::promptLeptons(const std::vector<unsigned>& ind){
     }
     
     return allPrompt;
+}
+
+bool treeReader::noConversionInSelection(const std::vector<unsigned>& ind){
+
+    bool allGood = true;
+
+    for(auto & l : ind){
+        allGood = allGood && !(_lMatchPdgId[l] == 22);
+    }
+
+    return allGood;
 }
 
 bool treeReader::leptonIsPrompt(const unsigned & l){

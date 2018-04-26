@@ -50,7 +50,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].GetYaxis()->SetTitle(titleY.c_str());
     distribs.vectorHisto[dataSample].SetMinimum(0.01);
     distribs.vectorHisto[dataSample].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
-    distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.01);
+    distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.02);
 
     if(titleX == "trilep"){
       distribs.vectorHisto[dataSample].GetXaxis()->SetTitle("");
@@ -165,6 +165,11 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->SetMarkerSize(0.2);
 
     dataCopyGraph->SetMarkerSize(0.5);
+
+    if(titleX==""){
+      uncHistoCopy->GetXaxis()->SetTitle("");
+      uncHistoCopy->GetXaxis()->SetLabelSize(0.3);
+    }
      
     uncHistoCopy->Draw("axis");
 

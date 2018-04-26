@@ -152,7 +152,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
         histo.GetXaxis()->SetLabelSize(0.1);
         histo.GetXaxis()->SetTitleSize(0.25);
-        histo.GetXaxis()->SetLabelOffset(0.02);
+        histo.GetXaxis()->SetLabelOffset(0.01);
     }
 
     for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){

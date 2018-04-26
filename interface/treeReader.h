@@ -254,6 +254,7 @@ class treeReader {
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
         bool leptonIsFromPromptTau(const unsigned & l);
+        bool noConversionInSelection(const std::vector<unsigned>& ind);
 
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);

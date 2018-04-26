@@ -86,11 +86,9 @@ void treeReader::Analyze(){
       setStackColors(color, sam);
 
       //if(std::get<0>(samples[sam]) == "loose") continue; // valid only for 2017 in ss2L
-      if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue; // valid only for 2017 in ss2L
+      //if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue; // valid only for 2017 in ss2L
       if(std::get<1>(samples[sam]).find("TTToSemiLeptonic") != std::string::npos ) continue; // valid only for 2017 in ss2L
-      //if(std::get<1>(samples[sam]).find("TTTo2L2Nu") != std::string::npos ) continue; // valid only for 2017 in ss2L
-      
-      
+      if(std::get<1>(samples[sam]).find("TTTo2L2Nu") != std::string::npos ) continue; // valid only for 2017 in ss2L
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -122,7 +120,8 @@ void treeReader::Analyze(){
           if(!passPtCuts3L(indFO)) continue;
           
           int nLocEle = getElectronNumber(indFO);
-          //if(nLocEle != 0) continue;
+          //if(nLocEle != 3) continue;
+          //if(!noConversionInSelection(indFO)) continue;
 
           std::vector<unsigned> indJets;
 
@@ -136,7 +135,8 @@ void treeReader::Analyze(){
           int promptCategory = 0;
           for(auto & i : indFO){
             if (lepIsGood(i)) featureCategory += 1;
-            if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) promptCategory += 1;
+            //if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) promptCategory += 1;
+            if(_lIsPrompt[i]) promptCategory += 1;
             //if(leptonIsPrompt(i)) promptCategory += 1;
             /*
             cout << "lepton info: " << _lPt[i] << " " << _lEta[i] << " " << _lPhi[i] << " " << _lFlavor[i] << " " << _lIsPrompt[i] << " " << _lProvenance[i] << " " << _lProvenanceCompressed[i] << endl;
@@ -152,11 +152,12 @@ void treeReader::Analyze(){
           
           if(promptCategory > 2) continue;
           //if(featureCategory < 2) continue;
-          if(featureCategory > 3) continue;
+          //if(featureCategory > 3) continue;
           double FRloc = 1.;
 
           //if(featureCategory == 3 && !eventChargeConsistent(indFO)) continue;
           //if(featureCategory < 2){ 
+          bool promptInSideband = false;
           if(featureCategory < 3){ 
 
             int nFakeLepCounter = 0;
@@ -164,7 +165,8 @@ void treeReader::Analyze(){
             for(auto & i : indFO){
               //if (_leptonMvatZqTTV[i] > leptonMVAcut) continue;
               if(lepIsGood(i)) continue;
-              if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) continue;
+              //if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) continue;
+              if(_lIsPrompt[i]) promptInSideband = true;
 
               // used in ttV
               const double magicNumber = magicFactor;
@@ -179,6 +181,8 @@ void treeReader::Analyze(){
 
             FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
           }
+
+          if(promptInSideband) continue;
 
           //cout << "FRloc is: " << FRloc << endl;
 
