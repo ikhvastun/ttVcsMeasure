@@ -255,6 +255,25 @@ void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
     
 }   
 
+void showHist2D(TVirtualPad* c1, TH2D & histo2Dpassed, TH2D & histo2Dall, int flavour = 0, int flComp = 0){
+
+    c1->cd();
+    TPad *pad1 = new TPad("pad1","pad1",0,0,1,1);
+    pad1->SetRightMargin(0.07);
+    TH2D * passed = (TH2D*)histo2Dpassed.Clone("passed");
+    TH2D * all    = (TH2D*)histo2Dall.Clone("all");
+    passed->Divide(all);
+    passed->SetTitle(flavorsString[flavour] + " FR (" + flavorComposString[flComp] + ")");
+    passed->GetXaxis()->SetTitle("p_{T}^{corr} [GeV]");
+    passed->GetYaxis()->SetTitle("|#eta|");
+    passed->GetYaxis()->SetTitleOffset(0.6);
+    passed->SetMarkerSize(1.5);
+    passed->Draw("etextcolz");
+    passed->SaveAs("plotsForSave/" + flavorsString[flavour] + "FR_" + flavorComposString[flComp] + ".root");
+    //distribs2D.vectorHisto[0].Draw("colz");
+ 
+}
+
 void showHist2D(TVirtualPad* c1, DistribsAll & distribs, int flavour = 0){   
  
     c1->cd();

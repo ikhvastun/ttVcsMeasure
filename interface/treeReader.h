@@ -275,8 +275,11 @@ class treeReader {
         std::vector<unsigned> samplesOrder;
         std::vector<std::string> samplesOrderNames;
         int leptonSelection;
+        double leptonMVAcut;
+        double magicFactor;
         bool isData = false;
         bool isDataNonprompt = false;
+        bool is2017 = false;
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;

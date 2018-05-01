@@ -94,29 +94,14 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
     for(unsigned int i = 0; i < distribs.size(); i++){
       TString name = Form("varST_%d",i);
-      //distribs[i].colsStack = std::move(THStack(name,varN[i]));
-      distribs[i].stack.SetName(name);
-      distribs[i].stack.SetTitle(varN[i]);
-
       distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
 
       for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
-        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
+        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
 
-        name = Form("varUp_%d_%d",i,j);
-        distribs[i].vectorHistoUp[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-
-        name = Form("varDown_%d_%d",i,j);
-        distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-        
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
-        /*
-        distribs[i].vectorHisto[j].SetLineColor(colsStack[j]);
-        if (j < nSamples-1)
-          distribs[i].vectorHisto[j].SetFillColor(colsStack[j]);
-        distribs[i].vectorHisto[j].SetMarkerColor(colsStack[j]);
-        */
+
         distribs[i].vectorHisto[j].SetMarkerStyle(20);
         distribs[i].vectorHisto[j].SetMarkerSize(0.5);
         distribs[i].vectorHisto[j].SetLineWidth(1);
@@ -125,30 +110,23 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
-    // 0 - fakes, 1-2 ttZ, 3-WZ, 4--21 -rares, 22 - data
+    //TString name = Form("var2D_%d",i);
+    //distribs2D.vectorHisto[0] = std::move(TH2D(name,name+";",nBins2D[0],varMin2D[0],varMax2D[0],nBins2D[1],varMin2D[1],varMax2D[1]));
 
-    
-    for (unsigned int i=0; i!=distribs.size();++i) {
-      /*
-      for(unsigned int j = 1; j != distribsOrder.size(); j++){
-        distribs[i].stack.Add(&distribs[i].vectorHisto[distribsOrder[j]]);
-      }
-      */
-      for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
-      //for(unsigned int j = distribs.size()-1; j != 0; j--){
-        distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
+    for(unsigned int i = 0; i < distribs.size(); i++){
+      for(unsigned int j = 0; j < distribs[i].vectorHisto2D.size(); j++){
+
+        TString name = Form("FRflavour_%d_%d", i, j);
+        distribs[i].vectorHisto2D[j] = std::move(TH2D(name + (TString)(j%2 == 1 ? "passed" : ""),name+";",nPt-1, ptBins, nEta-1, etaBins[i%2]));
+        distribs[i].vectorHisto2D[j].Sumw2();
+
       }
     }
 
-    TString name = Form("var2D");
-    distribs2D.vectorHisto[0] = std::move(TH2D(name,name+";",nBins2D[0],varMin2D[0],varMax2D[0],nBins2D[1],varMin2D[1],varMax2D[1]));
-
-    name = Form("FRele");
-    distribs[0].vectorHisto2D[0] = std::move(TH2D(name,           name+";",nPt-1, ptBins, nEta-1, etaBins[0]));
-    distribs[0].vectorHisto2D[1] = std::move(TH2D(name + "passed",name+";",nPt-1, ptBins, nEta-1, etaBins[0]));
-    name = Form("FRmu");
-    distribs[1].vectorHisto2D[0] = std::move(TH2D(name,           name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
-    distribs[1].vectorHisto2D[1] = std::move(TH2D(name + "passed",name+";",nPt-1, ptBins, nEta-1, etaBins[1]));
+    for(int i = 0; i < 80; i++){
+        TString name = Form("hAveragePt_%d", i);
+        hAveragePt[i] = new TH1D(name, name, 40, 0, 200);
+    }
 
 }
 

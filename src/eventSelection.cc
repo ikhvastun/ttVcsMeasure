@@ -4,97 +4,42 @@
 
 using namespace std;
 
-unsigned treeReader::dilFlavorComb(const std::vector<unsigned>& ind){
-    unsigned flavCount[3] = {0,0,0};
-    for(unsigned l = 0; l < 2; ++l) ++flavCount[_lFlavor[ind[l]]];
-    if(flavCount[2] == 0){
-        if(flavCount[1] == 0) return 0; //ee
-        else if(flavCount[1] == 1) return 1; //em
-        else return 2; //mm
-    } else if(flavCount[2] == 1){
-        if(flavCount[1] == 0) return 3; //et
-        else return 4; //mt
-    }
-    return 5; //tt
-}
-
-double treeReader::coneCorr(const unsigned ind){
-    return 1. + std::max(_relIso[ind] - 0.1, 0.);
-}
-
-void treeReader::setConePt(){
-    for(unsigned l = 0; l < _nLight; ++l){
-        double coneC = coneCorr(l);
-        _lPt[l] *= coneC;
-        _lE[l] *= coneC;
-    }
-}
-
-/*
-bool treeReader::lepIsGood(const unsigned l){
-    if(!lepIsLoose(l)) return false;
-    //if(_closestJetCsvV2[l] > 0.8484) return false;
-    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
-    if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
-    return true;
-}
-*/
-
 bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
     if(!lepIsFOGood(l)) return false;
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
-    if(_leptonMvaTTH[l] < 0.9) return false;
+    if(_leptonMvatZqTTV[l] < leptonMVAcut) return false;
 
-    /*
     if(leptonSelection == 2){
-
         if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
     }
-    */
+
     return true;
 }
 
 bool treeReader::lepIsFOGood(const unsigned l){
-    // what is used in leptonMVA analysis
+
+    if(_lPt[l] < 10) return false;
+
     if(!lepIsLoose(l)) return false;
-    if(_closestJetCsvV2[l] > 0.8484) return false;
-
-    if(_lFlavor[l] == 0 && !_lElectronPassEmu[l]) return false;
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
+    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
-    /*
     if(leptonSelection == 2){
-        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-
-        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
         if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-
     }
-    */
-    
-    if(_leptonMvaTTH[l] < 0.9){
 
-        if(_lFlavor[l] == 0 && _lElectronMvaHZZ[l] <= 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7) return false;
-        
-        if(_ptRatio[l] <= 0.5) return false;
-        if(_closestJetCsvV2[l] >= 0.3) return false;
-        if(_lFlavor[l] == 1 && _lMuonSegComp[l] <= 0.3) return false; 
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
+
+    if(_leptonMvatZqTTV[l] < leptonMVAcut){
+        if(_ptRatio[l] < 0.4) return false; // 0.3 for 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        //if(_lFlavor[l] == 0 && electronMVAvalue < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.3) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < -0.1 + (fabs(_lEta[l]) >= 1.479)*0.8) return false;
+        //if(_lFlavor[l] == 0 && (leptonSelection == 2 ? (_lElectronMvaFall17NoIso[l] < 0.2 + (fabs(_lEta[l]) >= 1.479)*0.5) : (_lElectronMvaFall17NoIso[l] < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7))) return false;
     }
 
     return true;
-}
-
-bool treeReader::elePassVLooseMvaIDSUSY(const unsigned ind){
-    if(_lFlavor[ind] != 0) return true;
-    static const double gpCuts[3][2] = { {-0.48,-0.85}, {-0.67, -0.91}, {-0.49, -0.83} };
-    static const double hzzCuts[3] = {0.46, -0.03, 0.06};
-    unsigned eta = (fabs(_lEta[ind]) >= 0.8) + (fabs(_lEta[ind]) > 1.479);
-    if(_lPt[ind] > 10){
-        return _lElectronMva[ind] > std::min( gpCuts[eta][0], std::max(gpCuts[eta][1], gpCuts[eta][0] + (gpCuts[eta][1] - gpCuts[eta][0])*0.1*(_lPt[ind] - 15.) ) );
-    } else{
-        return _lElectronMvaHZZ[ind] > hzzCuts[eta];
-    }
 }
 
 bool treeReader::eleIsClean(const unsigned ind){
@@ -111,9 +56,6 @@ bool treeReader::eleIsClean(const unsigned ind){
 }
 
 bool treeReader::lepIsLoose(const unsigned ind){
-    // this is where potentially the discrepancy can come from
-    //if(_closestJetCsvV2[ind] > 0.8484) return false;
-
     if(_lFlavor[ind] == 2) return false;  //don't consider taus here
     //if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
     if(_lPt[ind] <= 10) return false;
@@ -123,130 +65,13 @@ bool treeReader::lepIsLoose(const unsigned ind){
     if(_3dIPSig[ind] >= 8) return false;
     if(_miniIso[ind] >= 0.4) return false;
     if(_lFlavor[ind] == 1){
-        //if(!_lPOGLoose[ind]) return false;
-        if(!_lPOGMedium[ind]) return false;
+        if(!_lPOGLoose[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;
-        //if(!elePassVLooseMvaIDSUSY(ind)) return false;
-    }
-    return true;
-}
-
-bool treeReader::lepIsTight(const unsigned l){
-    return _lEwkTight[l];
-}
-
-bool treeReader::lepIsFOGood_TTV(const unsigned l){
-
-    //used for Cutbased WP
-
-    if(_lPt[l] < 10) return false;
-
-    if(leptonSelection == 2){
-        if(_lFlavor[l] == 0 && _relIso[l] > 1.0) return false;
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.6) return false;
-    }
-
-    if(leptonSelection == 3){
-        if(_lFlavor[l] == 0 && _relIso[l] > 0.7) return false;
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.7) return false;
-    }
-
-    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
-
-    if(fabs(_3dIPSig[l]) > 4) return false;
-
-    if(_lFlavor[l] == 0){
-
-       double looseMVAloose[3];
-
-       if(leptonSelection == 2){
-           looseMVAloose[0] = -0.56;
-           looseMVAloose[1] = -0.72;
-           looseMVAloose[2] = -0.1;
-       }
-
-       if(leptonSelection == 3){
-           looseMVAloose[0] = 0.5;
-           looseMVAloose[1] = 0.5;
-           looseMVAloose[2] = 0.357;
-       }
-
-       int etaCategory = -1;
-
-       if (TMath::Abs(_lEta[l]) < 0.8 ) {
-           etaCategory = 0;
-       } else if (TMath::Abs(_lEta[l]) < 1.479 ) {
-           etaCategory = 1;
-       } else {
-           etaCategory = 2;
-       }
-       bool passedMVA = false;
-
-       passedMVA = _lElectronMva[l] > looseMVAloose[etaCategory];
-
-       if(!passedMVA) return false;
-
-        if(leptonSelection == 2){
-
-            if(!_lElectronPassConvVeto[l]) return false;
-            if(!_lElectronChargeConst[l]) return false;
-            if(_lElectronMissingHits[l] != 0) return false;
-
-        }
-
-        if(!_lElectronPassEmu[l]) return false;
     }
 
     return true;
-}
-
-bool treeReader::lepIsGood_TTV(const unsigned l){
-
-    // used for cutBased analysis
-
-    if(!lepIsFOGood_TTV(l)) return false;
-
-    if(_lFlavor[l] == 0){
-
-       double looseMVA[3];
-
-       looseMVA[0] = 0.837;
-       looseMVA[1] = 0.715;
-       looseMVA[2] = 0.357;
-
-       int etaCategory = -1;
-
-       if (TMath::Abs(_lEta[l]) < 0.8 ) {
-           etaCategory = 0;
-       } else if (TMath::Abs(_lEta[l]) < 1.479 ) {
-           etaCategory = 1;
-       } else {
-           etaCategory = 2;
-       }
-       bool passedMVA = false;
-
-       passedMVA = _lElectronMva[l] > looseMVA[etaCategory];
-
-       if (!passedMVA) return false;
-       if (_relIso[l] > 0.1) return false;
-
-
-    }
-
-    if(leptonSelection == 2){
-        // what's there originally
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.15) return false;
-        //if(_lFlavor[l] == 1 && _relIso[l] > 0.1) return false;
-    }
-
-    if(leptonSelection == 3){
-        if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) return false;
-        //if(_lFlavor[l] == 1 && _relIso[l] > 0.1) return false;
-    }
-
-   return true;
 }
 
 unsigned treeReader::selectLep(std::vector<unsigned>& ind){
@@ -266,6 +91,22 @@ unsigned treeReader::selectLep(std::vector<unsigned>& ind){
         ind.push_back(ptMap[l].second);
     }
     return lCount;	
+}
+
+unsigned treeReader::selectFakeLep(std::vector<unsigned>& ind){
+    unsigned lCount = 0;
+    std::vector<std::pair<double, unsigned>> ptMap;
+    for(unsigned l = 0; l < _nLight; ++l){
+        if(lepIsFOGood(l)){
+            ++lCount;
+            ptMap.push_back({_lPt[l], l});
+        }
+    }
+    std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
+    for(unsigned l = 0; l < lCount; ++l){
+        ind.push_back(ptMap[l].second);
+    }
+    return lCount;  
 }
 
 unsigned treeReader::selectLooseLep(std::vector<unsigned>& ind){
@@ -300,15 +141,6 @@ double treeReader::ptFake(double lpt, double ptratio, int flavour, double mvaTTH
     else
       ptf = 0.9 * lpt / ptratio;
     return ptf;
-}
-
-unsigned treeReader::tightLepCount(const std::vector<unsigned>& ind, const unsigned lCount){
-    unsigned tightC = 0; 
-    for(unsigned l = 0; l < lCount; ++l){
-        if(lepIsTight(l)) ++tightC;
-        else return tightC;
-    }
-    return tightC;
 }
 
 bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
@@ -535,7 +367,7 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
         //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
         //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
-        if(l0reco.DeltaR(l0gen) < 1.0){
+        if(l0reco.DeltaR(l0gen) < 0.1){
             //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << endl;
             if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){ //  && _lFlavor[l] == _gen_lFlavor[i]
                 leptIsP = true;

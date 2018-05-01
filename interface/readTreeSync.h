@@ -13,8 +13,12 @@ const int dataSample = 0;
 //int uncertaintySample = distribsOrder.size() + 1; // +1 for data
 
 TString flavorsString[2] = {"el", "mu"};
+TString flavorComposString[4] = {"all", "b", "c", "light"};
+//TString flavorComposString[4] = {"B_L", "B_C_L", "B_C_T_L", "B_T_L"};
 TString additionalString[2] = {"_NC", ""};
 
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4;
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85; // 0.85 for 2017
 
 struct BinLabelOptions{
   int index;
@@ -23,7 +27,6 @@ struct BinLabelOptions{
 
 std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
 
-      
       {1, "2j"},
       {2, "3j1b"},
       {3, "3j>1b"},
@@ -48,7 +51,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
       {22, "3j"},
       {23, ">3j"},
 
-    };
+};
       
       
 std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
@@ -63,10 +66,9 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
       {8, "nB#geq2,nJ3"},
       {9, "nB#geq2,nJ#geq4"},
       
-    };
+};
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor2L = {
-      
       
       {1, "#mu^{-}#mu^{-}"},
       {2, "#mu^{-}e^{-}"},
@@ -75,33 +77,36 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor2L = {
       {4, "#mu^{+}#mu^{+}"},
       {5, "#mu^{+}e^{+}"},
       {6, "e^{+}e^{+}"},
-      };
+};
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
-      
       {1, "#mu#mu#mu"},
       {2, "#mu#mu e"},
       {3, "#mu ee"},
       {4, "eee"},
       
-    };
+};
 
-const int nVars  = 2;
+const int nVars  = 16;
 
 TString varN[nVars] = {
-    "pt corr ele", "pt corr mu"
+    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu","pt corr ele", "pt corr mu","pt corr ele", "pt corr mu",
+    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu","pt corr ele", "pt corr mu","pt corr ele", "pt corr mu"
 }; 
 
 double varMin[nVars] = {
-    0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
 };
     
 double varMax[nVars] = {
-    100, 100, 
+    100, 100, 100, 100, 100, 100, 100, 100,
+    100, 100, 100, 100, 100, 100, 100, 100
 };
     
 int nBins[nVars] = {
-    20, 20,
+    20, 20, 20, 20, 20, 20, 20, 20,
+    20, 20, 20, 20, 20, 20, 20, 20
 };
 
 const int nVars2D  = 4;
@@ -179,7 +184,6 @@ BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_RESHAPING, "central", o
                                         { {BTagEntry::OP_RESHAPING, "central", otherSysTypes},
                                           {BTagEntry::OP_RESHAPING, "central", otherSysTypes},
                                           {BTagEntry::OP_RESHAPING, "central", otherSysTypes}}
-
 };
 
 TFile *file_btagEff = TFile::Open("data/btagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
@@ -223,6 +227,9 @@ double passedNonPrompt_TTV[2][2];
 double passedPrompt[2][2][800];
 double passedNonPrompt[2][2][800];
 int nPoints = 800;
+
+TH1D * hAveragePt[80];
+double borderOfBarrelEndcap[2] = {1.479, 1.2};
 
 Float_t user_pt, user_eta, user_trackMult,  user_miniIsoCharged, user_miniIsoNeutral, user_ptrel, user_ptratio, user_jetBtagCSV, user_sip3d, user_dxy, user_dz, user_segmComp, user_eleMVA, user_relIso;
 
