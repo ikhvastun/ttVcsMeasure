@@ -42,6 +42,6 @@ const TString lumi_sqrtS = "";
 
 const bool drawLogo      = false;
 
-void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10 );
+void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10, double lumi = 35.9 );
 
 #endif  // CMSlumi_H

@@ -282,11 +282,11 @@ class treeReader {
         double magicFactor;
         bool isData = false;
         bool isDataNonprompt = false;
+        bool is2017 = false;
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        const double dataLumi = 35.9;                                          //in units of 1/fb
-        //const double dataLumi = 41.9;                                          //in units of 1/fb
+        double dataLumi = 35.9;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   

@@ -61,12 +61,13 @@ int SRID3L (int njets, int nbjets) {
 
 }
 
-void getFRmaps(vector<TH2D> & fakeMaps){
+void getFRmaps(vector<TH2D> & fakeMaps, bool is2017 = false){
 
     TFile *fakerate = NULL;
 
     for (int i=0; i!=nFlavors; ++i){
 
+      //fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_ttbar_" + (TString)(is2017 ? "2017" : "2016") + "_noChargeAgreementCut.root","READ");
       fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR.root","READ");
       TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 

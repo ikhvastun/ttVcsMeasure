@@ -1,0 +1,4 @@
+tight TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root              182.7
+loose TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root              182.7
+ttbar2l TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root                        88.38 
+dy DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 6025

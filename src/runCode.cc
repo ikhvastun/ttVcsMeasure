@@ -61,8 +61,8 @@ void treeReader::Analyze(){
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   //readSamples("data/samples_FOtuning.txt"); // 
+  readSamples("data/samples_FOtuning_ttbar.txt"); // 
   //readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
-  readSamples("data/samples_FOtuning_ttbar_2017_3L.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -70,7 +70,7 @@ void treeReader::Analyze(){
   LastError::lasterror = Errors::UNKNOWN;
 
   vector<TH2D> fakeMaps;
-  getFRmaps(fakeMaps);
+  getFRmaps(fakeMaps, is2017);
 
   if(LastError::lasterror != Errors::OK){
      cout << "FR maps not found" << endl;
@@ -85,10 +85,11 @@ void treeReader::Analyze(){
       Color_t color = assignColor(std::get<0>(samples[sam]));
       setStackColors(color, sam);
 
-      //if(std::get<0>(samples[sam]) == "loose") continue; // valid only for 2017 in ss2L
-      //if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue; // valid only for 2017 in ss2L
-      if(std::get<1>(samples[sam]).find("TTToSemiLeptonic") != std::string::npos ) continue; // valid only for 2017 in ss2L
-      if(std::get<1>(samples[sam]).find("TTTo2L2Nu") != std::string::npos ) continue; // valid only for 2017 in ss2L
+      if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue;
+      if(std::get<1>(samples[sam]).find("TTToSemiLeptonic") != std::string::npos ) continue;
+      if(std::get<1>(samples[sam]).find("TTJets_SingleLeptFromT") != std::string::npos ) continue;
+      if(is2017 && std::get<1>(samples[sam]).find("TTTo2L2Nu") != std::string::npos ) continue;
+      //if(std::get<1>(samples[sam]).find("DiLept") != std::string::npos ) continue;
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -302,7 +303,7 @@ void treeReader::Analyze(){
     //if(varPlot == 0 || varPlot == 7 || varPlot == 10 || varPlot == 12 || varPlot > 13) continue;
     if(varPlot == 0 || varPlot == 12 || varPlot > 13) continue;
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, false); // + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
+    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, false, dataLumi); // + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".png");
     //plot[varPlot]->cd();

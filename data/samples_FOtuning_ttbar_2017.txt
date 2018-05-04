@@ -1,2 +1,3 @@
 tight TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root              182.7
-loose TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root              182.7
+loose TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root                     88.37
+dy DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root 6025

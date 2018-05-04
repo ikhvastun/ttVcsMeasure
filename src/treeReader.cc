@@ -27,13 +27,15 @@ void treeReader::readSamples(const std::string& list){
         namesOfTheSample.push_back(std::get<0>(*it));
         //colsOfTheStack.push_back(assignColor(std::get<0>(*it)));
     }
+    is2017 = list.find("2017") != std::string::npos;
+    dataLumi = is2017 ? 41.9 : 35.9;
 }
 
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_FR/closureTest/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  // 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_FR/closureTest/2017MC/"+ (const TString&) std::get<1>(samples[currentSample]),"read");  // 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_FR/closureTest/" + (TString)(is2017 ? "2017" : "2016") + "MC/" + (const TString&) std::get<1>(samples[currentSample]),"read");  // 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);
@@ -187,8 +189,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetId", _jetId, &b__jetId);
     fChain->SetBranchAddress("_met", &_met, &b__met);
     fChain->SetBranchAddress("_metPhi", &_metPhi, &b__metPhi);
-    fChain->SetBranchAddress("_rawmet", &_rawmet, &b__rawmet);
-    fChain->SetBranchAddress("_rawmetPhi", &_rawmetPhi, &b__rawmetPhi);
+    //fChain->SetBranchAddress("_rawmet", &_rawmet, &b__rawmet);
+    //fChain->SetBranchAddress("_rawmetPhi", &_rawmetPhi, &b__rawmetPhi);
     /*
     fChain->SetBranchAddress("_metJECDown", &_metJECDown, &b__metJECDown);
     fChain->SetBranchAddress("_metJECUp", &_metJECUp, &b__metJECUp);

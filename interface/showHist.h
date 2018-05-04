@@ -27,7 +27,7 @@ using Output::DistribsAll;
 using Output::DistribsAll2D;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, double lumi = 35.9){   
  
     double xPad = 0.25; // 0.25
 
@@ -95,7 +95,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].Draw("E0same");
 
     leg->Draw("same");
-    CMS_lumi( pad1, iPeriod, iPos );
+    CMS_lumi( pad1, iPeriod, iPos, lumi );
 
     pad1->cd();
     pad1->RedrawAxis();

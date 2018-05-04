@@ -8,15 +8,10 @@ bool treeReader::lepIsGood(const unsigned l){
     // what is used in leptonMVA analysis
     if(!lepIsFOGood(l)) return false;
     if(_leptonMvatZqTTV[l] < leptonMVAcut) return false;
-    //if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
-    //if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-    //if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
 
-    /*
     if(leptonSelection == 2){
         if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
     }
-    */
 
     return true;
 }
@@ -33,15 +28,13 @@ bool treeReader::lepIsFOGood(const unsigned l){
         if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
     }
 
-    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.8001) return false;
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
     if(_leptonMvatZqTTV[l] < leptonMVAcut){
-        if(_ptRatio[l] < 0.3) return false;
-        //if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.4941) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > 0.2) return false;
-        if(_lFlavor[l] == 0 && _lElectronMvaFall17NoIso[l] < -0.0 + (fabs(_lEta[l]) >= 1.479)*0.3) return false;
-        //if(_lFlavor[l] == 1 && _lMuonSegComp[l] < 0.8) return false;
-        //if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+        if(_ptRatio[l] < (is2017 ? 0.3 : 0.4)) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.0 : -0.1) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.8)) return false;
         //if(_lFlavor[l] == 0 && (leptonSelection == 2 ? (_lElectronMvaFall17NoIso[l] < 0.2 + (fabs(_lEta[l]) >= 1.479)*0.5) : (_lElectronMvaFall17NoIso[l] < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7))) return false;
     }
 
@@ -83,23 +76,18 @@ bool treeReader::lepIsLoose(const unsigned ind){
         if(_lElectronMissingHits[ind] > 1) return false;
         if(!_lElectronPassEmu[ind]) return false;
     }
-    //if(_lFlavor[ind] == 0 && !_lElectronPassConvVeto[ind]) return false;
-    //if(_lFlavor[ind] == 0 && _lElectronMissingHits[ind] != 0) return false;
     return true;
 }
 
 unsigned treeReader::selectLep(std::vector<unsigned>& ind){
-    //setConePt(); REMOVE CONE CORRECTION UNTIL MOVING TO FR
     unsigned lCount = 0;
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
-        //cout << "lepton info: " << _lPt[l] << " " << _lEwkLoose[l] << " " << _leptonMvaTTH[l] << endl;
         if(lepIsGood(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
     }
-    //if(lCount < 2) return 0;
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
     for(unsigned l = 0; l < lCount; ++l){
         ind.push_back(ptMap[l].second);
@@ -108,13 +96,10 @@ unsigned treeReader::selectLep(std::vector<unsigned>& ind){
 }
 
 unsigned treeReader::selectFOLep(std::vector<unsigned>& ind){
-    //setConePt(); REMOVE CONE CORRECTION UNTIL MOVING TO FR
     unsigned lCount = 0;
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
-        //cout << "lepton info: " << _lPt[l] << " " << _lEwkLoose[l] << " " << _leptonMvaTTH[l] << endl;
         if(lepIsFOGood(l)){
-        //if(lepIsLoose(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
@@ -132,13 +117,10 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
         double ptcor = _leptonMvatZqTTV[i] > leptonMVAcut ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i];
-        //double ptcor = _lPt[i];
         ptMap.push_back({ptcor, i});
         
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
-
-    //cout << "two leptons with pt: " << ptMap[0].first << " " << ptMap[1].first << endl;
 
     ptCorrV.clear();
     for(auto & i : ptMap)
@@ -160,8 +142,6 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
 
-    //cout << "two leptons with pt: " << ptMap[0].first << " " << ptMap[1].first << endl;
-
     ptCorrV.clear();
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
@@ -177,11 +157,9 @@ bool treeReader::jetIsClean(const unsigned ind, bool nonpromptSample){
     jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]);
     for(unsigned l = 0; l < _nLight; ++l){
         //if(lepIsFOGood(l)){
-        //if((nonpromptSample && lepIsFOGood(l)) || (!nonpromptSample && lepIsGood(l))){
         if(lepIsLoose(l)){
             TLorentzVector lep;
             lep.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
-            //cout << "jet lepton cleaning is going on, delta R is: " << lep.DeltaR(jet) << endl;
             if(lep.DeltaR(jet) < 0.4) return false;
         }
     }
@@ -189,9 +167,7 @@ bool treeReader::jetIsClean(const unsigned ind, bool nonpromptSample){
 }
 
 bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool nonpromptSample){
-    //cout << "jet info (pt/eta/csv/unc/clean): " << _jetPt[ind] << " " << _jetEta[ind] << " " << _jetCsvV2[ind] << " " << unc << " " << clean << endl; 
     if(fabs(_jetEta[ind]) > 2.4) return false;
-    //cout << "still here" << endl; 
     switch(unc){
         
         case 0: if(_jetPt[ind] < ptCut) return false; break;
@@ -201,16 +177,13 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
         case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;
         default: ;
     }
-    //cout << "jet info (pt/eta/csv): " << _jetPt[ind] << " " << _jetEta[ind] << " " << _jetCsvV2[ind] << endl; 
     return !clean || jetIsClean(ind, nonpromptSample);
 }
 
 unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool nonpromptSample){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
-        //cout << "jet info (pt/eta/csv): " << _jetPt[j] << " " << _jetEta[j] << " " << _jetCsvV2[j] << endl; 
         if(jetIsGood(j, 30, unc, clean, nonpromptSample)) {
-            //cout << "this jet passes selection" << endl;
             ++nJets;
             ind.push_back(j);
         }
@@ -318,11 +291,9 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
 
 int treeReader::getElectronNumber(const std::vector<unsigned>& ind){
     int electronNumber = 0;
-
     for(auto & l : ind){
         if(_lFlavor[l] == 0) electronNumber++;
     }
-
     return electronNumber;
 }
 
@@ -330,9 +301,8 @@ bool treeReader::promptLeptons(const std::vector<unsigned>& ind){
     bool allPrompt = true;
 
     for(auto & l : ind){
-        //cout << "check this lepton: " << _lPt[l] << " " << _lEta[l] << " " << _lPhi[l] << endl;
         bool leptIsPr = leptonIsPrompt(l);
-        allPrompt = allPrompt && leptIsPr; // _lIsPrompt[l];
+        allPrompt = allPrompt && leptIsPr; 
     }
     
     return allPrompt;
@@ -349,26 +319,21 @@ bool treeReader::noConversionInSelection(const std::vector<unsigned>& ind){
     return allGood;
 }
 
+// test function that checks the gen lepton in cone 0.1 around reco lepton, not used anymore
 bool treeReader::leptonIsPrompt(const unsigned & l){
 
     bool leptIsP = false;
     TLorentzVector l0reco;
     l0reco.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
-    //cout << "let's match, number of gen leptons: " << _gen_nL << endl;
     for(unsigned i = 0; i < _gen_nL; i++){
         TLorentzVector l0gen;
-        //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
-        //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
         if(l0reco.DeltaR(l0gen) < 0.1){
-            //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << endl;
-            if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){ //  && _lFlavor[l] == _gen_lFlavor[i]
+            if(_gen_lIsPrompt[i] && (_lFlavor[l] == _gen_lFlavor[i] || _gen_lFlavor[i] == 2)){
                 leptIsP = true;
             }
         }
     }
-    
-    //cout << "what the matching function returns: " << leptIsP << endl;
     return leptIsP;
 }
 
@@ -377,21 +342,15 @@ bool treeReader::leptonIsFromPromptTau(const unsigned & l){
     bool leptIsP = false;
     TLorentzVector l0reco;
     l0reco.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
-    //cout << "let's match, number of gen leptons: " << _gen_nL << endl;
     for(unsigned i = 0; i < _gen_nL; i++){
         TLorentzVector l0gen;
-        //cout << "let's match: " << _gen_lPt[i] << " " << _gen_lEta[i] << " " << _gen_lPhi[i] << endl;
         l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
-        //cout << "the deltaR is: " << l0reco.DeltaR(l0gen) << endl;
         if(l0reco.DeltaR(l0gen) < 0.1){
-            //cout << "lepton is matched to (genFl/dR/genIsPr/momPDGid/provenance) " << _gen_lFlavor[i] << " " << l0reco.DeltaR(l0gen) << " " << _gen_lIsPrompt[i]  << " " << _gen_lMomPdg[i] << " " << _lProvenance[l]<< " " << _lProvenanceCompressed[l] << endl;
-            if(_gen_lIsPrompt[i] && _gen_lFlavor[i] == 2){ //  && _lFlavor[l] == _gen_lFlavor[i]
+            if(_gen_lIsPrompt[i] && _gen_lFlavor[i] == 2){
                 leptIsP = true;
             }
         }
     }
-    
-    //cout << "what the matching function returns: " << leptIsP << endl;
     return leptIsP;
 }
 
