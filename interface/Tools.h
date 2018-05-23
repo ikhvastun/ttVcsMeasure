@@ -3,6 +3,7 @@ const unsigned int indexFlavour = 14;
 
 #include "errors.h"
 #include "../interface/treeReader.h"
+#include "../interface/mt2_bisect.h"
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
 
@@ -28,7 +29,6 @@ int SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
     if(njets > 3 && nbjets > 1)
         index = 4 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;
     
-
     if(mvaValueRegion == 2 && njets == 2) 
         index = 20;
     if(mvaValueRegion == 2 && njets == 3) 
@@ -63,20 +63,13 @@ int SRID3L (int njets, int nbjets) {
 
 void getFRmaps(vector<TH2D> & fakeMaps){
 
-    //TFile *fakerate = TFile::Open("FRmaps/FR_data_ttH_mva.root","READ");
     TFile *fakerate = NULL;
 
     for (int i=0; i!=nFlavors; ++i){
 
-      //fakerate = TFile::Open("FRmapsQCDmine/fakerate_" + flavorsString[i] + "_QCD.root","READ");
-      //TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
-
-      //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_data_comb" + additionalString[i]));
-      //TH2D * tempPtr = (TH2D*) (fakerate->Get("FR_mva090_" + flavorsString[i] + "_QCD")); //  + additionalString[i]
-      
-      // for ttW
-      fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/FRmaps_ttW/fakerate_" + flavorsString[i] +"_data_ttW.root","READ");
-      TH2D * tempPtr = (TH2D*)fakerate->Get(flavorsString[i]+ "_FR_");
+      //fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_leptonMVA0p4_ptratio0p3_deepCSV0.2_electronMVA0p0and0p3_magic0p85_ttbar_2017_noChargeAgreementCut.root","READ");
+      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_2016.root","READ");
+      TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 
       if(tempPtr != NULL){
         fakeMaps.push_back(*tempPtr);
@@ -92,43 +85,8 @@ void getFRmaps(vector<TH2D> & fakeMaps){
 
 }
 
-/*
-void getFRmapsForTTZ(vector<vector<TH2D>> & fakeMaps){
-
-    for(int j = 0; j!=2; ++j){
-
-      vector<TH2D> fakeMapsTemp;
-      
-      for (int i=0; i!=nFlavors; ++i){
-
-        //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_data_ttZ_GH_90to150fit.root","READ"); // tuned
-        TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_data_ttZ" + eraRuns[j] + "_tuned_tuned.root","READ");
-        //TFile *fakerate = TFile::Open("/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/fakePrediction/fakerate_" + flavorsString[i] +"_QCD_ttZ_test.root","READ");
-        
-        //TH2D * tempPtr = (TH2D*) (fakerate->Get(flavorsStringFull[i]+ "_map_corr"));
-        TH2D * tempPtr = (TH2D*) (fakerate->Get(flavorsString[i]+ "_FR_data_low"));
-        //TH2D * tempPtr = (TH2D*) (fakerate->Get("fakerate_" + flavorsString[i]));
-        if(tempPtr != NULL){
-          fakeMapsTemp.push_back(*tempPtr);
-        }
-        else{
-          LastError::lasterror = Errors::FRmapsReturnNULL;
-          return;
-        }
-        
-      }
-      fakeMaps.push_back(fakeMapsTemp);
-    }
-
-    LastError::lasterror = Errors::OK;
-    
-}
-*/
-
 void initdistribs(std::vector<std::string> & namesOfSamples){
 
-
-    
     for(unsigned int i = 0; i < distribs.size(); i++){
       TString name = Form("varST_%d",i);
       //distribs[i].colsStack = std::move(THStack(name,varN[i]));
@@ -148,12 +106,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
         
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
-        /*
-        distribs[i].vectorHisto[j].SetLineColor(colsStack[j]);
-        if (j < nSamples-1)
-          distribs[i].vectorHisto[j].SetFillColor(colsStack[j]);
-        distribs[i].vectorHisto[j].SetMarkerColor(colsStack[j]);
-        */
+
         distribs[i].vectorHisto[j].SetMarkerStyle(20);
         distribs[i].vectorHisto[j].SetMarkerSize(0.5);
         distribs[i].vectorHisto[j].SetLineWidth(1);
@@ -162,24 +115,15 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
-    // 0 - fakes, 1-2 ttZ, 3-WZ, 4--21 -rares, 22 - data
-
-    
     for (unsigned int i=0; i!=distribs.size();++i) {
-      /*
-      for(unsigned int j = 1; j != distribsOrder.size(); j++){
-        distribs[i].stack.Add(&distribs[i].vectorHisto[distribsOrder[j]]);
-      }
-      */
       for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
-      //for(unsigned int j = distribs.size()-1; j != 0; j--){
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }
 
     
     for(auto & histo: distribs[indexFlavour].vectorHisto) {
-      for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
+      for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
         histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
       }
 
@@ -188,7 +132,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
 
-    for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : flavourLabelOptionsFor3L){
+    for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
       distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
     }
 
@@ -224,33 +168,56 @@ int flavourCategory3L(int nLocEle){
 
 }
 
-float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision){
+int flavourCategory4L(int nLocEle){
+  
+  return 1 + nLocEle / 2;
+
+}
+
+float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
 
     float lepSF = 1.;
     
     if(flavour == 0){
-      TH2F * hist = lepSFMapsElectron[0];
-      int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
-      int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
-      lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
+      // this one stands for tracking lepton efficiency 
+      if(!is2017){
+        TH2F * hist = lepSFMapsElectron[0];
+        int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
+        int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
+        lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
+      }
 
-      
-      for(int sfFile = 1; sfFile < 5; sfFile++){
-        TH2F *hist = lepSFMapsElectron[sfFile];
+      // 1 stands for loose on top of reco, should be applied for every WP
+      TH2F * hist = lepSFMapsElectron[1 + is2017 * 5];
+      int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+      int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
+      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+
+      int neededFileIs = leptonSelection + is2017 * 5; // needed file numeration coincides with number of leptons used in analysis 
+      hist = lepSFMapsElectron[neededFileIs];
+      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
+      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+
+      if(leptonSelection == 2){
+        // additionally to ss2l we apply tight charge selection
+        hist = lepSFMapsElectron[5 + is2017 * 5];
         ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
         etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
         lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
       }
       
+      
     }
                 
+    // not applied yet
+    /*
     if(flavour == 1){
                   
       lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta);
 
       //lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta) + var * TMath::Max(lepSFMaps1DMuon[eraDecision]->GetErrorY(eta), lepSFMaps1DMuon[eraDecision]->GetErrorY(eta));
 
-      
       for(int sfFile = 0; sfFile < 4; sfFile++){
         TH2F *hist = lepSFMapsMuon[sfFile];
         int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
@@ -259,30 +226,8 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       } 
         
     }
-    
-
-    /*
-    if(flavour == 0){
-      lepSF *= lepSFMaps[0]->GetBinContent(lepSFMaps[0]->FindBin(std::min(double(pt), 199.), TMath::Abs(eta)));
-      if(pt > 25){
-        lepSF *= lepSFMaps1D[2]->Eval(eta);
-      }
-    }
-
-    int leptonFileDicision = 0;
-    if(eraDecision == 0)
-      leptonFileDicision = 3;
-    else
-      leptonFileDicision = 5;
-                
-    if(flavour == 1){
-      lepSF *= lepSFMaps1D[int((leptonFileDicision-3)/2)]->Eval(eta);
-      if(pt > 20){
-        lepSF *= lepSFMaps[leptonFileDicision]->GetBinContent(lepSFMaps[3]->FindBin(std::min(double(pt), 119.), TMath::Abs(eta)));
-        lepSF *= lepSFMaps[leptonFileDicision+1]->GetBinContent(lepSFMaps[4]->FindBin(std::min(double(pt), 119.), TMath::Abs(eta)));
-      }
-    }
     */
+    
     return lepSF;
 }
 
@@ -330,14 +275,21 @@ void addBranchToBDTTreeVariables(){
 
     signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
 
+    signalTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
     signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
     signalTree->Branch("mt", &mtHighest, "mt/D");
     signalTree->Branch("mtlow", &mtLowest, "mtlow/D");
 
     signalTree->Branch("leadpt", &leadpt, "leadpt/D");
     signalTree->Branch("trailpt", &trailpt, "trailpt/D");
+    signalTree->Branch("leadeta", &leadeta, "leadeta/D");
+    signalTree->Branch("traileta", &traileta, "traileta/D");
     signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
     signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+    signalTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+    signalTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+    signalTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+    signalTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
 
 
     bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
@@ -347,40 +299,45 @@ void addBranchToBDTTreeVariables(){
 
     bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
 
+    bkgTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
     bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
     bkgTree->Branch("mt", &mtHighest, "mt/D");
     bkgTree->Branch("mtlow", &mtLowest, "mtlow/D");
 
     bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
     bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
+    bkgTree->Branch("leadeta", &leadeta, "leadeta/D");
+    bkgTree->Branch("traileta", &traileta, "traileta/D");
     bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");  
     bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+    bkgTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+    bkgTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+    bkgTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+    bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
 }
 
 void addVariablesToBDT(){
 
     reader->AddVariable( "HTLoc", &userHTLoc ); 
-    
-    // not used in ttH
-    //reader->AddVariable( "nJLoc", &usernJLoc );
-    
+    reader->AddVariable( "nJLoc", &usernJLoc );
     reader->AddVariable( "nBLoc", &usernBLoc );
     reader->AddVariable( "_met", &user_met );
+    reader->AddVariable( "minDeltaRlead", &userminDeltaRlead );
     reader->AddVariable( "minDeltaR", &userminDeltaR );
-
-    // not used in ttH
-    //reader->AddVariable( "mt", &usermt );
-    
+    reader->AddVariable( "mt", &usermt );
     reader->AddVariable( "mtlow", &usermtlow );
-    reader->AddVariable( "leadpt", &userleadpt );
-    reader->AddVariable( "trailpt", &usertrailpt );
+    reader->AddVariable( "leadpt + trailpt", &userleadpt );
+    //reader->AddVariable( "trailpt", &usertrailpt );
     reader->AddVariable( "leadingJetPt", &userleadingjetpt );
-
-    // not used in ttH
-    //reader->AddVariable( "trailJetPt", &usertrailjetpt );  
+    reader->AddVariable( "trailJetPt", &usertrailjetpt );  
+    reader->AddVariable( "chargeOfLeptons * abs(leadeta)", &userleadeta );
+    reader->AddVariable( "chargeOfLeptons * abs(traileta)", &usertraileta );
+    reader->AddVariable( "mll_ss", &usermll_ss );
+    reader->AddVariable( "mt2ll_ss", &usermt2ll_ss );
+    reader->AddVariable( "ll_deltaR", &userll_deltaR );
 
     // the one used for leptonMVA
-    TString dir    = "MVAtrainings/ttWvsttbarMC_LeptonMVA_0p9/dataset/weights/"; 
+    TString dir    = "MVAtrainings/2016MC/ttVvsNPchargeMisID_nbjets1/dataset/weights/"; 
 
     // used for cut based
     //TString dir    = "/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis/ttWvsttbar_MC_newJEC_fixed/weights/";
@@ -398,13 +355,20 @@ void fillBDTvariables(vector<Float_t> & varForBDT){
     usernBLoc = varForBDT.at(1);
     userHTLoc = varForBDT.at(2);
     user_met = varForBDT.at(3);
-    userminDeltaR = varForBDT.at(4);
-    userleadpt = varForBDT.at(5);
-    usertrailpt = varForBDT.at(6);
-    usermt = varForBDT.at(7);
-    usermtlow = varForBDT.at(8);            
-    userleadingjetpt = varForBDT.at(9);
-    usertrailjetpt = varForBDT.at(10);
+    userminDeltaRlead = varForBDT.at(4);
+    userminDeltaR = varForBDT.at(5);
+    userleadpt = varForBDT.at(6) + varForBDT.at(7);
+    usertrailpt = varForBDT.at(7);
+    userleadeta = varForBDT.at(14) * fabs(varForBDT.at(8));
+    usertraileta = varForBDT.at(14) * fabs(varForBDT.at(9));
+    usermt = varForBDT.at(10);
+    usermtlow = varForBDT.at(11);            
+    userleadingjetpt = varForBDT.at(12);
+    usertrailjetpt = varForBDT.at(13);
+    userchargeOfLeptons = varForBDT.at(14);
+    userll_deltaR = varForBDT.at(15);
+    usermll_ss = varForBDT.at(16);
+    usermt2ll_ss = varForBDT.at(17);
 }
 
 
@@ -424,16 +388,6 @@ void setStackColors(Color_t & color, int sam){
     }
 }
 
-
-
-/*
-std::map<std::string, unsigned> pair_to_map(std::vector<std::string> & a, std::vector<unsigned> b)
-{
-    std::map<std::string, unsigned> my_map;
-    for (unsigned i = 0; i < a.size(); ++i)
-    {
-        my_map[a] = b;
-    }
-    return my_map;
+double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzVector& metVec){
+    return  asymm_mt2_lester_bisect::get_mT2(l1.M(), l1.Px(), l1.Py(), l2.M(), l2.Px(), l2.Py(), metVec.Px(), metVec.Py(), 0, 0);
 }
-*/

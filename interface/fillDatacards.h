@@ -19,7 +19,7 @@ void fillString(ofstream & file, vector<double> & str);
 vector<double> formEmptyString(int);
 void fillExperUnc(ofstream &, vector<std::string> & );
 
-std::vector<double> experUnc      = {1.025,  1.01, 1.03, (leptonSelectionAnalysis == 2 ? 1.06 : 1.08), 1.01}; // Didar's proposal is to use 6% for 2L, 8% for 3L, skype chat 12 Dec 2017, from Tom's map I got 3% for 2L, 4% for 3L
+std::vector<double> experUnc      = {1.025,  1.01, 1.02, (leptonSelectionAnalysis == 2 ? 1.02 : 1.03), 1.01}; // Didar's proposal is to use 6% for 2L, 8% for 3L, skype chat 12 Dec 2017, from Tom's map I got 3% for 2L, 4% for 3L
 std::vector<TString> experUncName = {"lumi", "PU", "trigger", "LeptonId", "JER", }; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 

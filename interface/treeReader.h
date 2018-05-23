@@ -39,39 +39,39 @@ class treeReader {
         Int_t           _gen_lCharge[gen_nL_max];   
         Int_t           _gen_lMomPdg[gen_nL_max];   
         Bool_t          _gen_lIsPrompt[gen_nL_max];   
-        Bool_t          _2017_e;
+        Bool_t          _passTrigger_e;
         Bool_t          _HLT_Ele35_WPTight_Gsf;
         Int_t           _HLT_Ele35_WPTight_Gsf_prescale;
         Bool_t          _HLT_Ele40_WPTight_Gsf;
         Int_t           _HLT_Ele40_WPTight_Gsf_prescale;
-        Bool_t          _2017_ee;
+        Bool_t          _passTrigger_ee;
         Bool_t          _HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350;
         Int_t           _HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale;
         Bool_t          _HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL;
         Int_t           _HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_prescale;
         Bool_t          _HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
         Int_t           _HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale;
-        Bool_t          _2017_eee;
+        Bool_t          _passTrigger_eee;
         Bool_t          _HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL;
         Int_t           _HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_prescale;
-        Bool_t          _2017_em;
+        Bool_t          _passTrigger_em;
         Bool_t          _HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ;
         Int_t           _HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_prescale;
         Bool_t          _HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
         Int_t           _HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale;
         Bool_t          _HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ;
         Int_t           _HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_prescale;
-        Bool_t          _2017_m;
+        Bool_t          _passTrigger_m;
         Bool_t          _HLT_IsoMu27;
         Int_t           _HLT_IsoMu27_prescale;
         Bool_t          _HLT_IsoMu30;
         Int_t           _HLT_IsoMu30_prescale;
-        Bool_t          _2017_mee;
+        Bool_t          _passTrigger_mee;
         Bool_t          _HLT_Mu8_DiEle12_CaloIdL_TrackIdL;
         Int_t           _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale;
         Bool_t          _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ;
         Int_t           _HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale;
-        Bool_t          _2017_mm;
+        Bool_t          _passTrigger_mm;
         Bool_t          _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL;
         Int_t           _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale;
         Bool_t          _HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ;
@@ -84,12 +84,14 @@ class treeReader {
         Int_t           _HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale;
         Bool_t          _HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8;
         Int_t           _HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale;
-        Bool_t          _2017_mme;
+        Bool_t          _passTrigger_mme;
         Bool_t          _HLT_DiMu9_Ele9_CaloIdL_TrackIdL;
         Int_t           _HLT_DiMu9_Ele9_CaloIdL_TrackIdL_prescale;
         Bool_t          _HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ;
         Int_t           _HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_prescale;
-        Bool_t          _2017_mmm;
+        Bool_t          _passTrigger_emm;
+        Bool_t          _passTrigger_eem;
+        Bool_t          _passTrigger_mmm;
         Bool_t          _HLT_TripleMu_10_5_5_DZ;
         Int_t           _HLT_TripleMu_10_5_5_DZ_prescale;
         Bool_t          _HLT_TripleMu_5_3_3_Mass3p8to60_DZ;
@@ -114,12 +116,14 @@ class treeReader {
         Double_t        _3dIPSig[nL_max];   
         Float_t         _lElectronMva[nL_max];   
         Float_t         _lElectronMvaHZZ[nL_max];   
+        Float_t         _lElectronMvaFall17NoIso[nL_max];
         Bool_t          _lElectronPassEmu[nL_max];   //[_nLight]
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
         UInt_t          _lElectronMissingHits[nL_max];   //[_nLight]  
         Double_t        _leptonMvaSUSY[nL_max];   //[_nLight]
         Double_t        _leptonMvaTTH[nL_max];   //[_nLight]
+        Double_t        _leptonMvatZqTTV[nL_max];   //[_nLight]
         Bool_t          _lHNLoose[nL_max];   
         Bool_t          _lHNFO[nL_max];   
         Bool_t          _lHNTight[nL_max];   
@@ -170,6 +174,7 @@ class treeReader {
         Double_t        _jetDeepCsv_bb[nJets_max];   
         UInt_t          _jetHadronFlavor[nJets_max];   
         UInt_t          _jetId[nJets_max];   
+        Bool_t          _jetIsTight[nJets_max];   
         Double_t        _met;
         Double_t        _metJECDown;
         Double_t        _metJECUp;
@@ -218,15 +223,18 @@ class treeReader {
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
-        bool jetIsClean(const unsigned, bool);
-        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool nonpromptSample = false);
+        bool passPtCuts4L(const std::vector<unsigned>&);
+        bool jetIsClean(const unsigned);
+        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool is2017 = false);
         unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&, bool);
-        double deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept);
+        unsigned nJetsNotB(const unsigned unc, const bool clean, std::vector<unsigned>&, const unsigned wp, bool);
+        double deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept, const bool deepCSV = true);
         bool bTaggedDeepCSV(const unsigned unc, const unsigned wp = 1);
         bool bTaggedCSVv2(const unsigned uncm, const unsigned wp = 1);
         unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1, bool nonpromptSample = false);
         double HTCalc(const std::vector<unsigned>& ind);
-        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &);
+        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&);
+        bool invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind);
         int getElectronNumber(const std::vector<unsigned>& ind);
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);
@@ -234,6 +242,8 @@ class treeReader {
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
+        bool noConversionInSelection(const std::vector<unsigned>& ind);
+        bool leptonFromConversion(const unsigned & l);
 
         Color_t assignColor(std::string & name);
 
@@ -254,13 +264,15 @@ class treeReader {
         std::vector<unsigned> samplesOrder;
         std::vector<std::string> samplesOrderNames;
         int leptonSelection;
+        double leptonMVAcut;
+        double magicFactor;
         bool isData = false;
         bool isDataNonprompt = false;
+        bool is2017 = false;
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        //const double dataLumi = 35.9;                                          //in units of 1/fb
-        const double dataLumi = 38.7;                                          //in units of 1/fb
+        double dataLumi = 41.9;                                          //in units of 1/fb
 
         // List of branches
         TBranch        *b__runNb;   
@@ -282,39 +294,41 @@ class treeReader {
         TBranch        *b__gen_lCharge;   
         TBranch        *b__gen_lMomPdg;   
         TBranch        *b__gen_lIsPrompt;   
-        TBranch        *b__2017_e;   
+        TBranch        *b__passTrigger_e;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf_prescale;   
         TBranch        *b__HLT_Ele40_WPTight_Gsf;   
         TBranch        *b__HLT_Ele40_WPTight_Gsf_prescale;   
-        TBranch        *b__2017_ee;   
+        TBranch        *b__passTrigger_ee;   
         TBranch        *b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350;   
         TBranch        *b__HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_prescale;   
         TBranch        *b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL;   
         TBranch        *b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_prescale;   
         TBranch        *b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;   
         TBranch        *b__HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale;   
-        TBranch        *b__2017_eee;   
+        TBranch        *b__passTrigger_eee;   
+        TBranch        *b__passTrigger_eem;   
+        TBranch        *b__passTrigger_emm;   
         TBranch        *b__HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL;   
         TBranch        *b__HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_prescale;   
-        TBranch        *b__2017_em;   
+        TBranch        *b__passTrigger_em;   
         TBranch        *b__HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ;   
         TBranch        *b__HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_prescale;   
         TBranch        *b__HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;   
         TBranch        *b__HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_prescale;   
         TBranch        *b__HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ;   
         TBranch        *b__HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_prescale;   
-        TBranch        *b__2017_m;   
+        TBranch        *b__passTrigger_m;   
         TBranch        *b__HLT_IsoMu27;   
         TBranch        *b__HLT_IsoMu27_prescale;   
         TBranch        *b__HLT_IsoMu30;   
         TBranch        *b__HLT_IsoMu30_prescale;   
-        TBranch        *b__2017_mee;   
+        TBranch        *b__passTrigger_mee;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_prescale;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ;   
         TBranch        *b__HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_prescale;   
-        TBranch        *b__2017_mm;   
+        TBranch        *b__passTrigger_mm;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_prescale;   
         TBranch        *b__HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ;   
@@ -327,12 +341,12 @@ class treeReader {
         TBranch        *b__HLT_DoubleMu4_Mass8_DZ_PFHT350_prescale;   
         TBranch        *b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8;   
         TBranch        *b__HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_prescale;   
-        TBranch        *b__2017_mme;   
+        TBranch        *b__passTrigger_mme;   
         TBranch        *b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL;   
         TBranch        *b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL_prescale;   
         TBranch        *b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ;   
         TBranch        *b__HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_prescale;   
-        TBranch        *b__2017_mmm;   
+        TBranch        *b__passTrigger_mmm;   
         TBranch        *b__HLT_TripleMu_10_5_5_DZ;   
         TBranch        *b__HLT_TripleMu_10_5_5_DZ_prescale;   
         TBranch        *b__HLT_TripleMu_5_3_3_Mass3p8to60_DZ;   
@@ -357,12 +371,14 @@ class treeReader {
         TBranch        *b__3dIPSig;   
         TBranch        *b__lElectronMva;   
         TBranch        *b__lElectronMvaHZZ;
+        TBranch        *b__lElectronMvaFall17NoIso;
         TBranch        *b__lElectronPassEmu;   //!
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!
         TBranch        *b__lElectronMissingHits;   //! 
         TBranch        *b__leptonMvaSUSY;   //!
         TBranch        *b__leptonMvaTTH;   //! 
+        TBranch        *b__leptonMvatZqTTV;   //! 
         TBranch        *b__lHNLoose;   
         TBranch        *b__lHNFO;   
         TBranch        *b__lHNTight;   
@@ -413,6 +429,7 @@ class treeReader {
         TBranch        *b__jetDeepCsv_bb;   
         TBranch        *b__jetHadronFlavor;   
         TBranch        *b__jetId;   
+        TBranch        *b__jetIsTight;   
         TBranch        *b__met;   
         TBranch        *b__metJECDown;   
         TBranch        *b__metJECUp;   

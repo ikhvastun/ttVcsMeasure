@@ -25,7 +25,7 @@ using Output::distribs;
 using Output::DistribsAll;
 
 //void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, double lumi = 35.9){   
  
     double xPad = 0.25; // 0.25
 
@@ -35,6 +35,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetBottomMargin(0.02);
     pad1->Draw();
     pad1->cd();
+    if(plotInLog)
+        pad1->SetLogy();
     
     double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
     double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
@@ -46,18 +48,17 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].GetYaxis()->SetTitle(titleY.c_str());
     distribs.vectorHisto[dataSample].SetMinimum(0.01);
     distribs.vectorHisto[dataSample].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
-    distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.01);
+    distribs.vectorHisto[dataSample].GetXaxis()->SetLabelOffset(0.02);
 
     if(titleX == "trilep"){
       distribs.vectorHisto[dataSample].GetXaxis()->SetTitle("");
       distribs.vectorHisto[dataSample].GetXaxis()->SetLabelSize(0.1);
     }
     
-
-    if(title == "log"){
+    if(plotInLog){
       distribs.vectorHisto[dataSample].SetTitle("");
       distribs.vectorHisto[dataSample].SetMinimum(0.5);
-      distribs.vectorHisto[dataSample].SetMaximum(1000.);
+      distribs.vectorHisto[dataSample].SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
     }
 
     //TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
@@ -80,7 +81,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     distribs.vectorHisto[dataSample].Draw("E0same");
 
     leg->Draw("same");
-    CMS_lumi( pad1, iPeriod, iPos );
+    CMS_lumi( pad1, iPeriod, iPos, lumi );
 
     if(titleX == "M_{T}^{3rd} [GeV]"){
         TLine *line2 = new TLine(50, 0, 50, 900);
@@ -247,6 +248,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
       uncHistoCopy->GetXaxis()->SetTitle("");
       uncHistoCopy->GetXaxis()->SetTitleOffset(0.6);
       pad2->SetLeftMargin(0.07);
+    }
+
+    if(titleX == "flavour"){
+       uncHistoCopy->GetXaxis()->SetTitle("");
+       uncHistoCopy->GetXaxis()->SetTitleOffset(0.6);
+       uncHistoCopy->GetXaxis()->SetLabelSize(0.3);
     }
 
     TLine *line = new TLine(xmin, 1, xmax, 1);
