@@ -1,4 +1,0 @@
-nonprompt TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 			88.3791
-nonprompt TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 	182.722
-nonprompt TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 182.722
-TTW  TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8.root  		0.2043
