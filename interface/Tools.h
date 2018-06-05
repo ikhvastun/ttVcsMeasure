@@ -197,21 +197,19 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
     float lepSF = 1.;
 
     if(flavour == 0){
-      TH2F * hist = lepSFMapsElectron[0];
+      TH2F * hist = lepSFMapsElectron[pt < 20 ? 5 : eraDecision];
       int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
       int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
       lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
 
-      
-      for(int sfFile = 4; sfFile < 5; sfFile++){
-        TH2F *hist = lepSFMapsElectron[sfFile];
-        ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-        etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
-        lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-      }
+      hist = lepSFMapsElectron[eraDecision + 6];
+      etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
+      ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
+      lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
       
     }
                 
+    /*
     if(flavour == 1){
                   
       lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta);
@@ -227,6 +225,7 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       } 
         
     }
+    */
 
     return lepSF;
 }

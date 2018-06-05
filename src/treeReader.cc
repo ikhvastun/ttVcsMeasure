@@ -33,14 +33,19 @@ void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataPrompt = std::get<0>(samples[currentSample]) == "dataPrompt";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
+    /*
     if(isData)
-        sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2017ReReco_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2017ReReco_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ZMET/data_ReReco_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ZMET/DY_jetCutCheck/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     else if(isDataPrompt)
         sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2017PromptReco/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     else
-        sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2018MoriondMC_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuple_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/CMSSW_9_4_0/src/heavyNeutrino/multilep/test/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ZllMET/2018MoriondMC_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ZMET/MC_JECv6_check/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+        sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ZMET/DY_jetCutCheck/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    */
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ZMET/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt || isDataPrompt);
@@ -130,6 +135,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_nLight", &_nLight, &b__nLight);
     fChain->SetBranchAddress("_lPt", _lPt, &b__lPt);
     fChain->SetBranchAddress("_lEta", _lEta, &b__lEta);
+    fChain->SetBranchAddress("_lEtaSC", _lEtaSC, &b__lEtaSC);
     fChain->SetBranchAddress("_lPhi", _lPhi, &b__lPhi);
     fChain->SetBranchAddress("_lE", _lE, &b__lE);
     fChain->SetBranchAddress("_lFlavor", _lFlavor, &b__lFlavor);
@@ -159,6 +165,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetEta", _jetEta, &b__jetEta);
     fChain->SetBranchAddress("_jetPhi", _jetPhi, &b__jetPhi);
     fChain->SetBranchAddress("_jetE", _jetE, &b__jetE);
+    /*
     fChain->SetBranchAddress("_jetCsvV2", _jetCsvV2, &b__jetCsvV2);
     fChain->SetBranchAddress("_jetDeepCsv_udsg", _jetDeepCsv_udsg, &b__jetDeepCsv_udsg);
     fChain->SetBranchAddress("_jetDeepCsv_b", _jetDeepCsv_b, &b__jetDeepCsv_b);
@@ -166,6 +173,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetDeepCsv_bb", _jetDeepCsv_bb, &b__jetDeepCsv_bb);
     fChain->SetBranchAddress("_jetHadronFlavor", _jetHadronFlavor, &b__jetHadronFlavor);
     fChain->SetBranchAddress("_jetId", _jetId, &b__jetId);
+    */
     
     fChain->SetBranchAddress("_met", &_met, &b__met);
     fChain->SetBranchAddress("_metPhi", &_metPhi, &b__metPhi);
@@ -221,8 +229,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
     if(!isData){
         fChain->SetBranchAddress("_weight", &_weight, &b__weight);
         fChain->SetBranchAddress("_nTrueInt", &_nTrueInt, &b__nTrueInt);
-        fChain->SetBranchAddress("_lIsPrompt", _lIsPrompt, &b__lIsPrompt);
-        fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
+        //fChain->SetBranchAddress("_lIsPrompt", _lIsPrompt, &b__lIsPrompt);
+        //fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
     }
 
     

@@ -177,7 +177,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         stackCopyUnc[i]->Reset();
         stackCopyUncUp[i]->Reset();
         stackCopyUncDown[i]->Reset();
-        
+
         for(unsigned int j = distribs.vectorHistoUp.size()-1; j != 0; j--){
 
             if(option == 3){
@@ -192,15 +192,17 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     }  
 
     for(unsigned int i = 0; i < stackCopyUnc[0]->GetNbinsX(); i++){
-        uncHistoCopy->SetBinError(i+1, uncHistoCopy->GetBinError(i+1) / TMath::Sqrt(2));
+        uncHistoCopy->SetBinError(i+1, uncHistoCopy->GetBinError(i+1) / TMath::Sqrt(2) < 1 ? uncHistoCopy->GetBinError(i+1) / TMath::Sqrt(2) : 1.);
         double err = TMath::Power(uncHistoCopy->GetBinError(i+1), 2);
 
         for(unsigned int j = 0; j < 3; j++){
-            err += TMath::Power(TMath::Max(stackCopyUncUp[j]->GetBinContent(i+1) - stackCopy->GetBinContent(i+1), stackCopy->GetBinContent(i+1) - stackCopyUncUp[j]->GetBinContent(i+1)) / stackCopy->GetBinContent(i+1), 2);
-            //cout << "central/up/down: " << stackCopyJES->GetBinContent(i+1) << " " << stackCopyJESUp->GetBinContent(i+1) << " " << stackCopyJESDown->GetBinContent(i+1) << endl;
+            err += TMath::Power(TMath::Max(fabs(stackCopyUncUp[j]->GetBinContent(i+1) - stackCopy->GetBinContent(i+1)), fabs(stackCopy->GetBinContent(i+1) - stackCopyUncDown[j]->GetBinContent(i+1))) / stackCopy->GetBinContent(i+1), 2);
+            //cout << "central/up/down: " << stackCopy->GetBinContent(i+1) << " " << stackCopyUncUp[j]->GetBinContent(i+1) << " " << stackCopyUncDown[j]->GetBinContent(i+1) << "; unc: " << TMath::Sqrt(err) << endl;
+            //cout << "uncertainty in given bin is: " << TMath::Sqrt(err) << endl;
             //cout << "stat + JES is " << TMath::Sqrt(err) << endl;
             stackCopyUnc[j]->SetBinContent(i+1, 1.);
-            stackCopyUnc[j]->SetBinError(i+1, TMath::Sqrt(err));
+            stackCopyUnc[j]->SetBinError(i+1, TMath::Sqrt(err) > 1 ? 1. : TMath::Sqrt(err));
+            //stackCopyUnc[j]->SetBinError(i+1, 0.2);
         }
     }
 
@@ -228,6 +230,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     mtlegRatio->AddEntry(stackCopyUnc[1], "JER + JES + Stat", "f");
     mtlegRatio->AddEntry(stackCopyUnc[2], "Uncl + JER + JES + Stat", "f");
 
+    // here I am testing
+    for(unsigned int i = 0; i < stackCopyUnc[0]->GetNbinsX(); i++){
+        for(unsigned int j = 0; j < 3; j++){
+            cout << "central value: " << stackCopyUnc[j]->GetBinContent(i+1) << "; unc: " << stackCopyUnc[j]->GetBinError(i+1) << endl;
+        }
+    }
+
+
     if (titleX.find("E_{T}^{miss}") != std::string::npos || titleX.find("u_") != std::string::npos){
         stackCopyUnc[2]->Draw("e2same");
         stackCopyUnc[1]->Draw("e2same");
@@ -235,7 +245,6 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     }
     uncHistoCopy->Draw("e2same");
     mtlegRatio->Draw("same");
-
 
     if(titleX=="monetplot"){
       uncHistoCopy->GetXaxis()->SetTitle("");
@@ -250,6 +259,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     
     dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
 
+    pad2->RedrawAxis();
     pad2->Update();
     //delete stack;
 }

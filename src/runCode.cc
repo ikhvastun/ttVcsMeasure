@@ -103,8 +103,7 @@ void treeReader::Analyze(){
       setStackColors(color, sam);
 
       //if(std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "DY") continue; // PU reco reweigning 
-
-      //if(std::get<0>(samples[sam]) != "Top") continue; 
+      //if(std::get<0>(samples[sam]) == "data") continue; 
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -121,25 +120,10 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 10000) break;
+          if(it > nEntries / 50) break;
           //if(std::get<0>(samples[sam]) == "data" && _runNb > 299329) continue; // run B (<= 299329) -> 4.8, run F -> 13.5, run CDE (>=304911) -> 23.1
           //if(std::get<0>(samples[sam]) == "data" && (_runNb <= 299329 || _runNb > 304826)) continue; // run B (<= 299329) -> 4.8, run CDE (>=304911) -> 23.1, run F -> 13.5
           //if(std::get<0>(samples[sam]) == "data" && _runNb < 304826) continue; // run B (<= 299329) -> 4.8, run F -> 13.5, run CDE (>=304911) -> 23.1
-          
-          int runBin = -999;
-          if(isData){
-            if(_runNb < 299329) runBin = 0;
-            else if(_runNb < 304826) runBin = 1;
-            else runBin = 2;
-          }
-          else{
-            double tempValue = ((double) rand() / (RAND_MAX));
-            if(tempValue < 0.11455847)
-              runBin = 0;
-            else if (tempValue < 0.55131265 + 0.11455847)
-              runBin = 1;
-            else 
-              runBin = 2;
-          }
           
           /*
           const bool is_in = eventsList.find(_eventNb) != eventsList.end();
@@ -191,6 +175,34 @@ void treeReader::Analyze(){
 
           if(!passPtCuts2L(ind)) continue;
 
+          int runBin = -999;
+          int runBinForPU = -99;
+          if(isData){
+            if(_runNb < 299329) runBin = 0;
+            else if(_runNb < 304826) runBin = 1;
+            else runBin = 2;
+          }
+          else{
+            double tempValue = ((double) rand() / (RAND_MAX));
+            if(tempValue < 0.115424){
+              runBin = 0;
+              runBinForPU = 0;
+            }
+            else if (tempValue < 0.673971){
+              runBin = 1;
+              if(tempValue < 0.347458)  
+                  runBinForPU = 1;
+              else if (tempValue < 0.449734)
+                  runBinForPU = 2;
+              else
+                  runBinForPU = 3;
+            }
+            else {
+              runBin = 2;
+              runBinForPU = 4;
+            }
+          }
+
           std::vector<unsigned> indJets;
 
           unsigned third = -9999;
@@ -219,37 +231,33 @@ void treeReader::Analyze(){
           double lepSFUp = 1.;
           double lepSFDown = 1.;
 
-          /*
-          double tempValue = (double) rand() / (RAND_MAX);
+          //double tempValue = (double) rand() / (RAND_MAX);
           int leptonFileDicision = -99;
 
-          if(tempValue < 20./35.9) leptonFileDicision = 0;
-          else leptonFileDicision = 1;  
-          */
+          //if(tempValue < 20./35.9) leptonFileDicision = 0;
+          //else leptonFileDicision = 1;  
 
           
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data" && std::get<0>(samples[sam]) != "dataPrompt"){
 
             //dataMCSF = h_dataMC->GetBinContent(h_dataMC->GetXaxis()->FindBin(_nVertex));
             
-            if(_nTrueInt < 10) dataMCSF = 0.;
-            dataMCSF = h_dataMC[runBin]->GetBinContent(h_dataMC[runBin]->GetXaxis()->FindBin(_nTrueInt));
-            /*  
-            for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
+            //if(_nTrueInt < 10) dataMCSF = 0.;
+            dataMCSF = h_dataMC_2017[runBinForPU]->GetBinContent(h_dataMC_2017[runBinForPU]->GetXaxis()->FindBin(TMath::Min(double(_nTrueInt), 99.)));
+            for(unsigned int leptonInd = 0; leptonInd < 2; leptonInd++){
 
-              lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 0, leptonFileDicision);
+              lepSF *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEtaSC[ind.at(leptonInd)], 0, runBinForPU);
 
-              lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 1, leptonFileDicision);
-              lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], -1, leptonFileDicision);
+              //lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], 1, leptonFileDicision);
+              //lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], _lEta[ind.at(leptonInd)], -1, leptonFileDicision);
             }
-            */
             
           }
           
           
-          
-          dataMCSF *= lepSF;
+          //weight = 1.;
           weight = weight * dataMCSF;
+          weight = weight * lepSF;
           
           /*
           double btagSF_event = 1.;
@@ -329,21 +337,18 @@ void treeReader::Analyze(){
             
           
           distribs[0].vectorHisto[samCategory].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
-          
           distribs[0].vectorHistoUp[samCategory].FillUnc(_rawmetJECUp, _rawmetJetResUp, _rawmetUnclUp, varMax[0], weight);
           distribs[0].vectorHistoDown[samCategory].FillUnc(_rawmetJECDown, _rawmetJetResDown, _rawmetUnclDown, varMax[0], weight);
 
-
           distribs[1].vectorHisto[samCategory].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
-
           distribs[1].vectorHistoUp[samCategory].FillUnc(_metJECUp, _metJetResUp, _metUnclUp, varMax[1], weight);
           distribs[1].vectorHistoDown[samCategory].FillUnc(_metJECDown, _metJetResDown, _metUnclDown, varMax[1], weight);
+          //distribs[1].vectorHistoUp[samCategory].FillUnc(-99, -99, -99, varMax[1], weight);
+          //distribs[1].vectorHistoDown[samCategory].FillUnc(-99, -99, -99, varMax[1], weight);
 
           distribs[2].vectorHisto[samCategory].Fill(TMath::Min(uPara,varMax[2]-0.001), weight);
-
           distribs[2].vectorHistoUp[samCategory].FillUnc(paraCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), paraCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), paraCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[2], weight);
           distribs[2].vectorHistoDown[samCategory].FillUnc(paraCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), paraCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), paraCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
-
 
           distribs[3].vectorHisto[samCategory].Fill(TMath::Min(uPerp,varMax[3]-0.001), weight);
           distribs[3].vectorHistoUp[samCategory].FillUnc(perpCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), perpCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), perpCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[3], weight);
@@ -368,12 +373,10 @@ void treeReader::Analyze(){
           
 
           distribs[0].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_rawmet,varMax[0]-0.1),weight);
-          
           distribs[0].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(_rawmetJECUp, _rawmetJetResUp, _rawmetUnclUp, varMax[0], weight);
           distribs[0].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(_rawmetJECDown, _rawmetJetResDown, _rawmetUnclDown, varMax[0], weight);
 
           distribs[1].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_met,varMax[1]-0.1),weight);
-          
           distribs[1].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(_metJECUp, _metJetResUp, _metUnclUp, varMax[1], weight);
           distribs[1].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(_metJECDown, _metJetResDown, _metUnclDown, varMax[1], weight);
 
@@ -382,8 +385,8 @@ void treeReader::Analyze(){
           distribs[2].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(paraCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), paraCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), paraCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
 
           distribs[3].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(uPerp,varMax[3]-0.001), weight);
-          distribs[3].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(perpCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), perpCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), perpCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[2], weight);
-          distribs[3].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(perpCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), perpCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), perpCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[2], weight);
+          distribs[3].vectorHistoEras[samCategory].runErasUncUp[runBin].FillUnc(perpCalc(_metJECUp, _metPhiJECUp, phi_Z, pt_Z), perpCalc(_metJetResUp, _metPhiJetResUp, phi_Z, pt_Z), perpCalc(_metUnclUp, _metPhiUnclUp, phi_Z, pt_Z), varMax[3], weight);
+          distribs[3].vectorHistoEras[samCategory].runErasUncDown[runBin].FillUnc(perpCalc(_metJECDown, _metPhiJECDown, phi_Z, pt_Z), perpCalc(_metJetResDown, _metPhiJetResDown, phi_Z, pt_Z), perpCalc(_metUnclDown, _metPhiUnclDown, phi_Z, pt_Z), varMax[3], weight);
 
 
           distribs[4].vectorHistoEras[samCategory].runEras[runBin].Fill(TMath::Min(_lPt[ind.at(0)],varMax[4]-0.001), weight);
@@ -516,36 +519,40 @@ void treeReader::Analyze(){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
-  
   vector<std::string> figNames = {"Raw E_{T}^{miss} [GeV]", "Type I E_{T}^{miss} [GeV]", "u_{||} + q_{T} [GeV]", "u_{#perp}   [GeV]", "p_{T}^{leading} [GeV]", "p_{T}^{trailing} [GeV]", "#eta_{T}^{leading} [GeV]", "#eta_{T}^{trailing} [GeV]", "NPV", "M_{ll} [GeV]", "E_{T}^{miss} smeared [GeV]"};
   vector<TString> namesForSaveFiles = {"rawmet", "met", "upara", "uperp", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll", "metSM"};
   vector<TString> runEraNames = {"B", "CDE", "F"};
 
   for(int varPlot = 0; varPlot < nVars; varPlot++){
-    //if(varPlot != 1) continue;
+    if(varPlot != 1) continue;
     plot[varPlot]->cd();
     showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     plot[varPlot]->SaveAs("plotsForSave/fullDataset/nonlog/" + namesForSaveFiles.at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/fullDataset/nonlog/" + namesForSaveFiles.at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/nonlog/" + namesForSaveFiles.at(varPlot) + ".root");
     plot[varPlot]->cd();
     showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     plot[varPlot]->SaveAs("plotsForSave/fullDataset/log/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
     plot[varPlot]->SaveAs("plotsForSave/fullDataset/log/" + namesForSaveFiles.at(varPlot) + "Log.png");
+    plot[varPlot]->SaveAs("plotsForSave/fullDataset/log/" + namesForSaveFiles.at(varPlot) + "Log.root");
 
-    
+    /*
     for(int runEra = 0; runEra < 3; runEra++){
         plot[varPlot]->cd();
         showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, runEra); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
         plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/nonlog/" + namesForSaveFiles.at(varPlot) + ".pdf");
         plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/nonlog/" + namesForSaveFiles.at(varPlot) + ".png");
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/nonlog/" + namesForSaveFiles.at(varPlot) + ".root");
         plot[varPlot]->cd();
         showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, runEra); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
         plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/log/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
         plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/log/" + namesForSaveFiles.at(varPlot) + "Log.png");
+        plot[varPlot]->SaveAs("plotsForSave/Run" + runEraNames[runEra] + "/log/" + namesForSaveFiles.at(varPlot) + "Log.root");
     }
+    */
     
   }
-  
+  return;
 
   /*
   TLegend* mtlegData[3];
@@ -640,8 +647,11 @@ void treeReader::Analyze(){
         TLatex latex2;
         latex2.DrawLatex(histMetCorr[i][j][runEra]->GetMean() + 3 * histMetCorr[i][j][runEra]->GetRMS(), histMetCorr[i][j][runEra]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
         
-        scaleChoice[0][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
-        scaleChoice[0][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
+        //scaleChoice[0][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+        //scaleChoice[0][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
+
+        scaleChoice[0][j][runEra]->SetBinContent(i+1, -1 * histMetCorr[i][j][runEra]->GetMean());
+        scaleChoice[0][j][runEra]->SetBinError(i+1, 0.0001);
       }
       c1[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleCorr.pdf");
       c1[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleCorr.png");
@@ -671,8 +681,11 @@ void treeReader::Analyze(){
         TLatex latex2;
         latex2.DrawLatex(histMetUnCorr[i][j][runEra]->GetMean() + 3 * histMetUnCorr[i][j][runEra]->GetRMS(), histMetUnCorr[i][j][runEra]->GetMaximum() / 3, Form("mean = %.2f", f1->GetParameter(1)));
         
-        scaleChoice[1][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
-        scaleChoice[1][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
+        //scaleChoice[1][j][runEra]->SetBinContent(i+1, -1 * f1->GetParameter(1));
+        //scaleChoice[1][j][runEra]->SetBinError(i+1, -1 * f1->GetParError(1));
+
+        scaleChoice[1][j][runEra]->SetBinContent(i+1, -1 * histMetUnCorr[i][j][runEra]->GetMean());
+        scaleChoice[1][j][runEra]->SetBinError(i+1, 0.0001);
 
       }
       c2[j]->SaveAs("scale/fits/" + (runEra == 3 ? (TString) "fullDataset/" : (TString) "Run" + runEraNames[runEra] + "/") + (TString) (j == 0 ? "data" : "MC") + "scaleUnCorr.pdf");

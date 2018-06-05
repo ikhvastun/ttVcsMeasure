@@ -129,6 +129,7 @@ int nBins[nVars] = {
 
 double weightMC[3] = {4.8, 23.1, 13.5};
 // Lepton SF
+/*
 TFile *file_dataMC_runB = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_4p8fb_nTrueVertices_nTrueVgr10.root","READ"); // PU reweighing
 TFile *file_dataMC_runCDE = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_23p1fb_nTrueVertices_nTrueVgr10.root","READ");
 TFile *file_dataMC_runF = TFile::Open("data/pileUpReweighing/puWeights_2017data_2017MC_13p5fb_nTrueVertices_nTrueVgr10.root","READ");
@@ -137,8 +138,21 @@ TH1D *h_dataMC[3] = {(TH1D*)file_dataMC_runB->Get("puw"),
                      (TH1D*)file_dataMC_runCDE->Get("puw"),
                      (TH1D*)file_dataMC_runF->Get("puw")
                    }; 
+*/
 
-TFile *lepSF_ele_file = TFile::Open("data/leptonSF/scaleFactorsAll.root","READ");
+TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
+TH1D *h_dataMC_2017[5] = {(TH1D*)file_dataMC_2017->Get("puw_Run2017B_central"),
+                          (TH1D*)file_dataMC_2017->Get("puw_Run2017C_central"),                         
+                          (TH1D*)file_dataMC_2017->Get("puw_Run2017D_central"),                         
+                          (TH1D*)file_dataMC_2017->Get("puw_Run2017E_central"),                         
+                          (TH1D*)file_dataMC_2017->Get("puw_Run2017F_central")
+};
+
+TFile *lepSF_ele_file_B = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runB_passingTight94X.root","READ");
+TFile *lepSF_ele_file_C = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runC_passingTight94X.root","READ");
+TFile *lepSF_ele_file_D = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runD_passingTight94X.root","READ");
+TFile *lepSF_ele_file_E = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runE_passingTight94X.root","READ");
+TFile *lepSF_ele_file_F = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runF_passingTight94X.root","READ");
 
 TFile * recoToLoose_leptonSF_mu1 = TFile::Open("data/leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
 TFile * recoToLoose_leptonSF_mu2 = TFile::Open("data/leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
@@ -147,7 +161,12 @@ TFile * recoToLoose_leptonSF_mu3 = TFile::Open("data/leptonSF/TnP_NUM_TightIP2D_
 TFile *lepSF_mu_trackBF = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
 TFile *lepSF_mu_trackGH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
 
-TFile *electronTrack = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root","READ");
+TFile *electronTrack_B = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runB_passingRECO.root","READ");
+TFile *electronTrack_C = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runC_passingRECO.root","READ");
+TFile *electronTrack_D = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runD_passingRECO.root","READ");
+TFile *electronTrack_E = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runE_passingRECO.root","READ");
+TFile *electronTrack_F = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runF_passingRECO.root","READ");
+TFile *electronTrack_lowEt = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root","READ");
 
 TFile *lepSF_el_LeptonMVAfile = TFile::Open("data/leptonSF/scaleFactors.root","READ");
 //TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("leptonSF/lepMVAEffSF_el_3l.root","READ");
@@ -160,13 +179,18 @@ TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
   };
 
 
-TH2F* lepSFMapsElectron[5] = {
-    (TH2F*) electronTrack->Get("EGamma_SF2D"),
-    (TH2F*) (lepSF_ele_file->Get("GsfElectronToMVAVLooseFOIDEmuTightIP2D")),
-    (TH2F*) (lepSF_ele_file->Get("MVAVLooseElectronToMini4")),
-    (TH2F*) (lepSF_ele_file->Get("MVAVLooseElectronToConvVetoIHit1")),
-    //(TH2F*) lepSF_el_LeptonMVAfile->Get("sf"),
-    leptonSelectionAnalysis == 2 ? (TH2F*) lepSF_el_LeptonMVAfile->Get("GsfElectronToTTZ2017TightCharge") : (TH2F*) lepSF_el_LeptonMVAfile->Get("GsfElectronToTTZ2017")
+TH2F* lepSFMapsElectron[11] = {
+    (TH2F*) (electronTrack_B->Get("EGamma_SF2D")),
+    (TH2F*) (electronTrack_C->Get("EGamma_SF2D")),
+    (TH2F*) (electronTrack_D->Get("EGamma_SF2D")),
+    (TH2F*) (electronTrack_E->Get("EGamma_SF2D")),
+    (TH2F*) (electronTrack_F->Get("EGamma_SF2D")),
+    (TH2F*) (electronTrack_lowEt->Get("EGamma_SF2D")),
+    (TH2F*) (lepSF_ele_file_B->Get("EGamma_SF2D")),
+    (TH2F*) (lepSF_ele_file_C->Get("EGamma_SF2D")),
+    (TH2F*) (lepSF_ele_file_D->Get("EGamma_SF2D")),
+    (TH2F*) (lepSF_ele_file_E->Get("EGamma_SF2D")),
+    (TH2F*) (lepSF_ele_file_F->Get("EGamma_SF2D")),
 };
 
 TH2F* lepSFMapsMuon[4] = {
