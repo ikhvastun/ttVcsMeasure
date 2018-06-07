@@ -61,14 +61,14 @@ int SRID3L (int njets, int nbjets) {
 
 }
 
-void getFRmaps(vector<TH2D> & fakeMaps){
+void getFRmaps(vector<TH2D> & fakeMaps, bool is2017 = false){
 
     TFile *fakerate = NULL;
 
     for (int i=0; i!=nFlavors; ++i){
 
       //fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_leptonMVA0p4_ptratio0p3_deepCSV0.2_electronMVA0p0and0p3_magic0p85_ttbar_2017_noChargeAgreementCut.root","READ");
-      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_2016.root","READ");
+      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_" + (is2017 ? "2017" : "2016") + ".root","READ");
       TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 
       if(tempPtr != NULL){
@@ -180,53 +180,61 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
     
     if(flavour == 0){
       // this one stands for tracking lepton efficiency 
-      if(!is2017){
-        TH2F * hist = lepSFMapsElectron[0];
-        int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
-        int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
-        lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
-      }
+      TH2F * hist = lepSFMapsElectron[0 + is2017 * 6 + (is2017 ? (pt < 20) : 0)];
+      int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
+      int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
+      lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
 
       // 1 stands for loose on top of reco, should be applied for every WP
-      TH2F * hist = lepSFMapsElectron[1 + is2017 * 5];
+      hist = lepSFMapsElectron[1 + is2017 * 7];
+      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
+      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+
+      int neededFileIs = leptonSelection + is2017 * 7; // needed file numeration coincides with number of leptons used in analysis 
+      hist = lepSFMapsElectron[neededFileIs];
+      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
+      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+
+      /*
+      if(leptonSelection == 2){
+        // additionally to ss2l we apply tight charge selection
+        hist = lepSFMapsElectron[5 + is2017 * 7];
+        ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+        etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
+        lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+      }
+      */
+      
+    }
+                
+    if(flavour == 1){
+                  
+      lepSF *= (is2017 ? 1. : lepSFMaps1DMuon[eraDecision]->Eval(eta) );
+
+      TH2F * hist = lepSFMapsMuon[1 + is2017 * 5 - 1];
       int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
       int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
 
-      int neededFileIs = leptonSelection + is2017 * 5; // needed file numeration coincides with number of leptons used in analysis 
-      hist = lepSFMapsElectron[neededFileIs];
+      int neededFileIs = leptonSelection + is2017 * 5 - 1; // needed file numeration coincides with number of leptons used in analysis 
+      hist = lepSFMapsMuon[neededFileIs];
       ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
       etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
 
+      /*
       if(leptonSelection == 2){
         // additionally to ss2l we apply tight charge selection
-        hist = lepSFMapsElectron[5 + is2017 * 5];
+        hist = lepSFMapsMuon[5 + is2017 * 5 - 1];
         ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
         etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
         lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
       }
-      
-      
-    }
-                
-    // not applied yet
-    /*
-    if(flavour == 1){
-                  
-      lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta);
+      */
 
-      //lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta) + var * TMath::Max(lepSFMaps1DMuon[eraDecision]->GetErrorY(eta), lepSFMaps1DMuon[eraDecision]->GetErrorY(eta));
-
-      for(int sfFile = 0; sfFile < 4; sfFile++){
-        TH2F *hist = lepSFMapsMuon[sfFile];
-        int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-        int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
-        lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin);
-      } 
-        
     }
-    */
     
     return lepSF;
 }

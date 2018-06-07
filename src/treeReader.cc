@@ -34,8 +34,8 @@ void treeReader::readSamples(const std::string& list){
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    //sampleFile = std::make_shared<TFile>("/Users/illiakhvastunov/Desktop/CERN/MCsamples/92X/codeFromWillem/"+ (const TString&) std::get<1>(samples[currentSample]),"read"); 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_onZ_DYCR/" + (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);
@@ -160,7 +160,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetDeepCsv_c", _jetDeepCsv_c, &b__jetDeepCsv_c);
     fChain->SetBranchAddress("_jetDeepCsv_bb", _jetDeepCsv_bb, &b__jetDeepCsv_bb);
     fChain->SetBranchAddress("_jetHadronFlavor", _jetHadronFlavor, &b__jetHadronFlavor);
-    fChain->SetBranchAddress("_jetId", _jetId, &b__jetId);
+    //fChain->SetBranchAddress("_jetId", _jetId, &b__jetId);
     fChain->SetBranchAddress("_jetIsTight", _jetIsTight, &b__jetIsTight);
     fChain->SetBranchAddress("_met", &_met, &b__met);
     fChain->SetBranchAddress("_metPhi", &_metPhi, &b__metPhi);
@@ -337,7 +337,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     outputTree->Branch("_jetDeepCsv_bb",             &_jetDeepCsv_bb,            "_jetDeepCsv_bb[_nJets]/D");
     //outputTree->Branch("_jetDeepCsv_cc",             &_jetDeepCsv_cc,            "_jetDeepCsv_cc[_nJets]/D");
     outputTree->Branch("_jetHadronFlavor",           &_jetHadronFlavor,          "_jetHadronFlavor[_nJets]/i");
-    outputTree->Branch("_jetId",                     &_jetId,                    "_jetId[_nJets]/i");
+    //outputTree->Branch("_jetId",                     &_jetId,                    "_jetId[_nJets]/i");
 
     outputTree->Branch("_HLT_Ele27_WPTight_Gsf",        &_HLT_Ele27_WPTight_Gsf,        "_HLT_Ele27_WPTight_Gsf/O");
     outputTree->Branch("_HLT_IsoMu24",        &_HLT_IsoMu24,        "_HLT_IsoMu24/O");

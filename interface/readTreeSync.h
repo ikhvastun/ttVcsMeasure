@@ -6,7 +6,7 @@
 
 const int nFlavors = 2;
 
-const int leptonSelectionAnalysis = 4;
+const int leptonSelectionAnalysis = 2;
 
 const int nSamples = 100;
 const int dataSample = 0;
@@ -14,7 +14,7 @@ const int dataSample = 0;
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : (leptonSelectionAnalysis == 3 ? 0.4 : -0.4);
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.4 : (leptonSelectionAnalysis == 3 ? 0.4 : -0.4); // should be 0.6 for 2L analysis
 double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85;
 
 struct BinLabelOptions{
@@ -96,7 +96,7 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
     };
 
 
-const int nVars  = 33;
+const int nVars  = 45;
 
  TString varN[nVars] = {
     "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading} [GeV]", "p_{T}^{trailing} [GeV]",
@@ -111,7 +111,14 @@ const int nVars  = 33;
     "met", "minDeltaR", "mt highest", "mt lowest", "leading jet pt", "trailing jet pt",
     "SR control region",
     "ele conv p_{T}", "ele conv eta",
-    "number of PV interactions"
+    "number of PV interactions",
+    "p_{T}^{4th} [GeV]",
+    "M_{lll} [GeV]",
+    "eta^{leading}", "eta^{sub-leading}"
+    "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading}[GeV]",
+    "eta^{leading}", "eta^{sub-leading}"
+    "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading}[GeV]",
+    "eta^{leading}", "eta^{sub-leading}"
     }; 
 
 
@@ -128,11 +135,16 @@ double varMin[nVars] = {
     0, 0.4, 30, 30, 0, 0,
     19.5, 
     0, -2.5,
-    -0.5
+    -0.5,
+    0,
+    81,
+    -2.5, -2.5,
+    0, 0, -2.5, -2.5,
+    0, 0, -2.5, -2.5,
   };
     
 double varMax[nVars] = {
-    300,200, 200,
+    60,60, 100,
     300,200,
     3,
     400, 1000, 7.5, 5.5, 420, 300, 
@@ -144,11 +156,16 @@ double varMax[nVars] = {
     300, 4, 300, 300, 200, 200, 
     22.5,
     200, 2.5,
-    59.5
+    59.5,
+    200,
+    101,
+    2.5, 2.5,
+    60, 60, 2.5, 2.5,
+    60, 60, 2.5, 2.5,
 };
     
 int nBins[nVars] = {
-    20, 20, 20,
+    6, 6, 20,
     30, 20,
     30,
     10, 10, 8, 6, 13, 18, 
@@ -160,58 +177,87 @@ int nBins[nVars] = {
     15, 18, 18, 18, 20, 20,
     3,
     20, 20,
-    20
+    20,
+    20,
+    20,
+    50, 50,
+    6, 6, 50, 50,
+    6, 6, 50, 50,
 };
 
 
 // Lepton SF
 
-TFile *file_dataMC = TFile::Open("data/pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
-TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
+//TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Summer16.root","READ"); // PU reweighing
+TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8_Summer16.root","READ"); // PU reweighing
+//TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root","READ"); // PU reweighing
+TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw_Run2016Inclusive_central"); 
 
-TFile *lepSF_ele_file_2016 = TFile::Open("data/leptonSF/scaleFactors2016.root","READ");
-TFile *lepSF_ele_file_2017 = TFile::Open("data/leptonSF/scaleFactors2017.root","READ");
+//TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Fall17.root","READ"); // PU reweighing
+TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
+//TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
+TH1D *h_dataMC_2017 = (TH1D*)file_dataMC_2017->Get("puw_Run2017Inclusive_central"); 
 
-TFile * recoToLoose_leptonSF_mu1 = TFile::Open("data/leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu2 = TFile::Open("data/leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu3 = TFile::Open("data/leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
+//TFile *file_dataMC = TFile::Open("data/pileUpReweighing/puWeights_36p8slashfb.root","READ"); // PU reweighing
+//TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 
+
+//TFile *lepSF_ele_file_2016 = TFile::Open("data/leptonSF/scaleFactors_electrons_2016_old.root","READ");
+TFile *lepSF_ele_file_2016 = TFile::Open("data/leptonSF/scaleFactors_electrons_2016.root","READ");
+TFile *lepSF_ele_file_2017 = TFile::Open("data/leptonSF/scaleFactors_electrons_2017.root","READ");
+
+TFile *lepSF_mu_file_2016 = TFile::Open("data/leptonSF/scaleFactors_muons_2016.root","READ");
+TFile *lepSF_mu_file_2017 = TFile::Open("data/leptonSF/scaleFactors_muons_2017.root","READ");
+
+//TFile * recoToLoose_leptonSF_mu1 = TFile::Open("data/leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
+//TFile * recoToLoose_leptonSF_mu2 = TFile::Open("data/leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
+//TFile * recoToLoose_leptonSF_mu3 = TFile::Open("data/leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
 
 TFile *lepSF_mu_trackBF = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
 TFile *lepSF_mu_trackGH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
 
-TFile *electronTrack = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root","READ");
+TFile *electronTrack_2016 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root","READ");
+TFile *electronTrack_2017 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_2017.root","READ");
+TFile *electronTrack_lowEt_2017 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt_2017.root","READ");
 
 TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_el_3l.root","READ");
 TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_mu_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_mu_3l.root","READ");
 //TFile *lepSF_el_LeptonMVAfile = TFile::Open("leptonSF/scaleFactors.root","READ");
-
 
 TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
     (TGraphAsymmErrors*) lepSF_mu_trackBF->Get("ratio_eff_eta3_dr030e030_corr"),
     (TGraphAsymmErrors*) lepSF_mu_trackGH->Get("ratio_eff_eta3_dr030e030_corr"),
   };
 
-TH2F* lepSFMapsElectron[11] = {
-    (TH2F*) electronTrack->Get("EGamma_SF2D"),
+TH2F* lepSFMapsElectron[13] = {
+    (TH2F*) electronTrack_2016->Get("EGamma_SF2D"),
     (TH2F*) (lepSF_ele_file_2016->Get("EleToTTVLoose")),
-    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
+    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
+    //(TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLeptonMvattWToTightCharge")),
+    (TH2F*) electronTrack_2017->Get("EGamma_SF2D"),
+    (TH2F*) electronTrack_lowEt_2017->Get("EGamma_SF2D"),
     (TH2F*) (lepSF_ele_file_2017->Get("EleToTTVLoose")),
     (TH2F*) (lepSF_ele_file_2017->Get("TTVLooseToTTVLeptonMvattW")),
     (TH2F*) (lepSF_ele_file_2017->Get("TTVLooseToTTVLeptonMvattZ3l")),
     (TH2F*) (lepSF_ele_file_2017->Get("TTVLooseToTTVLeptonMvattZ4l")),
     (TH2F*) (lepSF_ele_file_2017->Get("TTVLeptonMvattWToTightCharge")),
-    //leptonSelectionAnalysis == 2 ? (TH2F*) lepSF_el_LeptonMVAfile->Get("GsfElectronToTTZ2017TightCharge") : (TH2F*) lepSF_el_LeptonMVAfile->Get("GsfElectronToTTZ2017")
 };
 
-TH2F* lepSFMapsMuon[4] = {
+TH2F* lepSFMapsMuon[10] = {
 
-    (TH2F*)(recoToLoose_leptonSF_mu1->Get("SF")),
-    (TH2F*)(recoToLoose_leptonSF_mu2->Get("SF")),
-    (TH2F*)(recoToLoose_leptonSF_mu3->Get("SF")),
-    (TH2F*) lepSF_mu_LeptonMVAfile->Get("sf"),
+    (TH2F*) (lepSF_mu_file_2016->Get("MuonToTTVLoose")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
+    //(TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLeptonMvattWTotkSigmaPtOverPtCut")),
+    (TH2F*) (lepSF_mu_file_2017->Get("MuonToTTVLoose")),
+    (TH2F*) (lepSF_mu_file_2017->Get("TTVLooseToTTVLeptonMvattW")),
+    (TH2F*) (lepSF_mu_file_2017->Get("TTVLooseToTTVLeptonMvattZ3l")),
+    (TH2F*) (lepSF_mu_file_2017->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    (TH2F*) (lepSF_mu_file_2017->Get("TTVLeptonMvattWTotkSigmaPtOverPtCut")),
 
 };
 

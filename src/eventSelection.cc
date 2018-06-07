@@ -24,6 +24,9 @@ bool treeReader::lepIsFOGood(const unsigned l){
 
     if(_lPt[l] < 10) return false;
 
+    //if(fabs(_lEta[l]) < 0.8) return false;
+    //if(_lFlavor[l] == 0 && fabs(_lEta[l]) < 0.8) return false;
+    //if(_lFlavor[l] == 0 && fabs(_lEta[l]) > 1.442) return false;
     if(!lepIsLoose(l)) return false;
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
@@ -58,7 +61,7 @@ bool treeReader::eleIsClean(const unsigned ind){
 
 bool treeReader::lepIsLoose(const unsigned ind){
     if(_lFlavor[ind] == 2) return false;  //don't consider taus here
-    //cout << "info about loose lepton: " << (fabs(_dxy[ind]) >= 0.05) << " " << (fabs(_dz[ind]) >= 0.1) << " " << (_3dIPSig[ind] >= 8) << " " << (_miniIso[ind] >= 0.4) << " " << (_lElectronMissingHits[ind] > 1) << " " << (!_lElectronPassEmu[ind]) << endl;
+    //cout << "info about loose lepton with pt " << _lPt[ind] << ": " << (fabs(_dxy[ind]) >= 0.05) << " " << (fabs(_dz[ind]) >= 0.1) << " " << (_3dIPSig[ind] >= 8) << " " << (_miniIso[ind] >= 0.4) << " " << (_lElectronMissingHits[ind] > 1) << " " << (!_lElectronPassEmu[ind]) << endl;
     //cout << "lepton miniiso: " << _miniIso[ind] << endl;
     if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
     if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
@@ -422,6 +425,7 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "ZZ") return kGreen+3;
     if(name == "rare") return 8;
     if(name == "Z#gamma") return kGreen;
+    if(name == "DY") return kBlue-9;
 
     return kBlack;
 }
