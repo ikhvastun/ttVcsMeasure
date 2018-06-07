@@ -121,7 +121,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         }
 
         
-        for(unsigned int k = 0; k < 3; k++){
+        for(unsigned int k = 0; k < 4; k++){
           name = Form("varHistEra_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoEras[j].runEras[k] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
 
@@ -209,15 +209,13 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       
     }
                 
-    /*
     if(flavour == 1){
                   
-      lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta);
+      //lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta);
 
       //lepSF *= lepSFMaps1DMuon[eraDecision]->Eval(eta) + var * TMath::Max(lepSFMaps1DMuon[eraDecision]->GetErrorY(eta), lepSFMaps1DMuon[eraDecision]->GetErrorY(eta));
 
-      
-      for(int sfFile = 0; sfFile < 4; sfFile++){
+      for(int sfFile = 0; sfFile < 2; sfFile++){
         TH2F *hist = lepSFMapsMuon[sfFile];
         int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
         int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
@@ -225,7 +223,6 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       } 
         
     }
-    */
 
     return lepSF;
 }
@@ -353,7 +350,7 @@ void setStackColors(Color_t & color, int sam){
         distribs[i].vectorHisto[sam].SetFillColor(color);
         distribs[i].vectorHisto[sam].SetMarkerColor(color);
 
-        for(unsigned int k = 0; k < 3; k++){
+        for(unsigned int k = 0; k < 4; k++){
           distribs[i].vectorHistoEras[sam].runEras[k].SetLineColor(color);
           distribs[i].vectorHistoEras[sam].runEras[k].SetFillColor(color);
           distribs[i].vectorHistoEras[sam].runEras[k].SetLineColor(color);

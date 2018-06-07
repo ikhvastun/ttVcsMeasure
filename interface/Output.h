@@ -18,11 +18,20 @@ namespace Output{
 
   struct Era
   {
-    Era():runEras(3), runErasUncUp(3), runErasUncDown(3){}
+    Era():runEras(4), runErasUncUp(4), runErasUncDown(4){}
     
     std::vector<TH1D> runEras;
     std::vector<Unc> runErasUncUp;
     std::vector<Unc> runErasUncDown;
+    void Fill(double value, int era, double valueUncJESUp, double valueUncJESDown, double valueUncJERUp, double valueUncJERDown, double valueUncUnclUp, double valueUncUnclDown, double lastBin, double weight){
+        runEras.at(era).Fill(TMath::Min(value, lastBin-0.001), weight);
+        runErasUncUp.at(era).FillUnc(valueUncJESUp, valueUncJERUp, valueUncUnclUp, lastBin, weight);
+        runErasUncDown.at(era).FillUnc(valueUncJESDown, valueUncJERDown, valueUncUnclDown, lastBin, weight);
+
+        runEras.at(3).Fill(TMath::Min(value, lastBin-0.001), weight);
+        runErasUncUp.at(3).FillUnc(valueUncJESUp, valueUncJERUp, valueUncUnclUp, lastBin, weight);
+        runErasUncDown.at(3).FillUnc(valueUncJESDown, valueUncJERDown, valueUncUnclDown, lastBin, weight);
+    }
   };
 
 

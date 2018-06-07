@@ -154,9 +154,8 @@ TFile *lepSF_ele_file_D = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runD_p
 TFile *lepSF_ele_file_E = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runE_passingTight94X.root","READ");
 TFile *lepSF_ele_file_F = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runF_passingTight94X.root","READ");
 
-TFile * recoToLoose_leptonSF_mu1 = TFile::Open("data/leptonSF/TnP_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu2 = TFile::Open("data/leptonSF/TnP_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root","read");
-TFile * recoToLoose_leptonSF_mu3 = TFile::Open("data/leptonSF/TnP_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root","read");
+TFile * recoToTight_leptonSF_ID = TFile::Open("data/leptonSF/RunBCDEF_SF_ID.root","read");
+TFile * recoToTight_leptonSF_ISO = TFile::Open("data/leptonSF/RunBCDEF_SF_ISO.root","read");
 
 TFile *lepSF_mu_trackBF = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
 TFile *lepSF_mu_trackGH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
@@ -193,12 +192,10 @@ TH2F* lepSFMapsElectron[11] = {
     (TH2F*) (lepSF_ele_file_F->Get("EGamma_SF2D")),
 };
 
-TH2F* lepSFMapsMuon[4] = {
+TH2F* lepSFMapsMuon[2] = {
 
-    (TH2F*)(recoToLoose_leptonSF_mu1->Get("SF")),
-    (TH2F*)(recoToLoose_leptonSF_mu2->Get("SF")),
-    (TH2F*)(recoToLoose_leptonSF_mu3->Get("SF")),
-    (TH2F*) lepSF_mu_LeptonMVAfile->Get("sf"),
+    (TH2F*)(recoToTight_leptonSF_ID->Get("NUM_MediumID_DEN_genTracks_pt_abseta")),
+    (TH2F*)(recoToTight_leptonSF_ISO->Get("NUM_LooseRelIso_DEN_MediumID_pt_abseta")),
 
 };
 

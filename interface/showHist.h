@@ -24,10 +24,9 @@ using namespace std;
 using Output::distribs;
 using Output::DistribsAll;
 
-//void showHist(TVirtualPad* c1, TH1D *hist, TH1D *hist2, THStack *stack, string title, string titleX, string titleY, double num, TLegend *leg){   
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false, const int option = 3){   
+void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false, const int option = 3){ // 3 stands here for fulldataset, 0 - RunB, 1 - RunCDE, 2 - RunF
  
-    double xPad = 0.25; // 0.25
+    double xPad = 0.25; // use 0 if ratio plot is not needed, 0.25 corresponds to 1/4 of the canvas will be filled with the ratio plot 
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
     pad1->SetTopMargin(0.07);
@@ -39,24 +38,15 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetLogy();
 
     TH1D * dataHist;
+    // stack here corresponds to all MC 
     THStack *stack = new THStack("hs","hs");
-    if(option == 3){
-        dataHist = &distribs.vectorHisto[dataSample];
-        for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){      
-            stack->Add(&distribs.vectorHisto[j]);
-        }
+    dataHist = &distribs.vectorHistoEras[dataSample].runEras[option];
+    for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){      
+        stack->Add(&distribs.vectorHistoEras[j].runEras[option]);
     }
-    else{
-        dataHist = &distribs.vectorHistoEras[dataSample].runEras[option];
-        for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){      
-            stack->Add(&distribs.vectorHistoEras[j].runEras[option]);
-        }
-    }
-
 
     double xmin = dataHist->GetXaxis()->GetXmin();
     double xmax = dataHist->GetXaxis()->GetXmax();
-    //pad1->DrawFrame(xmin, -0.1, xmax, 1.1);
     
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle(title.c_str());
@@ -84,12 +74,10 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     //setex2->Draw();
 
     dataHist->Draw("E0same");
-
     leg->Draw("same");
 
-
+    // 0 - RunB, 1 - RunCDE, 2 - RunF, 3 - fullDataset
     TString lumi_13TeV = option == 0 ? "4.8 fb^{-1}" : (option == 1 ? "23.1 fb^{-1}" : (option == 2 ? "13.5 fb^{-1}" : "41.9 fb^{-1}"));
-
     CMS_lumi( pad1, iPeriod, iPos, lumi_13TeV );
 
     pad1->cd();
@@ -109,11 +97,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     pad2->RedrawAxis();
     pad2->cd();
 
-    TH1D * dataCopy = (TH1D*)dataHist->Clone("dataCopy");
-    
+    // here data and MC are copied to draw on ratio plot
+    TH1D *dataCopy = (TH1D*)dataHist->Clone("dataCopy");
     TH1D *stackCopy = (TH1D*)(stack->GetStack()->Last())->Clone("stackCopy");
     dataCopy->Divide(stackCopy);
 
+    // first let's calculate uncertainties for data
     TGraphAsymmErrors * dataCopyGraph = new TGraphAsymmErrors(dataCopy);
 
     for(int i = 0; i < dataCopyGraph->GetN(); i++){
@@ -132,91 +121,86 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
       dataCopyGraph->SetPointError(i, dataCopyGraph->GetErrorXlow(i), dataCopyGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
     }
 
-    TH1D * uncHistoCopy = (TH1D*)(stack->GetStack()->Last())->Clone("uncHistoCopy");
-    uncHistoCopy->Divide(uncHistoCopy);
+    // this one will be used on the ratio plot
+    stackCopy->Divide(stackCopy);
 
-    uncHistoCopy->SetFillStyle(1001);
-    uncHistoCopy->SetFillColor(kCyan - 4);
-    uncHistoCopy->SetMarkerStyle(1);
+    stackCopy->SetFillStyle(1001);
+    stackCopy->SetFillColor(kCyan - 4);
+    stackCopy->SetMarkerStyle(1);
 
-    uncHistoCopy->SetTitle("");
-    uncHistoCopy->GetXaxis()->SetTitle(titleX.c_str());
+    stackCopy->SetTitle("");
+    stackCopy->GetXaxis()->SetTitle(titleX.c_str());
     if(titleX == "trilep")
-      uncHistoCopy->GetXaxis()->SetTitle("");
-    uncHistoCopy->GetYaxis()->SetTitle("data/pred");
+      stackCopy->GetXaxis()->SetTitle("");
+    stackCopy->GetYaxis()->SetTitle("data/pred");
 
-    uncHistoCopy->GetXaxis()->SetRangeUser(xmin, xmax);
+    stackCopy->GetXaxis()->SetRangeUser(xmin, xmax);
 
-    uncHistoCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
-    uncHistoCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    uncHistoCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    stackCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
+    stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(2.0);
-    uncHistoCopy->SetMinimum(0.0);
-    uncHistoCopy->SetMarkerStyle(20);
-    uncHistoCopy->SetMarkerSize(0.2);
+    stackCopy->SetMaximum(2.0);
+    stackCopy->SetMinimum(0.0);
+    stackCopy->SetMarkerStyle(20);
+    stackCopy->SetMarkerSize(0.2);
 
     dataCopyGraph->SetMarkerSize(0.5);
 
-    uncHistoCopy->Draw("axis");
+    stackCopy->Draw("axis");
 
-    TH1D *stackCopyUnc[3]; // = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopyJES");
-    TH1D *stackCopyUncUp[3]; // = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopyJES");
-    TH1D *stackCopyUncDown[3]; // = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopyJES");
-
-    //THStack *stackUp, *stackDown;
+    // histCopyUnc - a histogram with central value at 1 and with applied one of the uncertainties on top: JEC, JES and Uncl
+    TH1D *histCopyUnc[3];
+    // stack of MC with varied up and down of 3 different types of uncertainties
+    TH1D *stackUncUp[3];
+    TH1D *stackUncDown[3];
 
     for(unsigned int i = 0; i < 3; i++){
         
-        stackCopyUnc[i] =  (TH1D*)(stack->GetStack()->Last())->Clone(Form("stackCopyUnc_%d", i));
-        stackCopyUncUp[i] = (TH1D*)(stack->GetStack()->Last())->Clone(Form("stackCopyUncUp_%d", i));
-        stackCopyUncDown[i] = (TH1D*)(stack->GetStack()->Last())->Clone(Form("stackCopyUncDown_%d", i));
+        histCopyUnc[i] =  (TH1D*)(stack->GetStack()->Last())->Clone(Form("histCopyUnc_%d", i));
+        stackUncUp[i] = (TH1D*)(stack->GetStack()->Last())->Clone(Form("stackUncUp_%d", i));
+        stackUncDown[i] = (TH1D*)(stack->GetStack()->Last())->Clone(Form("stackUncDown_%d", i));
 
-        stackCopyUnc[i]->Reset();
-        stackCopyUncUp[i]->Reset();
-        stackCopyUncDown[i]->Reset();
+        histCopyUnc[i]->Reset();
+        stackUncUp[i]->Reset();
+        stackUncDown[i]->Reset();
 
         for(unsigned int j = distribs.vectorHistoUp.size()-1; j != 0; j--){
-
-            if(option == 3){
-                stackCopyUncUp[i]->Add((TH1D*)&distribs.vectorHistoUp[j].unc[i]);
-                stackCopyUncDown[i]->Add((TH1D*)&distribs.vectorHistoDown[j].unc[i]);
-            }
-            else{
-                stackCopyUncUp[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncUp[option].unc[i]);
-                stackCopyUncDown[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncDown[option].unc[i]);
-            }
+            stackUncUp[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncUp[option].unc[i]);
+            stackUncDown[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncDown[option].unc[i]);
         }
     }  
 
-    for(unsigned int i = 0; i < stackCopyUnc[0]->GetNbinsX(); i++){
-        uncHistoCopy->SetBinError(i+1, uncHistoCopy->GetBinError(i+1) / TMath::Sqrt(2) < 1 ? uncHistoCopy->GetBinError(i+1) / TMath::Sqrt(2) : 1.);
-        double err = TMath::Power(uncHistoCopy->GetBinError(i+1), 2);
+    for(unsigned int i = 0; i < histCopyUnc[0]->GetNbinsX(); i++){
+        // content in particular bin in stack
+        double stackBinContent = ((TH1D*)stack->GetStack()->Last())->GetBinContent(i+1);
+        double stackBinError = ((TH1D*)stack->GetStack()->Last())->GetBinError(i+1);
+
+        stackCopy->SetBinError(i+1, stackBinError / stackBinContent);
+        double err = TMath::Power(stackCopy->GetBinError(i+1), 2);
 
         for(unsigned int j = 0; j < 3; j++){
-            err += TMath::Power(TMath::Max(fabs(stackCopyUncUp[j]->GetBinContent(i+1) - stackCopy->GetBinContent(i+1)), fabs(stackCopy->GetBinContent(i+1) - stackCopyUncDown[j]->GetBinContent(i+1))) / stackCopy->GetBinContent(i+1), 2);
-            //cout << "central/up/down: " << stackCopy->GetBinContent(i+1) << " " << stackCopyUncUp[j]->GetBinContent(i+1) << " " << stackCopyUncDown[j]->GetBinContent(i+1) << "; unc: " << TMath::Sqrt(err) << endl;
-            //cout << "uncertainty in given bin is: " << TMath::Sqrt(err) << endl;
-            //cout << "stat + JES is " << TMath::Sqrt(err) << endl;
-            stackCopyUnc[j]->SetBinContent(i+1, 1.);
-            stackCopyUnc[j]->SetBinError(i+1, TMath::Sqrt(err) > 1 ? 1. : TMath::Sqrt(err));
-            //stackCopyUnc[j]->SetBinError(i+1, 0.2);
+            // consider largest deviation between the upward and downward variations 
+            err += TMath::Power(TMath::Max(stackUncUp[j]->GetBinContent(i+1) - stackBinContent, stackBinContent - stackUncDown[j]->GetBinContent(i+1)) / stackBinContent, 2);
+            histCopyUnc[j]->SetBinContent(i+1, 1.);
+            // if uncertainty is greater than 100% consider 100% uncertainty
+            histCopyUnc[j]->SetBinError(i+1, TMath::Sqrt(err) > 1 ? 1. : TMath::Sqrt(err));
         }
     }
 
-    stackCopyUnc[2]->SetFillStyle(1001);
-    stackCopyUnc[2]->SetFillColor(kGreen - 4);
-    stackCopyUnc[2]->SetMarkerStyle(1);
+    histCopyUnc[2]->SetFillStyle(1001);
+    histCopyUnc[2]->SetFillColor(kGreen - 4);
+    histCopyUnc[2]->SetMarkerStyle(1);
 
-    stackCopyUnc[1]->SetFillStyle(1001);
-    stackCopyUnc[1]->SetFillColor(kBlue - 4);
-    stackCopyUnc[1]->SetMarkerStyle(1);
+    histCopyUnc[1]->SetFillStyle(1001);
+    histCopyUnc[1]->SetFillColor(kBlue - 4);
+    histCopyUnc[1]->SetMarkerStyle(1);
 
-    stackCopyUnc[0]->SetFillStyle(1001);
-    stackCopyUnc[0]->SetFillColor(kOrange - 4);
-    stackCopyUnc[0]->SetMarkerStyle(1);
+    histCopyUnc[0]->SetFillStyle(1001);
+    histCopyUnc[0]->SetFillColor(kOrange - 4);
+    histCopyUnc[0]->SetMarkerStyle(1);
 
     TLegend* mtlegRatio = new TLegend(0.17,0.39,0.85,0.58); 
     mtlegRatio->SetNColumns(4);
@@ -225,32 +209,18 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     mtlegRatio->SetBorderSize(0);
     mtlegRatio->SetTextFont(42);
 
-    mtlegRatio->AddEntry(uncHistoCopy, "Stat", "f");
-    mtlegRatio->AddEntry(stackCopyUnc[0], "JES + Stat", "f");
-    mtlegRatio->AddEntry(stackCopyUnc[1], "JER + JES + Stat", "f");
-    mtlegRatio->AddEntry(stackCopyUnc[2], "Uncl + JER + JES + Stat", "f");
-
-    // here I am testing
-    for(unsigned int i = 0; i < stackCopyUnc[0]->GetNbinsX(); i++){
-        for(unsigned int j = 0; j < 3; j++){
-            cout << "central value: " << stackCopyUnc[j]->GetBinContent(i+1) << "; unc: " << stackCopyUnc[j]->GetBinError(i+1) << endl;
-        }
-    }
-
+    mtlegRatio->AddEntry(stackCopy, "Stat", "f");
+    mtlegRatio->AddEntry(histCopyUnc[0], "JES + Stat", "f");
+    mtlegRatio->AddEntry(histCopyUnc[1], "JER + JES + Stat", "f");
+    mtlegRatio->AddEntry(histCopyUnc[2], "Uncl + JER + JES + Stat", "f");
 
     if (titleX.find("E_{T}^{miss}") != std::string::npos || titleX.find("u_") != std::string::npos){
-        stackCopyUnc[2]->Draw("e2same");
-        stackCopyUnc[1]->Draw("e2same");
-        stackCopyUnc[0]->Draw("e2same");
+        histCopyUnc[2]->Draw("e2same");
+        histCopyUnc[1]->Draw("e2same");
+        histCopyUnc[0]->Draw("e2same");
     }
-    uncHistoCopy->Draw("e2same");
+    stackCopy->Draw("e2same");
     mtlegRatio->Draw("same");
-
-    if(titleX=="monetplot"){
-      uncHistoCopy->GetXaxis()->SetTitle("");
-      uncHistoCopy->GetXaxis()->SetTitleOffset(0.6);
-      pad2->SetLeftMargin(0.07);
-    }
 
     TLine *line = new TLine(xmin, 1, xmax, 1);
     line->SetLineStyle(2);
@@ -261,7 +231,6 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     pad2->RedrawAxis();
     pad2->Update();
-    //delete stack;
 }
 
 void showDataComp(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotLog = false, int runEra = 0){
