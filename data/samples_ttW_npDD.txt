@@ -2,10 +2,7 @@ data data_combined.root                                        				1
 ttW  TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8.root  		0.2043
 ttZ	 TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root   	    		0.2728
 ttZ  TTZToLL_M-1to10_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 				0.0493 
-Nonprompt TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 			88.3791
-Nonprompt TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 	182.722
-Nonprompt TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 182.722
-Nonprompt DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root			6025.2
+nonpromptData data_combined.root                                                     1
 chargeMisID TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 			88.3791
 ttH  ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8.root 		0.215
 ttX  tZq_ll_4f_13TeV-amcatnlo-pythia8.root										0.09418

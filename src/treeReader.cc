@@ -34,8 +34,8 @@ void treeReader::readSamples(const std::string& list){
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_onZ_DYCR/" + (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_onZ_DYCR/" + (TString)(is2017 ? "2017MC/" : "2016MC/")  + (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);

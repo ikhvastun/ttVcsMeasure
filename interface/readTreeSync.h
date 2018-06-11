@@ -6,7 +6,7 @@
 
 const int nFlavors = 2;
 
-const int leptonSelectionAnalysis = 2;
+const int leptonSelectionAnalysis = 3;
 
 const int nSamples = 100;
 const int dataSample = 0;
@@ -14,8 +14,8 @@ const int dataSample = 0;
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.4 : (leptonSelectionAnalysis == 3 ? 0.4 : -0.4); // should be 0.6 for 2L analysis
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85;
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : (leptonSelectionAnalysis == 3 ? 0.4 : -0.4); // should be 0.6 for 2L analysis
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.85;
 
 struct BinLabelOptions{
   int index;
@@ -144,7 +144,7 @@ double varMin[nVars] = {
   };
     
 double varMax[nVars] = {
-    60,60, 100,
+    300,200, 100,
     300,200,
     3,
     400, 1000, 7.5, 5.5, 420, 300, 
@@ -165,11 +165,11 @@ double varMax[nVars] = {
 };
     
 int nBins[nVars] = {
-    6, 6, 20,
+    20, 20, 20,
     30, 20,
     30,
     10, 10, 8, 6, 13, 18, 
-    10, 25,
+    20, 25,
     leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size()))) ,
     leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size()),
     20, 16, 12,
@@ -231,8 +231,8 @@ TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
 TH2F* lepSFMapsElectron[13] = {
     (TH2F*) electronTrack_2016->Get("EGamma_SF2D"),
     (TH2F*) (lepSF_ele_file_2016->Get("EleToTTVLoose")),
-    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
+    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
     //(TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLeptonMvattWToTightCharge")),
@@ -248,8 +248,8 @@ TH2F* lepSFMapsElectron[13] = {
 TH2F* lepSFMapsMuon[10] = {
 
     (TH2F*) (lepSF_mu_file_2016->Get("MuonToTTVLoose")),
-    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
     //(TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLeptonMvattWTotkSigmaPtOverPtCut")),

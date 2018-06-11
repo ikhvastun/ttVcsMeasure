@@ -68,7 +68,7 @@ void getFRmaps(vector<TH2D> & fakeMaps, bool is2017 = false){
     for (int i=0; i!=nFlavors; ++i){
 
       //fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_leptonMVA0p4_ptratio0p3_deepCSV0.2_electronMVA0p0and0p3_magic0p85_ttbar_2017_noChargeAgreementCut.root","READ");
-      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_" + (is2017 ? "2017" : "2016") + ".root","READ");
+      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_" + (is2017 ? "2017" : "2016") + "_test.root","READ");
       TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
 
       if(tempPtr != NULL){
@@ -188,16 +188,15 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       // 1 stands for loose on top of reco, should be applied for every WP
       hist = lepSFMapsElectron[1 + is2017 * 7];
       ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
+      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
 
       int neededFileIs = leptonSelection + is2017 * 7; // needed file numeration coincides with number of leptons used in analysis 
       hist = lepSFMapsElectron[neededFileIs];
       ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
+      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
 
-      /*
       if(leptonSelection == 2){
         // additionally to ss2l we apply tight charge selection
         hist = lepSFMapsElectron[5 + is2017 * 7];
@@ -205,7 +204,6 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
         etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
         lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
       }
-      */
       
     }
                 
@@ -224,7 +222,6 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
 
-      /*
       if(leptonSelection == 2){
         // additionally to ss2l we apply tight charge selection
         hist = lepSFMapsMuon[5 + is2017 * 5 - 1];
@@ -232,7 +229,6 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
         etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
         lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
       }
-      */
 
     }
     
@@ -324,14 +320,14 @@ void addBranchToBDTTreeVariables(){
     bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
 }
 
-void addVariablesToBDT(){
+void addVariablesToBDT(const bool is2017 = false){
 
     reader->AddVariable( "HTLoc", &userHTLoc ); 
     reader->AddVariable( "nJLoc", &usernJLoc );
     reader->AddVariable( "nBLoc", &usernBLoc );
     reader->AddVariable( "_met", &user_met );
-    reader->AddVariable( "minDeltaRlead", &userminDeltaRlead );
-    reader->AddVariable( "minDeltaR", &userminDeltaR );
+    reader->AddVariable( "minDeltaRlead+ll_deltaR", &userminDeltaRlead );
+    reader->AddVariable( "minDeltaR+ll_deltaR", &userminDeltaR );
     reader->AddVariable( "mt", &usermt );
     reader->AddVariable( "mtlow", &usermtlow );
     reader->AddVariable( "leadpt + trailpt", &userleadpt );
@@ -342,10 +338,10 @@ void addVariablesToBDT(){
     reader->AddVariable( "chargeOfLeptons * abs(traileta)", &usertraileta );
     reader->AddVariable( "mll_ss", &usermll_ss );
     reader->AddVariable( "mt2ll_ss", &usermt2ll_ss );
-    reader->AddVariable( "ll_deltaR", &userll_deltaR );
+    //reader->AddVariable( "ll_deltaR", &userll_deltaR );
 
     // the one used for leptonMVA
-    TString dir    = "MVAtrainings/2016MC/ttVvsNPchargeMisID_nbjets1/dataset/weights/"; 
+    TString dir    = "MVAtrainings/" + (TString)(is2017 ? "2017MC" : "2016MC") + "/ttVvsNPchargeMisID/dataset/weights/"; 
 
     // used for cut based
     //TString dir    = "/Users/illiakhvastunov/Desktop/CERN/ss2l_2016_fulldataset/analysis/ttWvsttbar_MC_newJEC_fixed/weights/";
@@ -363,8 +359,8 @@ void fillBDTvariables(vector<Float_t> & varForBDT){
     usernBLoc = varForBDT.at(1);
     userHTLoc = varForBDT.at(2);
     user_met = varForBDT.at(3);
-    userminDeltaRlead = varForBDT.at(4);
-    userminDeltaR = varForBDT.at(5);
+    userminDeltaRlead = varForBDT.at(4) + varForBDT.at(15);
+    userminDeltaR = varForBDT.at(5) + varForBDT.at(15);
     userleadpt = varForBDT.at(6) + varForBDT.at(7);
     usertrailpt = varForBDT.at(7);
     userleadeta = varForBDT.at(14) * fabs(varForBDT.at(8));

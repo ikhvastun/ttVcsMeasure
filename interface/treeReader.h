@@ -249,6 +249,7 @@ class treeReader {
 
         double ptFake(double lpt, double ptratio, int flavour, double mvaTTHvalue, bool mediumIdPassed);
         double ptFakeStIso(double lpt, int flavor, double isolation);
+        bool twoLeptonsInEndcap(const std::vector<unsigned>& ind);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 

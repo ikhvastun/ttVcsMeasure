@@ -24,22 +24,17 @@ bool treeReader::lepIsFOGood(const unsigned l){
 
     if(_lPt[l] < 10) return false;
 
-    //if(fabs(_lEta[l]) < 0.8) return false;
-    //if(_lFlavor[l] == 0 && fabs(_lEta[l]) < 0.8) return false;
-    //if(_lFlavor[l] == 0 && fabs(_lEta[l]) > 1.442) return false;
     if(!lepIsLoose(l)) return false;
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
-    if(leptonSelection != 4)
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
-    if(leptonSelection != 4 && _leptonMvatZqTTV[l] < leptonMVAcut){
-        if(_ptRatio[l] < (is2017 ? 0.3 : 0.4)) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+    if(_leptonMvatZqTTV[l] < leptonMVAcut){
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.2 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))) return false;
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.0 : -0.1) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.8)) return false;
-        //if(_lFlavor[l] == 0 && (leptonSelection == 2 ? (_lElectronMvaFall17NoIso[l] < 0.2 + (fabs(_lEta[l]) >= 1.479)*0.5) : (_lElectronMvaFall17NoIso[l] < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7))) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.0 : 0.4) : (leptonSelection == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.5))) return false;
     }
 
     return true;
@@ -194,7 +189,7 @@ bool treeReader::jetIsClean(const unsigned ind){
 
 bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool is2017){
     if(fabs(_jetEta[ind]) > 2.4) return false;
-    //if(is2017 && !_jetIsTight[ind]) return false;
+    if(is2017 && !_jetIsTight[ind]) return false;
     switch(unc){
         
         case 0: if(_jetPt[ind] < ptCut) return false; break;
@@ -428,4 +423,16 @@ Color_t treeReader::assignColor(std::string & name){
     if(name == "DY") return kBlue-9;
 
     return kBlack;
+}
+
+bool treeReader::twoLeptonsInEndcap(const std::vector<unsigned>& ind){
+   for(auto & i : ind){
+    if(_lFlavor[i] == 0) continue;
+    for(auto & l : ind){
+     if(i == l) continue;
+     if(_lFlavor[l] == 0) continue;
+     if(fabs(_lEta[i]) > 1.6 && fabs(_lEta[l]) > 1.6) return true;
+    }
+   }
+   return false;
 }
