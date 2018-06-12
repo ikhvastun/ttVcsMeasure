@@ -112,6 +112,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
     //TString name = Form("var2D_%d",i);
     //distribs2D.vectorHisto[0] = std::move(TH2D(name,name+";",nBins2D[0],varMin2D[0],varMax2D[0],nBins2D[1],varMin2D[1],varMax2D[1]));
+    distribsPtRatio = new TH1D("distribsPtRatio", "distribsPtRatio", 25, 0, 5);
 
     for(unsigned int i = 0; i < distribs.size(); i++){
       for(unsigned int j = 0; j < distribs[i].vectorHisto2D.size(); j++){

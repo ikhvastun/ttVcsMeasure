@@ -60,9 +60,9 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples_FOtuning.txt"); // 
   //readSamples("data/samples_FOtuning_ttbar.txt"); // 
-  readSamples("data/samples_QCD.txt"); // 
+  readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
+  //readSamples("data/samples_QCD.txt"); // 
   //readSamples("data/samples_QCD_2017.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
@@ -95,17 +95,17 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 100000) break;
-          //if(it > nEntries / 200) break;
+          //if(it > nEntries / 10) break;
           
           std::vector<unsigned> ind, indFO;
           const unsigned lCount = selectLep(ind);
           const unsigned lCountFO = selectFakeLep(indFO);
 
           // for QCD
-          if(lCountFO != 1) continue;
+          //if(lCountFO != 1) continue;
 
           // for ttbar
-          //if(lCountFO < 1) continue;
+          if(lCountFO < 1) continue;
 
           int featureCategory = -99;
           int nLocEle = getElectronNumber(indFO);
@@ -124,12 +124,14 @@ void treeReader::Analyze(){
           //if(HTLoc < 200) continue;
 
           // for QCD
+          /*
           if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos && sam != 0 && _lPt[indFO.at(0)] > 15) continue;
           if(_met > 20) continue;
           TLorentzVector l0p4;
           l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           double mtL = mtCalc(l0p4, _met, _metPhi);
           if(mtL > 20) continue;
+          */
 
           /*
           int qualityCategory = 0;
@@ -195,6 +197,8 @@ void treeReader::Analyze(){
             // for total
             distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
             distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
+
+            distribsPtRatio->Fill(TMath::Min(double(magicFactor * _lPt[i] / _ptRatio[i] / _lPt[i]),varMax[16]-0.001), weight);
             /*
             if(featureCategory == 1){
                 distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))));
@@ -340,6 +344,13 @@ void treeReader::Analyze(){
     }
 
   }
+
+  /*
+  TCanvas * plotPtRatio = new TCanvas("plotPtRatio", "plotPtRatio", 500, 450);
+  distribsPtRatio->Draw();
+  plotPtRatio->SaveAs("plotsForSave/ptRatioToPt.pdf");
+  plotPtRatio->SaveAs("plotsForSave/ptRatioToPt.root");
+  */
 
   return;
 

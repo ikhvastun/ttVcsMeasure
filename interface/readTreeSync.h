@@ -10,15 +10,14 @@ const int leptonSelectionAnalysis = 3;
 
 const int nSamples = 100;
 const int dataSample = 0;
-//int uncertaintySample = distribsOrder.size() + 1; // +1 for data
 
 TString flavorsString[2] = {"el", "mu"};
 TString flavorComposString[4] = {"all", "b", "c", "light"};
 //TString flavorComposString[4] = {"B_L", "B_C_L", "B_C_T_L", "B_T_L"};
 TString additionalString[2] = {"_NC", ""};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4;
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85; // 0.85 for 2017
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.8; // 0.4 for ttZ, 0.8 for 3L tZq
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.95; // 0.85 for ttZ, 0.95 for tZq
 
 struct BinLabelOptions{
   int index;
@@ -87,26 +86,30 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
 };
 
-const int nVars  = 16;
+const int nVars  = 17;
 
 TString varN[nVars] = {
-    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu","pt corr ele", "pt corr mu","pt corr ele", "pt corr mu",
-    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu","pt corr ele", "pt corr mu","pt corr ele", "pt corr mu"
+    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", 
+    "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", "pt corr ele", "pt corr mu", 
+    "p_{T}^{corr} / p_{T}"
 }; 
 
 double varMin[nVars] = {
     0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0,
 };
     
 double varMax[nVars] = {
-    100, 100, 100, 100, 100, 100, 100, 100,
-    100, 100, 100, 100, 100, 100, 100, 100
+    100, 100, 100, 100, 100, 100, 100, 100, 
+    100, 100, 100, 100, 100, 100, 100, 100, 
+    5.
 };
     
 int nBins[nVars] = {
     20, 20, 20, 20, 20, 20, 20, 20,
-    20, 20, 20, 20, 20, 20, 20, 20
+    20, 20, 20, 20, 20, 20, 20, 20,
+    25
 };
 
 const int nVars2D  = 4;
@@ -123,8 +126,7 @@ int nBins2D[2] = {
     100, 100
 };
 
-
-
+TH1D *distribsPtRatio;
 // Lepton SF
 TFile *file_dataMC = TFile::Open("data/pileUpReweighing/puw_nTrueInt_Moriond2017_36p5fb_Summer16_central.root","READ"); // PU reweighing
 TH1D *h_dataMC = (TH1D*)file_dataMC->Get("puw"); 

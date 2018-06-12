@@ -11,6 +11,9 @@ bool treeReader::lepIsGood(const unsigned l){
 
     if(leptonSelection == 2){
         if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
+        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
     }
 
     return true;
@@ -24,19 +27,13 @@ bool treeReader::lepIsFOGood(const unsigned l){
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
-    if(leptonSelection == 2){
-        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-    }
-
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
     if(_leptonMvatZqTTV[l] < leptonMVAcut){
-        if(_ptRatio[l] < 0.4) return false; // 0.3 for 2017
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.7 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.2 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))) return false; // 0.4 original one, medium WP : (is2017 ? 0.4941 : 0.6324)
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        //if(_lFlavor[l] == 0 && electronMVAvalue < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.3) return false;
-        if(_lFlavor[l] == 0 && electronMVAvalue < -0.1 + (fabs(_lEta[l]) >= 1.479)*0.8) return false;
-        //if(_lFlavor[l] == 0 && (leptonSelection == 2 ? (_lElectronMvaFall17NoIso[l] < 0.2 + (fabs(_lEta[l]) >= 1.479)*0.5) : (_lElectronMvaFall17NoIso[l] < 0.0 + (fabs(_lEta[l]) >= 1.479)*0.7))) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.5 : 0.5))) return false; // 0.8 originally and -0.1
     }
 
     return true;
