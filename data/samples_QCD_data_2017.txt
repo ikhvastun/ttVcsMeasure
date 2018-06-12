@@ -1,0 +1,5 @@
+data  combineData.root                                               1
+Wjets WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root      61526.7
+DYjets DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.root 6025.2
+ttbar TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root                 88.4
+ttbar TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root          365.5

@@ -16,9 +16,12 @@ TString flavorsString[2] = {"el", "mu"};
 TString flavorComposString[4] = {"all", "b", "c", "light"};
 //TString flavorComposString[4] = {"B_L", "B_C_L", "B_C_T_L", "B_T_L"};
 TString additionalString[2] = {"_NC", ""};
+TString histString[3] = {"all","tight","FR"};
+TString rangeString[6] ={"10to15", "15to20", "20to30", "30to45", "45to65", "gr65"};
+TString rangeEtaString[2] ={"barrel", "endcap"};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4;
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85; // 0.85 for 2017
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4; // 0.4 for ttZ
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85; // 0.85 for ttZ
 
 struct BinLabelOptions{
   int index;
@@ -221,6 +224,12 @@ const double ptBins[nPt] = {10., 15., 20., 30., 45., 65., 100.};
 
 const int nEta = 4;
 double etaBins[2][nEta] = {{0., 0.8, 1.442, 2.5}, {0., 1.2, 2.1, 2.4}};
+
+const int rangePeriods = 6; // in lepton corrected pt 10-15, 15-20, 20-30, 30-45, 45-65, > 65 
+const int rangeEtaPeriods = 2;
+TH2D* fakeMapsCalc[nFlavors][3][rangePeriods][rangeEtaPeriods][nSamples+1]; 
+TH1D* mtMaps[nFlavors][rangePeriods][rangeEtaPeriods][nSamples+1];
+THStack* mtStack[nFlavors][rangePeriods][rangeEtaPeriods]; 
 
 double passedPrompt_TTV[2][2];
 double passedNonPrompt_TTV[2][2];

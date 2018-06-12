@@ -60,10 +60,8 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples_FOtuning.txt"); // 
-  //readSamples("data/samples_FOtuning_ttbar.txt"); // 
-  readSamples("data/samples_QCD.txt"); // 
-  //readSamples("data/samples_QCD_2017.txt"); // 
+  readSamples("data/samples_QCD_data.txt"); // 
+  //readSamples("data/samples_QCD_data_2017.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -76,8 +74,6 @@ void treeReader::Analyze(){
       Color_t color = assignColor(std::get<0>(samples[sam]));
       setStackColors(color, sam);
 
-      if(is2017 && std::get<0>(samples[sam]) == "loose") continue;
-      //if(!(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos )) continue;
       //if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos ) continue;
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
@@ -94,20 +90,20 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 100000) break;
-          //if(it > nEntries / 200) break;
+          //if(it > 10000) break;
+          //if(it > nEntries / 20) break;
           
-          std::vector<unsigned> ind, indFO;
-          const unsigned lCount = selectLep(ind);
+          std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO);
 
-          // for QCD
           if(lCountFO != 1) continue;
 
-          // for ttbar
-          //if(lCountFO < 1) continue;
+          bool allLeptonsArePrompt = true;
+          if(std::get<0>(samples[sam]) != "data")
+            allLeptonsArePrompt = promptLeptons(indFO);
 
-          int featureCategory = -99;
+          if((std::get<0>(samples[sam]) == "DYjets" || std::get<0>(samples[sam]) == "Wjets" || std::get<0>(samples[sam]) == "ttbar") && !allLeptonsArePrompt) continue;
+
           int nLocEle = getElectronNumber(indFO);
 
           std::vector<unsigned> indJets;
@@ -121,87 +117,73 @@ void treeReader::Analyze(){
           nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
           nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
           HTLoc = HTCalc(indJets);
-          //if(HTLoc < 200) continue;
 
-          // for QCD
-          if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos && sam != 0 && _lPt[indFO.at(0)] > 15) continue;
-          if(_met > 20) continue;
+          double leptFakePtCorr = lepIsGood(indFO.at(0)) ? _lPt[indFO.at(0)] : magicFactorAnalysis * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];
           TLorentzVector l0p4;
           l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          // let's implement the formula from ttH AN
+          //l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           double mtL = mtCalc(l0p4, _met, _metPhi);
-          if(mtL > 20) continue;
 
+          int fakeCS = 0;
+          if (_met > 20) {
+            fakeCS = 1; //region for EWK subtraction
+          } else if (!(_met < 20 && mtL < 20)) continue;
+
+          //double ptCorrCutEle = magicFactorAnalysis * 17 / 0.3; // 17 is pt threshold on high pt prescalled trigger, 0.3 stands for pt ratio cut in FO object
+          //double ptCorrCutMu  = magicFactorAnalysis * 17 / 0.3;
+
+          // for electrons there are 3 triggers: ele8, ele17 and ele23 
+          // here let's consider ele17 will start from 30 GeV, mu27 from 50
+          // for muons 4 triggers: mu3, mu8, mu17 and mu27
+          // here let's consider mu3 from 10, mu8 from 15, mu17 from 30 and mu27 from 50
           /*
-          int qualityCategory = 0;
-          int promptCategory = 0;
-          for(auto & i : indFO){
-            if (lepIsGood(i)) qualityCategory+= 1;
-            if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) promptCategory += 1;
-          }
+          int rangePeriod = 0;
+          if(_lFlavor[indFO.at(0)] == 0)
+            rangePeriod = (leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) + (leptFakePtCorr > magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4));
+          if(_lFlavor[indFO.at(0)] == 1)
+            rangePeriod = (leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) + (leptFakePtCorr > magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4));
 
-          if(promptCategory > 2) continue;
-          if(qualityCategory< 2) continue;
-          if(qualityCategory> 3) continue;
+          bool eleTrigDecision = (_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr < magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) || (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4) && leptFakePtCorr < magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4)) || (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4)); 
+          bool muTrigDecision = ((_HLT_Mu3_PFJet40 || _HLT_Mu8) && leptFakePtCorr < magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) || (_HLT_Mu17 && leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4) && leptFakePtCorr < magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4)) || (_HLT_Mu27 && leptFakePtCorr > magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4));
+
+          */
+          /*
+          int rangePeriod = (leptFakePtCorr > 30) + (leptFakePtCorr > 50);
+          bool eleTrigDecision = _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || 
+                                 (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 30) || 
+                                 (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 50); 
+           
+          bool muTrigDecision = (_HLT_Mu3_PFJet40 || _HLT_Mu8) || 
+                                (_HLT_Mu17 && leptFakePtCorr > 30) || 
+                                (_HLT_Mu27 && leptFakePtCorr > 50);
           */
 
-          for(auto & i : indFO){
-            double mvaVL = -999.;
-            mvaVL =  _leptonMvatZqTTV[i];
+          int rangePeriod = (leptFakePtCorr > 15) + (leptFakePtCorr > 20) + (leptFakePtCorr > 30) + (leptFakePtCorr > 45) + (leptFakePtCorr > 65);
+          int rangeEtaPeriod = _lFlavor[indFO.at(0)] ? fabs(_lEta[indFO.at(0)]) > 1.2 : fabs(_lEta[indFO.at(0)]) > 1.479;
+          bool eleTrigDecision = _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || 
+                                 (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 25) || 
+                                 (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 32); 
+           
+          bool muTrigDecision = (_HLT_Mu3_PFJet40 || _HLT_Mu8) || 
+                                (_HLT_Mu17 && leptFakePtCorr > 32) || 
+                                (_HLT_Mu27 && leptFakePtCorr > 45);
 
-            // for ttbar
-            if(_lIsPrompt[i]) continue;
-            if(_lProvenanceCompressed[i] == 0) continue;
-            if(_lProvenanceCompressed[i] == 4) continue;
-            //if(_lProvenanceCompressed[i] != 1) continue;
+          bool triggerDecision[2] = {eleTrigDecision, muTrigDecision};
 
-            if(lepIsGood(i)) featureCategory = 0;
-            else featureCategory = 1;
+          //if(sam == 0)
+          if(!triggerDecision[_lFlavor[indFO.at(0)]]) continue;
 
-            int ptAverageBin = int((mvaVL + 1) * 40);
-
-            hAveragePt[ptAverageBin]->Fill(double(featureCategory == 0 ? _lPt[i] : _lPt[i] / _ptRatio[i]), weight);
-
-            int additionalFlavourIndex = 0;
-            if(_lProvenanceCompressed[i] == 1)
-                additionalFlavourIndex = 2;
-            if(_lProvenanceCompressed[i] == 2)
-                additionalFlavourIndex = 4;
-            if(_lProvenanceCompressed[i] == 3)
-                additionalFlavourIndex = 6;
-
-            int additionalPositionIndex = 0;
-            if(fabs(_lEta[i]) > borderOfBarrelEndcap[_lFlavor[i]])
-                additionalPositionIndex = 8;
-            /*
-            int additionalFlavourIndex = 0;
-            if(_lProvenance[i] == 8)
-                additionalFlavourIndex = 0;
-            if(_lProvenance[i] == 9)
-                additionalFlavourIndex = 2;
-            if(_lProvenance[i] == 10)
-                additionalFlavourIndex = 4;
-            if(_lProvenance[i] == 11)
-                additionalFlavourIndex = 6;
-
-            int additionalPositionIndex = 0;
-            if(fabs(_lEta[i]) > borderOfBarrelEndcap[_lFlavor[i]])
-                additionalPositionIndex = 8;
-            */
-            //weight = 1.;
-
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight); // 
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory+additionalFlavourIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
-
-            // for total
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
-            /*
-            if(featureCategory == 1){
-                distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))));
+          if (fakeCS == 0) { //FR measurement region
+            if(lepIsGood(indFO.at(0))){
+               fakeMapsCalc[_lFlavor[indFO.at(0)]][1][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
             }
-            */
+            fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
           }
-          
+          else if (lepIsGood(indFO.at(0))){
+            mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam]->Fill(mtL,weight);
+          }
+
       }
 
       std::cout << std::endl;
@@ -209,139 +191,117 @@ void treeReader::Analyze(){
       std::cout << std::endl;
   }
 
-  for(int i = 0; i < 80; i++){
-    cout << hAveragePt[i]->GetMean() << " ";
-  }
-  cout << endl;
+  TCanvas* c1 = new TCanvas("fakeMaps","fakeMaps",800,400);
+  c1->Divide(2,1);
 
-  TLegend* mtleg = new TLegend(0.77,0.89,0.95,0.62);
-  //mtleg->SetNColumns(4);
-  mtleg->SetFillColor(0);
-  mtleg->SetFillStyle(0);
-  mtleg->SetBorderSize(0);
-  mtleg->SetTextFont(42);
+  TCanvas* c2 = new TCanvas("promptCont","promptCont",800,400);
+  c2->Divide(rangePeriods,2*2);
+  TPad* c2pads[2][rangePeriods][rangeEtaPeriods][2];
 
-  /*
-  //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
-  int count = 0;
+  //gStyle->SetPaintTextFormat("1.2f");
+  gStyle->SetOptTitle(1);
+  gStyle->SetPadTopMargin(0.10);
 
-  for (std::vector<std::string>::iterator it = samplesOrderNames.begin(); it != samplesOrderNames.end(); it++) {
+  //TGaxis::SetMaxDigits(3);
 
-        cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
+  TLegend* leg[2];
+  for(int i=0; i!=nFlavors; ++i) {
+     for(int rangeEta = 0; rangeEta < rangeEtaPeriods; rangeEta++){
+        for(int range = 0; range < rangePeriods; range++){
 
-        mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
-        count++;
-  }
-  */
+            //derive normalization for prompt contamination:
+            double datayields = mtMaps[i][range][rangeEta][0]->Integral(80/10+1,150/10+1); // 70 to 120
 
-  double scale_num = 1.6;
+            double MCyields = 0;
+            for (int sam=1; sam!=nSamples; ++sam) {
+                if(sam > (is2017 ? 4 : 5)) continue;
+                MCyields += mtMaps[i][range][rangeEta][sam]->Integral(80/10+1,150/10+1);
+                mtMaps[i][range][rangeEta][nSamples]->Add(mtMaps[i][range][rangeEta][sam]);
+            }
+            double EWKsf = datayields/MCyields;
+            std::cout<<"SF for "<<flavorsString[i]<<" is "<<EWKsf<<std::endl;
 
-  TCanvas* plot[2][2];
-  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++) plot[i][j] = new TCanvas(Form("plot_%d_%d", i, j),"",500,450);
-  TCanvas* plot2D[8];
-  for(int i = 0; i < 8; i++) plot2D[i] = new TCanvas(Form("plot_2D_%d", i),"",500,450);
+            mtMaps[i][range][rangeEta][0]->Scale(1./EWKsf);
+            //plot histograms showing MT distributions
+            c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
+            c2pads[i][range][rangeEta][0] = new TPad(Form("pad_%d_%d_%d_0",i,range,rangeEta),"",0,0.3,1,1);
+            c2pads[i][range][rangeEta][0]->Draw();
+            c2pads[i][range][rangeEta][0]->cd();
+            mtMaps[i][range][rangeEta][0]->Draw("pe");
+            mtStack[i][range][rangeEta]->Draw("hist same");
+            mtMaps[i][range][rangeEta][0]->Draw("pe same");
+            mtMaps[i][range][rangeEta][0]->Draw("axis same");
 
-  /*
-  showHist2D(plot2D[0],distribs2D); 
-  plot2D[0]->SaveAs("plotsForSave/correlation.pdf");
-  plot2D[0]->SaveAs("plotsForSave/correlation.png");
-  plot2D[0]->SaveAs("plotsForSave/correlation.root");
-  */
-  //showHist2D(plot2D[0],distribs[0], 0); 
-  //showHist2D(plot2D[1],distribs[1], 1); 
-
-  for(int flComp = 0; flComp < 4; flComp++){
-    for(int flavour = 0; flavour < 2; flavour++){
-        showHist2D(plot2D[flavour+2*flComp],distribs[flavour].vectorHisto2D[0+2*flComp], distribs[flavour].vectorHisto2D[1+2*flComp], flavour, flComp); 
-    }
-  }
-
-  Color_t colorFL[4] = {kBlack, kRed, kGreen, kBlue};
-  TString posString[2] = {"barrel", "endcap"};
-  for(int flavor = 0; flavor < 2; flavor++){
-    for(int pos = 0; pos < 2; pos++){
-        double xmin = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmin();
-        double xmax = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmax();
-
-        plot[flavor][pos]->cd();
-        double xPad = 0.25; // 0.25
-
-        TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
-        pad1->SetTopMargin(0.07);
-        if(xPad != 0)
-            pad1->SetBottomMargin(0.02);
-        pad1->Draw();
-        pad1->cd();
-
-        for(int flComp = 0; flComp < 4; flComp++){
-            distribs[flavor].vectorHisto[2*flComp+8*pos].Divide(&distribs[flavor].vectorHisto[2*flComp+1+8*pos]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetLineColor(colorFL[flComp]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMarkerColor(colorFL[flComp]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetTitle(flavorsString[flavor] + " FR (" + posString[pos] + ")");
-            distribs[flavor].vectorHisto[2*flComp+8*pos].GetXaxis()->SetTitle("p_{T}^{corr} [GeV]"); 
-            distribs[flavor].vectorHisto[2*flComp+8*pos].GetYaxis()->SetTitle("FR"); 
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMinimum(0);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMaximum(0.3);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].Draw("same");
-            if(flavor == 0 && pos == 0)
-                mtleg->AddEntry(&distribs[flavor].vectorHisto[2*flComp+8*pos], flavorComposString[flComp], "l");
+            //leg[i] = new TLegend(0.6,0.85,0.9,0.5,Form("SF=%3.2f",EWKsf),"NDC");
+            leg[i] = new TLegend(0.6,0.85,0.9,0.5,"pt:" + rangeString[range] + ", eta:" + rangeEtaString[rangeEta],"NDC");
+            leg[i]->AddEntry(mtMaps[i][0][0][0],"data","pel");
+            for (int sam=1; sam!=nSamples; ++sam) {
+                if(sam > 3) continue;
+                leg[i]->AddEntry(mtMaps[i][0][0][sam],samplesOrderNames.at(sam).c_str(),"f");
+            }
+            leg[i]->Draw("same");
+            c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
+            c2pads[i][range][rangeEta][1] = new TPad(Form("pad_%d_%d_%d_1",i,range,rangeEta),"",0,0.0,1,0.3);
+            c2pads[i][range][rangeEta][1]->Draw();
+            c2pads[i][range][rangeEta][1]->cd();
+            mtMaps[i][range][rangeEta][nSamples]->Divide(mtMaps[i][range][rangeEta][0],mtMaps[i][range][rangeEta][nSamples]);
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitle("data/MC");
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetRangeUser(0,6);
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetNdivisions(505);
+            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetTitle("");
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitleOffset(0.3/0.7*1.25);
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitleSize(0.7/0.3*0.06);
+            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetTitleSize(0.7/0.3*0.06);
+            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetLabelSize(0.7/0.3*0.05);
+            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetLabelSize(0.7/0.3*0.05);
+            mtMaps[i][range][rangeEta][nSamples]->Draw("pe");
+            mtMaps[i][range][rangeEta][nSamples]->Fit("pol0","","",80,150);
+  
+            //obtain and plot FR
+            for (int sam=1; sam!=nSamples; ++sam) {
+                if(sam > (is2017 ? 4 : 5)) continue;
+                fakeMapsCalc[i][1][range][rangeEta][0]->Add(fakeMapsCalc[i][1][range][rangeEta][sam],-EWKsf);
+                fakeMapsCalc[i][0][range][rangeEta][0]->Add(fakeMapsCalc[i][0][range][rangeEta][sam],-EWKsf);
+            }
         }
-        mtleg->Draw("same");
-
-        pad1->cd();
-        pad1->RedrawAxis();
-        pad1->Update();
-
-        if(xPad == 0) return;
-
-        plot[flavor][pos]->cd();
-
-        TPad *pad2 = new TPad("pad2","pad2",0,0,1,xPad);
-
-        pad2->SetBottomMargin((1.-xPad)/xPad*0.13);
-        pad2->SetTopMargin(0.06);
-
-        pad2->Draw();
-        pad2->RedrawAxis();
-        pad2->cd();
-
-        TH1D *flClones[4];
-        for(int flComp = 0; flComp < 4; flComp++){
-           flClones[flComp] = (TH1D*)distribs[flavor].vectorHisto[2*flComp+8*pos].Clone(Form("clone_%d_%d_%d", flavor, pos, flComp));
-        }
-        flClones[0]->Divide(flClones[1]);
-        flClones[2]->Divide(flClones[1]);
-        flClones[3]->Divide(flClones[1]);
-
-        flClones[0]->SetTitle("");
-        flClones[0]->GetXaxis()->SetTitle("p_{T}^{corr} [GeV]");
-        flClones[0]->GetYaxis()->SetTitle("X / b");
-
-        flClones[0]->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
-        flClones[0]->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-        flClones[0]->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-        flClones[0]->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-        flClones[0]->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-
-        flClones[0]->Draw("axis");
-        flClones[0]->SetMaximum(2.0);
-        flClones[0]->SetMinimum(0.0);
-
-        TLine *line = new TLine(xmin, 1, xmax, 1);
-        line->SetLineStyle(2);
-
-        line->Draw("same");
-
-        flClones[0]->Draw("same");
-        flClones[2]->Draw("same");
-        flClones[3]->Draw("same");
-
-        plot[flavor][pos]->SaveAs("plotsForSave/FR_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
     }
 
-  }
+    for(int rangeEta = 0; rangeEta < rangeEtaPeriods; rangeEta++){
+        for(int range = 1; range < rangePeriods; range++){
+            fakeMapsCalc[i][1][0][rangeEta][0]->Add(fakeMapsCalc[i][1][range][rangeEta][0]);
+            fakeMapsCalc[i][0][0][rangeEta][0]->Add(fakeMapsCalc[i][0][range][rangeEta][0]);
+        }
+    }
+    fakeMapsCalc[i][1][0][0][0]->Add(fakeMapsCalc[i][1][0][1][0]);
+    fakeMapsCalc[i][0][0][0][0]->Add(fakeMapsCalc[i][0][0][1][0]);
 
-  return;
+    //fakeMapsCalc[i][2][0][0]->Divide(fakeMapsCalc[i][1][0][0],fakeMapsCalc[i][0][0][0]);
+    TH2D *cloneFirst = (TH2D*) fakeMapsCalc[i][1][0][0][0]->Clone("passed");
+    cloneFirst->Divide(fakeMapsCalc[i][0][0][0][0]);
+
+    c1->cd(1+i);
+
+    //fakeMapsCalc[i][2][0][0]->GetZaxis()->SetRangeUser(0.,1.0);
+    //fakeMapsCalc[i][2][0][0]->SetMarkerSize(1.5);
+
+    //fakeMapsCalc[i][2][0][0]->Draw("col");
+    //fakeMapsCalc[i][2][0][0]->Draw("text e same");
+
+    //fakeMapsCalc[i][2][0][0]->SaveAs("maps/fakerate_"+flavorsString[i] + "_data.root");
+
+    cloneFirst->GetZaxis()->SetRangeUser(0.,1.0);
+    cloneFirst->SetMarkerSize(1.5);
+    cloneFirst->Draw("col");
+    cloneFirst->Draw("text e same");
+    cloneFirst->SaveAs("maps/fakerate_"+flavorsString[i] + "_data.root");
+
+ }
+
+ //c1->SaveAs("maps/data_fake_maps.pdf");
+ c1->SaveAs("maps/data_fake_maps.root");
+ //c2->SaveAs("maps/data_fake_EWK.pdf");
+ c2->SaveAs("maps/data_fake_EWK.root");
+ return;
 
 }
 
