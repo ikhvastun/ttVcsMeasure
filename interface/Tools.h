@@ -123,38 +123,8 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       }
     }
 
-    for(int i = 0; i < 80; i++){
-        TString name = Form("hAveragePt_%d", i);
-        hAveragePt[i] = new TH1D(name, name, 40, 0, 200);
-    }
-
-    for (int i=0; i!=nFlavors; ++i) {
-
-        for (int sam=0; sam!=nSamples+1; ++sam) {
-
-          for(unsigned int range = 0; range < rangePeriods; range++){
-            for(unsigned int etaRange = 0; etaRange < rangeEtaPeriods; etaRange++){
-
-                if(sam == 0) mtStack[i][range][etaRange] = new THStack(Form("mtStack_%d_%d_%d",i,range,etaRange),Form("mtStack_%d_%d_%d",i,range,etaRange));
-
-                mtMaps[i][range][etaRange][sam] = new TH1D(Form("mtMaps_%d_%d_%d_%d",i,sam,range,etaRange),";M_{T} (GeV); events / 10 GeV",20,0,200);
-                mtMaps[i][range][etaRange][sam]->SetMarkerSize(0.6);
-                mtMaps[i][range][etaRange][sam]->Sumw2();
-
-                if (sam > 0 && sam < nSamples) mtStack[i][range][etaRange]->Add(mtMaps[i][range][etaRange][sam]);
-
-                for (int j=0; j!=3; ++j) { // 3 here stands for 3 categories: passed, all, passed / all
-                    fakeMapsCalc[i][j][range][etaRange][sam] = new TH2D(flavorsString[i]+"_"+histString[j]+"_" +std::to_string(sam) +"_"+rangeString[range] + "_" + rangeEtaString[etaRange],
-                                                  flavorsString[i]+"_"+histString[j]+"_"+rangeString[range]+"_" + rangeEtaString[etaRange]+
-                                                  ";p_{T} (GeV);|#eta|;"+histString[j],
-                                                  nPt-1, ptBins, nEta-1, etaBins[i]
-                                                  );
-                    fakeMapsCalc[i][j][range][etaRange][sam]->Sumw2();
-                }
-              }
-            }
-        }
-    }
+    chargeMisIDMapsCalc[0] = new TH2D("chargeSame", "chargeSame;p_{T} (GeV);|#eta|", nPt-1, ptBins, nEta-1, etaBins[0]);
+    chargeMisIDMapsCalc[1] = new TH2D("notSame", "notSame;p_{T} (GeV);|#eta|", nPt-1, ptBins, nEta-1, etaBins[0]);
 
 }
 

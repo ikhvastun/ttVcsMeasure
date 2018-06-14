@@ -435,6 +435,21 @@ Color_t treeReader::assignColor(std::string & name){
     return kBlack;
 }
 
+int treeReader::leptonGenCharge(const unsigned & l){
 
+    int lepGenCharge = 99;
+    TLorentzVector l0reco;
+    l0reco.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
+    for(unsigned i = 0; i < _gen_nL; i++){
+        TLorentzVector l0gen;
+        l0gen.SetPtEtaPhiE(_gen_lPt[i], _gen_lEta[i], _gen_lPhi[i], _gen_lE[i]);
+        if(l0reco.DeltaR(l0gen) < 0.1){
+            if(_gen_lIsPrompt[i] && _lFlavor[l] == _gen_lFlavor[i])
+                lepGenCharge = _gen_lCharge[i];
+        }
+    }
+
+    return lepGenCharge;
+}
 
 

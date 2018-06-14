@@ -6,7 +6,7 @@
 
 const int nFlavors = 2;
 
-const int leptonSelectionAnalysis = 3;
+const int leptonSelectionAnalysis = 2;
 
 const int nSamples = 100;
 const int dataSample = 0;
@@ -220,7 +220,7 @@ double MET;
 // For FR
 
 const int nPt = 7;
-const double ptBins[nPt] = {10., 15., 20., 30., 45., 65., 100.};
+const double ptBins[nPt] = {10., 40., 60., 80., 100., 200., 300.};
 
 const int nEta = 4;
 double etaBins[2][nEta] = {{0., 0.8, 1.442, 2.5}, {0., 1.2, 2.1, 2.4}};
@@ -230,6 +230,7 @@ const int rangeEtaPeriods = 2;
 TH2D* fakeMapsCalc[nFlavors][3][rangePeriods][rangeEtaPeriods][nSamples+1]; 
 TH1D* mtMaps[nFlavors][rangePeriods][rangeEtaPeriods][nSamples+1];
 THStack* mtStack[nFlavors][rangePeriods][rangeEtaPeriods]; 
+TH2D * chargeMisIDMapsCalc[2];
 
 double passedPrompt_TTV[2][2];
 double passedNonPrompt_TTV[2][2];

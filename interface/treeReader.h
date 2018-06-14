@@ -282,6 +282,7 @@ class treeReader {
 
         std::vector<std::string> getNamesOfTheSample() {return namesOfTheSample;}
         std::vector<Color_t> getColsOfTheStack(){return colsOfTheStack;}
+        int leptonGenCharge(const unsigned & l);
     private:
         TTree* fChain;                                                          //current Tree
         std::shared_ptr<TFile> sampleFile;                                      //current sample
