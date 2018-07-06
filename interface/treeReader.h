@@ -233,7 +233,7 @@ class treeReader {
         bool bTaggedCSVv2(const unsigned uncm, const unsigned wp = 1);
         unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1, bool nonpromptSample = false);
         double HTCalc(const std::vector<unsigned>& ind);
-        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&);
+        double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&, TLorentzVector &, TLorentzVector &);
         bool invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind);
         int getElectronNumber(const std::vector<unsigned>& ind);
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
@@ -250,6 +250,7 @@ class treeReader {
         double ptFake(double lpt, double ptratio, int flavour, double mvaTTHvalue, bool mediumIdPassed);
         double ptFakeStIso(double lpt, int flavor, double isolation);
         bool twoLeptonsInEndcap(const std::vector<unsigned>& ind);
+        double cosThetaStar(const TLorentzVector &, const TLorentzVector &);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -274,6 +275,7 @@ class treeReader {
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         double dataLumi = 41.9;                                          //in units of 1/fb
+        int nonPromptSample = -999;
 
         // List of branches
         TBranch        *b__runNb;   

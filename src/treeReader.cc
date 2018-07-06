@@ -22,9 +22,13 @@ void treeReader::readSamples(const std::string& list){
         samples.push_back(tools::readSampleLine(line));
     }
     file.close();       //close file after usage
+    int sampleCounter = 0;
     for( auto it = samples.cbegin(); it != samples.cend(); ++it){
         std::cout << std::get<0>(*it) << "     " << std::get<1>(*it) << "      " << std::get<2>(*it) << std::endl;
         namesOfTheSample.push_back(std::get<0>(*it));
+        if(std::get<0>(*it) == "nonpromptData")
+            nonPromptSample = sampleCounter;
+        sampleCounter++;
         //colsOfTheStack.push_back(assignColor(std::get<0>(*it)));
     }
     is2017 = list.find("2017") != std::string::npos;

@@ -1,0 +1,5 @@
+ttW  TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.root  		0.2043
+Nonprompt TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root             88.3791
+Nonprompt TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root   365 
+chargeMisID TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root           88.3791
+nonpromptData data_combined.root                                        				1

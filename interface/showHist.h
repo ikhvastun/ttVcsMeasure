@@ -235,8 +235,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     uncHistoCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     uncHistoCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
 
-    uncHistoCopy->SetMaximum(1.2);
-    uncHistoCopy->SetMinimum(0.8);
+    uncHistoCopy->SetMaximum(1.5);
+    uncHistoCopy->SetMinimum(0.5);
     uncHistoCopy->SetMarkerStyle(20);
     uncHistoCopy->SetMarkerSize(0.2);
 

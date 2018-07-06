@@ -28,13 +28,21 @@ bool treeReader::lepIsFOGood(const unsigned l){
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
+    if(leptonSelection == 2){
+        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
+        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+    }
+
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
-    if(_leptonMvatZqTTV[l] < leptonMVAcut){
+    if(leptonSelection != 4 && _leptonMvatZqTTV[l] < leptonMVAcut){
         if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;
         if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.2 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))) return false;
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.0 : 0.4) : (leptonSelection == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.5))) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.0 : 0.4) : (leptonSelection == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.3))) return false;
+
     }
 
     return true;
@@ -121,8 +129,8 @@ bool treeReader::passPtCuts4L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
     
-    if(ptMap[0].first < 40) return false;
-    if(ptMap[1].first < 10) return false;
+    if(ptMap[0].first < 25) return false;
+    if(ptMap[1].first < 15) return false;
     if(ptMap[2].first < 10) return false;
     if(ptMap[3].first < 10) return false;
     
@@ -155,8 +163,8 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
         double ptcor = _leptonMvatZqTTV[i] > leptonMVAcut ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i];
+        //double ptcor = lepIsGood(i) ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
-        
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
 
@@ -293,7 +301,7 @@ bool treeReader::invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind){
     return belowMllheavyFlavourResonances;
 }
 
-double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, double & mll, double & ptZ, double & ptNonZ, double & mlll, std::vector<unsigned> & indLeptonOnZ){
+double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, double & mll, double & ptZ, double & ptNonZ, double & mlll, std::vector<unsigned> & indLeptonOnZ, TLorentzVector & Zboson, TLorentzVector & lnegative){
                         
     TLorentzVector l0p4, l1p4, l2p4;
 
@@ -320,13 +328,15 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                 if (_lFlavor[ind.at(l0)] == _lFlavor[ind.at(l1)] ) {
 
                     //cout << "the leptons are of the same flavour with inv. mass: " << mdiL << endl;
-                    if (fabs(mdiL - 91.2) < deltaMZ) {
-                        deltaMZ = fabs(mdiL - 91.2);
+                    if (fabs(mdiL - 91.1876) < deltaMZ) {
+                        deltaMZ = fabs(mdiL - 91.1876);
                         indLeptonOnZ.clear();
                         indLeptonOnZ.push_back(ind.at(l0));
                         indLeptonOnZ.push_back(ind.at(l1));
                         mll = mdiL;
                         ptZ = l1p4.Pt();
+                        Zboson = l1p4;
+                        lnegative = _lCharge[l0] == -1 ? l0p4 : (l1p4 - l0p4);
                         if(leptonSelection == 3 || leptonSelection == 4){
                             for(auto & lepThird : ind){
                                 if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;
@@ -410,7 +420,7 @@ Color_t treeReader::assignColor(std::string & name){
 
     if(name == "data") return kBlack;
     if(name == "Nonprompt") return kBlue-9;
-    if(name == "nonpromptData") return kBlue-9;
+    if(name == "nonpromptData") return kBlue-9; // switch to kBlue-9
     if(name == "chargeMisID") return kMagenta-7;
     if(name == "ttZ") return 91;
     if(name == "ttW") return 98;
@@ -435,4 +445,21 @@ bool treeReader::twoLeptonsInEndcap(const std::vector<unsigned>& ind){
     }
    }
    return false;
+}
+
+double treeReader::cosThetaStar(const TLorentzVector & Z_tlv, const TLorentzVector & l_tlv){
+
+    TVector3 Z, l;
+    Z.SetPtEtaPhi( Z_tlv.Pt(), Z_tlv.Eta(), Z_tlv.Phi());
+    l.SetPtEtaPhi( l_tlv.Pt(), l_tlv.Eta(), l_tlv.Phi());
+    // get cos(theta) and the lorentz factor, calculate cos(theta*)
+    //cout << "info for further calculations: " << Z_tlv.M() << " " << l_tlv.M() << endl;
+    double cosTheta = Z*l / (sqrt(Z*Z) * sqrt(l*l));
+    //cout << "cos theta in lab frame: " << cosTheta << endl;
+    double gamma   = TMath::Sqrt( 1 + TMath::Power(Z_tlv.Pt()/Z_tlv.M(),2) * TMath::Power(TMath::CosH(Z_tlv.Eta()),2) );
+    //cout << "gamma: " << gamma << endl;
+    double beta    = sqrt( 1 - 1/TMath::Power(gamma,2) );
+    //cout << "beta: " << beta << endl;
+    return (-beta + cosTheta) / (1 - beta*cosTheta);
+
 }

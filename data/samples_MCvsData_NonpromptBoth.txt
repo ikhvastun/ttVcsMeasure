@@ -1,0 +1,4 @@
+nonpromptData data_combined.root                                        				1
+Nonprompt TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 			88.38
+Nonprompt TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 	182.7
+Nonprompt TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 182.7

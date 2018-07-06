@@ -14,7 +14,7 @@ const int dataSample = 0;
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : (leptonSelectionAnalysis == 3 ? 0.4 : -0.4); // should be 0.6 for 2L analysis
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : (leptonSelectionAnalysis == 3 ? 0.4 : 0.8); // should be 0.6 for 2L analysis
 double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.85;
 
 struct BinLabelOptions{
@@ -35,6 +35,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
       {8, "3j>1b"},
       {9, ">3j1b"},
       {10, ">3j>1b"},
+      /*
       {11, "2j"},
       {12, "3j1b"},
       {13, "3j>1b"},
@@ -45,6 +46,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
       {18, "3j>1b"},
       {19, ">3j1b"},
       {20, ">3j>1b"},
+      */
       //{21, "2j"},
       //{22, "3j"},
       //{23, ">3j"},
@@ -96,8 +98,8 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
     };
 
 
-const int nVars  = 45;
 
+/*
  TString varN[nVars] = {
     "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading} [GeV]", "p_{T}^{trailing} [GeV]",
     "M_{T}^{leading} [GeV]", "M_{T}^{trailing} [GeV]", 
@@ -118,7 +120,10 @@ const int nVars  = 45;
     "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading}[GeV]",
     "eta^{leading}", "eta^{sub-leading}"
     "p_{T}^{leading}[GeV]", "p_{T}^{sub-leading}[GeV]",
-    "eta^{leading}", "eta^{sub-leading}"
+    "eta^{leading}", "eta^{sub-leading}",
+    "mt", "mt", "mt", "mt",
+    "cosThetaStar",
+    "R_{lead lep}^{jet}"
     }; 
 
 
@@ -141,6 +146,9 @@ double varMin[nVars] = {
     -2.5, -2.5,
     0, 0, -2.5, -2.5,
     0, 0, -2.5, -2.5,
+    0, 0, 0, 0,
+    -1,
+    0.4
   };
     
 double varMax[nVars] = {
@@ -162,6 +170,9 @@ double varMax[nVars] = {
     2.5, 2.5,
     60, 60, 2.5, 2.5,
     60, 60, 2.5, 2.5,
+    200, 200, 200, 200,
+    1,
+    3
 };
     
 int nBins[nVars] = {
@@ -169,7 +180,7 @@ int nBins[nVars] = {
     30, 20,
     30,
     10, 10, 8, 6, 13, 18, 
-    20, 25,
+    10, 25,
     leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size()))) ,
     leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size()),
     20, 16, 12,
@@ -183,7 +194,11 @@ int nBins[nVars] = {
     50, 50,
     6, 6, 50, 50,
     6, 6, 50, 50,
+    20, 20, 20, 20,
+    5,
+    26 
 };
+*/
 
 
 // Lepton SF
@@ -193,8 +208,11 @@ TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_
 //TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root","READ"); // PU reweighing
 TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw_Run2016Inclusive_central"); 
 
-//TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Fall17.root","READ"); // PU reweighing
-TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
+//TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puw_nTrueInt_Moriond2017_36p5fb_Summer16_central.root","READ"); // PU reweighing
+//TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw"); 
+
+TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Fall17.root","READ"); // PU reweighing
+//TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
 //TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
 TH1D *h_dataMC_2017 = (TH1D*)file_dataMC_2017->Get("puw_Run2017Inclusive_central"); 
 
@@ -214,6 +232,7 @@ TFile *lepSF_mu_file_2017 = TFile::Open("data/leptonSF/scaleFactors_muons_2017.r
 
 TFile *lepSF_mu_trackBF = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEF.root", "READ");
 TFile *lepSF_mu_trackGH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_GH.root", "READ");
+TFile *lepSF_mu_trackBH = TFile::Open("data/leptonSF/Tracking_EfficienciesAndSF_BCDEFGH.root", "READ");
 
 TFile *electronTrack_2016 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root","READ");
 TFile *electronTrack_2017 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_2017.root","READ");
@@ -224,7 +243,8 @@ TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data
 //TFile *lepSF_el_LeptonMVAfile = TFile::Open("leptonSF/scaleFactors.root","READ");
 
 TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
-    (TGraphAsymmErrors*) lepSF_mu_trackBF->Get("ratio_eff_eta3_dr030e030_corr"),
+    (TGraphAsymmErrors*) lepSF_mu_trackBH->Get("ratio_eff_eta3_dr030e030_corr"),
+    // this is not used at the moment 
     (TGraphAsymmErrors*) lepSF_mu_trackGH->Get("ratio_eff_eta3_dr030e030_corr"),
   };
 
@@ -233,8 +253,8 @@ TH2F* lepSFMapsElectron[13] = {
     (TH2F*) (lepSF_ele_file_2016->Get("EleToTTVLoose")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
-    //(TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
-    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    //(TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    (TH2F*) (lepSF_ele_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
     (TH2F*) (lepSF_ele_file_2016->Get("TTVLeptonMvattWToTightCharge")),
     (TH2F*) electronTrack_2017->Get("EGamma_SF2D"),
     (TH2F*) electronTrack_lowEt_2017->Get("EGamma_SF2D"),
@@ -250,8 +270,8 @@ TH2F* lepSFMapsMuon[10] = {
     (TH2F*) (lepSF_mu_file_2016->Get("MuonToTTVLoose")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattW")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ3l")),
-    //(TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
-    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    //(TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvattZ4l")),
+    (TH2F*) (lepSF_mu_file_2016->Get("TTVLooseToTTVLeptonMvatZq")),
     (TH2F*) (lepSF_mu_file_2016->Get("TTVLeptonMvattWTotkSigmaPtOverPtCut")),
     (TH2F*) (lepSF_mu_file_2017->Get("MuonToTTVLoose")),
     (TH2F*) (lepSF_mu_file_2017->Get("TTVLooseToTTVLeptonMvattW")),
@@ -298,12 +318,17 @@ TGraphAsymmErrors* lepSFMaps1D[3] = {
 
 // btag SF
 BTagCalibration calib_csvv2[2] {
-  {"CSVv2BF", "data/btagSF/CSVv2_Moriond17_B_F.csv"},
-  {"CSVv2GH", "data/btagSF/CSVv2_Moriond17_G_H.csv"},
+  //{"CSVv2BF", "data/btagSF/CSVv2_Moriond17_B_F.csv"},
+  //{"CSVv2GH", "data/btagSF/CSVv2_Moriond17_G_H.csv"},
+  {"deepCSV_2016", "data/btagSF/DeepCSV_Moriond17_B_H.csv"},
+  {"deepCSV_2017", "data/btagSF/DeepCSV_94XSF_V2_B_F.csv"},
 };
 
-const std::vector<std::string> otherSysTypes={"up_hf", "down_hf", "up_lf", "down_lf"};
+// available for csv
+//const std::vector<std::string> otherSysTypes={"up_hf", "down_hf", "up_lf", "down_lf"};
+const std::vector<std::string> otherSysTypes={"up", "down"};
 
+/*
 BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_RESHAPING, "central", otherSysTypes},
                                           {BTagEntry::OP_RESHAPING, "central", otherSysTypes},
                                           {BTagEntry::OP_RESHAPING, "central", otherSysTypes}},
@@ -313,16 +338,51 @@ BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_RESHAPING, "central", o
                                           {BTagEntry::OP_RESHAPING, "central", otherSysTypes}}
 
 };
+*/
+BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_MEDIUM, "central", otherSysTypes},
+                                          {BTagEntry::OP_MEDIUM, "central", otherSysTypes},
+                                          {BTagEntry::OP_MEDIUM, "central", otherSysTypes}},
 
-TFile *file_btagEff = TFile::Open("data/btagSF/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root","READ"); // btagEff
-TH2D* h_btagEff[3] = {
-    (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_udsg"), 
-    (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_c"),
-    (TH2D*)file_btagEff->Get("h2_BTaggingEff_csv_med_Eff_b")
+                                        { {BTagEntry::OP_MEDIUM, "central", otherSysTypes},
+                                          {BTagEntry::OP_MEDIUM, "central", otherSysTypes},
+                                          {BTagEntry::OP_MEDIUM, "central", otherSysTypes}}
+};
+
+TFile *file_btagEff_ttZ4l_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ4l_2016.root","READ"); // btagEff
+TFile *file_btagEff_ttZ4l_2017 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ4l_2017.root","READ"); // btagEff
+TFile *file_btagEff_ttZ3l_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ3l_2016.root","READ"); // btagEff
+TFile *file_btagEff_ttZ3l_2017 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ3l_2017.root","READ"); // btagEff
+TFile *file_btagEff_ttW_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttW_2016.root","READ"); // btagEff
+TFile *file_btagEff_ttW_2017 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttW_2017.root","READ"); // btagEff
+TH2D* h_btagEff[2][9] = {{ (TH2D*)file_btagEff_ttW_2016->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttW_2016->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttW_2016->Get("bTagEff_mediumbeauty"), 
+                           (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumbeauty"), 
+                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumbeauty"),},
+                         { (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumbeauty"), 
+                           (TH2D*)file_btagEff_ttZ3l_2017->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttZ3l_2017->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttZ3l_2017->Get("bTagEff_mediumbeauty"), 
+                           (TH2D*)file_btagEff_ttZ4l_2017->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_ttZ4l_2017->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_ttZ4l_2017->Get("bTagEff_mediumbeauty")}
 }; 
 
+int jetFlavourNumber[6] = {0,0,0,0,1,2};
+/*
+  KEY: TH2D     bTagEff_mediumudsg;1    bTagEff_medium_udsg_numerator
+  KEY: TH2D     bTagEff_mediumcharm;1   bTagEff_medium_charm_numerator
+  KEY: TH2D     bTagEff_mediumbeauty;1  bTagEff_medium_beauty_numerator
+*/
+
 // trees for BDT
-TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );   
+TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
 TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
 TTree* signalTree = new TTree("signalTree","signalTree");
 TTree* bkgTree = new TTree("bkgTree","bkgTree");
@@ -360,4 +420,59 @@ TString eraRuns[2] = {"", "_GH"};
 const int nPt = 6;
 const double ptBins[nPt] = {15., 20., 30., 45., 65., 100.};
 
+//vector<int> orderForSaveFiles = {0, 1, 2, 8, 9, 15, 14, 12, 16, 17, 18, 4, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48};
+
+struct histInfo{
+  std::string fancyName;
+  int index;
+  //std::string usualName;
+  double varMin;
+  double varMax;
+  int nBins;
+  //bool isEnVar;
+};
+
+const int nVars  = 52;
+
+std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_{T} [GeV]", 0, 0, 300, 30}},
+                                                 {"sublead", {"Sub-leading lepton p_{T} [GeV]", 1, 0, 200, 20}},
+                                                 {"trail",   {"Trailing lepton p_{T} [GeV]", 2, 0, 200, 20}},
+                                                 {"pt4th",   {"4th lepton p_{T} [GeV]", 3, 0, 100, 20}},
+                                                 {"mtW",     {"m_{T}^{W} [GeV]", 4, 0, 200, 20}},
+                                                 {"njets",   {"N_{j}", 5, -0.5, 7.5, 8}},
+                                                 {"nbjets",  {"N_{b}", 6, -0.5, 4.5, 5}},
+                                                 {"BDT",     {"BDT", 7, -1, 1, 10}},
+                                                 {"flavour", {"flavour", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size()))))}},
+                                                 {"SR",      {"", 9, -0.5, leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5), leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size())}},
+                                                 {"mll",     {"M(ll) [GeV]", 10, 81., 101., 10}},
+                                                 {"ptZ",     {"p_{T}^{Z} [GeV]", 11, 0, 400, 16}},
+                                                 {"ptNonZ",  {"Non-Z lepton p_{T} [GeV]", 12, 0, 200, 20}},
+                                                 {"mll3e",   {"M(ll) in 3e [GeV]", 13, 0, 200, 20}},
+                                                 {"mll2e1mu",{"M(ll) in 2e1mu [GeV]", 14, 0, 200, 20}},
+                                                 {"mll1e2mu",{"M(ll) in 1e2mu [GeV]", 15, 0, 200, 20}},
+                                                 {"mll3mu",  {"M(ll) in 3mu [GeV]", 16, 0, 200, 20}},
+                                                 {"met",     {"E_{T}^{miss} [GeV]", 17, 0, 300, 15}},
+                                                 {"deltaR",  {"#Delta R(jet, trailing lepton)", 18, 0.4, 3., 13}},
+                                                 {"deltaRlead",  {"#Delta R(jet, leading lepton)", 19, 0.4, 3., 13}},
+                                                 {"mtLeading",{"Leading lepton M_{T} [GeV]", 20, 0, 300, 20}},
+                                                 {"mtTrailing",{"Trailing lepton M_{T} [GeV]", 21, 0, 200, 20}},
+                                                 {"leadJetPt", {"Leading non-b jet p_{T} [GeV]", 22, 30, 310, 14}},
+                                                 {"trailJetPt", {"Trailing non-b jet p_{T} [GeV]", 23, 30, 310, 14}},
+                                                 {"SRnpCR", {"", 24, -0.5, 2.5, 3}},
+                                                 {"nPV", {"number of PV", 25, -0.5, 49.5, 25}},
+                                                 {"mlll", {"M(lll) [GeV]", 26, 81., 101., 10}},
+                                                 {"etaLead", {"Leading lepton #eta", 27, -2.5, 2.5, 20}},
+                                                 {"etaSubl", {"Sub-leading lepton #eta", 28, -2.5, 2.5, 20}},
+                                                 {"etaTrail", {"Trailing lepton #eta", 29, -2.5, 2.5, 20}},
+                                                 {"eta4th", {"4th lepton #eta", 30, -2.5, 2.5, 20}},
+                                                 {"mt_3m", {"m_{T}^{W} in 3#mu [GeV]", 31, 0, 200, 20}},
+                                                 {"mt_2m1e", {"m_{T}^{W} in 2#mu e [GeV]", 32, 0, 200, 20}}, 
+                                                 {"mt_1m2e", {"m_{T}^{W} in 1#mu 2e [GeV]", 33, 0, 200, 20}}, 
+                                                 {"mt_3e", {"m_{T}^{W} in 3e [GeV]", 34, 0, 200, 20}},
+                                                 {"cosThetaStar", {"cos(#Theta^{*})", 35, -1, 1, 5}},
+                                                 {"mll_ss",  {"Invariant mass of ss 2l pair [GeV]", 36, 0, 300, 20}},
+                                                 {"chargeOfLeptons",  {"Charge of the leptons in ss2l channel", 37, -1.5, 1.5, 3}},
+                                                 {"ll_deltaR",  {"#Delta R(leading lepton, trailing lepton)", 38, 0, 7., 35}},
+                                                 {"mt2ll_ss",  {"M_{T2}^{ll} [GeV]", 39, 0, 200., 20}}
+                                           };
 #endif 

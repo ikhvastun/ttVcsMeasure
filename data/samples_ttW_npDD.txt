@@ -21,4 +21,5 @@ rare ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root						131.3
 rare ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root								0.01398
 rare WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root								0.05565
 rare WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root 							0.2086
-rare WWTo2L2Nu_13TeV-powheg.root 												0.03711
+rare WWTo2L2Nu_13TeV-powheg.root 												12.178
+rare WWTo2L2Nu_DoubleScattering_13TeV-pythia8.root                              0.03711 

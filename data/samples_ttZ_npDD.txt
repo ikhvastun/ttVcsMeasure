@@ -1,9 +1,9 @@
 data data_combined.root                                        				1
-nonpromptData data_combined.root                                                 1
+WZ   WZTo3LNu_mllmin01_13TeV-powheg-pythia8_ext1.root                           38.20068
 ttZ	 TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root   	    		0.2728
 ttZ  TTZToLL_M-1to10_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root 				0.0493 
 ttW  TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8.root  		0.2043
-WZ   WZTo3LNu_mllmin01_13TeV-powheg-pythia8_ext1.root                           38.20068
+nonpromptData data_combined.root                                                 1
 ttH  ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8.root 		0.215
 ttX  tZq_ll_4f_13TeV-amcatnlo-pythia8.root										0.09418
 ttX  TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8.root	    		3.697
@@ -15,6 +15,7 @@ ttX  THW_Hincl_13TeV-madgraph-pythia8_TuneCUETP8M1.root							0.01561
 ttX  TTWW_TuneCUETP8M2T4_13TeV-madgraph-pythia8.root 							7.829e-3
 ttX  TTWZ_TuneCUETP8M2T4_13TeV-madgraph-pythia8.root							2.919e-3
 ttX  TTZZ_TuneCUETP8M2T4_13TeV-madgraph-pythia8.root							1.573e-3
+Z#gamma ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root              131.3 
 ZZ ZZTo4L_13TeV_powheg_pythia8.root                                             1.3816
 ZZ   GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8.root 0.005423
 ZZ   GluGluToContinToZZTo2e2tau_13TeV_MCFM701_pythia8.root 0.005423
@@ -26,7 +27,6 @@ ZZ   VBF_HToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8.root 0.001034
 ZZ   WplusH_HToZZTo4L_M125_13TeV_powheg2-minlo-HWJ_JHUgenV6_pythia8.root 0.0002339
 ZZ   WminusH_HToZZTo4L_M125_13TeV_powheg2-minlo-HWJ_JHUgenV6_pythia8.root 0.0001471
 ZZ   ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUgenV6_pythia8.root 0.000652
-Z#gamma ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root              131.3 
 rare WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root 						585
 rare WZG_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root        						0.04123
 rare ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root								0.01398

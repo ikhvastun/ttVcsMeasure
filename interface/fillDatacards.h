@@ -34,7 +34,6 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
   /*
   There are 3 vectors here:
     distribsOrderForDatacards -> order that is used for datacard, from 1 to 9, where 1 stands for ttW for 2L, 9 for rare
-
   */
 
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
