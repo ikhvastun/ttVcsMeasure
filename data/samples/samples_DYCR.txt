@@ -1,2 +1,0 @@
-data DoubleEG.root                                        				1
-DY DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8.root          6025.2

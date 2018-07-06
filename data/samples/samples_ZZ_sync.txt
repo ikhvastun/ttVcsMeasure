@@ -1,2 +1,0 @@
-data data_combined.root                                        				1
-ZZ ZZTo4L_13TeV_powheg_pythia8.root                                             1.3816
