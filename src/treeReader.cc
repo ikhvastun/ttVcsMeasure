@@ -38,6 +38,7 @@ void treeReader::readSamples(const std::string& list){
 void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
+    isChargeMisIDSample = std::get<0>(samples[currentSample]) == "chargeMisID";
     sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
     //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_onZ_DYCR/" + (TString)(is2017 ? "2017MC/" : "2016MC/")  + (const TString&) std::get<1>(samples[currentSample]),"read"); 
     sampleFile->cd("blackJackAndHookers");
@@ -67,7 +68,11 @@ void treeReader::GetEntry(long unsigned entry)
     if (!fChain) return;
     fChain->GetEntry(entry);
     //Set up correct weights
-    if(!isData && !isDataNonprompt) weight = _weight*scale; //MC
+    if(!isData && !isDataNonprompt) {
+        weight = _weight*scale; //MC
+        if(isChargeMisIDSample && is2017)
+            weight *= 1.2; // apply 20% correction to observed charge mis ID in 2017
+    }
     else weight = 1;                               //data
 }
 

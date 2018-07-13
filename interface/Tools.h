@@ -219,7 +219,7 @@ int flavourCategory4L(int nLocEle){
 
 }
 
-float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
+float getTrackingSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
 
     float lepSF = 1.;
     
@@ -230,17 +230,33 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
       int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
       lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
 
+    }
+                
+    if(flavour == 1){
+      lepSF *= (is2017 ? 1. : lepSFMaps1DMuon[eraDecision]->Eval(eta) );
+    }
+    
+    return lepSF;
+}
+
+float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
+
+    float lepSF = 1.;
+    
+    if(flavour == 0){
       // 1 stands for loose on top of reco, should be applied for every WP
-      hist = lepSFMapsElectron[1 + is2017 * 7];
-      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
+      TH2F * hist = lepSFMapsElectron[1 + is2017 * 7];
+      int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
+      int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+      //cout << "lepSF loose on reco: " << hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) << endl;
 
       int neededFileIs = leptonSelection + is2017 * 7; // needed file numeration coincides with number of leptons used in analysis 
       hist = lepSFMapsElectron[neededFileIs];
       ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
       etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
       lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
+      //cout << "lepSF tight on loose: " << hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) << endl;
 
       if(leptonSelection == 2){
         // additionally to ss2l we apply tight charge selection
@@ -254,8 +270,6 @@ float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecisi
                 
     if(flavour == 1){
                   
-      lepSF *= (is2017 ? 1. : lepSFMaps1DMuon[eraDecision]->Eval(eta) );
-
       TH2F * hist = lepSFMapsMuon[1 + is2017 * 5 - 1];
       int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
       int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
@@ -311,13 +325,9 @@ float getBTagSF(bool is2017, float var, int jf, float eta, float pt, float csv){
    else if(var == 2) varStr = "up_lf";
 
    float sf = 1.;
-   if(is2017)
-     // iterative fit is included in 2017, not in 2016
-     //readerBtag[is2017][jetFlavorVariation].eval_auto_bounds(varStr, jfInput, fabs(eta), pt, csv);
-     readerBtag[is2017][jetFlavorVariation].eval_auto_bounds(varStr, jfInput, eta, pt, csv);
-   else
-     readerBtag[is2017][jetFlavorVariation].eval_auto_bounds(varStr, jfInput, eta, pt, csv);
+   sf = readerBtag[is2017][jetFlavorVariation].eval_auto_bounds(varStr, jfInput, eta, pt, csv);
                                               
+   cout << "btag sf for jet with pt " << pt << " and eta " << eta << " is " << sf << endl;
    return sf;      
 }
 
@@ -387,7 +397,7 @@ void addVariablesToBDT(const bool is2017 = false){
     readerTTWcsttbar->AddVariable( "trailJetPt", &usertrailjetpt );  
     readerTTWcsttbar->AddVariable( "leadeta", &userleadeta );
     readerTTWcsttbar->AddVariable( "traileta", &usertraileta );
-    readerTTWcsttbar->AddVariable( "chargeOfLeptons", &userchargeOfLeptons);
+    //readerTTWcsttbar->AddVariable( "chargeOfLeptons", &userchargeOfLeptons);
     readerTTWcsttbar->AddVariable( "mll_ss", &usermll_ss );
     readerTTWcsttbar->AddVariable( "mt2ll_ss", &usermt2ll_ss );
 
@@ -450,7 +460,11 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
     return  asymm_mt2_lester_bisect::get_mT2(l1.M(), l1.Px(), l1.Py(), l2.M(), l2.Px(), l2.Py(), metVec.Px(), metVec.Py(), 0, 0);
 }
 
-void applyTriggerSF(double & weight, int leptonSelection, const double leptPt){
-    if(leptonSelection == 3 && leptPt < 120)
-        weight *= 0.985; // got it from Daniel's trigger measurement, agreed with him on skype, 5 Jul 2018
+double getTriggerSF(int leptonSelection, const double leptPt, bool is2017 = false){
+    if(leptonSelection == 3 && leptPt < 120 && is2017)
+        //weight *= 0.985; // got it from Daniel's trigger measurement, agreed with him on skype, 5 Jul 2018
+        return 0.985;
+    if(leptonSelection == 3 && leptPt < 80 && !is2017)
+        return 0.966000020504;
+    return 1.;
 }

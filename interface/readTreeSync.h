@@ -6,16 +6,13 @@
 
 const int nFlavors = 2;
 
-const int leptonSelectionAnalysis = 3;
+const int leptonSelectionAnalysis = 4;
 
 const int nSamples = 100;
 const int dataSample = 0;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
-
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : (leptonSelectionAnalysis == 3 ? 0.4 : 0.8); // should be 0.6 for 2L analysis
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.85;
 
 struct BinLabelOptions{
   int index;
@@ -204,12 +201,12 @@ int nBins[nVars] = {
 // Lepton SF
 
 //TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Summer16.root","READ"); // PU reweighing
-TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8_Summer16.root","READ"); // PU reweighing
+//TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8_Summer16.root","READ"); // PU reweighing
 //TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puWeights_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root","READ"); // PU reweighing
-TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw_Run2016Inclusive_central"); 
+//TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw_Run2016Inclusive_central"); 
 
-//TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/puw_nTrueInt_Moriond2017_36p5fb_Summer16_central.root","READ"); // PU reweighing
-//TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("puw"); 
+TFile *file_dataMC_2016 = TFile::Open("data/pileUpReweighing/PUW_Vienna_2016.root","READ"); 
+TH1D *h_dataMC_2016 = (TH1D*)file_dataMC_2016->Get("hRatio"); 
 
 TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_ZZTo4L_13TeV_powheg_pythia8_Fall17.root","READ"); // PU reweighing
 //TFile *file_dataMC_2017 = TFile::Open("data/pileUpReweighing/puWeights_WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_Fall17.root","READ"); // PU reweighing
@@ -238,8 +235,8 @@ TFile *electronTrack_2016 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D.root
 TFile *electronTrack_2017 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_2017.root","READ");
 TFile *electronTrack_lowEt_2017 = TFile::Open("data/leptonSF/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt_2017.root","READ");
 
-TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_el_3l.root","READ");
-TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_mu_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_mu_3l.root","READ");
+//TFile *lepSF_el_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_el_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_el_3l.root","READ");
+//TFile *lepSF_mu_LeptonMVAfile = leptonSelectionAnalysis == 2 ? TFile::Open("data/leptonSF/lepMVAEffSF_mu_2lss.root","READ") : TFile::Open("data/leptonSF/lepMVAEffSF_mu_3l.root","READ");
 //TFile *lepSF_el_LeptonMVAfile = TFile::Open("leptonSF/scaleFactors.root","READ");
 
 TGraphAsymmErrors* lepSFMaps1DMuon[2] = {
@@ -348,6 +345,8 @@ BTagCalibrationReader readerBtag[2][3]{ { {BTagEntry::OP_MEDIUM, "central", othe
                                           {BTagEntry::OP_MEDIUM, "central", otherSysTypes}}
 };
 
+TFile *file_btagEff_tZq_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_tZq_2016.root","READ"); // btagEff
+TFile *file_btagEff_tZq_2017 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_tZq_2017.root","READ"); // btagEff
 TFile *file_btagEff_ttZ4l_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ4l_2016.root","READ"); // btagEff
 TFile *file_btagEff_ttZ4l_2017 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ4l_2017.root","READ"); // btagEff
 TFile *file_btagEff_ttZ3l_2016 = TFile::Open("data/btagSF/bTagEff_deepCSV_cleaned_ttZ3l_2016.root","READ"); // btagEff
@@ -360,9 +359,12 @@ TH2D* h_btagEff[2][9] = {{ (TH2D*)file_btagEff_ttW_2016->Get("bTagEff_mediumudsg
                            (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumudsg"), 
                            (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumcharm"),
                            (TH2D*)file_btagEff_ttZ3l_2016->Get("bTagEff_mediumbeauty"), 
-                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumudsg"), 
-                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumcharm"),
-                           (TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumbeauty"),},
+                           //(TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumudsg"), 
+                           //(TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumcharm"),
+                           //(TH2D*)file_btagEff_ttZ4l_2016->Get("bTagEff_mediumbeauty"),},
+                           (TH2D*)file_btagEff_tZq_2016->Get("bTagEff_mediumudsg"), 
+                           (TH2D*)file_btagEff_tZq_2016->Get("bTagEff_mediumcharm"),
+                           (TH2D*)file_btagEff_tZq_2016->Get("bTagEff_mediumbeauty"),},
                          { (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumudsg"), 
                            (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumcharm"),
                            (TH2D*)file_btagEff_ttW_2017->Get("bTagEff_mediumbeauty"), 

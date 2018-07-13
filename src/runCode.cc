@@ -52,8 +52,8 @@ using Output::distribs;
 void treeReader::Analyze(){
 
   leptonSelection = leptonSelectionAnalysis;
-  magicFactor = magicFactorAnalysis;
-  leptonMVAcut = leptonMVAcutAnalysis;
+  //magicFactor = magicFactorAnalysis;
+  //leptonMVAcut = leptonMVAcutAnalysis;
   //Set CMS plotting style
   setTDRStyle();
   //gROOT->SetBatch(kTRUE);
@@ -65,14 +65,14 @@ void treeReader::Analyze(){
   //readSamples("data/samples_ZZ_sync.txt");
   //readSamples("data/samples_DYCR.txt");
   //readSamples("data/samples_DYCR_2017.txt");
-  //readSamples("data/samples_ttZ.txt");
-  readSamples("data/samples_ttZ_npDD.txt");
-  //readSamples("data/samples_ttZ_2017.txt");
-  //readSamples("data/samples_ttZ_2017_npDD.txt");
+  readSamples("data/samples/samples_ttZ.txt");
+  //readSamples("data/samples/samples_ttZ_npDD.txt");
+  //readSamples("data/samples/samples_ttZ_2017.txt");
+  //readSamples("data/samples/samples_ttZ_2017_npDD.txt");
   //readSamples("data/samples_ttW.txt");
-  //readSamples("data/samples_ttW_npDD.txt");
+  //readSamples("data/samples/samples_ttW_npDD.txt");
   //readSamples("data/samples_ttW_2017.txt");
-  //readSamples("data/samples_ttW_2017_npDD.txt");
+  //readSamples("data/samples/samples_ttW_2017_npDD.txt");
   setTDRStyle(); 
 
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
@@ -128,7 +128,10 @@ void treeReader::Analyze(){
       setStackColors(color, sam);
 
       //if(std::get<0>(samples[sam]) != "ZZ" && std::get<0>(samples[sam]) != "data") continue;
-      //if(std::get<0>(samples[sam]) != "ZZ") continue;
+      //if(std::get<0>(samples[sam]) != "data") continue;
+      //if(std::get<0>(samples[sam]) != "WZ") continue;
+      //if(std::get<0>(samples[sam]) != "chargeMisID") continue;
+      if(std::get<0>(samples[sam]) != "ttZ") continue;
       if(std::get<0>(samples[sam]) == "nonpromptData"){
           cout << "Total number of events: " << distribs[0].vectorHisto[sam].Integral() << endl;
           continue;
@@ -141,6 +144,7 @@ void treeReader::Analyze(){
       //if(std::get<0>(samples[sam]) != "Nonprompt" && std::get<0>(samples[sam]) != "ttW" && std::get<0>(samples[sam]) != "chargeMisID") continue;
       //if(!(std::get<1>(samples[sam]).find("ZZTo4L_13TeV_powheg_pythia8") != std::string::npos )) continue;
       //if(!(std::get<1>(samples[sam]).find("TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8") != std::string::npos )) continue;
+      //if(!(std::get<1>(samples[sam]).find("WWZ") != std::string::npos )) continue;
 
       std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -156,8 +160,8 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(_eventNb != 3596719) continue;
-          bool printAddInfo = false;
+          if(_eventNb != 524536) continue;
+          bool printAddInfo = true;
           
           if(printAddInfo)
               cout << _passTrigger_e << " " << _passTrigger_m << " " << _passTrigger_ee << " " << _passTrigger_em  << " " << _passTrigger_mm << " " << _passTrigger_eee << " " << _passTrigger_eem << " " << _passTrigger_emm << " " << _passTrigger_mmm << endl;
@@ -166,12 +170,12 @@ void treeReader::Analyze(){
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 100) break;
+          //if(it > nEntries / 20) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons
-          const unsigned lCount = selectLep(indTight);
-          const unsigned lCountFake = selectFakeLep(indFake);
+          const unsigned lCount = selectLep(indTight, leptonSelection);
+          const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
 
           if(printAddInfo) cout << "before 12 GeV cut" << endl;
           if(invMassOfAny2Lbelow12GeV(indFake)) continue;
@@ -184,14 +188,26 @@ void treeReader::Analyze(){
           std::vector<unsigned> ind;
           //used for main analysis
           // remove additional FO lepton from ss2l selection
-          if(leptonSelectionAnalysis == 2 && lCountFake != leptonSelectionAnalysis) continue;
-          if(lCount > leptonSelectionAnalysis) continue;
-          if(lCountFake < leptonSelectionAnalysis) continue;
-          if(lCount == leptonSelectionAnalysis) {
+          if(leptonSelection == 2 && lCountFake != leptonSelection) continue;
+          if(leptonSelection == 3){
+            std::vector<unsigned> indTight4L;
+            const unsigned lCount4L = selectLep(indTight4L, 4);
+            if(printAddInfo) cout << "Number of tight leptons in 4L tight selection: " << lCount4L << endl;
+            if(lCount4L >= 4) continue;
+          }
+          if(leptonSelection == 2){
+            std::vector<unsigned> indTight3L;
+            const unsigned lCount3L = selectLep(indTight3L, 3);
+            if(printAddInfo) cout << "Number of tight leptons in 3L tight selection: " << lCount3L << endl;
+            if(lCount3L >= 3) continue;
+          }
+          if(lCount > leptonSelection) continue;
+          if(lCountFake < leptonSelection) continue;
+          if(lCount == leptonSelection) {
               samCategory = sam;
               ind = indTight;
           }
-          if(lCount < leptonSelectionAnalysis){
+          if(lCount < leptonSelection){
               if(leptonSelectionAnalysis == 4) continue;
               samCategory = nonPromptSample;
               ind = indFake;
@@ -259,7 +275,7 @@ void treeReader::Analyze(){
           double mt1 = 9999;
           if(leptonSelectionAnalysis == 4){
             // ZZ control region
-            if(dMZ > 15) continue; // 20 GeV originally in TOP-17-005
+            if(dMZ > 20) continue; // 20 GeV originally in TOP-17-005
             mll1stpair = mll;
             std::vector<unsigned> vectorRemoved;
             vectorRemoved = ind;
@@ -269,7 +285,7 @@ void treeReader::Analyze(){
             vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(1)), vectorRemoved.end());
             dMZ = deltaMZ(vectorRemoved, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
             if(printAddInfo) cout << "second deltaMZ is : " << dMZ << endl;
-            if(dMZ > 15) continue;
+            if(dMZ > 20) continue;
             if(printAddInfo)
                 cout << "index and pt of leptons that make second Z boson: ind1->" << indOf2LonZ.at(0) << " pt1->" << _lPt[indOf2LonZ.at(0)] << " ind2->" << indOf2LonZ.at(1) << " pt2->" << _lPt[indOf2LonZ.at(1)] << endl;
             mll2ndpair = mll;
@@ -292,21 +308,21 @@ void treeReader::Analyze(){
             //if(false) continue;
 
             // WZ CR
-            if(dMZ > 10) continue;
-            if(nBLoc != 0) continue;
+            //if(dMZ > 10) continue;
+            //if(nBLoc != 0) continue;
             // in origin one this cut is not used
             //if(nJLoc < 2) continue;
             //if(_met < 30) continue;
             cosTSt = cosThetaStar(Zboson, lnegative);
             //cout << "cos theta star is: " << cosTSt << endl;
-            if(nJLoc < 1) continue;
+            //if(nJLoc < 1) continue;
 
             // ttbar CR
             // original one from TOP-17-005
             //if(!(dMZ == 999999 || !((dMZ < 10) || (nBLoc < 1)))) continue;
             
             // conversion CR
-            //if(!(mlll > 81 && mlll < 101 && dMZ > 10)) continue; //  && nBLoc == 0
+            if(!(mlll > 81 && mlll < 101 && dMZ > 10)) continue; //  && nBLoc == 0
 
             // DY CR
             /*
@@ -347,11 +363,18 @@ void treeReader::Analyze(){
             cout << "initial weight: " << weight << endl;
           }
 
-          if(!isData)
-            applyTriggerSF(weight, leptonSelection, ptCorrV[0].first);
+          double triggerSF = 1.;
+          if(!isData){
+            triggerSF = getTriggerSF(leptonSelection, ptCorrV[0].first);
+          }
+          if(printAddInfo){
+            cout << "trigger SF: " << triggerSF << endl;
+          }
+          weight = weight * triggerSF;
           
           // ---------------------- here lepton SF and PU reweighing is being applied
-          double dataMCSF = 1.;
+          double pileUpWeightFromHisto = 1.;
+          double trackSF = 1.;
           double lepSF = 1.;
           double lepSFUp = 1.;
           double lepSFDown = 1.;
@@ -363,32 +386,39 @@ void treeReader::Analyze(){
           else leptonFileDicision = 1;  
 
           //myfile << _runNb << " " << _lumiBlock << " " << _eventNb << " : ";
-          myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
+          if(samCategory == dataSample && nLocEle == 3)
+          //if(samCategory == 1 && nLocEle == 0)
+            myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
           if(std::get<0>(samples[sam]) != "nonpromptData" && std::get<0>(samples[sam]) != "data"){
 
             if(printAddInfo) cout << "number of true interactions are: " << _nTrueInt << endl;
-            dataMCSF = (is2017 ? h_dataMC_2017->GetBinContent(h_dataMC_2017->GetXaxis()->FindBin(TMath::Min(double(_nTrueInt), 99.))) : h_dataMC_2016->GetBinContent(h_dataMC_2016->GetXaxis()->FindBin(TMath::Min(double(_nTrueInt), 49.))));
+            pileUpWeightFromHisto = (is2017 ? h_dataMC_2017->GetBinContent(h_dataMC_2017->GetXaxis()->FindBin(TMath::Min(double(_nTrueInt), 99.))) : h_dataMC_2016->GetBinContent(h_dataMC_2016->GetXaxis()->FindBin(TMath::Min(double(_nTrueInt), 49.))));
 
             for(unsigned int leptonInd = 0; leptonInd < leptonSelectionAnalysis; leptonInd++){
 
                 double sfForLep = getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), 0, 0, leptonSelectionAnalysis, is2017);
+                double sfForTrackLep = getTrackingSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), 0, 0, leptonSelectionAnalysis, is2017);
                 lepSF *= sfForLep;
-                if(printAddInfo) cout << "lepton SF for lepton with pt " << _lPt[ind.at(leptonInd)] << " is " << sfForLep << endl;
+                trackSF *= sfForTrackLep;
+                if(printAddInfo) cout << "lepton SF for lepton with pt " << _lPt[ind.at(leptonInd)] << " and SC eta " << _lEtaSC[ind.at(leptonInd)] << " is " << sfForTrackLep << " " << sfForLep << endl;
                 //myfile << std::setprecision(3) << sfForLep << "\t" ;
 
-                lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), 1, 0, leptonSelectionAnalysis, is2017);
-                lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), -1, 0, leptonSelectionAnalysis, is2017);
+                //lepSFUp *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), 1, 0, leptonSelectionAnalysis, is2017);
+                //lepSFDown *= getLeptonSF(_lFlavor[ind.at(leptonInd)], _lPt[ind.at(leptonInd)], (_lFlavor[ind.at(leptonInd)] ? _lEta[ind.at(leptonInd)] : _lEtaSC[ind.at(leptonInd)]), -1, 0, leptonSelectionAnalysis, is2017);
                 if(printAddInfo) cout << "SF after " << leptonInd + 1 << " lepton is " << lepSF << endl; 
             }
           }
           //myfile << std::endl;
           
-          weight = weight * dataMCSF;
+          weight = weight * pileUpWeightFromHisto;
           if(printAddInfo){
+            cout << "pileup weight is: " << pileUpWeightFromHisto << endl;
             cout << "weight after pileup reweigning is: " << weight << endl;
+            cout << "tracking SF is " << trackSF << endl;
             cout << "lepton SF is " << lepSF << endl;
           }
 
+          weight = weight * trackSF;
           weight = weight * lepSF;
 
           if(printAddInfo){
@@ -426,6 +456,9 @@ void treeReader::Analyze(){
               double centralValue = getBTagSF(is2017, 0, _jetHadronFlavor[j], TMath::Abs(_jetEta[j]), pt, csv);
               btagSF_event *= centralValue;
               double btagEffcalc = h_btagEff[is2017][jetFlavourNumber[_jetHadronFlavor[j]] + 3 * (leptonSelection - 2)]->GetBinContent(h_btagEff[is2017][jetFlavourNumber[_jetHadronFlavor[j]] + 3 * (leptonSelection - 2)]->FindBin(TMath::Min(_jetPt[j], 599.),fabs(_jetEta[j])));
+              if(printAddInfo){
+               cout << "jet with pt: " << pt << "; has btagEffcalc: " << btagEffcalc << "; and centralValue: " << centralValue << endl;
+              }
               if(bTaggedDeepCSV(j, 1)){
                p_mc *= btagEffcalc;
                p_data *= centralValue * btagEffcalc;
@@ -463,6 +496,8 @@ void treeReader::Analyze(){
           weight = weight * btagSF_event;
 
           if(printAddInfo){
+            cout << "components of btag SF: " << p_data << " " << p_mc << endl;
+            cout << "b-tagging SF is: " << btagSF_event << endl;
             cout << "weight after b-tagging is: " << weight << endl;
           }
           
@@ -473,7 +508,7 @@ void treeReader::Analyze(){
           //myfile << _runNb << " " << _lumiBlock << " " << _eventNb << " " << lCount << " " << lCountFake << " "; //  << FRloc << endl; 
           if(printAddInfo){
               for(auto & i : ind)
-                cout << "info about all leptons: " << _lPt[i] << " " << _lEta[i] << " " << _lFlavor[i] << " " << _lCharge[i] << " " << _leptonMvatZqTTV[i]  << endl;
+                cout << "info about all leptons: " << "pt: " << _lPt[i] << " ;eta: " << _lEta[i] << " ;phi: " << _lPhi[i] << " ;flavour: " << _lFlavor[i] << " ;charge: " << _lCharge[i] << " ;lepMVA: " << _leptonMvatZqTTV[i] << " ;medId: " << _lPOGMedium[i]  << endl;
           }
 
           //if(std::get<0>(samples[sam]) == "nonpromptData"){ 
@@ -483,9 +518,9 @@ void treeReader::Analyze(){
 
             for(int j = 0; j < ind.size(); j++){
               int i = ind.at(j);
-              if(lepIsGood(i)) continue;    
+              if(lepIsGood(i, leptonSelection)) continue;    
 
-              double leptFakePtCorr = magicFactor * _lPt[i] / _ptRatio[i];
+              double leptFakePtCorr = magicFactorInAnalysis[leptonSelection]* _lPt[i] / _ptRatio[i];
               double FRloc_loc = fakeMaps.at(_lFlavor[i]).GetBinContent(fakeMaps.at(_lFlavor[i]).FindBin(TMath::Min(leptFakePtCorr,65-1.), fabs(_lEta[i])));
               //myfile << leptFakePtCorr << " " << _lEta[i] << " " << _lFlavor[i] << " ";
               if(printAddInfo) cout << "info about FO not tight lepton: " << leptFakePtCorr << " " << _lEta[i] << " " << _lFlavor[i] << " " << _leptonMvatZqTTV[i]  << endl;
@@ -564,7 +599,7 @@ void treeReader::Analyze(){
             
             vector<Float_t> varForBDT = {(Float_t)nJLoc, (Float_t)nBLoc, (Float_t)HTLoc, (Float_t)MET, (Float_t)minDeltaRlead, (Float_t)minDeltaR, (Float_t)l0p4.DeltaR(l1p4), (Float_t)mtHighest, (Float_t)mtLowest, (Float_t)leadpt, (Float_t)trailpt, (Float_t) leadingJetPt, (Float_t) trailJetPt, (Float_t)leadeta, (Float_t)traileta, (Float_t)chargeOfLeptons, (Float_t)(l0p4+l1p4).M(), (Float_t)mt2ll_ss};
             fillBDTvariables(varForBDT);
-            //mvaVL = readerTTWcsttbar->EvaluateMVA( "BDTG method");
+            mvaVL = readerTTWcsttbar->EvaluateMVA( "BDTG method");
             /*
             cout << "all variables: ";
             for(auto & value : varForBDT)
@@ -579,6 +614,7 @@ void treeReader::Analyze(){
 
           //if(chargeOfLeptons != -1) continue;
 
+          /*
           if(leptonSelectionAnalysis == 3){
 
             // WZ CR
@@ -591,8 +627,10 @@ void treeReader::Analyze(){
             distribs[31 + nLocEle].vectorHisto[samCategory].Fill(TMath::Min(mt1,figNames["mtW"].varMax-0.1),weight);
             //if(mt1 < 50) continue;
           }
+          */
 
-          distribs[7].vectorHisto[samCategory].Fill(TMath::Min(mvaVL,figNames["BDT"].varMax-0.001),weight);
+          if(samCategory != dataSample)
+            distribs[7].vectorHisto[samCategory].Fill(TMath::Min(mvaVL,figNames["BDT"].varMax-0.001),weight);
 
           int mvaValueRegion = 0;
           /*
@@ -780,7 +818,7 @@ void treeReader::Analyze(){
 //  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "deltaR", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "SRnpCR", "pteleconv", "etaeleconv", "nPV", "pt4th", "mlll", "etaLead", "etaSubl", "ptleadForw", "subleadForw", "etaLeadForw", "etaSublForw", "ptleadMiddle", "subleadMiddle", "etaLeadMiddle", "etaSublMiddle", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e"};
 
   // list for WZ
-  vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", "cosThetaStar"};
+  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", "cosThetaStar"};
   // list for Zgamma
   //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mlll"};
   // list for ttbar CR
@@ -788,7 +826,9 @@ void treeReader::Analyze(){
   // list for DY nonprompt CR
   //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e"};
   // list for ss2l ttW
-  //vector<TString> listToPrint = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "BDT", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR"};
+  //vector<TString> listToPrint = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDT"}; // 
+  // list for 4L ZZ CR
+  vector<TString> listToPrint = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
   for(int varPlot = 0; varPlot < listToPrint.size(); varPlot++){
     plot[varPlot]->cd();
     showHist(plot[varPlot],distribs[figNames[listToPrint.at(varPlot)].index],"",figNames[listToPrint.at(varPlot)].fancyName,"Events", scale_num, mtleg, false, false, dataLumi);

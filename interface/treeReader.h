@@ -215,16 +215,16 @@ class treeReader {
         unsigned dilFlavorComb(const std::vector<unsigned>&);
         double coneCorr(const unsigned);
         void setConePt();
-        bool lepIsGood(const unsigned);
-        bool lepIsFOGood(const unsigned);
+        bool lepIsGood(const unsigned, const int);
+        bool lepIsFOGood(const unsigned, const int);
         bool lepIsTight(const unsigned);
-        unsigned selectLep(std::vector<unsigned>&);
-        unsigned selectFakeLep(std::vector<unsigned>&);
+        unsigned selectLep(std::vector<unsigned>&, const int);
+        unsigned selectFakeLep(std::vector<unsigned>&, const int);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
         bool passPtCuts4L(const std::vector<unsigned>&);
-        bool jetIsClean(const unsigned);
+        bool jetIsClean(const unsigned, const int);
         bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool is2017 = false);
         unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&, bool);
         unsigned nJetsNotB(const unsigned unc, const bool clean, std::vector<unsigned>&, const unsigned wp, bool);
@@ -270,12 +270,15 @@ class treeReader {
         double magicFactor;
         bool isData = false;
         bool isDataNonprompt = false;
+        bool isChargeMisIDSample = false;
         bool is2017 = false;
         double scale = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         double dataLumi = 41.9;                                          //in units of 1/fb
         int nonPromptSample = -999;
+        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, 0.8}};
+        std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
 
         // List of branches
         TBranch        *b__runNb;   
