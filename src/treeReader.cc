@@ -13,6 +13,7 @@ treeReader::treeReader(TTree *tree) : fChain(nullptr)
     }
 }
 
+/*
 void treeReader::readSamples(const std::string& list){
     samples.clear();    //clear current sample list
     //read samples and cross sections from txt file
@@ -39,8 +40,7 @@ void treeReader::initSample(){
     isData = std::get<0>(samples[currentSample]) == "data";
     isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
     isChargeMisIDSample = std::get<0>(samples[currentSample]) == "chargeMisID";
-    sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
-    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_onZ_DYCR/" + (TString)(is2017 ? "2017MC/" : "2016MC/")  + (const TString&) std::get<1>(samples[currentSample]),"read"); 
+    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, isData || isDataNonprompt);
@@ -61,6 +61,81 @@ void treeReader::initSample(){
     }
 
     ++currentSample;    //increment the current sample for the next iteration
+}
+*/
+void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampleVector){
+    sampleVector.clear();    //clear current sample list
+    //read sample info (names and xSec) from txt file
+    std::ifstream file(list);
+    int sampleCounter = 0;
+    do {
+        sampleVector.push_back(Sample(file));
+        namesOfTheSample.push_back(sampleVector.back().getProcessName());
+        if(sampleVector.back().getProcessName() == "nonpromptData")
+            nonPromptSample = sampleCounter;
+        sampleCounter++;
+    } while(!file.eof());
+    sampleVector.pop_back();
+    file.close();       //close file after usage
+    //display samples that have been read 
+    for(auto& sample : sampleVector){
+        std::cout << sample << std::endl;
+    }
+    is2017 = list.find("2017") != std::string::npos;
+    dataLumi = is2017 ? 41.9 : 35.9;
+
+}
+
+void treeReader::readSamples(const std::string& list){
+    readSamples(list, this->samples);
+}
+
+void treeReader::initSample(const Sample& samp){ 
+
+    //update current sample
+    currentSample = samp;
+    sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(is2017 ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    sampleFile->cd("blackJackAndHookers");
+    fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
+    initTree(fChain, samp.isData());
+    nEntries = fChain->GetEntries();
+    isData = (samples[currentSampleIndex].getProcessName()) == "data";
+    isDataNonprompt = (samples[currentSampleIndex].getProcessName()) == "nonpromptData";
+
+    if(!samp.isData()){
+
+        //read sum of simulated event weights
+        TH1D* hCounter = new TH1D("hCounter", "Events counter", 1, 0, 1);
+        hCounter->Read("hCounter"); 
+        double sumSimulatedEventWeights = hCounter->GetBinContent(1);
+        delete hCounter;
+
+        //event weights set with lumi depending on sample's era 
+        /*
+        double dataLumi;
+        if( is2016() ){
+            dataLumi = lumi2016;
+        } else {
+            dataLumi = lumi2017;
+        } 
+        */
+        scale = samp.getXSec()*dataLumi*1000/sumSimulatedEventWeights;       //xSec*lumi divided by total sum of simulated event weights
+    }
+
+    if(std::find(samplesOrderNames.begin(), samplesOrderNames.end(), (samples[currentSampleIndex].getProcessName())) == samplesOrderNames.end()){
+        std::cout << "New collection: " << (samples[currentSampleIndex].getProcessName()) << "; with number: " << currentSampleIndex << std::endl;
+        samplesOrder.push_back(currentSampleIndex);
+        samplesOrderNames.push_back((samples[currentSampleIndex].getProcessName()));
+    }
+    if(currentSampleIndex == samples.size()-1){
+        samplesOrder.push_back(currentSampleIndex+1);
+    }
+
+    //++currentSampleIndex;    //increment the current sample for the next iteration
+}
+
+void treeReader::initSample(){ //initialize the next sample in the list 
+    initSample(samples[++currentSampleIndex]);
 }
 
 void treeReader::GetEntry(long unsigned entry)
@@ -154,12 +229,10 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lMuonTrackPtErr", _lMuonTrackPtErr, &b__lMuonTrackPtErr);
     fChain->SetBranchAddress("_nJets", &_nJets, &b__nJets);
     fChain->SetBranchAddress("_jetPt", _jetPt, &b__jetPt);
-    /*
     fChain->SetBranchAddress("_jetPt_JECUp", _jetPt_JECUp, &b__jetPt_JECUp);
     fChain->SetBranchAddress("_jetPt_JECDown", _jetPt_JECDown, &b__jetPt_JECDown);
     fChain->SetBranchAddress("_jetPt_JERUp", _jetPt_JERUp, &b__jetPt_JERUp);
     fChain->SetBranchAddress("_jetPt_JERDown", _jetPt_JERDown, &b__jetPt_JERDown);
-    */
     fChain->SetBranchAddress("_jetEta", _jetEta, &b__jetEta);
     fChain->SetBranchAddress("_jetPhi", _jetPhi, &b__jetPhi);
     fChain->SetBranchAddress("_jetE", _jetE, &b__jetE);
@@ -187,7 +260,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
     if(!isData){
         fChain->SetBranchAddress("_weight", &_weight, &b__weight);
         //fChain->SetBranchAddress("_nLheWeights", &_nLheWeights, &b__nLheWeights);
-        //fChain->SetBranchAddress("_lheWeight", _lheWeight, &b__lheWeight);
+        fChain->SetBranchAddress("_lheWeight", _lheWeight, &b__lheWeight);
         fChain->SetBranchAddress("_nTrueInt", &_nTrueInt, &b__nTrueInt);
         fChain->SetBranchAddress("_gen_met", &_gen_met, &b__gen_met);
         fChain->SetBranchAddress("_gen_metPhi", &_gen_metPhi, &b__gen_metPhi);

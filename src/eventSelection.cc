@@ -67,7 +67,8 @@ bool treeReader::lepIsLoose(const unsigned ind){
     if(_lFlavor[ind] == 2) return false;  //don't consider taus here
     //cout << "info about loose lepton with pt " << _lPt[ind] << ": " << (fabs(_dxy[ind]) >= 0.05) << " " << (fabs(_dz[ind]) >= 0.1) << " " << (_3dIPSig[ind] >= 8) << " " << (_miniIso[ind] >= 0.4) << " " << (_lElectronMissingHits[ind] > 1) << " " << (!_lElectronPassEmu[ind]) << " " << !_lPOGLoose[ind] << " " << !_lPOGMedium[ind] << endl;
     //cout << "lepton miniiso: " << _miniIso[ind] << endl;
-    if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
+    //if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
+    if(_lPt[ind] <= 10) return false;
     if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
     if(fabs(_dxy[ind]) >= 0.05) return false;
     if(fabs(_dz[ind]) >= 0.1) return false;
@@ -421,7 +422,7 @@ bool treeReader::leptonIsPrompt(const unsigned & l){
     return leptIsP;
 }
 
-Color_t treeReader::assignColor(std::string & name){
+Color_t treeReader::assignColor(const std::string & name){
 
     if(name == "data") return kBlack;
     if(name == "Nonprompt") return kBlue-9;
@@ -468,3 +469,77 @@ double treeReader::cosThetaStar(const TLorentzVector & Z_tlv, const TLorentzVect
     return (-beta + cosTheta) / (1 - beta*cosTheta);
 
 }
+
+bool treeReader::passTTZSelection(const int njets, const double dMZ) const{
+    if(njets < 2) return false;
+    if(dMZ > 10) return false; 
+    return true;
+}
+
+bool treeReader::passTTZCleanSelection(const int njets, const int nbjets, const double dMZ) const{
+    if(njets < 3) return false;
+    if(nbjets < 1) return false;
+    if(dMZ > 10) return false;
+    return true;
+}
+
+bool treeReader::passWZCRSelection(const int nbjets, const double dMZ) const{
+    if(nbjets != 0) return false;
+    if(dMZ > 10) return false; 
+    return true;
+}
+
+bool treeReader::passttbarCRSelection(const int nbjets, const double dMZ) const{
+    if(dMZ < 10){
+        if(nbjets == 0) return false;
+    } 
+    else if (dMZ != 999999) return false; 
+    return true;
+}
+
+bool treeReader::passZGCRSelection(const double mlll, const double dMZ) const{
+    if(dMZ < 10) return false;
+    else if (mlll < 81 || mlll > 101) return false; 
+    return true;
+}
+
+bool treeReader::passDYCRSelection(const double dMZ, const double ptNonZ, const unsigned third, const double met, const double metPhi, const int njets, const int nbjets) const{
+
+    if(dMZ > 10) return false;
+    if(met > 30) return false;
+    if(njets > 1) return false;
+    if(nbjets > 0) return false;
+
+    TLorentzVector l0p4;
+    l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
+
+    double mTthrid = mtCalc(l0p4, met, metPhi);
+
+    if(mTthrid > 30) return false;
+}
+
+bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle) const{
+    if(njets < 2) return false;
+    if(nbjets < 1) return false;
+
+    TLorentzVector l0p4, l1p4;
+    l0p4.SetPtEtaPhiE(ptCorrV[0].first, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * ptCorrV[0].first / _lPt[ind.at(0)]);
+    l1p4.SetPtEtaPhiE(ptCorrV[1].first, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * ptCorrV[1].first / _lPt[ind.at(1)]);
+
+    double ele_mll = (l0p4+l1p4).M();
+
+    if(ele_mll < 12) return false;
+    if(ele_mll > 76 && ele_mll < 106 && nEle == 2) return false;
+    if(met < 30) return false;
+    return true;
+}
+
+
+
+double treeReader::mtCalc(const TLorentzVector Vect, const double MET, const double MET_Phi) const{
+
+    double MT=sqrt(2* Vect.Pt() * MET * ( 1 - (TMath::Cos(Vect.Phi() - MET_Phi )) ) );
+    return MT;
+}
+
+

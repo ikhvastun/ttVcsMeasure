@@ -77,61 +77,7 @@ int SRID3L (int njets, int nbjets) {
 
 }
 
-void getFRmaps(vector<TH2D> & fakeMaps, bool is2017 = false, int leptonSelection = 2){
-
-    TFile *fakerate = NULL;
-
-    for (int i=0; i!=nFlavors; ++i){
-
-      fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_" + (leptonSelection == 2 ? "2L_" : "") + (is2017 ? "2017" : "2016") + (leptonSelection == 2 ? "" : "_test") + ".root","READ"); // _test used for 3L for the moment
-      //fakerate = TFile::Open("data/FRmaps/" + flavorsString[i] + "FR_data_" + (is2017 ? "2017" : "2016") + "_test.root","READ"); // _test used for 3L for the moment
-      TH2D * tempPtr = (TH2D*) (fakerate->Get("passed"));
-
-      if(tempPtr != NULL){
-        fakeMaps.push_back(*tempPtr);
-      }
-      else{
-        LastError::lasterror = Errors::FRmapsReturnNULL;
-        return;
-      }
-
-    }
-
-    LastError::lasterror = Errors::OK;
-
-}
-
 void initdistribs(std::vector<std::string> & namesOfSamples){
-
-    /*
-    for(unsigned int i = 0; i < distribs.size(); i++){
-      TString name = Form("varST_%d",i);
-      //distribs[i].colsStack = std::move(THStack(name,varN[i]));
-      distribs[i].stack.SetName(name);
-      distribs[i].stack.SetTitle(varN[i]);
-
-      distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-
-      for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
-        name = Form("var_%d_%d",i,j);
-        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-
-        name = Form("varUp_%d_%d",i,j);
-        distribs[i].vectorHistoUp[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-
-        name = Form("varDown_%d_%d",i,j);
-        distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",nBins[i],varMin[i],varMax[i]));
-        
-        distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
-
-        distribs[i].vectorHisto[j].SetMarkerStyle(20);
-        distribs[i].vectorHisto[j].SetMarkerSize(0.5);
-        distribs[i].vectorHisto[j].SetLineWidth(1);
-        if (j < nSamples)
-          distribs[i].vectorHisto[j].Sumw2();
-      }
-    }
-    */
 
     for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
 
@@ -144,11 +90,20 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         name = Form("var_%d_%d",i,j);
         distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
+        /*
         name = Form("varUp_%d_%d",i,j);
         distribs[i].vectorHistoUp[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
         name = Form("varDown_%d_%d",i,j);
         distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+        */
+        for(unsigned int k = 0; k < 6; k++){
+          name = Form("varUp_%d_%d_%d",i,j,k);
+          distribs[i].vectorHistoUncUp[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+
+          name = Form("varDown_%d_%d_%d",i,j,k);
+          distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+        }
         
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
@@ -165,7 +120,6 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }
-
     
     for(auto & histo: distribs[indexFlavour].vectorHisto) {
       for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
@@ -181,9 +135,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
     }
 
-
     for(auto & histo: distribs[indexSR].vectorHisto) {
-      
       for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
         histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
       }
@@ -192,9 +144,20 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
 
+    /*
     for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
       distribs[indexSR].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
     }
+    */
+    for(auto & histo: distribs[indexSR].vectorHistoUncUp) 
+        for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
+            for(unsigned int k = 0; k < 6; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSR].vectorHistoUncDown) 
+        for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
+            for(unsigned int k = 0; k < 6; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
 
 }
@@ -217,118 +180,6 @@ int flavourCategory4L(int nLocEle){
   
   return 1 + nLocEle / 2;
 
-}
-
-float getTrackingSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
-
-    float lepSF = 1.;
-    
-    if(flavour == 0){
-      // this one stands for tracking lepton efficiency 
-      TH2F * hist = lepSFMapsElectron[0 + is2017 * 6 + (is2017 ? (pt < 20) : 0)];
-      int etabin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(eta))); // careful, different convention
-      int ptbin  = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(pt)));
-      lepSF *= hist->GetBinContent(etabin,ptbin) + var * hist->GetBinError(etabin,ptbin) ;
-
-    }
-                
-    if(flavour == 1){
-      lepSF *= (is2017 ? 1. : lepSFMaps1DMuon[eraDecision]->Eval(eta) );
-    }
-    
-    return lepSF;
-}
-
-float getLeptonSF(int flavour, Float_t pt, Float_t eta, float var, int eraDecision, int leptonSelection, bool is2017 = false){
-
-    float lepSF = 1.;
-    
-    if(flavour == 0){
-      // 1 stands for loose on top of reco, should be applied for every WP
-      TH2F * hist = lepSFMapsElectron[1 + is2017 * 7];
-      int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
-      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-      //cout << "lepSF loose on reco: " << hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) << endl;
-
-      int neededFileIs = leptonSelection + is2017 * 7; // needed file numeration coincides with number of leptons used in analysis 
-      hist = lepSFMapsElectron[neededFileIs];
-      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(is2017 ? fabs(eta) : eta)));
-      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-      //cout << "lepSF tight on loose: " << hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) << endl;
-
-      if(leptonSelection == 2){
-        // additionally to ss2l we apply tight charge selection
-        hist = lepSFMapsElectron[5 + is2017 * 7];
-        ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-        etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(eta)));
-        lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-      }
-      
-    }
-                
-    if(flavour == 1){
-                  
-      TH2F * hist = lepSFMapsMuon[1 + is2017 * 5 - 1];
-      int ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      int etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
-      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-
-      int neededFileIs = leptonSelection + is2017 * 5 - 1; // needed file numeration coincides with number of leptons used in analysis 
-      hist = lepSFMapsMuon[neededFileIs];
-      ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-      etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
-      lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-
-      if(leptonSelection == 2){
-        // additionally to ss2l we apply tight charge selection
-        hist = lepSFMapsMuon[5 + is2017 * 5 - 1];
-        ptbin = std::max(1, std::min(hist->GetNbinsX(), hist->GetXaxis()->FindBin(pt)));
-        etabin = std::max(1, std::min(hist->GetNbinsY(), hist->GetYaxis()->FindBin(TMath::Abs(eta))));
-        lepSF *= hist->GetBinContent(ptbin,etabin) + var * hist->GetBinError(ptbin, etabin) ;
-      }
-
-    }
-    
-    return lepSF;
-}
-
-
-float getBTagSF(bool is2017, float var, int jf, float eta, float pt, float csv){
-
-   bool isBFlav = false;
-   bool isCFlav = false;
-   bool isLFlav = false;
-
-   BTagEntry::JetFlavor jfInput = BTagEntry::FLAV_UDSG;
-   int jetFlavorVariation = 0;
-   if( abs(jf) == 5 ){
-    jfInput = BTagEntry::FLAV_B;
-    jetFlavorVariation = 0;
-   }
-   else if( abs(jf) == 4 ){
-    jfInput = BTagEntry::FLAV_C;
-    jetFlavorVariation = 1;
-   } 
-   else{
-    jfInput = BTagEntry::FLAV_UDSG;
-    jetFlavorVariation = 2;
-   }
-
-   std::string varStr;
-
-   if(var == 0) varStr = "central";
-   else if(var == -1) varStr = "down_hf";
-   else if(var == -2) varStr = "down_lf";
-   else if(var == 1) varStr = "up_hf";
-   else if(var == 2) varStr = "up_lf";
-
-   float sf = 1.;
-   sf = readerBtag[is2017][jetFlavorVariation].eval_auto_bounds(varStr, jfInput, eta, pt, csv);
-                                              
-   cout << "btag sf for jet with pt " << pt << " and eta " << eta << " is " << sf << endl;
-   return sf;      
 }
 
 void addBranchToBDTTreeVariables(){
@@ -439,13 +290,6 @@ void fillBDTvariables(vector<Float_t> & varForBDT){
     usermt2ll_ss = varForBDT.at(17);
 }
 
-
-double mtCalc(TLorentzVector Vect, double MET, double MET_Phi){
-
-    double MT=sqrt(2* Vect.Pt() * MET * ( 1 - (TMath::Cos(Vect.Phi() - MET_Phi )) ) );
-
-    return MT;
-}
 
 void setStackColors(Color_t & color, int sam){
 

@@ -12,6 +12,8 @@
 #include <TF1.h>
 #include <TH1.h>
 
+#include "Reweighter.h"
+#include "Sample.h"
 
 class treeReader {
     public :
@@ -190,7 +192,7 @@ class treeReader {
         Bool_t          _HLT_IsoMu24;
         Bool_t          _HLT_IsoTkMu24;
         
-
+        bool debug;
         //Constructor
         treeReader(TTree *tree = nullptr);
 
@@ -204,11 +206,16 @@ class treeReader {
 
         //set up tree for analysis
         void readSamples(const std::string& list = ""); //read sample list from file
+        //general function to read a list of samples
+        void readSamples(const std::string&, std::vector<Sample>&);
+
         void initSample();
+        void initSample(const Sample&);
 
         //functions to analyze tree
         void GetEntry(long unsigned entry);
-        void Analyze();
+        void Analyze(const std::string& fileToAnalyse, const std::string option = "", const std::string& sampleToDebug = "", long = -999);
+        void GetEntry(const Sample&, long unsigned entry);
         void Loop(const std::string& sample, const double xSection);
 
         //functions for event selection
@@ -217,7 +224,6 @@ class treeReader {
         void setConePt();
         bool lepIsGood(const unsigned, const int);
         bool lepIsFOGood(const unsigned, const int);
-        bool lepIsTight(const unsigned);
         unsigned selectLep(std::vector<unsigned>&, const int);
         unsigned selectFakeLep(std::vector<unsigned>&, const int);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
@@ -239,18 +245,37 @@ class treeReader {
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);
         bool lepIsLoose(const unsigned ind);
+        bool passTTZSelection(const int, const double) const;
+        bool passTTZCleanSelection(const int, const int, const double) const;
+        bool passWZCRSelection(const int, const double) const;
+        bool passttbarCRSelection(const int, const double) const;
+        bool passZGCRSelection(const double, const double) const;
+        bool passDYCRSelection(const double, const double, const unsigned, const double, const double, const int, const int) const;
+        double mtCalc(const TLorentzVector Vect, const double MET, const double MET_Phi) const;
+        bool pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle) const;
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
         bool noConversionInSelection(const std::vector<unsigned>& ind);
         bool leptonFromConversion(const unsigned & l);
 
-        Color_t assignColor(std::string & name);
+        Color_t assignColor(const std::string & name);
 
         double ptFake(double lpt, double ptratio, int flavour, double mvaTTHvalue, bool mediumIdPassed);
         double ptFakeStIso(double lpt, int flavor, double isolation);
         bool twoLeptonsInEndcap(const std::vector<unsigned>& ind);
         double cosThetaStar(const TLorentzVector &, const TLorentzVector &);
+
+        double puWeight(const unsigned unc = 0);
+        double bTagWeight(const unsigned jetFlavor, const unsigned unc = 0);
+        double bTagWeight_udsg(const unsigned unc = 0);
+        double bTagWeight_c(const unsigned unc = 0);
+        double bTagWeight_b(const unsigned unc = 0);
+        double bTagWeight(const unsigned unc = 0);
+        double leptonWeight(const unsigned unc = 0);
+        void initializeWeights();
+        double sfWeight();
+        double fakeRateWeight(const unsigned unc = 0);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -259,10 +284,13 @@ class treeReader {
     private:
         TTree* fChain;                                                          //current Tree
         std::shared_ptr<TFile> sampleFile;                                      //current sample
-        std::vector<std::tuple<std::string, std::string, double> > samples;     //list of samples
+        std::vector<Sample> samples;
+        //std::vector<std::tuple<std::string, std::string, double> > samples;     //list of samples
         std::vector<std::string> namesOfTheSample;
         std::vector<Color_t> colsOfTheStack;
-        unsigned currentSample = 0;                                             //current index in list
+        //unsigned currentSampleIndex = 0;                                             //current index in list
+        Sample currentSample; 
+        int currentSampleIndex = -1;
         std::vector<unsigned> samplesOrder;
         std::vector<std::string> samplesOrderNames;
         int leptonSelection;
@@ -277,8 +305,17 @@ class treeReader {
         unsigned long nEntries = 0;
         double dataLumi = 41.9;                                          //in units of 1/fb
         int nonPromptSample = -999;
-        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, 0.8}};
+        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
         std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
+        std::shared_ptr<Reweighter> reweighter;
+
+        //bool is2017() { return currentSample.is2017(); }
+        bool is2016() { return !is2017; }                  //if sample is not 2017 it is automatically 2016
+        //bool isData() { return currentSample.isData(); }
+        //bool isMC() { return currentSample.isMC(); } 
+
+        bool isElectron(const unsigned leptonIndex) const { return (_lFlavor[leptonIndex] == 0); }
+        bool isMuon(const unsigned leptonIndex) const { return (_lFlavor[leptonIndex] == 1); }
 
         // List of branches
         TBranch        *b__runNb;   
