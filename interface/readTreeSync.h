@@ -143,7 +143,7 @@ struct histInfo{
   //bool isEnVar;
 };
 
-const int nVars  = 52;
+const int nVars  = 40;
 
 std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_{T} [GeV]", 0, 0, 300, 30}},
                                                  {"sublead", {"Sub-leading lepton p_{T} [GeV]", 1, 0, 200, 20}},
@@ -153,7 +153,7 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"njets",   {"N_{j}", 5, -0.5, 7.5, 8}},
                                                  {"nbjets",  {"N_{b}", 6, -0.5, 4.5, 5}},
                                                  {"BDT",     {"BDT", 7, -1, 1, 10}},
-                                                 {"flavour", {"flavour", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size()))))}},
+                                                 {"flavour", {"", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size()))))}},
                                                  {"SR",      {"", 9, -0.5, leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5), leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size())}},
                                                  {"mll",     {"M(ll) [GeV]", 10, 81., 101., 10}},
                                                  {"ptZ",     {"p_{T}^{Z} [GeV]", 11, 0, 400, 16}},

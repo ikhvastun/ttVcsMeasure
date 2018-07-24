@@ -13,56 +13,6 @@ treeReader::treeReader(TTree *tree) : fChain(nullptr)
     }
 }
 
-/*
-void treeReader::readSamples(const std::string& list){
-    samples.clear();    //clear current sample list
-    //read samples and cross sections from txt file
-    std::ifstream file(list);
-    std::string line;
-    while(std::getline(file, line)){
-        samples.push_back(tools::readSampleLine(line));
-    }
-    file.close();       //close file after usage
-    int sampleCounter = 0;
-    for( auto it = samples.cbegin(); it != samples.cend(); ++it){
-        std::cout << std::get<0>(*it) << "     " << std::get<1>(*it) << "      " << std::get<2>(*it) << std::endl;
-        namesOfTheSample.push_back(std::get<0>(*it));
-        if(std::get<0>(*it) == "nonpromptData")
-            nonPromptSample = sampleCounter;
-        sampleCounter++;
-        //colsOfTheStack.push_back(assignColor(std::get<0>(*it)));
-    }
-    is2017 = list.find("2017") != std::string::npos;
-    dataLumi = is2017 ? 41.9 : 35.9;
-}
-
-void treeReader::initSample(){
-    isData = std::get<0>(samples[currentSample]) == "data";
-    isDataNonprompt = std::get<0>(samples[currentSample]) == "nonpromptData";
-    isChargeMisIDSample = std::get<0>(samples[currentSample]) == "chargeMisID";
-    //sampleFile = std::make_shared<TFile>("/user/ikhvastu/Work/ntuples_ttV_" + (TString)(is2017 ? "2017/" : "2016/") + (const TString&) std::get<1>(samples[currentSample]),"read"); //  + (TString)(is2017 ? "" : "newReReco/") 
-    sampleFile->cd("blackJackAndHookers");
-    fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
-    initTree(fChain, isData || isDataNonprompt);
-    nEntries = fChain->GetEntries();
-    if(!isData && !isDataNonprompt){
-        TH1D* hCounter = new TH1D("hCounter", "Events counter", 1, 0, 1);
-        hCounter->Read("hCounter"); 
-        scale = std::get<2>(samples[currentSample])*dataLumi*1000/hCounter->GetBinContent(1);       //xSec*lumi divided by number of events
-        delete hCounter;
-    }
-    if(std::find(samplesOrderNames.begin(), samplesOrderNames.end(), std::get<0>(samples[currentSample])) == samplesOrderNames.end()){
-        std::cout << "New collection: " << std::get<0>(samples[currentSample]) << "; with number: " << currentSample << std::endl;
-        samplesOrder.push_back(currentSample);
-        samplesOrderNames.push_back(std::get<0>(samples[currentSample]));
-    }
-    if(currentSample == samples.size()-1){
-        samplesOrder.push_back(currentSample+1);
-    }
-
-    ++currentSample;    //increment the current sample for the next iteration
-}
-*/
 void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampleVector){
     sampleVector.clear();    //clear current sample list
     //read sample info (names and xSec) from txt file

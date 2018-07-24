@@ -39,10 +39,10 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
     if(lepSel != 4 && _leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[leptonSelection]){
-        if(_ptRatio[l] < (is2017 ? (lepSel == 3 ? 0.3 : 0.4) : (lepSel == 3 ? 0.4 : 0.5))) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (lepSel == 3 ? 0.2 : 0.4) : (lepSel == 3 ? 0.4 : 0.3))) return false;
+        if(_ptRatio[l] < (is2017 ? (lepSel == 3 ? 0.4 : 0.4) : (lepSel == 3 ? 0.4 : 0.5))) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (lepSel == 3 ? 0.5 : 0.4) : (lepSel == 3 ? 0.4 : 0.3))) return false;
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (lepSel == 3 ? 0.0 : 0.4) : (lepSel == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (lepSel == 3 ? 0.3 : 0.4) : (lepSel == 3 ? 0.8 : 0.3))) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (lepSel == 3 ? -0.3 : 0.4) : (lepSel == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (lepSel == 3 ? 0.6 : 0.4) : (lepSel == 3 ? 0.8 : 0.3))) return false;
 
     }
     //cout << "info about FO leptons: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _lCharge[l] << " " << _leptonMvatZqTTV[l]  << endl;
@@ -490,10 +490,11 @@ bool treeReader::passWZCRSelection(const int nbjets, const double dMZ) const{
 }
 
 bool treeReader::passttbarCRSelection(const int nbjets, const double dMZ) const{
-    if(dMZ < 10){
+    //if(!(deltaMZ == 999999 || !((deltaMZ < 10) || (mlll < 105) || (nBLoc < 1)))) continue;
+    if(dMZ < 10) return false;
+    else if(dMZ > 10 && dMZ != 999999){
         if(nbjets == 0) return false;
     } 
-    else if (dMZ != 999999) return false; 
     return true;
 }
 
@@ -516,6 +517,7 @@ bool treeReader::passDYCRSelection(const double dMZ, const double ptNonZ, const 
     double mTthrid = mtCalc(l0p4, met, metPhi);
 
     if(mTthrid > 30) return false;
+    return true;
 }
 
 bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle) const{

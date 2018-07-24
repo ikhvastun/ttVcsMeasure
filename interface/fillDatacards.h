@@ -16,279 +16,177 @@ using namespace std;
 void fillString(ofstream &, vector<TString> &);
 void fillString(ofstream &, vector<std::string> &);
 void fillString(ofstream & file, vector<double> & str);
+void fillString(ofstream & file, vector<int> & str);
 vector<double> formEmptyString(int);
+vector<int> formEmptyStringInt(int);
+vector<int> formUnityStringInt(int);
 void fillExperUnc(ofstream &, vector<std::string> & );
 
-std::vector<double> experUnc      = {1.025,  1.01, 1.02, (leptonSelectionAnalysis == 2 ? 1.02 : 1.03), 1.01}; // Didar's proposal is to use 6% for 2L, 8% for 3L, skype chat 12 Dec 2017, from Tom's map I got 3% for 2L, 4% for 3L
-std::vector<TString> experUncName = {"lumi", "PU", "trigger", "LeptonId", "JER", }; //"JES", "btagl", "btagb", "PDF", "Q2"};
+std::vector<double> experUnc      = {1.025}; 
+std::vector<TString> experUncName = {"lumi"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
 const int SRNumber = leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L.size() : theSRLabelOptionsFor3L.size();
 
-//std::vector<int> distribsOrderForYields;
-//std::vector<TString> nameOfProcessesForDatacard;
-std::vector<int> distribsOrderForDatacards; 
-
+// just an example, nameOfProcessForDatacards: data, ttZ, ttW, etc.
+// distribsOrderForYields = 0, 1, 3, ...., 
+// 0 - data
+// so 1 + 2 = ttZ
+// 3 = ttW
 void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcessesForDatacard, vector<unsigned> & distribsOrderForYields){
 
-  /*
-  There are 3 vectors here:
-    distribsOrderForDatacards -> order that is used for datacard, from 1 to 9, where 1 stands for ttW for 2L, 9 for rare
-  */
-
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
+  std::vector<double> intYield;
 
-  vector<double> wz_jec, wz_bl, wz_bb, ttx_jec, ttx_bl, ttx_bb, tth_jec, tth_bl, tth_bb, ttw_jec, ttw_bl, ttw_bb, ttz_jec, ttz_bl, ttz_bb, WZbkg;
+  // first let's calculate total yield in each category
+  for (int i = 0; i != distribsOrderForYields.size()-1; ++i) {
 
-  if(leptonSelectionAnalysis == 3){
-    wz_jec = {1.03, 1.05, 1.06, 1.02, 1.05, 1.08, 1.00, 1.06, 1.04};
-    wz_bl = {1.02, 1.02, 1.04, 1.04, 1.05, 1.06, 1.03, 1.04, 1.06};
-    wz_bb = {1.00, 1.00, 1.00, 1.01, 1.01, 1.01, 1.03, 1.03, 1.02};
+     double yield = 0;
+     for (int k = 0; k != SRNumber; ++k) {
 
-    ttx_jec = {1.00, 1.03, 1.05, 1.00, 1.03, 1.05, 1.00, 1.02, 1.05};
-    ttx_bl = {1.01, 1.02, 1.03, 1.01, 1.02, 1.03, 1.00, 1.02, 1.03};
-    ttx_bb = {1.00, 1.00, 1.00, 1.01, 1.01, 1.01, 1.02, 1.02, 1.03};
-
-    tth_jec = {1.00, 0.97, 1.05, 0.97, 0.98, 1.03, 0.96, 1.03, 1.03};
-    tth_bl = {1.01, 1.01, 1.03, 1.01, 1.01, 1.03, 1.00, 1.02, 1.03};
-    tth_bb = {1.00, 1.00, 1.00, 1.01, 1.01, 1.01, 1.02, 1.03, 1.03};
-
-    ttw_jec = {1.00, 1.00, 1.03, 0.99, 1.01, 1.04, 0.99, 1.01, 1.03};
-    ttw_bl = {1.01, 1.01, 1.03, 1.01, 1.01, 1.03, 1.00, 1.01, 1.03};
-    ttw_bb = {1.00, 1.00, 1.00, 1.01, 1.01, 1.01, 1.02, 1.02, 1.03};
-
-    ttz_jec = {0.96, 0.98, 1.02, 0.95, 0.99, 1.02, 0.96, 0.98, 1.03};
-    ttz_bl = {1.01, 1.01, 1.03, 1.01, 1.01, 1.03, 1.01, 1.01, 1.03};
-    ttz_bb = {1.00, 1.00, 1.00, 1.01, 1.01, 1.01, 1.02, 1.03, 1.03};
-
-    WZbkg = {1.10, 1.10, 1.20, 1.10, 1.10, 1.20, 1.10, 1.10, 1.20};
-  }
-
-  if(leptonSelectionAnalysis == 2){
-    ttw_jec = {1.05, 1.03, 1.01, 1.02, 1.03, 1.03, 1.01, 1.01, 1.01, 1.03, 1.05, 1.03, 1.01, 1.02, 1.03, 1.03, 1.01, 1.01, 1.01, 1.03, 1.1, 1.1, 1.1};
-    ttw_bl = {1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.03, 1.02, 1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.03, 1.02, 1.1, 1.1, 1.1};
-    ttw_bb = {1.02, 1.03, 1.05, 1.07, 1.03, 1.04, 1.03, 1.06, 1.07, 1.05, 1.02, 1.03, 1.05, 1.07, 1.03, 1.04, 1.03, 1.06, 1.07, 1.05, 1.1, 1.1, 1.1};
-
-    ttz_jec = {1.07, 1.01, 1.02, 1.03, 1.01, 1.09, 1.05, 1.01, 1.03, 1.04, 1.07, 1.01, 1.02, 1.03, 1.01, 1.09, 1.05, 1.01, 1.03, 1.04, 1.1, 1.1, 1.1};
-    ttz_bl = {1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.02, 1.01, 1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.02, 1.01, 1.1, 1.1, 1.1};
-    ttz_bb = {1.01, 1.01, 1.02, 1.01, 1.02, 1.02, 1.01, 1.02, 1.01, 1.02, 1.01, 1.01, 1.02, 1.01, 1.02, 1.02, 1.01, 1.02, 1.01, 1.02, 1.1, 1.1, 1.1};
-
-    tth_jec = {1.08, 1.02, 1.02, 1.01, 1.03, 1.05, 1.04, 1.01, 1.03, 1.03, 1.08, 1.02, 1.02, 1.01, 1.03, 1.05, 1.04, 1.01, 1.03, 1.03, 1.1, 1.1, 1.1};
-    tth_bl = {1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.02, 1.02, 1.01, 1.01, 1.01, 1.02, 1.02, 1.1, 1.1, 1.1};
-    tth_bb = {1.01, 1.01, 1.02, 1.01, 1.02, 1.01, 1.01, 1.02, 1.01, 1.02, 1.01, 1.01, 1.02, 1.01, 1.02, 1.01, 1.01, 1.02, 1.01, 1.02, 1.1, 1.1, 1.1};
-
-    ttx_jec = {1.01, 1.05, 1.05, 1.09, 1.02, 1.03, 1.01, 1.02, 1.01, 1.03, 1.01, 1.05, 1.05, 1.09, 1.02, 1.03, 1.01, 1.02, 1.01, 1.03, 1.1, 1.1, 1.1};
-    ttx_bl = {1.01, 1.01, 1.03, 1.03, 1.03, 1.01, 1.01, 1.02, 1.03, 1.03, 1.01, 1.01, 1.03, 1.03, 1.03, 1.01, 1.01, 1.02, 1.03, 1.03, 1.1, 1.1, 1.1};
-    ttx_bb = {1.01, 1.01, 1.02, 1.01, 1.02, 1.02, 1.01, 1.02, 1.01, 1.02, 1.01, 1.01, 1.02, 1.01, 1.02, 1.02, 1.01, 1.02, 1.01, 1.02, 1.1, 1.1, 1.1};
-
-    WZbkg = {1.10, 1.10, 1.10, 1.20, 1.20, 1.10, 1.10, 1.10, 1.20, 1.20, 1.10, 1.10, 1.10, 1.20, 1.20, 1.10, 1.10, 1.10, 1.20, 1.20, 1.10, 1.10, 1.20};
-  }
- 
-  int indSR[SRNumber];
-
-  for(int i = 0; i < SRNumber; i++){
-    indSR[i] = i+1;
-  }
-
-  std::vector<std::vector<std::pair<double, double> >> yields;
-
-  /*
-  for(auto & i : distribsOrderForYields){
-    cout << i << " ";
-  }
-  cout << endl;
-  */
-
-    for (int i = 0; i != distribsOrderForYields.size()-1; ++i) {
-
-        if(i != 0){
-          //cout << "what we push to distribsOrderForDatacards: " << i << endl;
-          distribsOrderForDatacards.push_back(i); // = { 1    , 2     , 3       , 4    , 5    , 6    , 7   , 8  , 9};
+        for(unsigned int j = distribsOrderForYields.at(i); j != distribsOrderForYields.at(i+1); j++){
+          yield += distribs.vectorHisto[j].GetBinContent(k+1);
         }
+     }
+     intYield.push_back(yield);
+  }
 
-        vector<pair<double, double> > yieldForEachSR;
-
-        for (int k = 0; k != SRNumber; ++k) {
-          double yield = 0;
-          double unc = 0;
-
-          for(unsigned int j = distribsOrderForYields.at(i); j != distribsOrderForYields.at(i+1); j++){
-            yield += distribs.vectorHisto[j].GetBinContent(indSR[k]);
-            unc += TMath::Power(distribs.vectorHisto[j].GetBinError(indSR[k]), 2);
-
-          }
-          yieldForEachSR.push_back((make_pair(yield, unc))); // uncertainty on stats    
-        }
-        
-        yields.push_back(yieldForEachSR);
-    }
-
-    cout << "number of SR and Categories: " << SRNumber << " " << nCategories << endl;
-
-    // datacards
-    double statUnc[SRNumber][nCategories];
-    TH1F* hSRyield[nCategories]; 
-    for(int yieldNumber = 0; yieldNumber < nCategories; yieldNumber++){
-
-        TString name = Form("hSRyield_%d",yieldNumber);
-        
-        hSRyield[yieldNumber] = new TH1F(name,name,400,0,400);
-        hSRyield[yieldNumber]->Sumw2();
-        for (int k=0; k!=SRNumber; ++k) {
-            
-            hSRyield[yieldNumber]->SetBinContent(k+1,yields.at(yieldNumber).at(k).first);
-            hSRyield[yieldNumber]->SetBinError(k+1,TMath::Sqrt(yields.at(yieldNumber).at(k).second));
-            
-            double uncy = hSRyield[yieldNumber]->GetBinContent(k+1) != 0 ? TMath::Abs(hSRyield[yieldNumber]->GetBinError(k+1) / hSRyield[yieldNumber]->GetBinContent(k+1)) : 1.00;
-            //if(yieldNumber != nCategories)
-            statUnc[k][yieldNumber] = 1 + uncy;
-
-        }
-    }
+  cout << "number of SR and Categories: " << SRNumber << " " << nCategories << endl;
     
-    nameOfProcessesForDatacard.erase(nameOfProcessesForDatacard.begin());
-    const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal and -1 for data
-        
-    for(int id = 0; id < SRNumber; id++){
+  nameOfProcessesForDatacard.erase(nameOfProcessesForDatacard.begin()); // here we erase 1 element - data
+  const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal
 
-        TString datastr;
-        if(leptonSelectionAnalysis == 2)
-          datastr  = "A" + std::to_string(id); 
-        if(leptonSelectionAnalysis == 3)
-          datastr  = "B" + std::to_string(id); 
+   gSystem->Exec("rm datacards/shapes/shapeFile_ttZ3L.root"); // delete previous tex file
+   gSystem->Exec("rm datacards/datacard_ttZ3L.txt"); // delete previous tex file
+   ofstream fileout;
+   fileout .open ( "datacards/datacard_ttZ3L.txt", ios_base::app); // create a new tex file
+   fileout << fixed << showpoint << setprecision(2);
+   fileout << "imax 1 number of channels " <<  endl;
+   fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
+   fileout << "kmax " << (leptonSelectionAnalysis == 2 ? 24 : 81) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   fileout << "----------- " <<  endl;
+   TFile *file = TFile::Open("datacards/shapes/shapeFile_ttZ3L.root", "RECREATE");
+   fileout << "shapes * * shapes/shapeFile_ttZ3L.root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
+   fileout << "-----------  " <<  endl;
+   fileout << "bin  1" <<  endl;
+   fileout << "observation  " << intYield[0] << endl;
+   fileout << "-----------  " <<  endl;
 
-        gSystem->Exec("rm datacards/" + datastr + ".txt"); // delete previous tex file
-        ofstream fileout;
-        fileout .open ( "datacards/" + datastr + ".txt", ios_base::app); // create a new tex file
-        fileout << fixed << showpoint << setprecision(2);
-        fileout << "#  " << datastr  << endl;
-        fileout << "imax 1 number of channels " <<  endl;
-        fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
-        fileout << "kmax " << (leptonSelectionAnalysis == 2 ? 24 : 22) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
-        fileout << "----------- " <<  endl;
-        fileout << "shapes * * FAKE" << endl;
-        fileout << "-----------  " <<  endl;
-        fileout << "bin          "  << datastr <<  endl;
-        fileout << "observation  " << int(hSRyield[0]->GetBinContent(id+1)) << endl;
-        fileout << "-----------  " <<  endl;
-        fileout << "bin          ";
+   vector<TString> datastrVector;
+   vector<TString> processNumberVector;
+   vector<double> rateVector;
 
-        vector<TString> datastrVector;
-        vector<TString> processNumberVector;
-        vector<double> rateVector;
+   for(int i = 1; i < nCategories; i++){ // here -1 we don't consider data
+      datastrVector.push_back(std::to_string(1));
+      processNumberVector.push_back(std::to_string(i - 1));
+      rateVector.push_back(intYield[i] < 0.01 ? 0.01 : intYield[i]);
+   }     
+     
+   fileout << "bin     " ;
+   fillString(fileout, datastrVector);
 
-        for(int i = 0; i < nCategories-1; i++){ // here -1 we don't consider data
-          datastrVector.push_back(datastr);
-          processNumberVector.push_back(std::to_string(i));
-          rateVector.push_back((hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1) < 0.01 ? 0.01 : hSRyield[distribsOrderForDatacards.at(i)]->GetBinContent(id+1)));
-        }
-        
-        fillString(fileout, datastrVector);
+   fileout << "process     " ;
+   fillString(fileout, nameOfProcessesForDatacard);
 
-        fileout << "process     " ;
-        fillString(fileout, nameOfProcessesForDatacard);
-        
-        fileout << "process     " ;
-        fillString(fileout, processNumberVector);
+   fileout << "process     " ;
+   fillString(fileout, processNumberVector);
 
-        fileout << "rate        " ;
-        fillString(fileout, rateVector);
+   fileout << "rate        " ;
+   fillString(fileout, rateVector);
 
-        fileout << "----------- " <<  endl;
-
-        
-        
-        for(int statInd = 0; statInd < numberOfBKG + 1; statInd++){
-          fileout << ("st" + nameOfProcessesForDatacard.at(statInd) + datastr + "    lnN  ");
-          vector<double> newString = formEmptyString(numberOfBKG + 1);
-          newString[statInd] = statUnc[id][distribsOrderForDatacards.at(statInd)];
-          fillString(fileout, newString);
-        }
-
-        fileout << "----------- " <<  endl;
-        fillExperUnc(fileout, nameOfProcessesForDatacard);
-
-        fileout << "JES      lnN  ";
-        vector<double> newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i <  nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "ttW")
-            newString[i] = ttw_jec[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttZ")
-            newString[i] = ttz_jec[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttH")
-            newString[i] = tth_jec[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttX")
-            newString[i] = ttx_jec[id];
-        }
-        fillString(fileout, newString);
-
-        fileout << "btagl      lnN  ";
-        newString.clear();
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i <  nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "ttW")
-            newString[i] = ttw_bl[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttZ")
-            newString[i] = ttz_bl[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttH")
-            newString[i] = tth_bl[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttX")
-            newString[i] = ttx_bl[id];
-        }
-        fillString(fileout, newString);
-
-        fileout << "btagb      lnN  ";
-        newString.clear();
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i <  nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "ttW")
-            newString[i] = ttw_bb[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttZ")
-            newString[i] = ttz_bb[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttH")
-            newString[i] = tth_bb[id];
-          if(nameOfProcessesForDatacard.at(i) == "ttX")
-            newString[i] = ttx_bb[id];
-        }
-        fillString(fileout, newString);
-
-        fileout << endl;
-        
-        fileout << "PDF      lnN  ";
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(std::find(ttVprocesses.begin(), ttVprocesses.end(), nameOfProcessesForDatacard.at(i)) != ttVprocesses.end() )
-            newString[i] = 1.01;
-        }
-        fillString(fileout, newString);
-
-        fileout << "Q2      lnN  ";
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(std::find(ttVprocesses.begin(), ttVprocesses.end(), nameOfProcessesForDatacard.at(i)) != ttVprocesses.end() )
-            newString[i] = 1.01;
-        }
-        fillString(fileout, newString);
-        fileout << endl;
-
-        fileout << ("fake     lnN ");
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "nonpromptData" || nameOfProcessesForDatacard.at(i) == "nonprompt")
-            newString[i] = 1.3;
-        }
-        fillString(fileout, newString);
-
-        if(leptonSelectionAnalysis == 2){
-          fileout << ("charge     lnN ");
-          newString = formEmptyString(numberOfBKG + 1);
-          for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-            if(nameOfProcessesForDatacard.at(i) == "chargeMisID")
-              newString[i] = 1.2;
+   // first fill stat unc
+   for(int cat = 0; cat < nCategories; cat++){ 
+       TH1D *hist, *histStUp, *histStDown;
+       if(cat == 0){
+          hist = (TH1D*)distribs.vectorHisto[cat].Clone("hist");
+          hist->SetName("data_obs");
+          hist->Write();
+          continue;
+       }
+       for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
+          if(sam == distribsOrderForYields[cat]){
+              hist = (TH1D*)distribs.vectorHisto[sam].Clone("hist");
+              histStUp = (TH1D*)distribs.vectorHisto[sam].Clone("histUp");
+              histStDown  = (TH1D*)distribs.vectorHisto[sam].Clone("histDown");
           }
-          fillString(fileout, newString);
-        }
+          else{
+            hist->Add(&distribs.vectorHisto[sam]); 
+            histStUp->Add(&distribs.vectorHisto[sam]); 
+            histStDown->Add(&distribs.vectorHisto[sam]); 
+          }
+       }
+       hist->SetName(nameOfProcessesForDatacard[cat-1].c_str());
+       hist->Write();
+       for(int sr = 0; sr < SRNumber; sr++){
+       
+         histStUp->SetBinContent(sr+1, hist->GetBinContent(sr+1) + hist->GetBinError(sr+1));
+         histStDown->SetBinContent(sr+1, hist->GetBinContent(sr+1) - hist->GetBinError(sr+1));
 
+         histStUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + "Up").c_str());
+         histStDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + "Down").c_str());
+         histStUp->Write();
+         histStDown->Write();
+
+         histStUp->SetBinContent(sr+1, hist->GetBinContent(sr+1));
+         histStDown->SetBinContent(sr+1, hist->GetBinContent(sr+1));
+
+         fileout << nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + " shape     " ;
+         vector<int> newString = formEmptyStringInt(numberOfBKG + 1); // + 1 for signal
+         newString[cat-1] = 1;
+         fillString(fileout, newString);
+       }
+   }
+
+   fileout << "----------- " <<  endl;
+   fillExperUnc(fileout, nameOfProcessesForDatacard);
+   
+   // here fill all syst shape uncertainties 
+   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "scale", "bTag_udsg", "bTag_bc"};
+   for(int syst = 0; syst < systShapeNames.size(); syst++){
+       for(int cat = 1; cat < nCategories; cat++){ 
+          TH1D *histStUp, *histStDown;
+          for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
+             if(sam == distribsOrderForYields[cat]){
+                histStUp = (TH1D*)distribs.vectorHistoUncUp[sam].unc[syst].Clone("histUp");
+                histStDown  = (TH1D*)distribs.vectorHistoUncDown[sam].unc[syst].Clone("histDown");
+             }
+             else{
+                histStUp->Add(&distribs.vectorHistoUncUp[sam].unc[syst]); 
+                histStDown->Add(&distribs.vectorHistoUncDown[sam].unc[syst]); 
+             }
+          }
+          histStUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeNames.at(syst) + "Up").c_str());
+          histStDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeNames.at(syst) + "Down").c_str());
+
+          histStUp->Write();
+          histStDown->Write();
+      }
+      fileout <<  systShapeNames.at(syst) << " shape     " ;
+      vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
+      newString[2] = 999; // don't consider uncertainty on nonprompt
+      fillString(fileout, newString);
+   }
+
+   fileout << ("fake     lnN ");
+   vector<double> newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+      if(nameOfProcessesForDatacard.at(i) == "nonpromptData" || nameOfProcessesForDatacard.at(i) == "nonprompt")
+        newString[i] = 1.3;
+   }
+   fillString(fileout, newString);
+
+   if(leptonSelectionAnalysis == 2){
+      fileout << ("charge     lnN ");
+      newString = formEmptyString(numberOfBKG + 1);
+      for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+          if(nameOfProcessesForDatacard.at(i) == "chargeMisID")
+            newString[i] = 1.2;
+      }
+      fillString(fileout, newString);
+   }
+
+   // this should be covered by scale and pdf 
+   /*
         fileout << ("ttX     lnN ");
         newString = formEmptyString(numberOfBKG + 1);
         for(int i = 1; i < nameOfProcessesForDatacard.size(); i++){
@@ -296,28 +194,25 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
             newString[i] = 1.1;
         }
         fillString(fileout, newString);
+        */
 
-        fileout << ("WZ     lnN ");
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "WZ")
-            newString[i] = WZbkg[id];
-        }
-        fillString(fileout, newString);
+   fileout << ("WZ     lnN ");
+   newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+      if(nameOfProcessesForDatacard.at(i) == "WZ")
+        newString[i] = 1.1;
+   }
+   fillString(fileout, newString);
 
-        fileout << ("rare    lnN ");
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "rare")
-            newString[i] = 1.5;
-        }
-        fillString(fileout, newString);
+   fileout << ("rare    lnN ");
+   newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+       if(nameOfProcessesForDatacard.at(i) == "rare")
+         newString[i] = 1.5;
+   }
+   fillString(fileout, newString);
 
-        fileout << endl;
-        
-        
-    }
-    
+   file->Close();
     
     std::cout << "datacard DONE" << std::endl;
 
@@ -349,11 +244,40 @@ void fillString(ofstream & file, vector<double> & str){
   file << endl;
 }
 
+void fillString(ofstream & file, vector<int> & str){
+  file << fixed << showpoint << setprecision(2);
+  for(int i = 0; i < str.size(); i++){
+    if(str.at(i) != 999)
+      file <<  str.at(i) << '\t';
+    else
+      file <<  "-" << '\t';
+  }
+  file << endl;
+}
+
 vector<double> formEmptyString(int numberOfProcesses){
   vector<double> formString;
   formString.clear();
   for(int i = 0; i < numberOfProcesses; i++)
     formString.push_back(1.0);
+  return formString;
+
+}
+
+vector<int> formEmptyStringInt(int numberOfProcesses){
+  vector<int> formString;
+  formString.clear();
+  for(int i = 0; i < numberOfProcesses; i++)
+    formString.push_back(999);
+  return formString;
+
+}
+
+vector<int> formUnityStringInt(int numberOfProcesses){
+  vector<int> formString;
+  formString.clear();
+  for(int i = 0; i < numberOfProcesses; i++)
+    formString.push_back(1);
   return formString;
 
 }
@@ -367,8 +291,8 @@ void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatac
         file << "-" << '\t' ;
       else if (nameOfProcessesForDatacard.at(statInd) == "chargeMisID")
         file << "-" << '\t' ;
-      else if (nameOfProcessesForDatacard.at(statInd) == "WZ" && experUncName.at(i) == "LeptonId")
-        file << "-" << '\t' ;
+      //else if (nameOfProcessesForDatacard.at(statInd) == "WZ" && experUncName.at(i) == "LeptonId")
+      //  file << "-" << '\t' ;
       else
         file << experUnc.at(i) << '\t' ;
     }

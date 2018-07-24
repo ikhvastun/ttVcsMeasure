@@ -161,8 +161,8 @@ void Reweighter::initializeMuonWeights(){
 void Reweighter::initializeFakeRate(){
 
     //WARNING : To be updated with new fake-rate in 2016/2017 splitting
-    TFile* frFileEl = TFile::Open("data/FRmaps/elFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + (leptonSelection == 2 ? "" : "_test") + ".root");
-    TFile* frFileMu = TFile::Open("data/FRmaps/muFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + (leptonSelection == 2 ? "" : "_test") + ".root");
+    TFile* frFileEl = TFile::Open("data/FRmaps/elFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
+    TFile* frFileMu = TFile::Open("data/FRmaps/muFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
     //const std::string frUnc[3] = {"", "_down", "_up"};
     const std::string frUnc[3] = {"", "", ""};
     for(unsigned unc = 0; unc < 3; ++unc){
@@ -285,7 +285,7 @@ double Reweighter::electronTightIdWeight(const double pt, const double eta, cons
 double Reweighter::muonFakeRate(const double pt, const double eta, const unsigned unc) const{
     //!!!! To be split for 2016 and 2017 data !!!! 
     if(unc < 3){
-        return frMapMu[unc]->GetBinContent(frMapMu[unc]->FindBin(std::min(pt, 99.), std::min(fabs(eta), 2.4) ) );
+        return frMapMu[unc]->GetBinContent(frMapMu[unc]->FindBin(std::min(pt, 44.), std::min(fabs(eta), 2.4) ) );
     } else {
         std::cerr << "Error: invalid muon fake-rate uncertainty requested: returning fake-rate 99" << std::endl;
         return 99;
@@ -295,7 +295,7 @@ double Reweighter::muonFakeRate(const double pt, const double eta, const unsigne
 double Reweighter::electronFakeRate(const double pt, const double eta, const unsigned unc) const{
     //!!!! To be split for 2016 and 2017 data !!!!
     if(unc < 3){ 
-        return frMapEle[unc]->GetBinContent(frMapEle[unc]->FindBin(std::min(pt, 99.), std::min(fabs(eta), 2.5) ) );
+        return frMapEle[unc]->GetBinContent(frMapEle[unc]->FindBin(std::min(pt, 44.), std::min(fabs(eta), 2.5) ) );
     } else {
         std::cerr << "Error: invalid electron fake-rate uncertainty requested: returning fake-rate 99" << std::endl;
         return 99;

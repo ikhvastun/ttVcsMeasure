@@ -159,27 +159,40 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
             for(unsigned int k = 0; k < 6; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
+    for(auto & histo: distribs[indexFlavour].vectorHistoUncUp) {
+        for(unsigned int k = 0; k < 6; k++){
+            for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+            histo.unc[k].GetXaxis()->SetLabelSize(0.1);
+            histo.unc[k].GetXaxis()->SetTitleSize(0.25);
+            histo.unc[k].GetXaxis()->SetLabelOffset(0.02);
+        }
+    }
+
+    for(auto & histo: distribs[indexFlavour].vectorHistoUncDown) {
+        for(unsigned int k = 0; k < 6; k++){
+            for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+            histo.unc[k].GetXaxis()->SetLabelSize(0.1);
+            histo.unc[k].GetXaxis()->SetTitleSize(0.25);
+            histo.unc[k].GetXaxis()->SetLabelOffset(0.02);
+        }
+    }
 
 }
 
-
-int flavourCategory2L(int nLocEle, int chargesTwoLepton){
-  
-  return 1 + nLocEle + 3 * (chargesTwoLepton > 0 ? 1 : 0);
-
+double flavourCategory2L(int nLocEle, int chargesTwoLepton){
+  return double(1 + nLocEle + 3 * (chargesTwoLepton > 0 ? 1 : 0));
 }
 
-
-int flavourCategory3L(int nLocEle){
-  
-  return 1 + nLocEle;
-
+double flavourCategory3L(int nLocEle){
+  return double(1 + nLocEle);
 }
 
-int flavourCategory4L(int nLocEle){
-  
-  return 1 + nLocEle / 2;
-
+double flavourCategory4L(int nLocEle){
+  return double(1 + nLocEle / 2);
 }
 
 void addBranchToBDTTreeVariables(){

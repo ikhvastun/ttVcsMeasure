@@ -1,5 +1,4 @@
 data data_combined.root                                        				1
-Z#gamma ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root              131.3 
 ttZ	 TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Summer16.root   	    		0.2728
 ttZ  TTZToLL_M-1to10_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 				0.0493 
 ttW  TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_Summer16.root  		0.2043
@@ -16,6 +15,7 @@ ttX  THW_Hincl_13TeV-madgraph-pythia8_TuneCUETP8M1_Summer16.root							0.01561
 ttX  TTWW_TuneCUETP8M2T4_13TeV-madgraph-pythia8_Summer16.root 							7.829e-3
 ttX  TTWZ_TuneCUETP8M2T4_13TeV-madgraph-pythia8_Summer16.root							2.919e-3
 ttX  TTZZ_TuneCUETP8M2T4_13TeV-madgraph-pythia8_Summer16.root							1.573e-3
+Z#gamma ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root              131.3 
 ZZ ZZTo4L_13TeV_powheg_pythia8_Summer16.root                                             1.3816
 ZZ   GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8_Summer16.root 0.005423
 ZZ   GluGluToContinToZZTo2e2tau_13TeV_MCFM701_pythia8_Summer16.root 0.005423
