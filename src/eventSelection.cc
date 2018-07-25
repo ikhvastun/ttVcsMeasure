@@ -29,18 +29,24 @@ bool treeReader::lepIsFOGood(const unsigned l){
 
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
+    if(leptonSelection == 2){
+        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
+        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+    }
     if(_leptonMvatZqTTV[l] < leptonMVAcut){
         // numbers for ttZ
-        if(_ptRatio[l] < (is2017 ? 0.3 : 0.4)) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.4 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.5 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))) return false; // 0.4 original one, medium WP : (is2017 ? 0.4941 : 0.6324)
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.0 : -0.1) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.8)) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? -0.3 : 0.4) : (leptonSelection == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.3))) return false;
         // numbers for tZq
         /*
-        if(_ptRatio[l] < (is2017 ? 0.6 : 0.7)) return false; // 0.3 for 2017
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.4)) return false;
+        if(_ptRatio[l] < (is2017 ? 0.6 : 0.6)) return false; // 0.3 for 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.3)) return false;
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.5)) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.3)) return false;
         */
     }
 

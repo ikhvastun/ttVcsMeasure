@@ -60,8 +60,8 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  readSamples("data/samples_QCD_data.txt"); // 
-  //readSamples("data/samples_QCD_data_2017.txt"); // 
+  //readSamples("data/samples_QCD_data.txt"); // 
+  readSamples("data/samples_QCD_data_2017.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -91,7 +91,7 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          //if(it > nEntries / 50) break;
           
           std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO);
@@ -120,9 +120,9 @@ void treeReader::Analyze(){
 
           double leptFakePtCorr = lepIsGood(indFO.at(0)) ? _lPt[indFO.at(0)] : magicFactorAnalysis * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];
           TLorentzVector l0p4;
-          l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          //l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           // let's implement the formula from ttH AN
-          //l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           double mtL = mtCalc(l0p4, _met, _metPhi);
 
           int fakeCS = 0;

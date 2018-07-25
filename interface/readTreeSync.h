@@ -21,7 +21,7 @@ TString rangeString[6] ={"10to15", "15to20", "20to30", "30to45", "45to65", "gr65
 TString rangeEtaString[2] ={"barrel", "endcap"};
 
 double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4; // 0.4 for ttZ
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.8 : 0.85; // 0.85 for ttZ
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.85; // 0.85 for ttZ
 
 struct BinLabelOptions{
   int index;
