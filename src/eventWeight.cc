@@ -82,6 +82,11 @@ double treeReader::leptonWeight(const unsigned unc){
     return sf;
 }
 
+// trigger SF
+double treeReader::triggerWeight(){
+    return reweighter->getTriggerSF(ptCorrV[0].first);
+}
+
 //check if scale-factors have to be initialized, and do so if needed
 void treeReader::initializeWeights(){
     static bool weightsAre2016 = is2016();
@@ -99,6 +104,7 @@ double treeReader::sfWeight(){
     sf *= bTagWeight();
     sf *= leptonWeight();
     sf *= fakeRateWeight();
+    sf *= triggerWeight();
     if( sf == 0){
         std::cerr << "Error: event sf is zero! This has to be debugged! evNumber: " << _eventNb << "; sf(pu, btag, lep): " << puWeight() << " " << bTagWeight() << " " << leptonWeight() << std::endl;
     } else if( std::isnan(sf) ){

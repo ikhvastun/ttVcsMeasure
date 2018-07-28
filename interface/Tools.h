@@ -1,9 +1,10 @@
-const unsigned int indexSR = 9;
-const unsigned int indexFlavour = 8; 
+//const unsigned int indexSR = 9;
+//const unsigned int indexFlavour = 8; 
 
 #include "errors.h"
-#include "../interface/treeReader.h"
-#include "../interface/mt2_bisect.h"
+#include "treeReader.h"
+#include "mt2_bisect.h"
+#include "readTreeSync.h"
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
 
@@ -90,14 +91,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         name = Form("var_%d_%d",i,j);
         distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
-        /*
-        name = Form("varUp_%d_%d",i,j);
-        distribs[i].vectorHistoUp[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
-
-        name = Form("varDown_%d_%d",i,j);
-        distribs[i].vectorHistoDown[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
-        */
-        for(unsigned int k = 0; k < 6; k++){
+        for(unsigned int k = 0; k < numberOfSyst; k++){
           name = Form("varUp_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoUncUp[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
@@ -144,23 +138,18 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
 
-    /*
-    for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
-      distribs[indexSR].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-    }
-    */
     for(auto & histo: distribs[indexSR].vectorHistoUncUp) 
         for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
-            for(unsigned int k = 0; k < 6; k++)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
     for(auto & histo: distribs[indexSR].vectorHistoUncDown) 
         for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
-            for(unsigned int k = 0; k < 6; k++)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
     for(auto & histo: distribs[indexFlavour].vectorHistoUncUp) {
-        for(unsigned int k = 0; k < 6; k++){
+        for(unsigned int k = 0; k < numberOfSyst; k++){
             for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
@@ -171,7 +160,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
     }
 
     for(auto & histo: distribs[indexFlavour].vectorHistoUncDown) {
-        for(unsigned int k = 0; k < 6; k++){
+        for(unsigned int k = 0; k < numberOfSyst; k++){
             for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
@@ -303,7 +292,6 @@ void fillBDTvariables(vector<Float_t> & varForBDT){
     usermt2ll_ss = varForBDT.at(17);
 }
 
-
 void setStackColors(Color_t & color, int sam){
 
     for(unsigned int i = 0; i < distribs.size(); i++){
@@ -317,11 +305,19 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
     return  asymm_mt2_lester_bisect::get_mT2(l1.M(), l1.Px(), l1.Py(), l2.M(), l2.Px(), l2.Py(), metVec.Px(), metVec.Py(), 0, 0);
 }
 
-double getTriggerSF(int leptonSelection, const double leptPt, bool is2017 = false){
-    if(leptonSelection == 3 && leptPt < 120 && is2017)
-        //weight *= 0.985; // got it from Daniel's trigger measurement, agreed with him on skype, 5 Jul 2018
-        return 0.985;
-    if(leptonSelection == 3 && leptPt < 80 && !is2017)
-        return 0.966000020504;
-    return 1.;
+void initListsToPrint(const std::string & selection){
+
+  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
+  listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mlll"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV"};
+  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e"};
+  listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDT"}; 
+  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
+  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
+
+  if(listToPrint.find(selection) == listToPrint.end()){
+      std::cerr << "control region selection is incorrect, please double check" << std::endl;
+      exit(EXIT_FAILURE);
+  }
+
 }

@@ -10,11 +10,12 @@
 #include "TFrame.h"
 #include "TMath.h"
 #include "TGraphAsymmErrors.h"
+#include "TExec.h"
+#include "TColor.h"
+
 #include "CMS_lumi.h"
 #include "Output.h"
 #include "readTreeSync.h"
-#include "TExec.h"
-#include "TColor.h"
 
 const int iPeriod = 4;    // 1=7TeV, 2=8TeV, 3=7+8TeV, 7=7+8+13TeV
 const int iPos =0;
@@ -24,7 +25,11 @@ using namespace std;
 using Output::distribs;
 using Output::DistribsAll;
 
-void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titleX, string titleY, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, double lumi = 35.9){
+void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
+void setUpSystUnc(DistribsAll &, TH1D *);
+void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
+void printInfoOnPlot3L();
+void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, double lumi = 35.9){
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
@@ -37,17 +42,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
-    // stack here corresponds to all MC
-    double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
-    double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
-    //pad1->DrawFrame(xmin, -0.1, xmax, 1.1);
-    
     dataHist->SetMarkerSize(1);
-    dataHist->SetTitle(title.c_str());
-    dataHist->GetXaxis()->SetTitle(titleX.c_str());
-    dataHist->GetYaxis()->SetTitle(titleY.c_str());
+    dataHist->SetTitle("");
+    dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
+    dataHist->GetYaxis()->SetTitle(("Events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
     dataHist->SetMinimum(0.01);
     dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
+    if(plotInLog)
+        dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num * 5);
     dataHist->GetXaxis()->SetLabelOffset(0.02);
     
     dataHist->Draw("E0");
@@ -59,6 +61,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
+
+    if(info.index == indexSR){
+       dataHist->GetXaxis()->SetTitleSize(0.07);
+       dataHist->GetXaxis()->SetTitleOffset(0.8);
+       printInfoOnPlot3L();
+    }
 
     if(xPad == 0) return;
 
@@ -73,28 +81,89 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     pad2->RedrawAxis();
     pad2->cd();
 
-    // here data and MC are copied to draw on ratio plot
-    TH1D *dataCopy = (TH1D*)dataHist->Clone("dataCopy");
     TH1D *stackCopy = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopy");
+    TH1D *dataCopy = (TH1D*)dataHist->Clone("dataCopy");
     dataCopy->Divide(stackCopy);
-    // first let's calculate uncertainties for data
     TGraphAsymmErrors * dataCopyGraph = new TGraphAsymmErrors(dataCopy);
+    // calculate asymmetric uncertainties for data
+    calculateRatioUnc(dataCopyGraph, dataHist, stackCopy);
 
-    for(int i = 0; i < dataCopyGraph->GetN(); i++){
+    setUpRatioFeatures(stackCopy, dataCopyGraph, info, xPad);
 
-      double dataPoint[3] = {dataHist->GetBinContent(i+1), dataHist->GetBinErrorUp(i+1), dataHist->GetBinErrorLow(i+1)};
-      double theMCPoint[3] = {stackCopy->GetBinContent(i+1), stackCopy->GetBinErrorUp(i+1), stackCopy->GetBinErrorLow(i+1)};
+    TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
+    setUpSystUnc(distribs, histSystAndStatUnc);
 
-      double uncRatio[2];
+    TLegend* mtlegRatio = new TLegend(0.17,0.39,0.85,0.58);
+    mtlegRatio->SetNColumns(4);
+    mtlegRatio->SetFillColor(0);
+    mtlegRatio->SetFillStyle(0);
+    mtlegRatio->SetBorderSize(0);
+    mtlegRatio->SetTextFont(42);
 
-      // calculating the uncertainty for a / b
-      // using formula: delta Unc ^ 2 = ( (a/b)'_a (delta a) ) ^ 2 + ( (a/b)'_b (delta b) ) ^ 2
+    mtlegRatio->AddEntry(stackCopy, "Stat", "f");
+    mtlegRatio->AddEntry(histSystAndStatUnc, "Stat+Syst", "f");
 
-      uncRatio[0] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[1], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[1], 2));
-      uncRatio[1] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[2], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[2], 2));
+    // Draw finally the things
+    stackCopy->Draw("axis");
+    histSystAndStatUnc->Draw("e2same");
+    stackCopy->Draw("e2same");
 
-      dataCopyGraph->SetPointError(i, dataCopyGraph->GetErrorXlow(i), dataCopyGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
-    }
+    double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
+    double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
+    TLine *line = new TLine(xmin, 1, xmax, 1);
+    line->SetLineStyle(2);
+    line->Draw("same");
+
+    mtlegRatio->Draw("same");
+    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+
+    pad2->RedrawAxis();
+    pad2->Update();
+}
+
+void printInfoOnPlot3L(){
+
+    TLine *line1 = new TLine(2.5, 0, 2.5, 1125);
+    line1->SetLineStyle(2);
+    line1->Draw("same");
+
+    TLine *line2 = new TLine(5.5, 0, 5.5, 1125);
+    line2->SetLineStyle(2);
+    line2->Draw("same");
+
+    TLatex nbjetsEq0region;
+    nbjetsEq0region.SetNDC();
+    nbjetsEq0region.SetTextAngle(0);
+    nbjetsEq0region.SetTextColor(kBlack);
+
+    nbjetsEq0region.SetTextFont(42);
+    nbjetsEq0region.SetTextAlign(31);
+    nbjetsEq0region.SetTextSize(0.05);
+    nbjetsEq0region.DrawLatex(0.35, 0.56,"N_{b} = 0");
+
+    TLatex nbjetsEq1region;
+    nbjetsEq1region.SetNDC();
+    nbjetsEq1region.SetTextAngle(0);
+    nbjetsEq1region.SetTextColor(kBlack);
+
+    nbjetsEq1region.SetTextFont(42);
+    nbjetsEq1region.SetTextAlign(31);
+    nbjetsEq1region.SetTextSize(0.05);
+    nbjetsEq1region.DrawLatex(0.64, 0.56,"N_{b} = 1");
+
+    TLatex nbjetsEq2region;
+    nbjetsEq2region.SetNDC();
+    nbjetsEq2region.SetTextAngle(0);
+    nbjetsEq2region.SetTextColor(kBlack);
+
+    nbjetsEq2region.SetTextFont(42);
+    nbjetsEq2region.SetTextAlign(31);
+    nbjetsEq2region.SetTextSize(0.05);
+    nbjetsEq2region.DrawLatex(0.91, 0.56,"N_{b} > 1");
+}
+
+void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, histInfo & info, double xPad){
+
     // this one will be used on the ratio plot
     stackCopy->Divide(stackCopy);
 
@@ -103,18 +172,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     stackCopy->SetMarkerStyle(1);
 
     stackCopy->SetTitle("");
-    stackCopy->GetXaxis()->SetTitle(titleX.c_str());
-    if(titleX == "trilep")
-      stackCopy->GetXaxis()->SetTitle("");
+    stackCopy->GetXaxis()->SetTitle(info.fancyName.c_str());
     stackCopy->GetYaxis()->SetTitle("data/pred");
-
-    stackCopy->GetXaxis()->SetRangeUser(xmin, xmax);
 
     stackCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    if(titleX != "")
+    if(info.index != indexSR && info.index != indexFlavour)
         stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     else
         stackCopy->GetXaxis()->SetLabelSize(0.25);
@@ -126,12 +191,33 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     dataCopyGraph->SetMarkerSize(0.5);
 
-    stackCopy->Draw("axis");
+}
+
+void calculateRatioUnc(TGraphAsymmErrors * dataGraph, TH1D * data, TH1D * stack){
+
+    for(int i = 0; i < dataGraph->GetN(); i++){
+
+      double dataPoint[3] = {data->GetBinContent(i+1), data->GetBinErrorUp(i+1), data->GetBinErrorLow(i+1)};
+      double theMCPoint[3] = {stack->GetBinContent(i+1), stack->GetBinErrorUp(i+1), stack->GetBinErrorLow(i+1)};
+
+      double uncRatio[2];
+
+      // calculating the uncertainty for a / b
+      // using formula: delta Unc ^ 2 = ( (a/b)'_a (delta a) ) ^ 2 + ( (a/b)'_b (delta b) ) ^ 2
+
+      uncRatio[0] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[1], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[1], 2));
+      uncRatio[1] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[2], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[2], 2));
+
+      dataGraph->SetPointError(i, dataGraph->GetErrorXlow(i), dataGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
+    }
+}
+
+void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
+
     // histSystAndStatUnc - a histogram with central value at 1 and with applied one of the uncertainties on top: JEC, JES and Uncl
-    TH1D *histSystAndStatUnc;
-    histSystAndStatUnc =  (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
+    //TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
+    TH1D *stackCopy = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopy");
     // stack of MC with varied up and down of 3 different types of uncertainties
-    const int numberOfSyst = 5;
     TH1D *stackUncUp[numberOfSyst];
     TH1D *stackUncDown[numberOfSyst];
 
@@ -176,103 +262,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     histSystAndStatUnc->SetFillStyle(1001);
     histSystAndStatUnc->SetFillColor(kOrange - 4);
     histSystAndStatUnc->SetMarkerStyle(1);
-
-    TLegend* mtlegRatio = new TLegend(0.17,0.39,0.85,0.58);
-    mtlegRatio->SetNColumns(4);
-    mtlegRatio->SetFillColor(0);
-    mtlegRatio->SetFillStyle(0);
-    mtlegRatio->SetBorderSize(0);
-    mtlegRatio->SetTextFont(42);
-
-    mtlegRatio->AddEntry(stackCopy, "Stat", "f");
-    mtlegRatio->AddEntry(histSystAndStatUnc, "Stat+Syst", "f");
-
-    //histSystAndStatUnc->Draw("e2same");
-    stackCopy->Draw("e2same");
-    mtlegRatio->Draw("same");
-
-    TLine *line = new TLine(xmin, 1, xmax, 1);
-    line->SetLineStyle(2);
-
-    line->Draw("same");
-
-    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
-
-    pad2->RedrawAxis();
-    pad2->Update();
+    histSystAndStatUnc->Draw("same");
 }
-
-/*
-void drawSystUnc(TVirtualPad* c1, DistribsAll & distribs, int process){
-
-    double xmin = distribs.vectorHisto[process].GetXaxis()->GetXmin();
-    double xmax = distribs.vectorHisto[process].GetXaxis()->GetXmax();
-
-    double xPad = 0.25; // 0.25
-
-    TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
-    pad1->SetTopMargin(0.07);
-    if(xPad != 0)
-        pad1->SetBottomMargin(0.02);
-    pad1->Draw();
-    pad1->cd();
-
-    distribs.vectorHisto[process].SetFillColor(0);
-    distribs.vectorHisto[process].Draw("hist");
-
-    distribs.vectorHistoUp[process].SetLineColor(kRed);
-    distribs.vectorHistoUp[process].SetLineStyle(2);
-    distribs.vectorHistoUp[process].Draw("histsame");
-
-    distribs.vectorHistoDown[process].SetLineColor(kRed);
-    distribs.vectorHistoDown[process].SetLineStyle(3);
-    distribs.vectorHistoDown[process].Draw("histsame");
-
-    //if(xPad == 0) return;
-
-    c1->cd();
-
-    TPad *pad2 = new TPad("pad2","pad2",0,0,1,xPad);
-    
-    pad2->SetBottomMargin((1.-xPad)/xPad*0.13);
-    pad2->SetTopMargin(0.06);
-
-    pad2->Draw();
-    pad2->RedrawAxis();
-    pad2->cd();
-
-    TH1D * var = (TH1D*)distribs.vectorHisto[process].Clone("var");
-    TH1D * varUp = (TH1D*)distribs.vectorHistoUp[process].Clone("varUp");
-    TH1D * varDown = (TH1D*)distribs.vectorHistoDown[process].Clone("varDown");
-    
-    varUp->Divide(var);
-    varDown->Divide(var);
-
-    TLine *line = new TLine(xmin, 1, xmax, 1);
-    line->SetLineStyle(2);
-
-    varUp->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
-    varUp->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    varUp->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
-    varUp->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    varUp->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    varUp->GetXaxis()->SetTitle("");
-    varUp->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.055);
-    varUp->GetXaxis()->SetLabelOffset(0.03);
-
-    varUp->SetMaximum(1.2);
-    varUp->SetMinimum(0.8);
-
-    varUp->Draw("axis");
-    
-    line->Draw("same");
-
-    varUp->Draw("histsame");
-    varDown->Draw("histsame");
-
-    pad2->Update();
-    
-}   
-*/
 
 #endif  // showHist

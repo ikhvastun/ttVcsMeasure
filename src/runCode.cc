@@ -49,14 +49,14 @@ using namespace tools;
 Errors LastError::lasterror = Errors::UNKNOWN;
 using Output::distribs;
 
-void treeReader::Analyze(const string& fileToAnalyse, const std::string option, const string& sampleToDebug, long evNb){
-//void treeReader::Analyze(){
+void treeReader::Analyze(const string& fileToAnalyse, const std::string option, const std::string selection, const string& sampleToDebug, long evNb){
 
   debug = (option == "debug" ? true : false);
   leptonSelection = leptonSelectionAnalysis;
+  initListsToPrint(selection);
   //Set CMS plotting style
   setTDRStyle();
-  //gROOT->SetBatch(kTRUE);
+  gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   cout << "reading sample file...." << endl;
   readSamples(fileToAnalyse);
@@ -68,7 +68,6 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
   initdistribs(namesOfSamples);
   cout << "finished with initiating of histos"<< endl;
 
-  
   if(leptonSelectionAnalysis == 2){
 
     // for reading values from xml files
@@ -111,23 +110,27 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
 
           GetEntry(it);
           if(debug && _eventNb != evNb) continue;
-          if(debug) cout << "event weight is " << weight << " after get entry" << endl; 
           
+          // trigger and met filters
           if(!(_passTrigger_e || _passTrigger_m || _passTrigger_ee || _passTrigger_em || _passTrigger_mm || _passTrigger_eee || _passTrigger_eem || _passTrigger_emm || _passTrigger_mmm)) continue;
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          //if(it > nEntries / 100) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
-          //select leptons
+          //select leptons relative to the analysis
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
 
+          // discard heavy flavour resonances
           if(invMassOfAny2Lbelow12GeV(indFake)) continue;
 
+          // selection of category for the event
+          // 2L: possible contribution from TT, TF and FF; TTF is vetoed
+          // 3L: TTT, TTF, TFF, FFF; for TTTF should consider if event pass 4L TTTT criteria
+          // 4L: TTTT only combination is possible
           int samCategory = sam;
-
           std::vector<unsigned> ind;
           //used for main analysis
           // remove additional FO lepton from ss2l selection
@@ -157,6 +160,7 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           if(leptonSelectionAnalysis == 2)
             if(_lCharge[ind.at(0)] * _lCharge[ind.at(1)] < 0) continue;
 
+          // consider only prompt leptons from the MC, all nonprompt should be taken into account by DD estimation
           bool allLeptonsArePrompt = true;
           
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData")
@@ -165,11 +169,12 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           if((samples[sam].getProcessName()) == "chargeMisID" && !allLeptonsArePrompt) continue;
           if((samples[sam].getProcessName()) == "Nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
-          if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ" || (samples[sam].getProcessName()) == "ttX" || (samples[sam].getProcessName()) == "WZ" || (samples[sam].getProcessName()) == "Z#gamma"  || (samples[sam].getProcessName()) == "ZZ" || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
+          if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ" || (samples[sam].getProcessName()) == "ttX" || (samples[sam].getProcessName()) == "WZ" || (samples[sam].getProcessName()) == "Zgamma"  || (samples[sam].getProcessName()) == "ZZ" || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
 
           int nLocEle = getElectronNumber(ind);
-          if(nLocEle != 3) continue;
+          //if(nLocEle != 3) continue;
 
+          // lepton pt criteria
           if(leptonSelectionAnalysis == 4)
             if(!passPtCuts4L(ind)) continue;
           if(leptonSelectionAnalysis == 3)
@@ -177,6 +182,7 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           if(leptonSelectionAnalysis == 2)
             if(!passPtCuts2L(ind)) continue;
 
+          // select here jets, bjets, delta from M of Z boson, HT
           std::vector<unsigned> indJets;
           std::vector<unsigned> indJetsNotB;
 
@@ -187,8 +193,12 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           double ptNonZ = 999999;
 
           nJLoc = nJets(0, true, indJets, is2017);
+          int nJLocDown = nJets(1, true, indJets, is2017);
+          int nJLocUp = nJets(2, true, indJets, is2017);
           nJLocNotB = nJetsNotB(0, true, indJetsNotB, 2, is2017);
           nBLoc = nBJets(0, true, true, 1, is2017);
+          int nBLocDown = nBJets(1, true, true, 1, is2017);
+          int nBLocUp = nBJets(2, true, true, 1, is2017);
 
           TLorentzVector Zboson, lnegative;
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
@@ -216,13 +226,20 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
 
           if(leptonSelectionAnalysis == 3){
             
-            if(!passTTZSelection(nJLoc, dMZ)) continue;
-            //if(!passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
-            //if(!passWZCRSelection(nBLoc, dMZ)) continue;
-            //if(!passDYCRSelection(dMZ, ptNonZ, third, _met, _metPhi, nJLoc, nBLoc)) continue;
-            //if(!passttbarCRSelection(nBLoc, dMZ)) continue;
-            //passZGCRSelection(mlll, dMZ);
-            cosTSt = cosThetaStar(Zboson, lnegative);
+            if(selection == "ttZ3L" && !passTTZSelection(nJLoc, dMZ)) continue;
+            if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
+            if(selection == "WZ" && !passWZCRSelection(nBLoc, dMZ)) continue;
+            if(selection == "DY" && !passDYCRSelection(dMZ, ptNonZ, third, _met, _metPhi, nJLoc, nBLoc)) continue;
+
+            // if Z boson is reconstructed then we can calculate mt for 3 rd lepton and cos theta star
+            if(dMZ < 10){
+                TLorentzVector l0p4;
+                l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
+                mt1 = mtCalc(l0p4, _met, _metPhi);
+                cosTSt = cosThetaStar(Zboson, lnegative);
+            }
+            if(selection == "ttbar" &&!passttbarCRSelection(nBLoc, dMZ)) continue;
+            if(selection == "Zgamma" && !passZGCRSelection(mlll, dMZ)) continue;
 
           }
           
@@ -230,13 +247,7 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
             pass2Lpreselection(nJLoc, nBLoc, ind, _met, nLocEle);
           }
           
-          double triggerSF = 1.;
-          if(!isData) triggerSF = getTriggerSF(leptonSelection, ptCorrV[0].first);
-          if(debug) cout << "trigger SF: " << triggerSF << endl;
-          weight = weight * triggerSF;
 
-          if(debug) cout << "weight is " << weight <<  " after trigger SF" << endl;
-          
           double mvaVL = 0;
 
           if(leptonSelectionAnalysis == 2){
@@ -302,21 +313,11 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
             
           }
 
-          //if(chargeOfLeptons != -1) continue;
+          // weight estimation for event
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData")
             weight *= sfWeight();
           if(samples[sam].getProcessName() == "data" && samCategory == nonPromptSample)
             weight *= fakeRateWeight();
-
-          if(leptonSelectionAnalysis == 3){
-
-            // WZ CR
-            TLorentzVector l0p4;
-            l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
-
-            mt1 = mtCalc(l0p4, _met, _metPhi);
-            //if(mt1 < 50) continue;
-          }
 
           if(debug) cout << "weight of event is " << weight << endl;
 
@@ -344,6 +345,24 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
                                    _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelectionAnalysis > 2 ? ptCorrV[2].second : -999.), (leptonSelectionAnalysis > 3 ? ptCorrV[3].second : -999.),
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss};
+          vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelectionAnalysis > 2 ? ptCorrV[2].first : 0., leptonSelectionAnalysis > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocUp), double(nBLocUp), mvaVL,
+                                   (leptonSelectionAnalysis == 4 ? flavourCategory4L(nLocEle) : (leptonSelectionAnalysis == 3 ? flavourCategory3L(nLocEle) : flavourCategory2L(nLocEle,_lCharge[ind.at(0)]))), 
+                                   leptonSelectionAnalysis == 4 ? 0. : (leptonSelectionAnalysis == 3 ? SRID3L(nJLocUp, nBLocUp) : SRID2L(nJLocUp, nBLocUp, mvaValueRegion, _lCharge[ind.at(0)])),
+                                   (leptonSelectionAnalysis != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelectionAnalysis > 2 ? ptCorrV[2].second : -999.), (leptonSelectionAnalysis > 3 ? ptCorrV[3].second : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss};
+          vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelectionAnalysis > 2 ? ptCorrV[2].first : 0., leptonSelectionAnalysis > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocDown), double(nBLocDown), mvaVL,
+                                   (leptonSelectionAnalysis == 4 ? flavourCategory4L(nLocEle) : (leptonSelectionAnalysis == 3 ? flavourCategory3L(nLocEle) : flavourCategory2L(nLocEle,_lCharge[ind.at(0)]))), 
+                                   leptonSelectionAnalysis == 4 ? 0. : (leptonSelectionAnalysis == 3 ? SRID3L(nJLocDown, nBLocDown) : SRID2L(nJLocDown, nBLocDown, mvaValueRegion, _lCharge[ind.at(0)])),
+                                   (leptonSelectionAnalysis != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelectionAnalysis > 2 ? ptCorrV[2].second : -999.), (leptonSelectionAnalysis > 3 ? ptCorrV[3].second : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss};
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
                                      "mtW", "njets", "nbjets", "BDT", 
                                      "flavour", 
@@ -357,7 +376,6 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           for(int dist = 0; dist < fillVar.size(); dist++){
             distribs[dist].vectorHisto[samCategory].Fill(TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1),weight);
 
-            /*
             if((samples[sam].getProcessName()) != "data"){
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * leptonWeight(1) / leptonWeight(0));
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * leptonWeight(2) / leptonWeight(0));
@@ -365,14 +383,17 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight*puWeight(1)/puWeight(0));
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight*puWeight(2)/puWeight(0));
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_udsg(1)/bTagWeight_udsg(0));
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_udsg(2)/bTagWeight_udsg(0));
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_udsg(1)/bTagWeight_udsg(0));
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_udsg(2)/bTagWeight_udsg(0));
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_c(1)*bTagWeight_b(1)/bTagWeight_c(0)/bTagWeight_b(0));
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_c(2)*bTagWeight_b(2)/bTagWeight_c(0)/bTagWeight_b(0));
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_c(1)*bTagWeight_b(1)/bTagWeight_c(0)/bTagWeight_b(0));
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*bTagWeight_c(2)*bTagWeight_b(2)/bTagWeight_c(0)/bTagWeight_b(0));
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]);
 
             }
             else if(samCategory == nonPromptSample){
@@ -391,8 +412,10 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
 
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
+
             }
-            */
           }
       }
 
@@ -431,12 +454,12 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
         cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
 
         if(leptonSelectionAnalysis == 3 && samplesOrderNames.at(count) == "chargeMisID") continue;
-        if(samplesOrderNames.at(count) != "nonpromptData") // && samplesOrderNames.at(count) != "Zgamma")
+        if(samplesOrderNames.at(count) != "nonpromptData" && samplesOrderNames.at(count) != "Zgamma")
             mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
         else if(samplesOrderNames.at(count) == "nonpromptData")
             mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"Nonprompt","f");
-        //else if(samplesOrderNames.at(count) == "Zgamma")
-        //    mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"Z#gamma","f");
+        else if(samplesOrderNames.at(count) == "Zgamma")
+            mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"Z#gamma","f");
   }
 
   count = 0;
@@ -453,7 +476,10 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
       count++;
   }
 
-  gSystem->Exec("rm plotsForSave/*");
+  std::string processToStore = selection;
+  gSystem->Exec("rm plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/*.{pdf,png,root}");
+  gSystem->Exec("rmdir plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore);
+  gSystem->Exec("mkdir plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore);
   double scale_num = 1.6;
   
   TCanvas* plot[nVars];
@@ -461,38 +487,23 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   }
 
-//  general list, don't erase
-//  vector<TString> namesForSaveFiles = {"ptlead", "sublead", "trail", "njets", "nbjets", "SR", "flavour", "BDT", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "deltaR", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "SRnpCR", "pteleconv", "etaeleconv", "nPV", "pt4th", "mlll", "etaLead", "etaSubl", "ptleadForw", "subleadForw", "etaLeadForw", "etaSublForw", "ptleadMiddle", "subleadMiddle", "etaLeadMiddle", "etaSublMiddle", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e"};
+  std::string crToPrint = selection;
 
-  // list for WZ
-  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", "cosThetaStar"};
-  // list for Zgamma
-  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mlll"};
-  // list for ttbar CR
-  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV"};
-  // list for DY nonprompt CR
-  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e"};
-  // list for ss2l ttW
-  //vector<TString> listToPrint = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDT"}; // 
-  // list for 4L ZZ CR
-  //vector<TString> listToPrint = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
-  // list for ttZ 3l signal seleciton
-  vector<TString> listToPrint = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
-  //vector<TString> listToPrint = {"SR"};
-  for(int varPlot = 0; varPlot < listToPrint.size(); varPlot++){
+  for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint.at(varPlot)].index],"",figNames[listToPrint.at(varPlot)].fancyName,"Events", scale_num, mtleg, false, false, dataLumi);
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + ".root");
+    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, dataLumi);
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint.at(varPlot)].index],"",figNames[listToPrint.at(varPlot)].fancyName,"Events", scale_num, mtleg, true, false, dataLumi);
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + "Log.pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + "Log.png");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint.at(varPlot) + "Log.root");
+    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, dataLumi);
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
+    plot[varPlot]->SaveAs("plotsForSave/" + (TString)(is2017 ? "2017/" : "2016/") + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
   }
   
-  //fillDatacards(distribs[indexSR], samplesOrderNames, samplesOrder);
+  if(crToPrint == "ttZ3L")
+      fillDatacards(distribs[indexSR], samplesOrderNames, samplesOrder);
 }
 
 int main(int argc, const char **argv)
@@ -502,27 +513,63 @@ int main(int argc, const char **argv)
     for(int i = 0; i < argc; ++i){
         cout << "Argument " << i << " " << argv[i] << endl;
     }
-    TApplication *rootapp = new TApplication("example", &rargc, rargv);
+    //TApplication *rootapp = new TApplication("example", &rargc, rargv);
     treeReader reader;
     if(argc == 1){
         std::cerr << "please specify input file with samples from data/samples directory" << std::endl;
         return 1;
     }
-    if(argc == 2) reader.Analyze(std::string(argv[1]));
+    if(argc == 2){
+        std::cerr << "please option (runFullSelection, runOnOneProcess, debug)" << std::endl;
+        return 1;
+        //reader.Analyze(std::string(argv[1]));
+    }    
     if(argc > 2){
         if(argc == 3) {
-            if(string(argv[2]) == "debug"){
-                std::cerr << "please specify sample to debug" << std::endl;
+            if(string(argv[2]) == "runFullSelection"){
+                std::cerr << "please specify control region (ttZ3L, WZ, ttbar, DY, Zgamma), use \'CR:\' before control region" << std::endl;
                 return 1;
             }
-            if(string(argv[2]) == "runOnOneProcess"){
-                std::cerr << "please specify sample to run on" << std::endl;
+            else if(string(argv[2]) == "debug"){
+                std::cerr << "please specify process to debug" << std::endl;
+                return 1;
+            }
+            else if(string(argv[2]) == "runOnOneProcess"){
+                std::cerr << "please specify process to run on" << std::endl;
                 return 1;
             }
         }
-        if(argc == 4) reader.Analyze(std::string(argv[1]), std::string(argv[2]), std::string(argv[3]));
-        if(argc == 5) reader.Analyze(std::string(argv[1]), std::string(argv[2]), std::string(argv[3]), atol(argv[4]));
+        if(argc == 4){
+            if(string(argv[2]) == "runFullSelection"){
+                if(string(argv[3]).find("selection:") != std::string::npos){
+                    std::string selection = string(argv[3]);
+                    selection.erase (selection.begin(), selection.begin()+10);
+                    std::cout << "output folder is set to: " << selection<< std::endl;
+                    reader.Analyze(std::string(argv[1]), std::string(argv[2]), selection); 
+                }
+            }
+        }
+        if(argc == 5){ 
+            if(string(argv[2]) == "runOnOneProcess"){
+                if(string(argv[3]).find("selection:") != std::string::npos){
+                    std::string selection = string(argv[3]);
+                    selection.erase (selection.begin(), selection.begin()+10);
+                    std::cout << "output folder is set to: " << selection<< std::endl;
+                    reader.Analyze(std::string(argv[1]), std::string(argv[2]), selection, std::string(argv[4])); 
+                }
+            }
+        }
+        if(argc == 6){ 
+            if(string(argv[2]) == "debug"){
+                if(string(argv[3]).find("selection:") != std::string::npos){
+                    std::string selection = string(argv[3]);
+                    selection.erase (selection.begin(), selection.begin()+10);
+                    std::cout << "output folder is set to: " << selection<< std::endl;
+                    reader.Analyze(std::string(argv[1]), std::string(argv[2]), selection, std::string(argv[4]), atol(argv[5]));
+                }
+            }
+        }
     }
-    rootapp->Run();
+    //rootapp->Run();
     return 0;
 }

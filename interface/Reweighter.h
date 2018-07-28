@@ -48,6 +48,8 @@ class Reweighter{
         double muonFakeRate(const double pt, const double eta, const unsigned unc = 0) const;
         double electronFakeRate(const double pt, const double eta, const unsigned unc = 0) const;
 
+        double getTriggerSF(const double pt) const;
+
     private:
         //boolean flagging weights as 2016 or 2017
         bool is2016;

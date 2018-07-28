@@ -301,3 +301,12 @@ double Reweighter::electronFakeRate(const double pt, const double eta, const uns
         return 99;
     }
 }
+
+double Reweighter::getTriggerSF(const double pt) const{
+    if(leptonSelection == 3 && pt < 120 && !is2016)
+        //weight *= 0.985; // got it from Daniel's trigger measurement, agreed with him on skype, 5 Jul 2018
+        return 0.985;
+    if(leptonSelection == 3 && pt < 80 && is2016)
+        return 0.966000020504;
+    return 1.;
+}

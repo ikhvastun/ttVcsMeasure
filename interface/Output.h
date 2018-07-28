@@ -6,7 +6,7 @@
 namespace Output{
 
     struct Unc{
-      Unc():unc(6){}
+      Unc():unc(numberOfSyst){}
       std::vector<TH1D> unc;
       void FillUnc(double value, int number, double lastBin, double weight){
         unc.at(number).Fill(TMath::Min(value, lastBin-0.1), weight);

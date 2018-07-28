@@ -22,8 +22,8 @@ vector<int> formEmptyStringInt(int);
 vector<int> formUnityStringInt(int);
 void fillExperUnc(ofstream &, vector<std::string> & );
 
-std::vector<double> experUnc      = {1.025}; 
-std::vector<TString> experUncName = {"lumi"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
+std::vector<double> experUnc      = {1.025, 1.01, 1.02}; 
+std::vector<TString> experUncName = {"lumi", "PDF", "trigger"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
 const int SRNumber = leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L.size() : theSRLabelOptionsFor3L.size();
@@ -63,7 +63,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    fileout << fixed << showpoint << setprecision(2);
    fileout << "imax 1 number of channels " <<  endl;
    fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
-   fileout << "kmax " << (leptonSelectionAnalysis == 2 ? 24 : 81) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   fileout << "kmax " << (leptonSelectionAnalysis == 2 ? 24 : 85) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "----------- " <<  endl;
    TFile *file = TFile::Open("datacards/shapes/shapeFile_ttZ3L.root", "RECREATE");
    fileout << "shapes * * shapes/shapeFile_ttZ3L.root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
@@ -141,7 +141,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    fillExperUnc(fileout, nameOfProcessesForDatacard);
    
    // here fill all syst shape uncertainties 
-   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "scale", "bTag_udsg", "bTag_bc"};
+   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "bTag_udsg", "bTag_bc", "jec"};
    for(int syst = 0; syst < systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *histStUp, *histStDown;
@@ -167,7 +167,49 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
       fillString(fileout, newString);
    }
 
-   fileout << ("fake     lnN ");
+   // here fill all syst shape uncertainties that have acceptance uncertainty 
+   std::vector<std::string> systShapeAcceptNames = {"scaleAcc"};
+   for(int syst = systShapeNames.size(); syst < systShapeAcceptNames.size() + systShapeNames.size(); syst++){
+       for(int cat = 1; cat < nCategories; cat++){ 
+          TH1D *hist, *histStUp, *histStDown, *histAccUp, *histAccDown;
+          for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
+             if(sam == distribsOrderForYields[cat]){
+                hist = (TH1D*)distribs.vectorHisto[sam].Clone("hist");
+                histStUp = (TH1D*)distribs.vectorHistoUncUp[sam].unc[syst].Clone("histUp");
+                histStDown  = (TH1D*)distribs.vectorHistoUncDown[sam].unc[syst].Clone("histDown");
+                
+                histAccUp = (TH1D*)distribs.vectorHistoUncUp[sam].unc[syst].Clone("histAccUp");
+                histAccDown = (TH1D*)distribs.vectorHistoUncDown[sam].unc[syst].Clone("histAccDown");
+
+                histAccUp->Reset("ICE");
+                histAccDown->Reset("ICE");
+             }
+             else{
+                hist->Add(&distribs.vectorHisto[sam]); 
+                histStUp->Add(&distribs.vectorHistoUncUp[sam].unc[syst]); 
+                histStDown->Add(&distribs.vectorHistoUncDown[sam].unc[syst]); 
+             }
+          }
+          
+          for(int sr = 0; sr < SRNumber; sr++){
+             histAccUp->SetBinContent(sr+1, (histStUp->GetBinContent(sr+1) / histStUp->Integral()) / (hist->GetBinContent(sr+1) / hist->Integral()) * hist->GetBinContent(sr+1));
+             histAccDown->SetBinContent(sr+1, (histStDown->GetBinContent(sr+1) / histStDown->Integral()) / (hist->GetBinContent(sr+1) / hist->Integral()) * hist->GetBinContent(sr+1));
+          }
+
+
+          histAccUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size()) + "Up").c_str());
+          histAccDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size()) + "Down").c_str());
+
+          histAccUp->Write();
+          histAccDown->Write();
+      }
+      fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size()) << " shape     " ;
+      vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
+      newString[2] = 999; // don't consider uncertainty on nonprompt
+      fillString(fileout, newString);
+   }
+
+   fileout << ("nonprompt     lnN ");
    vector<double> newString = formEmptyString(numberOfBKG + 1);
    for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
       if(nameOfProcessesForDatacard.at(i) == "nonpromptData" || nameOfProcessesForDatacard.at(i) == "nonprompt")
@@ -186,21 +228,35 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    }
 
    // this should be covered by scale and pdf 
-   /*
-        fileout << ("ttX     lnN ");
-        newString = formEmptyString(numberOfBKG + 1);
-        for(int i = 1; i < nameOfProcessesForDatacard.size(); i++){
-          if(std::find(ttVprocesses.begin(), ttVprocesses.end(), nameOfProcessesForDatacard.at(i)) != ttVprocesses.end() )
-            newString[i] = 1.1;
-        }
-        fillString(fileout, newString);
-        */
+   fileout << ("ttX     lnN ");
+   newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 1; i < nameOfProcessesForDatacard.size(); i++){
+       if(std::find(ttVprocesses.begin(), ttVprocesses.end(), nameOfProcessesForDatacard.at(i)) != ttVprocesses.end() )
+       newString[i] = 1.1;
+   }
+   fillString(fileout, newString);
 
    fileout << ("WZ     lnN ");
    newString = formEmptyString(numberOfBKG + 1);
    for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
       if(nameOfProcessesForDatacard.at(i) == "WZ")
         newString[i] = 1.1;
+   }
+   fillString(fileout, newString);
+
+   fileout << ("ZZ     lnN ");
+   newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+      if(nameOfProcessesForDatacard.at(i) == "ZZ")
+        newString[i] = 1.2;
+   }
+   fillString(fileout, newString);
+
+   fileout << ("Zgamma     lnN ");
+   newString = formEmptyString(numberOfBKG + 1);
+   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+      if(nameOfProcessesForDatacard.at(i) == "Zgamma")
+        newString[i] = 1.2;
    }
    fillString(fileout, newString);
 

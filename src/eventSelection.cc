@@ -199,9 +199,9 @@ bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
 
 bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool is2017){
     if(fabs(_jetEta[ind]) > 2.4) return false;
-    //if(is2017 && !_jetIsTight[ind]) return false;
+    if(is2017 && !_jetIsTight[ind]) return false;
     // temporary fix to sync with Daniel, 9 july 2018
-    if(!_jetIsTight[ind]) return false;
+    //if(!_jetIsTight[ind]) return false;
     switch(unc){
         
         case 0: if(_jetPt[ind] < ptCut) return false; break;
@@ -435,7 +435,7 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "WZ") return 51;
     if(name == "ZZ") return kGreen+3;
     if(name == "rare") return 8;
-    if(name == "Z#gamma") return kGreen;
+    if(name == "Zgamma") return kGreen;
     if(name == "DY") return kBlue-9;
 
     return kBlack;
