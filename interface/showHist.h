@@ -41,7 +41,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     // stack here corresponds to all MC 
     THStack *stack = new THStack("hs","hs");
     dataHist = &distribs.vectorHistoEras[dataSample].runEras[option];
+    TH1D * histoStackCopy = (TH1D*)distribs.vectorHistoEras[distribs.vectorHisto.size()-1].runEras[option].Clone("histoStackCopy");
+    histoStackCopy->Reset("ICE");
+    for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){
+        histoStackCopy->Add(&distribs.vectorHistoEras[j].runEras[option]);  
+    }
+    double scaleForMC = distribs.vectorHistoEras[dataSample].runEras[option].Integral() / histoStackCopy->Integral();
     for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){      
+        distribs.vectorHistoEras[j].runEras[option].Scale(scaleForMC);
         stack->Add(&distribs.vectorHistoEras[j].runEras[option]);
     }
 
@@ -99,6 +106,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
 
     // here data and MC are copied to draw on ratio plot
     TH1D *dataCopy = (TH1D*)dataHist->Clone("dataCopy");
+    // copied in the beginning of program to normalize stack
     TH1D *stackCopy = (TH1D*)(stack->GetStack()->Last())->Clone("stackCopy");
     dataCopy->Divide(stackCopy);
 
@@ -171,6 +179,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
             stackUncUp[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncUp[option].unc[i]);
             stackUncDown[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncDown[option].unc[i]);
         }
+        stackUncUp[i]->Scale(scaleForMC);
+        stackUncDown[i]->Scale(scaleForMC);
     }  
 
     for(unsigned int i = 0; i < histCopyUnc[0]->GetNbinsX(); i++){

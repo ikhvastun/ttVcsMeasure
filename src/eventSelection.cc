@@ -31,7 +31,6 @@ void treeReader::setConePt(){
 }
 
 bool treeReader::lepIsGood(const unsigned l){
-    // what is used in leptonMVA analysis
 
     if(!_lPOGTight[l]) return false;
     if(_lFlavor[l] == 1 && _relIso0p4Mu[l] > 0.25) return false;

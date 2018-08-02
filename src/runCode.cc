@@ -102,7 +102,7 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          //if(it > nEntries / 20) break;
           
           // check if event is in the list and print info for it
           /*
@@ -323,7 +323,6 @@ void treeReader::Analyze(){
   vector<TString> namesForSaveFiles = {"rawmet", "met", "upara", "uperp", "ptlead", "pttrail", "etalead", "etatrail", "npv", "mll", "metSM"};
   vector<TString> runEraNames = {"RunB", "RunCDE", "RunF", "fullDataset"};
 
-  /*
   for(int varPlot = 0; varPlot < nVars; varPlot++){
 
     for(int runEra = 0; runEra < 4; runEra++){
@@ -340,7 +339,7 @@ void treeReader::Analyze(){
     }
     
   }
-  */
+  return;
 
   TH1D * scaleChoice[2][2][4];
   TH1D * resChoice[2][2][2][4];
