@@ -122,7 +122,7 @@ void treeReader::Analyze(const string& fileToAnalyse, const std::string option, 
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          if(it > nEntries / 100) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis

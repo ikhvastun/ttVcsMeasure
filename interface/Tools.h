@@ -85,7 +85,7 @@ double SRID3L (int njets, int nbjets) {
 
 }
 
-double SRID4L (int nbjets) {
+double SRID4L(int nbjets){
     if(nbjets == 0) return 0.;
     else if(nbjets > 0) return 1.;
 }
