@@ -11,9 +11,6 @@ const int leptonSelectionAnalysis = 3;
 const int nSamples = 50;
 const int dataSample = 0;
 
-const unsigned int indexSR = 9;
-const unsigned int indexFlavour = 8;
-
 const int numberOfSyst = 6;
 
 TString flavorsString[2] = {"el", "mu"};
@@ -24,9 +21,69 @@ struct BinLabelOptions{
   std::string labelSR;
 };
 
-std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
+std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
 
-      
+      {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
+      {2, "2"},
+      {3, "3"},
+      {4, "4"},
+      {5, "5"}, // ZZ CR, nbjets = 0, njets = 1, > 1; nbjets > 0, njets 1, > 1
+      {6, "6"},
+      {7, "7"},
+      {8, "8"},
+      {9, "9"}, // nonprompt CR, same as main selection, but off Z or noOSSF
+      {10, "10"},
+      {11, "11"},
+      {12, "12"},
+      {13, "13"},
+      {14, "14"},
+      {15, "15"},
+      {16, "16"},
+      {17, "17"},
+      {18, "1"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      {19, "2"},
+      {20, "3"},
+      {21, "4"},
+      {22, "5"},
+      {23, "6"},
+      {24, "7"},
+      {25, "8"},
+      {26, "9"}, // ttZ 4L, nbjets = 0, 1
+      {27, "10"},
+
+};
+
+std::vector<BinLabelOptions> theSRLabelOptionsForWZCR = {
+
+      {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
+      {2, "2"},
+      {3, "3"},
+      {4, "4"},
+};
+
+std::vector<BinLabelOptions> theSRLabelOptionsForZZCR = {
+      {1, "1"}, // ZZ CR, nbjets = 0, njets = 1, > 1; nbjets > 0, njets 1, > 1
+      {2, "2"},
+      {3, "3"},
+      {4, "4"},
+};
+
+std::vector<BinLabelOptions> theSRLabelOptionsForTTCR = {
+
+      {1, "1"}, // nonprompt CR, same as main selection, but off Z or noOSSF
+      {2, "2"},
+      {3, "3"},
+      {4, "4"},
+      {5, "5"},
+      {6, "6"},
+      {7, "7"},
+      {8, "8"},
+      {9, "9"},
+
+};
+
+ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
+
       {1, "2j"},
       {2, "3j1b"},
       {3, "3j>1b"},
@@ -37,6 +94,16 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
       {8, "3j>1b"},
       {9, ">3j1b"},
       {10, ">3j>1b"},
+      {11, "2j"},
+      {12, "3j1b"},
+      {13, "3j>1b"},
+      {14, ">3j1b"},
+      {15, ">3j>1b"},
+      {16, "2j"},
+      {17, "3j1b"},
+      {18, "3j>1b"},
+      {19, ">3j1b"},
+      {20, ">3j>1b"},
       /*
       {11, "2j"},
       {12, "3j1b"},
@@ -58,17 +125,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor2L = {
       
 std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
 
-      /*
-      {1, "nB0,nJ2"},
-      {2, "nB0,nJ3"},
-      {3, "nB0,nJ#geq4"},
-      {4, "nB1,nJ2"},
-      {5, "nB1,nJ3"},
-      {6, "nB1,nJ#geq4"},
-      {7, "nB#geq2,nJ2"},
-      {8, "nB#geq2,nJ3"},
-      {9, "nB#geq2,nJ#geq4"},
-      */
+    /*
       {1, "2"},
       {2, "3"},
       {3, ">3"},
@@ -78,6 +135,21 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
       {7, "2"},
       {8, "3"},
       {9, ">3"},
+      */
+      {1, "2"},
+      {2, "3"},
+      {3, "4"},
+      {4, ">4"},
+      {5, "2"},
+      {6, "3"},
+      {7, "4"},
+      {8, ">4"},
+    };
+
+std::vector<BinLabelOptions> theSRLabelOptionsFor4L = {
+
+      {1, "0"},
+      {2, ">0"},
       
     };
 
@@ -105,8 +177,10 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
 std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
       
       {1, "#mu#mu#mu#mu"},
-      {2, "#mu#mu ee"},
-      {3, "eeee"},
+      {2, "#mu#mu#mu e"},
+      {3, "#mu#mu ee"},
+      {4, "#mu eee"},
+      {5, "eeee"},
       
     };
 
@@ -160,9 +234,11 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"mtW",     {"m_{T}^{W} [GeV]", 4, 0, 200, 20, true}},
                                                  {"njets",   {"N_{j}", 5, -0.5, 7.5, 8, false}},
                                                  {"nbjets",  {"N_{b}", 6, -0.5, 4.5, 5, false}},
-                                                 {"BDT",     {"BDT", 7, -1, 1, 10, false}},
-                                                 {"flavour", {"", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size())))), false}},
-                                                 {"SR",      {leptonSelectionAnalysis == 2 ? "" : "N_{j}", 9, -0.5, leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5), leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"BDTpp",   {"BDT in pp category", 7, -1, 1, 10, false}},
+                                                 //{"flavour", {"", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size())))), false}},
+                                                 //{"SR",      {leptonSelectionAnalysis == 2 ? "" : (leptonSelectionAnalysis == 3 ? "N_{j}" : "N_{b}"), 9, -0.5, leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (leptonSelectionAnalysis == 3 ? static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5 : static_cast<double>(theSRLabelOptionsFor4L.size()) - 0.5), leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? static_cast<int>(theSRLabelOptionsFor3L.size()) : static_cast<int>(theSRLabelOptionsFor4L.size())), false}},
+                                                 {"SR3L",    {"N_{j}", 8, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"SR4L",    {"N_{b}", 9, -0.5, static_cast<double>(theSRLabelOptionsFor4L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor4L.size()), false}},
                                                  {"mll",     {"M(ll) [GeV]", 10, 81., 101., 10, true}},
                                                  {"ptZ",     {"p_{T}^{Z} [GeV]", 11, 0, 400, 16, true}},
                                                  {"ptNonZ",  {"Non-Z lepton p_{T} [GeV]", 12, 0, 200, 20, true}},
@@ -192,21 +268,25 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"mll_ss",  {"Invariant mass of ss 2l pair [GeV]", 36, 0, 300, 20, true}},
                                                  {"chargeOfLeptons",  {"Charge of the leptons in ss2l channel", 37, -1.5, 1.5, 3, false}},
                                                  {"ll_deltaR",  {"#Delta R(leading lepton, trailing lepton)", 38, 0, 7., 35, false}},
-                                                 {"mt2ll_ss",  {"M_{T2}^{ll} [GeV]", 39, 0, 200., 20, true}}
+                                                 {"mt2ll_ss",  {"M_{T2}^{ll} [GeV]", 39, 0, 200., 20, true}},
+                                                 {"BDTmm",   {"BDT in mm category", 40, -1, 1, 10, false}},
+                                                 {"HT",     {"H_{T} [GeV]", 41, 0, 400, 20, true}},
+                                                 {"SRallTTZ", {"", 42, -0.5, static_cast<double>(theSRLabelOptionsForTTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTZ.size()), false}},
+                                                 {"SRWZCR", {"", 43, -0.5, static_cast<double>(theSRLabelOptionsForWZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForWZCR.size()), false}},
+                                                 {"SRZZCR", {"", 44, -0.5, static_cast<double>(theSRLabelOptionsForZZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForZZCR.size()), false}},
+                                                 {"SRTTCR", {"", 45, -0.5, static_cast<double>(theSRLabelOptionsForTTCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTCR.size()), false}},
                                            };
 
-//const int nVars  = 40;
 const int nVars  = figNames.size() ;
 
+const unsigned int indexSRTTCR = 45;
+const unsigned int indexSRZZCR = 44;
+const unsigned int indexSRWZCR = 43;
+const unsigned int indexSRTTZ = 42;
+const unsigned int indexSR3L = 8;
+const unsigned int indexSR4L = 9;
+//const unsigned int indexFlavour = 8;
+
 std::map<std::string, std::vector<TString>> listToPrint;
-/*
-listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
-listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mlll"};
-listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV"};
-listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e"};
-listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDT"}; 
-listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
-listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
-*/
 
 #endif 

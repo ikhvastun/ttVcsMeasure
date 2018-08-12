@@ -249,10 +249,18 @@ class treeReader {
         bool passTTZCleanSelection(const int, const int, const double) const;
         bool passWZCRSelection(const int, const double) const;
         bool passttbarCRSelection(const int, const double) const;
+        bool passttbarCRintZqSelection(const int njets, const int nbjets, const double dMZ) const;
         bool passZGCRSelection(const double, const double) const;
         bool passDYCRSelection(const double, const double, const unsigned, const double, const double, const int, const int) const;
         double mtCalc(const TLorentzVector Vect, const double MET, const double MET_Phi) const;
-        bool pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle) const;
+        bool pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle);
+        bool pass2Lcleanpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle);
+        bool passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int njets);
+        bool passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ);
+        double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ);
+        double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ);
+        double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets);
+        double SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
@@ -277,6 +285,7 @@ class treeReader {
         void initializeWeights();
         double sfWeight();
         double fakeRateWeight(const unsigned unc = 0);
+        double CMIDRateWeight(const unsigned unc = 0);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -302,13 +311,18 @@ class treeReader {
         bool isChargeMisIDSample = false;
         bool is2017 = false;
         double scale = 0;
+        double sumSimulatedEventWeights = 0;
+        double sumSimulatedEventWeightsScaleUp = 0;
+        double sumSimulatedEventWeightsScaleDown = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         double dataLumi = 41.9;                                          //in units of 1/fb
         int nonPromptSample = -999;
+        int CMIDSample = -999;
         std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
         std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
         std::shared_ptr<Reweighter> reweighter;
+        double crossSectionRatio[100][100];
 
         //bool is2017() { return currentSample.is2017(); }
         bool is2016() { return !is2017; }                  //if sample is not 2017 it is automatically 2016

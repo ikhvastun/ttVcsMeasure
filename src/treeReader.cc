@@ -23,6 +23,8 @@ void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampl
         namesOfTheSample.push_back(sampleVector.back().getProcessName());
         if(sampleVector.back().getProcessName() == "nonpromptData")
             nonPromptSample = sampleCounter;
+        if(sampleVector.back().getProcessName() == "chargeMisIDData")
+            CMIDSample = sampleCounter;
         sampleCounter++;
     } while(!file.eof());
     sampleVector.pop_back();
@@ -51,15 +53,27 @@ void treeReader::initSample(const Sample& samp){
     nEntries = fChain->GetEntries();
     isData = (samples[currentSampleIndex].getProcessName()) == "data";
     isDataNonprompt = (samples[currentSampleIndex].getProcessName()) == "nonpromptData";
+    isChargeMisIDSample = (samples[currentSampleIndex].getProcessName()) == "chargeMisIDData";
 
     if(!samp.isData()){
 
         //read sum of simulated event weights
         TH1D* hCounter = new TH1D("hCounter", "Events counter", 1, 0, 1);
         hCounter->Read("hCounter"); 
-        double sumSimulatedEventWeights = hCounter->GetBinContent(1);
+        sumSimulatedEventWeights = hCounter->GetBinContent(1);
         delete hCounter;
 
+        TH1D* lheCounter = new TH1D("lheCounter", "Events counter", 110, 0, 110);
+        lheCounter->Read("lheCounter"); 
+        sumSimulatedEventWeightsScaleUp = lheCounter->GetBinContent(9);
+        sumSimulatedEventWeightsScaleDown = lheCounter->GetBinContent(5);
+
+        for(unsigned lhe = 9; lhe < 110; ++lhe){
+            double variedSumOfWeights = lheCounter->GetBinContent(lhe + 1);
+            crossSectionRatio[currentSampleIndex][lhe-9] = sumSimulatedEventWeights /( variedSumOfWeights );
+        }
+
+        delete lheCounter;
         //event weights set with lumi depending on sample's era 
         /*
         double dataLumi;
@@ -93,10 +107,12 @@ void treeReader::GetEntry(long unsigned entry)
     if (!fChain) return;
     fChain->GetEntry(entry);
     //Set up correct weights
-    if(!isData && !isDataNonprompt) {
+    if(!isData && !isDataNonprompt && !isChargeMisIDSample) {
         weight = _weight*scale; //MC
+        /*
         if(isChargeMisIDSample && is2017)
             weight *= 1.2; // apply 20% correction to observed charge mis ID in 2017
+        */
     }
     else weight = 1;                               //data
 }

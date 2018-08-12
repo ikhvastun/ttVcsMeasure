@@ -13,12 +13,18 @@ namespace Output{
       };
     };
 
+    struct PDF{
+      PDF():var(100){}
+      std::vector<TH1D> var;
+    };
+
 	struct DistribsAll{
-  		DistribsAll():vectorHisto(nSamples+1), vectorHistoUncUp(nSamples+1), vectorHistoUncDown(nSamples+1){}
+  		DistribsAll():vectorHisto(nSamples+1), vectorHistoUncUp(nSamples+1), vectorHistoUncDown(nSamples+1), vectorHistoPDF(nSamples+1){}
   		std::vector<TH1D> vectorHisto;
   		TH1D vectorHistoTotalUnc;
   		std::vector<Unc> vectorHistoUncUp;
   		std::vector<Unc> vectorHistoUncDown;
+  		std::vector<PDF> vectorHistoPDF;
   		THStack stack;
 	};
 

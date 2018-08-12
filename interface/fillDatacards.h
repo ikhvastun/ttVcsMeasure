@@ -26,15 +26,15 @@ std::vector<double> experUnc      = {1.025, 1.01, 1.02};
 std::vector<TString> experUncName = {"lumi", "PDF", "trigger"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
-const int SRNumber = leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L.size() : theSRLabelOptionsFor3L.size();
 
 // just an example, nameOfProcessForDatacards: data, ttZ, ttW, etc.
 // distribsOrderForYields = 0, 1, 3, ...., 
 // 0 - data
 // so 1 + 2 = ttZ
 // 3 = ttW
-void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcessesForDatacard, vector<unsigned> & distribsOrderForYields){
+void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, vector<unsigned> & distribsOrderForYields, const TString name, bool is2017 = false){
 
+  const int SRNumber = figNames[name].nBins;
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
   std::vector<double> intYield;
 
@@ -56,17 +56,18 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
   nameOfProcessesForDatacard.erase(nameOfProcessesForDatacard.begin()); // here we erase 1 element - data
   const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal
 
-   gSystem->Exec("rm datacards/shapes/shapeFile_ttZ3L.root"); // delete previous tex file
-   gSystem->Exec("rm datacards/datacard_ttZ3L.txt"); // delete previous tex file
+   gSystem->Exec("rm datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root"); // delete previous tex file
+   gSystem->Exec("rm datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt"); // delete previous tex file
    ofstream fileout;
-   fileout .open ( "datacards/datacard_ttZ3L.txt", ios_base::app); // create a new tex file
+   fileout .open ( "datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt", ios_base::app); // create a new tex file
    fileout << fixed << showpoint << setprecision(2);
    fileout << "imax 1 number of channels " <<  endl;
    fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
-   fileout << "kmax " << (leptonSelectionAnalysis == 2 ? 24 : 85) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   //fileout << "kmax " << (lepSel == 2 ? 195 : (lepSel == 34 ? 129 : (lepSel == 3 ? 96 : 33))) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   fileout << "kmax 100 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "----------- " <<  endl;
-   TFile *file = TFile::Open("datacards/shapes/shapeFile_ttZ3L.root", "RECREATE");
-   fileout << "shapes * * shapes/shapeFile_ttZ3L.root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
+   TFile *file = TFile::Open("datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root", "RECREATE");
+   fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
    fileout << "-----------  " <<  endl;
    fileout << "bin  1" <<  endl;
    fileout << "observation  " << intYield[0] << endl;
@@ -141,7 +142,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    fillExperUnc(fileout, nameOfProcessesForDatacard);
    
    // here fill all syst shape uncertainties 
-   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "bTag_udsg", "bTag_bc", "jec"};
+   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "bTag_udsg" + (std::string)(is2017 ? "2017" : "2016"), "bTag_bc" + (std::string)(is2017 ? "2017" : "2016"), "jec"};
    for(int syst = 0; syst < systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *histStUp, *histStDown;
@@ -164,6 +165,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
       fileout <<  systShapeNames.at(syst) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
       newString[2] = 999; // don't consider uncertainty on nonprompt
+      /*
+      if(lepSel == 2)
+          newString[3] = 999;
+      */
       fillString(fileout, newString);
    }
 
@@ -206,6 +211,8 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
       fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size()) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
       newString[2] = 999; // don't consider uncertainty on nonprompt
+      //if(lepSel == 2)
+      //    newString[3] = 999;
       fillString(fileout, newString);
    }
 
@@ -217,15 +224,17 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    }
    fillString(fileout, newString);
 
-   if(leptonSelectionAnalysis == 2){
+   /*
+   if(lepSel == 2){
       fileout << ("charge     lnN ");
       newString = formEmptyString(numberOfBKG + 1);
       for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-          if(nameOfProcessesForDatacard.at(i) == "chargeMisID")
+          if(nameOfProcessesForDatacard.at(i) == "chargeMisID" || nameOfProcessesForDatacard.at(i) == "chargeMisIDData")
             newString[i] = 1.2;
       }
       fillString(fileout, newString);
    }
+   */
 
    // this should be covered by scale and pdf 
    fileout << ("ttX     lnN ");
@@ -252,13 +261,15 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> & nameOfProcesses
    }
    fillString(fileout, newString);
 
-   fileout << ("Zgamma     lnN ");
-   newString = formEmptyString(numberOfBKG + 1);
-   for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-      if(nameOfProcessesForDatacard.at(i) == "Zgamma")
-        newString[i] = 1.2;
-   }
-   fillString(fileout, newString);
+   //if(lepSel != 2){
+     fileout << ("Zgamma     lnN ");
+     newString = formEmptyString(numberOfBKG + 1);
+     for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
+       if(nameOfProcessesForDatacard.at(i) == "Zgamma")
+         newString[i] = 1.2;
+     }
+     fillString(fileout, newString);
+   //}
 
    fileout << ("rare    lnN ");
    newString = formEmptyString(numberOfBKG + 1);
@@ -345,7 +356,7 @@ void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatac
     for(int statInd = 0; statInd < nameOfProcessesForDatacard.size(); statInd++){
       if(nameOfProcessesForDatacard.at(statInd) == "nonpromptData" || nameOfProcessesForDatacard.at(statInd) == "nonprompt")
         file << "-" << '\t' ;
-      else if (nameOfProcessesForDatacard.at(statInd) == "chargeMisID")
+      else if (nameOfProcessesForDatacard.at(statInd) == "chargeMisID" || nameOfProcessesForDatacard.at(statInd) == "chargeMisIDData")
         file << "-" << '\t' ;
       //else if (nameOfProcessesForDatacard.at(statInd) == "WZ" && experUncName.at(i) == "LeptonId")
       //  file << "-" << '\t' ;

@@ -6,7 +6,7 @@
 
 //pu SF 
 double treeReader::puWeight(const unsigned unc){
-    if(debug) std::cout << "pile up true int " << _nTrueInt << "; pu weight: " << reweighter->puWeight(_nTrueInt, currentSample, unc) << std::endl;
+    //if(debug) std::cout << "pile up true int " << _nTrueInt << "; pu weight: " << reweighter->puWeight(_nTrueInt, currentSample, unc) << std::endl;
     return reweighter->puWeight(_nTrueInt, currentSample, unc);
 }
 
@@ -62,9 +62,15 @@ double treeReader::leptonWeight(const unsigned unc){
     for(unsigned l = 0; l < _nLight; ++l){
         if( lepIsGood(l, leptonSelection) ){
             if( isMuon(l) ){
+                //if(unc == 2) std::cout << "downward fluction for muon with pt " << _lPt[l] << " is " << reweighter->muonTightWeight(_lPt[l], _lEta[l], unc) << std::endl;
                 sf *= reweighter->muonTightWeight(_lPt[l], _lEta[l], unc);
+                if(leptonSelection == 2)
+                    sf *= reweighter->muonChargeConsWeight(_lPt[l], _lEta[l],  unc);
             } else if( isElectron(l) ){
+                //if(unc == 2) std::cout << "downward fluction for electron with pt " << _lPt[l] << " is " << reweighter->electronTightWeight(_lPt[l], _lEta[l], _lEtaSC[l], unc) << std::endl;
                 sf *= reweighter->electronTightWeight(_lPt[l], _lEta[l], _lEtaSC[l], unc);
+                if(leptonSelection == 2)
+                    sf *= reweighter->electronChargeConsWeight(_lPt[l], _lEtaSC[l], unc);
             }
         } 
         /*
@@ -78,7 +84,7 @@ double treeReader::leptonWeight(const unsigned unc){
         */
         //std::cout << "sf after lepton with pt: " << _lPt[l] << " and flavour " << _lFlavor[l] << "is " << sf << std::endl;
     }
-    if(debug) std::cout << "lepton SF is " << sf << std::endl;
+    //if(debug) std::cout << "lepton SF is " << sf << std::endl;
     return sf;
 }
 
@@ -103,10 +109,11 @@ double treeReader::sfWeight(){
     double sf = puWeight();
     sf *= bTagWeight();
     sf *= leptonWeight();
-    sf *= fakeRateWeight();
+    if(leptonSelection != 4)
+        sf *= fakeRateWeight();
     sf *= triggerWeight();
     if( sf == 0){
-        std::cerr << "Error: event sf is zero! This has to be debugged! evNumber: " << _eventNb << "; sf(pu, btag, lep): " << puWeight() << " " << bTagWeight() << " " << leptonWeight() << std::endl;
+        std::cerr << "Error: event sf is zero! This has to be debugged! evNumber: " << _eventNb << "; sf(pu, btag, lep, fr, trigger): " << puWeight() << " " << bTagWeight() << " " << leptonWeight() << " " << fakeRateWeight() << " " << triggerWeight() << std::endl;
     } else if( std::isnan(sf) ){
         std::cerr << "Error: event sf is nan! This has to be debugged" << std::endl;
     }
@@ -122,9 +129,11 @@ double treeReader::fakeRateWeight(const unsigned unc){
         if(lepIsFOGood(l, leptonSelection) && !lepIsGood(l, leptonSelection) ){
             double fr = 1.;
             if( isMuon(l) ){
-                fr = reweighter->muonFakeRate(_lPt[l], _lEta[l], unc);
+                fr = reweighter->muonFakeRate(magicFactorInAnalysis[leptonSelection] * _lPt[l] / _ptRatio[l], _lEta[l], unc);
+                //std::cout << "fr for muon is with pt and eta: " << magicFactorInAnalysis[leptonSelection] * _lPt[l] / _ptRatio[l] << " " << _lEta[l] << " " << fr << std::endl;
             } else if( isElectron(l) ){
-                fr = reweighter->electronFakeRate(_lPt[l], _lEta[l], unc);
+                fr = reweighter->electronFakeRate(magicFactorInAnalysis[leptonSelection] * _lPt[l] / _ptRatio[l], _lEta[l], unc);
+                //std::cout << "fr for electron is with pt and eta: " << magicFactorInAnalysis[leptonSelection] * _lPt[l] / _ptRatio[l] << " " << _lEta[l] << " " << fr << std::endl;
             }
             sf *= -fr/(1 - fr);
         }
@@ -132,4 +141,16 @@ double treeReader::fakeRateWeight(const unsigned unc){
     if(!isData) sf *= -1;
     if(debug) std::cout << "fr from class is " << sf << std::endl;
     return sf;
+}
+
+//charge mis ID rate
+double treeReader::CMIDRateWeight(const unsigned unc){
+    initializeWeights();
+    double fr = 0.;
+    for(unsigned l = 0; l < _nLight; ++l){
+        if(lepIsGood(l, leptonSelection) && _lFlavor[l] == 0 ){
+            fr += reweighter->electronCMIDRate(_lPt[l], _lEta[l], unc);
+        }
+    }
+    return fr;
 }

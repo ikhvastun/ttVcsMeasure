@@ -1,0 +1,8 @@
+data data_combined.root                                        				1
+ttW  TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_Summer16.root  		0.2043
+Nonprompt TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 			88.3791
+Nonprompt TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 	182.722
+Nonprompt TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 182.722
+#Nonprompt DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root			6025.2
+nonpromptData data_combined.root                                        				1
+chargeMisID TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 			88.3791

@@ -29,7 +29,7 @@ void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
 void setUpSystUnc(DistribsAll &, TH1D *);
 void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
 void printInfoOnPlot3L();
-void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, double lumi = 35.9){
+void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, bool is2017 = false){
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
@@ -42,6 +42,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
+    if(is2017) // keep it blinded for 2017
+        dataHist->Reset("ICE");
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle("");
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
@@ -53,19 +55,21 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     dataHist->GetXaxis()->SetLabelOffset(0.02);
     
     dataHist->Draw("E0");
-    distribs.stack.Draw("histsame");
-    dataHist->Draw("E0same");
+    //distribs.stack.Draw("histsame");
+    //dataHist->Draw("E0same");
+
     leg->Draw("same");
-    CMS_lumi( pad1, iPeriod, iPos, lumi );
+    CMS_lumi( pad1, iPeriod, iPos, (is2017 ? 41.9 : 35.9));
 
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
 
-    if(info.index == indexSR){
+    if(info.index == indexSR3L){
        dataHist->GetXaxis()->SetTitleSize(0.07);
        dataHist->GetXaxis()->SetTitleOffset(0.8);
-       printInfoOnPlot3L();
+       if(leptonSelectionAnalysis == 3)
+         printInfoOnPlot3L();
     }
 
     if(xPad == 0) return;
@@ -115,10 +119,29 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     line->Draw("same");
 
     mtlegRatio->Draw("same");
-    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+    if(!is2017)
+        dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
 
     pad2->RedrawAxis();
     pad2->Update();
+
+    c1->cd();
+    pad1->cd();
+    TH1D *systAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("systAndStatUnc");
+    for(unsigned int i = 0; i < systAndStatUnc->GetNbinsX(); i++){
+        systAndStatUnc->SetBinError(i+1, histSystAndStatUnc->GetBinError(i+1) * systAndStatUnc->GetBinContent(i+1));
+    }
+    distribs.stack.Draw("histsame");
+    systAndStatUnc->SetFillStyle(3005);
+    systAndStatUnc->SetFillColor(kGray+2);
+    systAndStatUnc->SetMarkerStyle(1);
+    systAndStatUnc->Draw("e2same");
+    dataHist->Draw("E0same");
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
 }
 
 void printInfoOnPlot3L(){
@@ -179,7 +202,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    if(info.index != indexSR && info.index != indexFlavour)
+    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ) //  && info.index != indexFlavour
         stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     else
         stackCopy->GetXaxis()->SetLabelSize(0.25);

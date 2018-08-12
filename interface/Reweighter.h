@@ -18,6 +18,9 @@ class Reweighter{
         Reweighter(const std::vector<Sample>&, const bool is2016, const int lepSel);
         ~Reweighter();
 
+        // function for uncorrelated uncertainty calculation
+        double uncorUncCalc(const double & centralOne, const double & centralTwo, const double & uncOne, const double & uncTwo) const;
+
         //pileup weight
         double puWeight(const double nTrueInt, const Sample&, const unsigned unc = 0) const;
 
@@ -29,11 +32,21 @@ class Reweighter{
 
         //lepton id + reconstruction weight
         double muonTightWeight(const double pt, const double eta, const unsigned unc) const{ 
-            return muonRecoWeight(eta, unc)*muonTightIdWeight(pt,eta, unc);
+            // no reco SF, email from Sergio and Sandro on 30th of July, 2018, they removed as well recommendations from twiki, varOne is always considered as 0
+            //double varOne = TMath::Abs(muonRecoWeight(eta, 0) - muonRecoWeight(eta, 0));
+            //std::cout << "muon sf with unc " << unc << " is " << muonTightIdWeight(pt,eta, unc) << std::endl;
+            return muonTightIdWeight(pt,eta, unc);
         }
 
         double electronTightWeight(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{ 
-            return electronRecoWeight(superClusterEta, pt, unc)*electronTightIdWeight(pt,eta, unc);
+            int var = unc == 2 ? -1 : int(unc);
+            double varOne = (var != 0 ? fabs(electronRecoWeight(superClusterEta, pt, unc) - electronRecoWeight(superClusterEta, pt, 0)) : 0.);
+            double varTwo = (var != 0 ? fabs(electronTightIdWeight(pt,superClusterEta, unc) - electronTightIdWeight(pt,superClusterEta, 0)) : 0.);
+            // let's implement fully uncorrelated uncertainties
+            double valueOne = electronRecoWeight(superClusterEta, pt, 0);
+            double valueTwo = electronTightIdWeight(pt,superClusterEta, 0);
+            //if(var == 2) std::cout << "electron tight id weight is " << valueOne*valueTwo + (var != 0 ? var * uncorUncCalc(valueOne, valueTwo, varOne, varTwo) : 0.) << std::endl;
+            return valueOne*valueTwo + (var != 0 ? var * uncorUncCalc(valueOne, valueTwo, varOne, varTwo) : 0.);
         }
 
         double muonLooseWeight(const double pt, const double eta, const unsigned unc) const{
@@ -43,11 +56,19 @@ class Reweighter{
         double electronLooseWeight(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{
             return electronRecoWeight(superClusterEta, pt, unc)*electronLooseIdWeight(pt,eta, unc);
         }
+        
+        // charge consistency weights (together with tight)
+        double muonChargeConsWeight(const double pt, const double eta, const unsigned unc) const;
+        double electronChargeConsWeight(const double pt, const double eta, const unsigned unc) const;
 
         //fakerates 
         double muonFakeRate(const double pt, const double eta, const unsigned unc = 0) const;
         double electronFakeRate(const double pt, const double eta, const unsigned unc = 0) const;
 
+        // charge mis ID
+        double electronCMIDRate(const double pt, const double eta, const unsigned unc = 0) const;
+
+        // trigger SF
         double getTriggerSF(const double pt) const;
 
     private:
@@ -61,7 +82,7 @@ class Reweighter{
         //btag scale factors and efficiencies
         std::shared_ptr<BTagCalibration> bTagCalib;
         std::shared_ptr<BTagCalibrationReader> bTagCalibReader;
-        std::shared_ptr<TH1D> bTagEffHist[3];
+        std::shared_ptr<TH2D> bTagEffHist[3];
 
         //reconstruction scale factors
         std::shared_ptr<TGraph> muonRecoSF;
@@ -72,10 +93,12 @@ class Reweighter{
         //muon id scale factors
         std::shared_ptr<TH2D> muonLooseToRecoSF;
         std::shared_ptr<TH2D> muonTightToLooseSF;
+        std::shared_ptr<TH2D> muonChargeConsToTightSF;
 
         //electron id scale factors
         std::shared_ptr<TH2D> electronLooseToRecoSF;
         std::shared_ptr<TH2D> electronTightToLooseSF;
+        std::shared_ptr<TH2D> electronChargeConsToTightSF;
 
 
         //initialize all weight histograms
@@ -93,6 +116,9 @@ class Reweighter{
         //fake rate maps
         std::shared_ptr<TH2D> frMapEle[3];
         std::shared_ptr<TH2D> frMapMu[3];
+        
+        //charge mis ID rate maps
+        std::shared_ptr<TH2D> CMIDMapEle[3];
 
         //tracking + reconstruction weights
         double muonRecoWeight(const double eta, const unsigned unc) const;
@@ -120,6 +146,9 @@ class Reweighter{
 
         //initialize fake-rate
         void initializeFakeRate();
+
+        // initialize charge mis ID 
+        void initializeCMIDRate();
 
         //initialize all weights 
         void initializeAllWeights(const std::vector< Sample>&);

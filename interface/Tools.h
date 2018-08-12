@@ -8,11 +8,17 @@
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
 
-int SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
-    int index = -1;
+double SRID2L (double mvaVL, double chargesLepton) {
+    double index = -1;
+    int chargesLeptonIndex = (chargesLepton == 1.);
+    if(mvaVL < -1) return -1;
+    else return floor((mvaVL + 1) / 0.2) + 10 * chargesLeptonIndex;
+}
+    /*
+double SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
+    double index = -1;
 
     int chargesLeptonIndex = (chargesLepton == 1.);
-    /*
     if(mvaValueRegion == 2) chargesLeptonIndex = 0.;
 
     if(njets == 2)
@@ -36,7 +42,7 @@ int SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
         index = 21;
     if(mvaValueRegion == 2 && njets > 3) 
         index = 22;
-    */
+
     if(njets == 2)
         index = 0 + 5 * chargesLeptonIndex;
 
@@ -56,9 +62,10 @@ int SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
     return index;
 
 }
+    */
 
-int SRID3L (int njets, int nbjets) {
-    int index = -1;
+double SRID3L (int njets, int nbjets) {
+    double index = -1.;
     
     const int njetsCategories = 3;
 
@@ -78,6 +85,11 @@ int SRID3L (int njets, int nbjets) {
 
 }
 
+double SRID4L (int nbjets) {
+    if(nbjets == 0) return 0.;
+    else if(nbjets > 0) return 1.;
+}
+
 void initdistribs(std::vector<std::string> & namesOfSamples){
 
     for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
@@ -85,7 +97,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histInfo hist = it->second;
       TString name = Form("varST_%d",hist.index);
       int i = hist.index;
-      distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+      //distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
       for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
@@ -98,6 +110,15 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
           name = Form("varDown_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
         }
+        //if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ){
+        /*
+        if(i == indexSRTTZ){
+            for(unsigned int pdf = 0; pdf < 100; pdf++){
+                name = Form("pdf_%d_%d_%d",i,j,pdf);
+                distribs[i].vectorHistoPDF[j].var[pdf] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+            }
+        }
+        */
         
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
@@ -114,9 +135,13 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }
+}
+
     
+void setLabelsForHistos(){
+    /*
     for(auto & histo: distribs[indexFlavour].vectorHisto) {
-      for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
+      for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
         histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
       }
 
@@ -124,13 +149,11 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histo.GetXaxis()->SetTitleSize(0.25);
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
+    */
 
-    for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
-      distribs[indexFlavour].vectorHistoTotalUnc.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-    }
-
-    for(auto & histo: distribs[indexSR].vectorHisto) {
-      for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L){
+    // ------------------ 3L
+    for(auto & histo: distribs[indexSR3L].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsFor3L){
         histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
       }
 
@@ -138,19 +161,61 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
 
-    for(auto & histo: distribs[indexSR].vectorHistoUncUp) 
-        for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
+    for(auto & histo: distribs[indexSR3L].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsFor3L)
             for(unsigned int k = 0; k < numberOfSyst; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
-    for(auto & histo: distribs[indexSR].vectorHistoUncDown) 
-        for(const auto & i: leptonSelectionAnalysis == 2 ? theSRLabelOptionsFor2L : theSRLabelOptionsFor3L)
+    for(auto & histo: distribs[indexSR3L].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsFor3L)
             for(unsigned int k = 0; k < numberOfSyst; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
+    // ------------------ 4L
+    for(auto & histo: distribs[indexSR4L].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsFor4L){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexSR4L].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsFor4L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSR4L].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsFor4L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    // --------------- all TTZ
+
+    for(auto & histo: distribs[indexSRTTZ].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsForTTZ){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexSRTTZ].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsForTTZ)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSRTTZ].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsForTTZ)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    /*
     for(auto & histo: distribs[indexFlavour].vectorHistoUncUp) {
         for(unsigned int k = 0; k < numberOfSyst; k++){
-            for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
+            for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
             histo.unc[k].GetXaxis()->SetLabelSize(0.1);
@@ -161,7 +226,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
     for(auto & histo: distribs[indexFlavour].vectorHistoUncDown) {
         for(unsigned int k = 0; k < numberOfSyst; k++){
-            for(const auto & i: leptonSelectionAnalysis == 2 ? flavourLabelOptionsFor2L : (leptonSelectionAnalysis == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
+            for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
             histo.unc[k].GetXaxis()->SetLabelSize(0.1);
@@ -169,6 +234,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
             histo.unc[k].GetXaxis()->SetLabelOffset(0.02);
         }
     }
+    */
 
 }
 
@@ -181,7 +247,7 @@ double flavourCategory3L(int nLocEle){
 }
 
 double flavourCategory4L(int nLocEle){
-  return double(1 + nLocEle / 2);
+  return double(1 + nLocEle);
 }
 
 void addBranchToBDTTreeVariables(){
@@ -307,13 +373,18 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
 
 void initListsToPrint(const std::string & selection){
 
-  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
-  listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mlll"};
-  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV"};
-  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e"};
-  listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "flavour", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDT"}; 
-  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "flavour", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
-  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "flavour", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
+  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
+  listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
+  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e"};
+  listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
+  listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
+  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
+  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
+  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
+  listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR", "cosThetaStar"};
+  listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
+  listToPrint["ttZ"] = {"SR3L", "SR4L", "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR"};
 
   if(listToPrint.find(selection) == listToPrint.end()){
       std::cerr << "control region selection is incorrect, please double check" << std::endl;

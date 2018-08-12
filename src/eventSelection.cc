@@ -39,11 +39,17 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
 
     if(lepSel != 4 && _leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[leptonSelection]){
-        if(_ptRatio[l] < (is2017 ? (lepSel == 3 ? 0.4 : 0.4) : (lepSel == 3 ? 0.4 : 0.5))) return false;
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (lepSel == 3 ? 0.5 : 0.4) : (lepSel == 3 ? 0.4 : 0.3))) return false;
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.4 : 0.5) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
         double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (lepSel == 3 ? -0.3 : 0.4) : (lepSel == 3 ? -0.1 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (lepSel == 3 ? 0.6 : 0.4) : (lepSel == 3 ? 0.8 : 0.3))) return false;
-
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? -0.3 : -0.1) : (leptonSelection == 3 ? -0.1 : -0.6))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection ==    3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.4))) return false;
+        // numbers for tZq
+        /*
+        if(_ptRatio[l] < (is2017 ? 0.6 : 0.6)) return false; // 0.3 for 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.2 : 0.3)) return false;
+        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.3)) return false;
+        */
     }
     //cout << "info about FO leptons: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _lCharge[l] << " " << _leptonMvatZqTTV[l]  << endl;
 
@@ -123,7 +129,6 @@ bool treeReader::passPtCuts4L(const std::vector<unsigned>& ind){
     for(auto & i : ind){
         double ptcor = _lPt[i];
         ptMap.push_back({ptcor, i});
-        
     }
     std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
 
@@ -203,7 +208,6 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
     // temporary fix to sync with Daniel, 9 july 2018
     //if(!_jetIsTight[ind]) return false;
     switch(unc){
-        
         case 0: if(_jetPt[ind] < ptCut) return false; break;
         case 1: if(_jetPt_JECDown[ind] < ptCut) return false; break;
         case 2: if(_jetPt_JECUp[ind] < ptCut) return false; break;
@@ -253,6 +257,7 @@ unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool c
     //cout << "nbjets calculation is starting here >>>>>>>>>>>>>>> " << endl;
     for(unsigned j = 0; j < _nJets; ++j){
         if(jetIsGood(j, 30, unc, clean, is2017)){
+            //if(fabs(_jetEta[j]) > 2.4) continue;
             
             if(deepCSV && bTaggedDeepCSV(j, wp)) ++nbJets;
             else if(!deepCSV && bTaggedCSVv2(j, wp)) ++nbJets;
@@ -428,6 +433,7 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "Nonprompt") return kBlue-9;
     if(name == "nonpromptData") return kBlue-9; // switch to kBlue-9
     if(name == "chargeMisID") return kMagenta-7;
+    if(name == "chargeMisIDData") return kMagenta-7;
     if(name == "ttZ") return 91;
     if(name == "ttW") return 98;
     if(name == "ttH") return kRed-10;
@@ -435,7 +441,7 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "WZ") return 51;
     if(name == "ZZ") return kGreen+3;
     if(name == "rare") return 8;
-    if(name == "Zgamma") return kGreen;
+    if(name == "Xgamma") return kGreen;
     if(name == "DY") return kBlue-9;
 
     return kBlack;
@@ -489,12 +495,20 @@ bool treeReader::passWZCRSelection(const int nbjets, const double dMZ) const{
     return true;
 }
 
+
 bool treeReader::passttbarCRSelection(const int nbjets, const double dMZ) const{
     //if(!(deltaMZ == 999999 || !((deltaMZ < 10) || (mlll < 105) || (nBLoc < 1)))) continue;
     if(dMZ < 10) return false;
     else if(dMZ > 10 && dMZ != 999999){
         if(nbjets == 0) return false;
     } 
+    return true;
+}
+
+bool treeReader::passttbarCRintZqSelection(const int njets, const int nbjets, const double dMZ) const{
+    if(dMZ != 999999) return false;
+    if(nbjets != 1) return false;
+    if(njets != 2 && njets != 3) return false;
     return true;
 }
 
@@ -520,13 +534,119 @@ bool treeReader::passDYCRSelection(const double dMZ, const double ptNonZ, const 
     return true;
 }
 
-bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle) const{
+bool treeReader::passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ){
+
+    double mll, ptZ, ptNonZ, mlll; 
+    unsigned third = -9999;
+    TLorentzVector Zboson, lnegative;
+    std::vector<unsigned> vectorRemoved;
+    vectorRemoved = ind;
+    vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(0)), vectorRemoved.end());
+    vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(1)), vectorRemoved.end());
+    double seconddMZ = deltaMZ(vectorRemoved, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
+    if(seconddMZ > 20) return false;
+    return true;
+}
+
+bool treeReader::passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int njets){
+
+    if(njets < 2) return false;
+    double mll, ptZ, ptNonZ, mlll; 
+    unsigned third = -9999;
+    TLorentzVector Zboson, lnegative;
+    std::vector<unsigned> vectorRemoved;
+    vectorRemoved = ind;
+    vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(0)), vectorRemoved.end());
+    vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(1)), vectorRemoved.end());
+    double seconddMZ = deltaMZ(vectorRemoved, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
+    if(seconddMZ < 20) return false;
+    return true;
+}
+
+double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ){
+    
+    if(leptonSelection == 3){
+        if(passWZCRSelection(nbjets, dMZ)){
+            if(njets == 0) return -999.;
+            return njets-1; // SR 0, 1, 2, 3
+        }
+        else if(passttbarCRSelection(nbjets, dMZ)){
+            if(njets < 2) return -999.;
+            int nbjetsInd = nbjets < 2 ? nbjets : 2;
+            int njetsInd = njets < 4 ? njets-2 : 2;
+            return 8 + nbjetsInd * 3 + njetsInd; // 8, 9, 10, 11, 12, 13, 14, 15, 16
+        }
+        else if(passTTZSelection(njets, dMZ)){
+            if(nbjets < 1)  return -999.;
+            int nbjetsInd = nbjets < 2 ? 0 : 1;
+            int njetsInd = njets < 5 ? njets-2 : 3;
+            return 17 + nbjetsInd * 4 + njetsInd; // 17, 18, 19, 20, 21, 22, 23, 24
+        }
+    }
+    else if(leptonSelection == 4){
+        if(passZZCRSelection(ind, indOf2LonZ)){
+            if(njets < 1) return -999.;
+            int nbjetsInd = nbjets < 1 ? 0 : 1;
+            int njetsInd = njets < 2 ? 0 : 1;
+            return 4 + nbjetsInd * 2 + njetsInd; // 4, 5, 6, 7
+        }
+        else if(passTTZ4LSelection(ind, indOf2LonZ, njets)){
+            int nbjetsInd = nbjets < 1 ? 0 : 1;
+            return 25 + nbjetsInd;
+        }
+    }
+    return -999;
+
+}
+
+double treeReader::SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ){
+    
+    if(leptonSelection == 3){
+        if(passWZCRSelection(nbjets, dMZ)){
+            if(njets == 0) return -999.;
+            return njets-1; // SR 0, 1, 2, 3
+        }
+    }
+    return -999;
+}
+
+double treeReader::SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets){
+    
+    if(leptonSelection == 4){
+        if(passZZCRSelection(ind, indOf2LonZ)){
+            if(njets < 1) return -999.;
+            int nbjetsInd = nbjets < 1 ? 0 : 1;
+            int njetsInd = njets < 2 ? 0 : 1;
+            return nbjetsInd * 2 + njetsInd; // 4, 5, 6, 7
+        }
+    }
+    return -999;
+
+}
+
+double treeReader::SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ){
+    if(leptonSelection == 3){
+        if(passttbarCRSelection(nbjets, dMZ)){
+            if(njets < 2) return -999.;
+            int nbjetsInd = nbjets < 2 ? nbjets : 2;
+            int njetsInd = njets < 4 ? njets-2 : 2;
+            return nbjetsInd * 3 + njetsInd; // 8, 9, 10, 11, 12, 13, 14, 15, 16
+        }
+    }
+    return -999;
+
+}
+
+
+bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle){
     if(njets < 2) return false;
     if(nbjets < 1) return false;
 
     TLorentzVector l0p4, l1p4;
-    l0p4.SetPtEtaPhiE(ptCorrV[0].first, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * ptCorrV[0].first / _lPt[ind.at(0)]);
-    l1p4.SetPtEtaPhiE(ptCorrV[1].first, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * ptCorrV[1].first / _lPt[ind.at(1)]);
+    double lepCorrLead = _leptonMvatZqTTV[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZqTTV[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
+    l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
 
     double ele_mll = (l0p4+l1p4).M();
 
@@ -536,7 +656,23 @@ bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std
     return true;
 }
 
+bool treeReader::pass2Lcleanpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle){
+    if(njets < 3) return false;
+    if(nbjets < 2) return false;
 
+    TLorentzVector l0p4, l1p4;
+    double lepCorrLead = _leptonMvatZqTTV[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZqTTV[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
+    l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
+
+    double ele_mll = (l0p4+l1p4).M();
+
+    if(ele_mll < 12) return false;
+    if(ele_mll > 76 && ele_mll < 106 && nEle == 2) return false;
+    if(met < 30) return false;
+    return true;
+}
 
 double treeReader::mtCalc(const TLorentzVector Vect, const double MET, const double MET_Phi) const{
 
