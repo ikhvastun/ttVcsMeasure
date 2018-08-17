@@ -11,7 +11,7 @@ const int leptonSelectionAnalysis = 3;
 const int nSamples = 50;
 const int dataSample = 0;
 
-const int numberOfSyst = 6;
+const int numberOfSyst = 7;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
@@ -19,6 +19,20 @@ TString additionalString[2] = {"_NC", ""};
 struct BinLabelOptions{
   int index;
   std::string labelSR;
+};
+
+std::vector<BinLabelOptions> theSRLabelOptionsForttZCleanPTZ = {
+      {1, "0-75"},
+      {2, "75-150"},
+      {3, "150-250"},
+      {4, ">250"}
+};
+
+std::vector<BinLabelOptions> theSRLabelOptionsForttZCleanCosTheta = {
+      {1, "[-1,-0.5]"},
+      {2, "[-0.5,0]"},
+      {3, "[0, 0.5]"},
+      {4, "[0.5, 1]]"}
 };
 
 std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
@@ -70,15 +84,15 @@ std::vector<BinLabelOptions> theSRLabelOptionsForZZCR = {
 
 std::vector<BinLabelOptions> theSRLabelOptionsForTTCR = {
 
-      {1, "1"}, // nonprompt CR, same as main selection, but off Z or noOSSF
-      {2, "2"},
-      {3, "3"},
-      {4, "4"},
-      {5, "5"},
-      {6, "6"},
-      {7, "7"},
-      {8, "8"},
-      {9, "9"},
+      {1, "0-2"}, // nonprompt CR, same as main selection, but off Z or noOSSF
+      {2, "3"},
+      {3, ">3"},
+      {4, "0-2"},
+      {5, "3"},
+      {6, ">3"},
+      {7, "0-2"},
+      {8, "3"},
+      {9, ">3"},
 
 };
 
@@ -264,7 +278,7 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"mt_2m1e", {"m_{T}^{W} in 2#mu e [GeV]", 32, 0, 200, 20, true}}, 
                                                  {"mt_1m2e", {"m_{T}^{W} in 1#mu 2e [GeV]", 33, 0, 200, 20, true}}, 
                                                  {"mt_3e", {"m_{T}^{W} in 3e [GeV]", 34, 0, 200, 20, true}},
-                                                 {"cosThetaStar", {"cos(#Theta^{*})", 35, -1, 1, 5, false}},
+                                                 {"cosThetaStar", {"cos(#theta^{*})", 35, -1, 1, 5, false}},
                                                  {"mll_ss",  {"Invariant mass of ss 2l pair [GeV]", 36, 0, 300, 20, true}},
                                                  {"chargeOfLeptons",  {"Charge of the leptons in ss2l channel", 37, -1.5, 1.5, 3, false}},
                                                  {"ll_deltaR",  {"#Delta R(leading lepton, trailing lepton)", 38, 0, 7., 35, false}},
@@ -274,11 +288,15 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"SRallTTZ", {"", 42, -0.5, static_cast<double>(theSRLabelOptionsForTTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTZ.size()), false}},
                                                  {"SRWZCR", {"", 43, -0.5, static_cast<double>(theSRLabelOptionsForWZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForWZCR.size()), false}},
                                                  {"SRZZCR", {"", 44, -0.5, static_cast<double>(theSRLabelOptionsForZZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForZZCR.size()), false}},
-                                                 {"SRTTCR", {"", 45, -0.5, static_cast<double>(theSRLabelOptionsForTTCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTCR.size()), false}},
+                                                 {"SRTTCR", {"N_{j}", 45, -0.5, static_cast<double>(theSRLabelOptionsForTTCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTCR.size()), false}},
+                                                 {"SRttZCleanPTZ", {"p_{T}^{Z} [GeV]", 46, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanPTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanPTZ.size()), true}},
+                                                 {"SRttZCleanCosTheta", {"cos(#theta^{*})", 47, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanCosTheta.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanCosTheta.size()), false}},
                                            };
 
 const int nVars  = figNames.size() ;
 
+const unsigned int indexSRttZcleanCosTheta = 47;
+const unsigned int indexSRttZcleanPTZ = 46;
 const unsigned int indexSRTTCR = 45;
 const unsigned int indexSRZZCR = 44;
 const unsigned int indexSRWZCR = 43;

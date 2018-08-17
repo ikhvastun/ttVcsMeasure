@@ -1,7 +1,7 @@
 import numpy as np
-fnameM = '../data/dumps/events_data_3mu_2017_test.txt'
+fnameM = 'dumps/myevents4L2016ZZCR.txt'
 #fnameW = '/user/wverbeke/dump.txt'
-fnameW = 'dumps/daniele_3mu_data_2017.txt'
+fnameW = 'dumps/daniele_4L_dataZZCR.txt'
 eventM = np.loadtxt(fnameM, dtype = int)
 #eventW = np.loadtxt(fnameW, dtype = int, delimiter = " ", usecols = (0,1,2))
 eventW = np.loadtxt(fnameW, dtype = int)

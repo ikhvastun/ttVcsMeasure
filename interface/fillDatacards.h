@@ -22,8 +22,8 @@ vector<int> formEmptyStringInt(int);
 vector<int> formUnityStringInt(int);
 void fillExperUnc(ofstream &, vector<std::string> & );
 
-std::vector<double> experUnc      = {1.025, 1.01, 1.02}; 
-std::vector<TString> experUncName = {"lumi", "PDF", "trigger"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
+std::vector<double> experUnc      = {1.025, 1.02}; 
+std::vector<TString> experUncName = {"lumi", "trigger"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
 std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
 
@@ -123,15 +123,15 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
          histStUp->SetBinContent(sr+1, hist->GetBinContent(sr+1) + hist->GetBinError(sr+1));
          histStDown->SetBinContent(sr+1, hist->GetBinContent(sr+1) - hist->GetBinError(sr+1));
 
-         histStUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + "Up").c_str());
-         histStDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + "Down").c_str());
+         histStUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat" + std::string(name) + "_bin_" + std::to_string(sr+1) + "Up").c_str());
+         histStDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + nameOfProcessesForDatacard[cat-1] + "_stat" + std::string(name) + "_bin_" + std::to_string(sr+1) + "Down").c_str());
          histStUp->Write();
          histStDown->Write();
 
          histStUp->SetBinContent(sr+1, hist->GetBinContent(sr+1));
          histStDown->SetBinContent(sr+1, hist->GetBinContent(sr+1));
 
-         fileout << nameOfProcessesForDatacard[cat-1] + "_stat_bin_" + std::to_string(sr+1) + " shape     " ;
+         fileout << nameOfProcessesForDatacard[cat-1] + "_stat" + name + "_bin_" + std::to_string(sr+1) + " shape     " ;
          vector<int> newString = formEmptyStringInt(numberOfBKG + 1); // + 1 for signal
          newString[cat-1] = 1;
          fillString(fileout, newString);
@@ -164,7 +164,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
       }
       fileout <<  systShapeNames.at(syst) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
-      newString[2] = 999; // don't consider uncertainty on nonprompt
+      newString[1] = 999; // don't consider uncertainty on nonprompt
       /*
       if(lepSel == 2)
           newString[3] = 999;
@@ -173,7 +173,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    }
 
    // here fill all syst shape uncertainties that have acceptance uncertainty 
-   std::vector<std::string> systShapeAcceptNames = {"scaleAcc"};
+   std::vector<std::string> systShapeAcceptNames = {"scaleAcc", "pdfAcc"};
    for(int syst = systShapeNames.size(); syst < systShapeAcceptNames.size() + systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *hist, *histStUp, *histStDown, *histAccUp, *histAccDown;
@@ -210,7 +210,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
       }
       fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size()) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
-      newString[2] = 999; // don't consider uncertainty on nonprompt
+      newString[1] = 999; // don't consider uncertainty on nonprompt
       //if(lepSel == 2)
       //    newString[3] = 999;
       fillString(fileout, newString);
@@ -241,7 +241,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    newString = formEmptyString(numberOfBKG + 1);
    for(int i = 1; i < nameOfProcessesForDatacard.size(); i++){
        if(std::find(ttVprocesses.begin(), ttVprocesses.end(), nameOfProcessesForDatacard.at(i)) != ttVprocesses.end() )
-       newString[i] = 1.1;
+       newString[i] = 1.11;
    }
    fillString(fileout, newString);
 
@@ -262,10 +262,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    fillString(fileout, newString);
 
    //if(lepSel != 2){
-     fileout << ("Zgamma     lnN ");
+     fileout << ("Xgamma     lnN ");
      newString = formEmptyString(numberOfBKG + 1);
      for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
-       if(nameOfProcessesForDatacard.at(i) == "Zgamma")
+       if(nameOfProcessesForDatacard.at(i) == "Xgamma")
          newString[i] = 1.2;
      }
      fillString(fileout, newString);

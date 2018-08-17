@@ -214,7 +214,7 @@ class treeReader {
 
         //functions to analyze tree
         void GetEntry(long unsigned entry);
-        void Analyze(const std::string& fileToAnalyse, const std::string option = "", const std::string selection = "", const std::string& sampleToDebug = "", long = -999);
+        void Analyze(const std::vector<std::string>& fileToAnalyse, const std::string option = "", const std::string selection = "", const std::string& sampleToDebug = "", long = -999);
         void GetEntry(const Sample&, long unsigned entry);
         void Loop(const std::string& sample, const double xSection);
 
@@ -255,12 +255,17 @@ class treeReader {
         double mtCalc(const TLorentzVector Vect, const double MET, const double MET_Phi) const;
         bool pass2Lpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle);
         bool pass2Lcleanpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle);
-        bool passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int njets);
-        bool passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ);
-        double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ);
+        bool passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets);
+        bool passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets);
+        double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ);
         double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ);
-        double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned>& indOf2LonZ, const int & njets, const int & nbjets);
+        double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets);
         double SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ);
+        double SRID3L(int & njets, int & nbjets);
+        double SRID4L(int & njets, int & nbjets);
+        double SRIDPTZ(const double & ptZ) const;
+        double SRIDCosTheta(const double & cosTheta) const;
+        double sumAllLeptonsCharge(const std::vector<unsigned>& ind);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
@@ -289,14 +294,16 @@ class treeReader {
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
-        std::vector<std::string> getNamesOfTheSample() {return namesOfTheSample;}
+        std::vector<std::string> getNamesOfTheFiles() {return namesOfTheFiles;}
+        std::vector<std::string> getNamesOfTheProcesses() {return namesOfTheProcesses;}
         std::vector<Color_t> getColsOfTheStack(){return colsOfTheStack;}
     private:
         TTree* fChain;                                                          //current Tree
         std::shared_ptr<TFile> sampleFile;                                      //current sample
         std::vector<Sample> samples;
         //std::vector<std::tuple<std::string, std::string, double> > samples;     //list of samples
-        std::vector<std::string> namesOfTheSample;
+        std::vector<std::string> namesOfTheFiles;
+        std::vector<std::string> namesOfTheProcesses;
         std::vector<Color_t> colsOfTheStack;
         //unsigned currentSampleIndex = 0;                                             //current index in list
         Sample currentSample; 
@@ -309,7 +316,7 @@ class treeReader {
         bool isData = false;
         bool isDataNonprompt = false;
         bool isChargeMisIDSample = false;
-        bool is2017 = false;
+        bool is2017folder = false;
         double scale = 0;
         double sumSimulatedEventWeights = 0;
         double sumSimulatedEventWeightsScaleUp = 0;
@@ -324,8 +331,12 @@ class treeReader {
         std::shared_ptr<Reweighter> reweighter;
         double crossSectionRatio[100][100];
 
-        //bool is2017() { return currentSample.is2017(); }
-        bool is2016() { return !is2017; }                  //if sample is not 2017 it is automatically 2016
+        std::map<std::string, int> processIndex;
+
+        bool is2017() { return currentSample.is2017(); }
+        bool is2016() { return currentSample.is2016(); }                  //if sample is not 2017 it is automatically 2016
+        double lumi2016 = 35.9;
+        double lumi2017 = 41.9;
         //bool isData() { return currentSample.isData(); }
         //bool isMC() { return currentSample.isMC(); } 
 

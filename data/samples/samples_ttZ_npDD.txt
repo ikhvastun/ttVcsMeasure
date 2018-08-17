@@ -1,7 +1,7 @@
-data data_combined.root                                        				1
+data data_combined_Summer16.root                                        				1
 ttZ	 TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Summer16.root   	    		0.2728
 ttZ  TTZToLL_M-1to10_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root 				0.0493 
-nonpromptData data_combined.root                                                 1
+nonpromptData data_combined_Summer16.root                                                 1
 WZ   WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root                  4.666
 ttH  ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_Summer16.root 		0.215
 ttX  tZq_ll_4f_13TeV-amcatnlo-pythia8_Summer16.root										0.09418

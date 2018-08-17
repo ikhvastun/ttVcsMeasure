@@ -29,7 +29,7 @@ void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
 void setUpSystUnc(DistribsAll &, TH1D *);
 void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
 void printInfoOnPlot3L();
-void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, bool is2017 = false){
+void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
@@ -42,8 +42,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
-    if(is2017) // keep it blinded for 2017
-        dataHist->Reset("ICE");
+    //if(is2017) // keep it blinded for 2017
+    //    dataHist->Reset("ICE");
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle("");
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
@@ -59,18 +59,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     //dataHist->Draw("E0same");
 
     leg->Draw("same");
-    CMS_lumi( pad1, iPeriod, iPos, (is2017 ? 41.9 : 35.9));
+    double lumi = 35.9;
+    if(showLegendOption == 1) lumi = 41.9;
+    else if (showLegendOption == 2) lumi = 77.8;
+    CMS_lumi( pad1, iPeriod, iPos, lumi);
 
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
-
-    if(info.index == indexSR3L){
-       dataHist->GetXaxis()->SetTitleSize(0.07);
-       dataHist->GetXaxis()->SetTitleOffset(0.8);
-       if(leptonSelectionAnalysis == 3)
-         printInfoOnPlot3L();
-    }
 
     if(xPad == 0) return;
 
@@ -119,8 +115,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     line->Draw("same");
 
     mtlegRatio->Draw("same");
-    if(!is2017)
-        dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+    //if(!is2017)
+    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
 
     pad2->RedrawAxis();
     pad2->Update();
@@ -138,6 +134,13 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     systAndStatUnc->Draw("e2same");
     dataHist->Draw("E0same");
 
+    if(info.index == indexSR3L){
+       dataHist->GetXaxis()->SetTitleSize(0.07);
+       dataHist->GetXaxis()->SetTitleOffset(0.8);
+       if(leptonSelectionAnalysis == 3)
+         printInfoOnPlot3L();
+    }
+
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
@@ -146,13 +149,15 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
 void printInfoOnPlot3L(){
 
-    TLine *line1 = new TLine(2.5, 0, 2.5, 1125);
+    TLine *line1 = new TLine(3.5, 0, 3.5, 1125);
     line1->SetLineStyle(2);
     line1->Draw("same");
 
     TLine *line2 = new TLine(5.5, 0, 5.5, 1125);
     line2->SetLineStyle(2);
-    line2->Draw("same");
+    
+    // need only one for the moment
+    //line2->Draw("same");
 
     TLatex nbjetsEq0region;
     nbjetsEq0region.SetNDC();
@@ -162,7 +167,7 @@ void printInfoOnPlot3L(){
     nbjetsEq0region.SetTextFont(42);
     nbjetsEq0region.SetTextAlign(31);
     nbjetsEq0region.SetTextSize(0.05);
-    nbjetsEq0region.DrawLatex(0.35, 0.56,"N_{b} = 0");
+    //nbjetsEq0region.DrawLatex(0.35, 0.56,"N_{b} = 0");
 
     TLatex nbjetsEq1region;
     nbjetsEq1region.SetNDC();
@@ -189,6 +194,10 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
 
     // this one will be used on the ratio plot
     stackCopy->Divide(stackCopy);
+
+    // if there is 0 event in stack, then set uncertainty to 0 
+    //for(int bin = 1; bin < stackCopy->GetNbinsX() + 1; bin++)
+    //    stackCopy->SetBinError(bin, 0.);
 
     stackCopy->SetFillStyle(1001);
     stackCopy->SetFillColor(kCyan - 4);
@@ -279,6 +288,8 @@ void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
                 //cout << "unc after applying " << j << " syst: " << TMath::Sqrt(err) << endl;
                 histSystAndStatUnc->SetBinError(i+1, TMath::Sqrt(err) > 1 ? 1. : TMath::Sqrt(err));
             }
+            //else
+            //    histSystAndStatUnc->SetBinError(i+1, 0.);
         }
     }
 

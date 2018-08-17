@@ -64,31 +64,6 @@ double SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) 
 }
     */
 
-double SRID3L (int njets, int nbjets) {
-    double index = -1.;
-    
-    const int njetsCategories = 3;
-
-    int njetsIndex;
-    if (njets == 2) njetsIndex = 0;
-    else if (njets == 3) njetsIndex = 1;
-    else if (njets >= 4) njetsIndex = 2;
-    
-    int nbjetsIndex;
-    if (nbjets == 0) nbjetsIndex = 0;
-    else if (nbjets == 1) nbjetsIndex = 1;
-    else if (nbjets >= 2) nbjetsIndex = 2;
-
-    index = nbjetsIndex * njetsCategories + njetsIndex;
-
-    return index;
-
-}
-
-double SRID4L(int nbjets){
-    if(nbjets == 0) return 0.;
-    else if(nbjets > 0) return 1.;
-}
 
 void initdistribs(std::vector<std::string> & namesOfSamples){
 
@@ -110,9 +85,8 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
           name = Form("varDown_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
         }
-        //if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ){
         /*
-        if(i == indexSRTTZ){
+        if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ || i == indexSRTTCR || i == indexSRWZCR || i == indexSRZZCR){
             for(unsigned int pdf = 0; pdf < 100; pdf++){
                 name = Form("pdf_%d_%d_%d",i,j,pdf);
                 distribs[i].vectorHistoPDF[j].var[pdf] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
@@ -380,11 +354,12 @@ void initListsToPrint(const std::string & selection){
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
-  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
-  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR", "met", "cosThetaStar"};
-  listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR", "cosThetaStar"};
+  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar"};
+  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta"};
+  listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
-  listToPrint["ttZ"] = {"SR3L", "SR4L", "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR"};
+  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR"};
+  //listToPrint["ttZ"] = {"SRZZCR"};
 
   if(listToPrint.find(selection) == listToPrint.end()){
       std::cerr << "control region selection is incorrect, please double check" << std::endl;

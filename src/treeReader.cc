@@ -14,27 +14,31 @@ treeReader::treeReader(TTree *tree) : fChain(nullptr)
 }
 
 void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampleVector){
-    sampleVector.clear();    //clear current sample list
+    //sampleVector.clear();    //clear current sample list
     //read sample info (names and xSec) from txt file
     std::ifstream file(list);
     int sampleCounter = 0;
+    int processCounter = 0;
     do {
         sampleVector.push_back(Sample(file));
-        namesOfTheSample.push_back(sampleVector.back().getProcessName());
-        if(sampleVector.back().getProcessName() == "nonpromptData")
-            nonPromptSample = sampleCounter;
-        if(sampleVector.back().getProcessName() == "chargeMisIDData")
-            CMIDSample = sampleCounter;
+        namesOfTheFiles.push_back(sampleVector.back().getProcessName());
+        if(std::find(namesOfTheProcesses.begin(), namesOfTheProcesses.end(), sampleVector.back().getProcessName()) == namesOfTheProcesses.end() && sampleVector.back().getProcessName() != "") {
+            namesOfTheProcesses.push_back(sampleVector.back().getProcessName());
+            processIndex.insert(std::pair<std::string,int>(sampleVector.back().getProcessName(), processCounter));
+            if(sampleVector.back().getProcessName() == "nonpromptData")
+                nonPromptSample = processCounter;
+            processCounter++;
+        } 
+
+        //if(sampleVector.back().getProcessName() == "chargeMisIDData")
+        //    CMIDSample = sampleCounter;
         sampleCounter++;
     } while(!file.eof());
     sampleVector.pop_back();
     file.close();       //close file after usage
     //display samples that have been read 
-    for(auto& sample : sampleVector){
-        std::cout << sample << std::endl;
-    }
-    is2017 = list.find("2017") != std::string::npos;
-    dataLumi = is2017 ? 41.9 : 35.9;
+    //is2017folder = list.find("2017") != std::string::npos;
+    //dataLumi = is2017 ? 41.9 : 35.9;
 
 }
 
@@ -47,11 +51,12 @@ void treeReader::initSample(const Sample& samp){
     //update current sample
     currentSample = samp;
     //sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(is2017 ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
-    sampleFile = samp.getFile("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ntuples_ttV_" + std::string(is2017 ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    sampleFile = samp.getFile("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, samp.isData());
     nEntries = fChain->GetEntries();
+    
     isData = (samples[currentSampleIndex].getProcessName()) == "data";
     isDataNonprompt = (samples[currentSampleIndex].getProcessName()) == "nonpromptData";
     isChargeMisIDSample = (samples[currentSampleIndex].getProcessName()) == "chargeMisIDData";
@@ -66,24 +71,24 @@ void treeReader::initSample(const Sample& samp){
 
         TH1D* lheCounter = new TH1D("lheCounter", "Events counter", 110, 0, 110);
         lheCounter->Read("lheCounter"); 
-        sumSimulatedEventWeightsScaleUp = lheCounter->GetBinContent(9);
-        sumSimulatedEventWeightsScaleDown = lheCounter->GetBinContent(5);
 
+        // for some samples these lhe weights are 0 (not stored in root file), simply take initial number of simulated events
+        sumSimulatedEventWeightsScaleUp = lheCounter->GetBinContent(9) != 0 ? lheCounter->GetBinContent(9) : sumSimulatedEventWeights;
+        sumSimulatedEventWeightsScaleDown = lheCounter->GetBinContent(5) != 0 ? lheCounter->GetBinContent(5) : sumSimulatedEventWeights;
+        
         for(unsigned lhe = 9; lhe < 110; ++lhe){
-            double variedSumOfWeights = lheCounter->GetBinContent(lhe + 1);
+            double variedSumOfWeights = lheCounter->GetBinContent(lhe + 1) != 0 ? lheCounter->GetBinContent(lhe + 1) : sumSimulatedEventWeights;
             crossSectionRatio[currentSampleIndex][lhe-9] = sumSimulatedEventWeights /( variedSumOfWeights );
         }
 
         delete lheCounter;
         //event weights set with lumi depending on sample's era 
-        /*
         double dataLumi;
         if( is2016() ){
             dataLumi = lumi2016;
         } else {
             dataLumi = lumi2017;
         } 
-        */
         scale = samp.getXSec()*dataLumi*1000/sumSimulatedEventWeights;       //xSec*lumi divided by total sum of simulated event weights
     }
 
