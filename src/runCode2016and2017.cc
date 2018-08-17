@@ -63,8 +63,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   samples.clear();
   for(auto & fileToAnalyse : filesToAnalyse)
     readSamples(fileToAnalyse);
-  //readSamples("data/samples/samples_ttZ_npDD.txt");
-  //readSamples("data/samples/samples_ttZ_2017_npDD.txt");
   for(auto& sample : samples){
     std::cout << sample << std::endl;
   }
@@ -81,13 +79,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   std::ofstream myfile;
   myfile.open("myevents.txt");
-
-  /*
-  for(map<std::string,int>::const_iterator it = processIndex.begin();it != processIndex.end(); ++it)
-    std::cout << it->first << " " << it->second << std::endl;
-
-  return; 
-  */
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
@@ -292,13 +283,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //std::chrono::duration<double> elapsed = finish - start;
           //std::cout << "time needed to estimate event weight: " << elapsed.count() << std::endl;
 
-          /*
-          if(samples[sam].getProcessName() == "data" && samCategory == nonPromptSample) // && leptonSelection != 4)
-            weight *= fakeRateWeight();
-          if(samCategory == CMIDSample)
-            weight *= CMIDRateWeight();
-          */
-
           if(debug) cout << "weight of event is " << weight << endl;
 
           int mvaValueRegion = 0;
@@ -426,7 +410,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 //    }
                 //}
                 //else{
-                
                     distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
                 //}

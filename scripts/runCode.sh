@@ -15,9 +15,11 @@ sampleFile=$1
 selection=$2
 
 year="2017"
-if [[ $sampleFile = *"2017"* ]]; then
+if [[ $sampleFile = *","* ]]; then
+    year="comb"
+elif [[ $sampleFile = *"2017"* ]]; then
     year="2017"
-else
+else 
     year="2016"
 fi
 
@@ -37,7 +39,7 @@ echo "...Job Ended!"
 
 " > submit.sh ;
 
-qsub submit.sh -l walltime=08:00:00;
+qsub submit.sh -l walltime=04:00:00;
 #echo 'output files are', out_err_${selection}_${year}
 #echo 'everything is fine'
 rm submit.sh
