@@ -540,7 +540,7 @@ bool treeReader::passDYCRSelection(const double dMZ, const double ptNonZ, const 
 
 bool treeReader::passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets){
 
-    if(njets < 1) return false;
+    //if(njets < 1) return false;
     double mll, ptZ, ptNonZ, mlll; 
     unsigned third = -9999;
     TLorentzVector Zboson, lnegative;
