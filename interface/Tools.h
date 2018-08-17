@@ -349,7 +349,7 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
 void initListsToPrint(const std::string & selection){
 
   listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
-  listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
+  listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
   listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
   listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll"};
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
