@@ -46,8 +46,8 @@
 ###########################################################################
 # combination of 2016 and 2017
 # 3L
-#sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_WZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_WZ.txt WZ
-sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_nonprompt.txt,data/samples/2017CR/samples_ttZ_2017_npDD_nonprompt.txt ttbar
-sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_nonprompt.txt,data/samples/2017CR/samples_ttZ_2017_npDD_nonprompt.txt DY
-sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_Xgamma.txt,data/samples/2017CR/samples_ttZ_2017_npDD_Xgamma.txt Xgamma
-sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_ZZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_ZZ.txt ZZ
+sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_WZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_WZ.txt WZ
+#sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_nonprompt.txt,data/samples/2017CR/samples_ttZ_2017_npDD_nonprompt.txt ttbar
+#sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_nonprompt.txt,data/samples/2017CR/samples_ttZ_2017_npDD_nonprompt.txt DY
+#sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_Xgamma.txt,data/samples/2017CR/samples_ttZ_2017_npDD_Xgamma.txt Xgamma
+#sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_ZZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_ZZ.txt ZZ
