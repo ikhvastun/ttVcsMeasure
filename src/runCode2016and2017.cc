@@ -200,6 +200,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                                        || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
           }
           if(leptonSelection == 4){
+            // WZ goes to nonprompt here
             if((samples[sam].getProcessName()) == "WZ") samCategory = nonPromptSample;
             if(!allLeptonsArePrompt) samCategory = nonPromptSample;
           }
