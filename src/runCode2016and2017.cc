@@ -133,7 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          if(it > nEntries / 20) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
@@ -194,10 +194,15 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if((samples[sam].getProcessName()) == "chargeMisID" && !allLeptonsArePrompt) continue;
           if((samples[sam].getProcessName()) == "Nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
-          if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ" || (samples[sam].getProcessName()) == "ttX" 
+          if(leptonSelection == 3){
+            if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ" || (samples[sam].getProcessName()) == "ttX" 
                                                        || (samples[sam].getProcessName()) == "WZ" || (samples[sam].getProcessName()) == "Xgamma"  || (samples[sam].getProcessName()) == "ZZ" 
                                                        || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
-
+          }
+          if(leptonSelection == 4){
+            if((samples[sam].getProcessName()) == "WZ") samCategory = nonPromptSample;
+            if(!allLeptonsArePrompt) samCategory = nonPromptSample;
+          }
           int nLocEle = getElectronNumber(ind);
           //if(nLocEle != 3) continue;
 
@@ -280,7 +285,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData")
             weight *= sfWeight();
-          if(samples[sam].getProcessName() == "data" && samCategory == nonPromptSample)
+          if(samples[sam].getProcessName() == "data" && samCategory == nonPromptSample && leptonSelection == 3)
             weight *= fakeRateWeight();
 
           //auto finish = std::chrono::high_resolution_clock::now();
@@ -506,6 +511,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     //std::cout << it->first << " " << it->second << std::endl;
     if(it->second == "data") continue;
     if(it->second == "ttH") continue;
+
+    if(selection == "ZZ" || selection == "ttZ4L"){
+      if(it->second == "WZ") continue;
+    }
     if(it->second != "nonpromptData" && it->second != "Xgamma")
       mtleg->AddEntry(&distribs[0].vectorHisto[it->first],it->second.c_str(),"f");
     else if(it->second == "nonpromptData")
@@ -526,7 +535,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     showLegendOption = 2;
   }
   else{
-    if(filesToAnalyse.at(0).find(2017)){
+    if(filesToAnalyse.at(0).find("2017")){
       folderToStorePlots = "2017/";
       showLegendOption = 1;
     }
