@@ -252,7 +252,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           if(leptonSelection == 3){
             
-            if(selection == "ttZ" && !(passTTZSelection(nJLoc, dMZ) || passWZCRSelection(nBLoc, dMZ) || passttbarCRSelection(nBLoc, dMZ))) continue;
+            if(selection == "ttZ" && !(passTTZSelection(nJLoc, dMZ) || passWZCRSelection(nBLoc, dMZ) || passttbarCRSelection(nBLoc, dMZ, mlll))) continue;
             if(selection == "tZq" &&!passttbarCRintZqSelection(nJLoc, nBLoc, dMZ)) continue;
             if(selection == "ttZ3L" && !passTTZSelection(nJLoc, dMZ)) continue;
             if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
@@ -266,7 +266,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 mt1 = mtCalc(l0p4, _met, _metPhi);
                 cosTSt = cosThetaStar(Zboson, lnegative);
             }
-            if(selection == "ttbar" &&!passttbarCRSelection(nBLoc, dMZ)) continue;
+            if(selection == "ttbar" &&!passttbarCRSelection(nBLoc, dMZ, mlll)) continue;
             if(selection == "Xgamma" && !passZGCRSelection(mlll, dMZ)) continue;
 
           }
@@ -298,7 +298,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           int mvaValueRegion = 0;
 
-          if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) << endl; 
+          if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) << endl; 
           if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
 
           vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -314,7 +314,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ),
+                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt)
                                    };
 
@@ -330,7 +330,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJECUp,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ),
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll),
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt)
                                    };
 
@@ -346,7 +346,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ),
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll),
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt)
                                    };
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
@@ -503,7 +503,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
   
   for(map<int, std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
-    std::cout << it->first << " " << it->second << std::endl;
+    //std::cout << it->first << " " << it->second << std::endl;
     if(it->second == "data") continue;
     if(it->second == "ttH") continue;
     if(it->second != "nonpromptData" && it->second != "Xgamma")
@@ -513,29 +513,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     else if(it->second == "Xgamma")
       mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"X#gamma","f");
   }
-
-  /*
-  return; 
-
-  int count = 0;
-  for (std::vector<std::string>::iterator it = samplesOrderNames.begin()+1; it != samplesOrderNames.end(); it++) {
-        count++;
-        if(samplesOrderNames.at(count) == "ttH") continue;
-        //if(samplesOrderNames.at(count) == "ZZ") continue;
-
-        cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
-
-        if(leptonSelection == 3 && samplesOrderNames.at(count) == "chargeMisID") continue;
-        if(samplesOrderNames.at(count) != "chargeMisIDData" && samplesOrderNames.at(count) != "nonpromptData" && samplesOrderNames.at(count) != "Xgamma")
-            mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
-        else if(samplesOrderNames.at(count) == "nonpromptData")
-            mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"Nonprompt","f");
-        else if(samplesOrderNames.at(count) == "Xgamma")
-            mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"X#gamma","f");
-        else if(samplesOrderNames.at(count) == "chargeMisIDData")
-            mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],"chargeMisID","f");
-  }
-  */
 
   // plots to make with systematics and stat uncertainty on them
   std::string processToStore = selection;

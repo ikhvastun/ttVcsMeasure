@@ -248,7 +248,7 @@ class treeReader {
         bool passTTZSelection(const int, const double) const;
         bool passTTZCleanSelection(const int, const int, const double) const;
         bool passWZCRSelection(const int, const double) const;
-        bool passttbarCRSelection(const int, const double) const;
+        bool passttbarCRSelection(const int, const double, const double) const;
         bool passttbarCRintZqSelection(const int njets, const int nbjets, const double dMZ) const;
         bool passZGCRSelection(const double, const double) const;
         bool passDYCRSelection(const double, const double, const unsigned, const double, const double, const int, const int) const;
@@ -257,8 +257,8 @@ class treeReader {
         bool pass2Lcleanpreselection(const int njets, const int nbjets, const std::vector<unsigned>& ind, const double met, const int nEle);
         bool passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets);
         bool passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets);
-        double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ);
-        double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ);
+        double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
+        double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
         double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets);
         double SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ);
         double SRID3L(int & njets, int & nbjets);

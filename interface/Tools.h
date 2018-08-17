@@ -72,7 +72,6 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
       histInfo hist = it->second;
       TString name = Form("varST_%d",hist.index);
       int i = hist.index;
-      //distribs[i].vectorHistoTotalUnc = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
       for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
@@ -85,6 +84,8 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
           name = Form("varDown_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
         }
+
+        // pdf uncertainties, taes quite a lot for time to initialize them, for convenience atm are commented 
         /*
         if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ || i == indexSRTTCR || i == indexSRWZCR || i == indexSRZZCR){
             for(unsigned int pdf = 0; pdf < 100; pdf++){
@@ -349,8 +350,8 @@ void initListsToPrint(const std::string & selection){
 
   listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
   listToPrint["Zgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
-  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
-  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
+  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll"};
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};

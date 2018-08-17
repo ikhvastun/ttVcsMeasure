@@ -499,9 +499,10 @@ bool treeReader::passWZCRSelection(const int nbjets, const double dMZ) const{
 }
 
 
-bool treeReader::passttbarCRSelection(const int nbjets, const double dMZ) const{
+bool treeReader::passttbarCRSelection(const int nbjets, const double dMZ, const double mlll) const{
     //if(!(deltaMZ == 999999 || !((deltaMZ < 10) || (mlll < 105) || (nBLoc < 1)))) continue;
     if(dMZ < 10) return false;
+    if(mlll < 101) return false;
     else if(dMZ > 10 && dMZ != 999999){
         if(nbjets == 0) return false;
     } 
@@ -569,14 +570,14 @@ bool treeReader::passTTZ4LSelection(const std::vector<unsigned>& ind, std::vecto
     return true;
 }
 
-double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ){
+double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ, const double & mlll){
     
     if(leptonSelection == 3){
         if(passWZCRSelection(nbjets, dMZ)){
             if(njets == 0) return -999.;
             return njets-1; // SR 0, 1, 2, 3
         }
-        else if(passttbarCRSelection(nbjets, dMZ)){
+        else if(passttbarCRSelection(nbjets, dMZ, mlll)){
             //if(njets < 2) return -999.;
             int nbjetsInd = nbjets < 2 ? nbjets : 2;
             //int njetsInd = njets < 4 ? njets-2 : 2;
@@ -673,9 +674,9 @@ double treeReader::SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsign
 
 }
 
-double treeReader::SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ){
+double treeReader::SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ, const double & mlll){
     if(leptonSelection == 3){
-        if(passttbarCRSelection(nbjets, dMZ)){
+        if(passttbarCRSelection(nbjets, dMZ, mlll)){
             //if(njets < 2) return -999.;
             int nbjetsInd = nbjets < 2 ? nbjets : 2;
             int njetsInd = njets < 3 ? 0 : (njets == 3 ? 1 : 2);
