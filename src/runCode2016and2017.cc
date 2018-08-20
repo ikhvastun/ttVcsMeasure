@@ -87,7 +87,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, samCategory);
 
-      //if(!((samples[sam].getFileName()).find("ST_tW_") != std::string::npos)) continue;
+      if(!(samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
@@ -455,6 +455,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       }
 
       cout << endl;
+      samCategory = processIndex.at(samples[sam].getProcessName());
       cout << "Total number of events: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[samCategory].Integral() << endl;
       if(leptonSelection != 4)
         cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
