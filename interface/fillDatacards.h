@@ -28,25 +28,23 @@ std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
 
 // just an example, nameOfProcessForDatacards: data, ttZ, ttW, etc.
+// obsolete information, should be erased asap
 // distribsOrderForYields = 0, 1, 3, ...., 
 // 0 - data
 // so 1 + 2 = ttZ
 // 3 = ttW
-void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, vector<unsigned> & distribsOrderForYields, const TString name, bool is2017 = false){
+void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false){
 
   const int SRNumber = figNames[name].nBins;
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
   std::vector<double> intYield;
 
   // first let's calculate total yield in each category
-  for (int i = 0; i != distribsOrderForYields.size()-1; ++i) {
+  for (int i = 0; i != nameOfProcessesForDatacard.size(); ++i) {
 
      double yield = 0;
      for (int k = 0; k != SRNumber; ++k) {
-
-        for(unsigned int j = distribsOrderForYields.at(i); j != distribsOrderForYields.at(i+1); j++){
-          yield += distribs.vectorHisto[j].GetBinContent(k+1);
-        }
+        yield += distribs.vectorHisto[i].GetBinContent(k+1);
      }
      intYield.push_back(yield);
   }
@@ -104,6 +102,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
           hist->Write();
           continue;
        }
+       hist = (TH1D*)distribs.vectorHisto[cat].Clone("hist");
+       histStUp = (TH1D*)distribs.vectorHisto[cat].Clone("histUp");
+       histStDown  = (TH1D*)distribs.vectorHisto[cat].Clone("histDown");
+       /*
        for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
           if(sam == distribsOrderForYields[cat]){
               hist = (TH1D*)distribs.vectorHisto[sam].Clone("hist");
@@ -116,6 +118,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
             histStDown->Add(&distribs.vectorHisto[sam]); 
           }
        }
+       */
        hist->SetName(nameOfProcessesForDatacard[cat-1].c_str());
        hist->Write();
        for(int sr = 0; sr < SRNumber; sr++){
@@ -146,6 +149,9 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    for(int syst = 0; syst < systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *histStUp, *histStDown;
+          histStUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[syst].Clone("histUp");
+          histStDown  = (TH1D*)distribs.vectorHistoUncDown[cat].unc[syst].Clone("histDown");
+          /*
           for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
              if(sam == distribsOrderForYields[cat]){
                 histStUp = (TH1D*)distribs.vectorHistoUncUp[sam].unc[syst].Clone("histUp");
@@ -156,6 +162,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
                 histStDown->Add(&distribs.vectorHistoUncDown[sam].unc[syst]); 
              }
           }
+          */
           histStUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeNames.at(syst) + "Up").c_str());
           histStDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeNames.at(syst) + "Down").c_str());
 
@@ -173,10 +180,20 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    }
 
    // here fill all syst shape uncertainties that have acceptance uncertainty 
-   std::vector<std::string> systShapeAcceptNames = {"scaleAcc", "pdfAcc"};
+   std::vector<std::string> systShapeAcceptNames = {"scaleAcc", "pdfAcc", "ISRAcc", "FSRAcc"};
    for(int syst = systShapeNames.size(); syst < systShapeAcceptNames.size() + systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *hist, *histStUp, *histStDown, *histAccUp, *histAccDown;
+          hist = (TH1D*)distribs.vectorHisto[cat].Clone("hist");
+          histStUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[syst].Clone("histUp");
+          histStDown  = (TH1D*)distribs.vectorHistoUncDown[cat].unc[syst].Clone("histDown");
+                
+          histAccUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[syst].Clone("histAccUp");
+          histAccDown = (TH1D*)distribs.vectorHistoUncDown[cat].unc[syst].Clone("histAccDown");
+
+          histAccUp->Reset("ICE");
+          histAccDown->Reset("ICE");
+          /*
           for(int sam = distribsOrderForYields[cat]; sam < distribsOrderForYields[cat+1]; sam++){
              if(sam == distribsOrderForYields[cat]){
                 hist = (TH1D*)distribs.vectorHisto[sam].Clone("hist");
@@ -195,6 +212,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
                 histStDown->Add(&distribs.vectorHistoUncDown[sam].unc[syst]); 
              }
           }
+          */
           
           for(int sr = 0; sr < SRNumber; sr++){
              histAccUp->SetBinContent(sr+1, (histStUp->GetBinContent(sr+1) / histStUp->Integral()) / (hist->GetBinContent(sr+1) / hist->Integral()) * hist->GetBinContent(sr+1));

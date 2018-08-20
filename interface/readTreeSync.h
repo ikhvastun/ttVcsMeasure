@@ -8,10 +8,10 @@ const int nFlavors = 2;
 
 const int leptonSelectionAnalysis = 3;
 
-const int nSamples = 50;
+const int nSamples = 20;
 const int dataSample = 0;
 
-const int numberOfSyst = 7;
+const int numberOfSyst = 9;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};

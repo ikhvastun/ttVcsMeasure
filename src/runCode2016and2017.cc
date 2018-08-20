@@ -404,16 +404,22 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
 
-                
-                //if(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR){
-                //    for(int varPDF = 0; varPDF < 100; varPDF++){
-                //        distribs[dist].vectorHistoPDF[samCategory].var[varPDF].Fill(fillVar.at(dist), weight*_lheWeight[9+varPDF]);
-                //    }
-                //}
-                //else{
+                if(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR){
+                    for(int varPDF = 0; varPDF < 100; varPDF++){
+                        distribs[dist].vectorHistoPDF[samCategory].var[varPDF].Fill(fillVar.at(dist), weight*_lheWeight[9+varPDF]);
+                    }
+                }
+                else{
                     distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
-                //}
+                }
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[6]); // 10, 12 - factor 4; 6 and 8 - factor 2
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[8]);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[7]);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[9]);
+
                 
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
@@ -437,6 +443,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
 
             }
           }
@@ -475,6 +487,28 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     }
   }
   */
+  for(int dist = 0; dist < figNames.size(); dist++){
+    if(!(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR)) continue;
+
+    //for(unsigned sam = 0; sam < processIndex.size() + 1; ++sam){
+    for(map<std::string,int>::const_iterator it = processIndex.begin();it != processIndex.end(); ++it){
+      if(it->second == dataSample) continue;
+      if(it->second == nonPromptSample) continue;
+      for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[it->second].unc.at(6).GetNbinsX() + 1; ++bin){
+          double pdfVarRms = 0.;
+          for(unsigned pdf = 0; pdf < 100; ++pdf){
+              double variedBin = distribs[dist].vectorHistoPDF[it->second].var[pdf].GetBinContent(bin);
+              variedBin *= crossSectionRatio[it->second][pdf];
+              double diff = (  variedBin - distribs[dist].vectorHisto[it->second].GetBinContent(bin) );
+              pdfVarRms += diff * diff;
+          }
+          pdfVarRms = sqrt( 0.01 * pdfVarRms );
+          //cout << "pdf rms for bin " << bin << " is equal to " << pdfVarRms << endl;
+          distribs[dist].vectorHistoUncUp[it->second].unc.at(6).SetBinContent(bin, distribs[dist].vectorHisto[it->second].GetBinContent(bin) + pdfVarRms);
+          distribs[dist].vectorHistoUncDown[it->second].unc.at(6).SetBinContent(bin, distribs[dist].vectorHisto[it->second].GetBinContent(bin) - pdfVarRms);
+      }
+    }
+  }
 
   // legend to print
   TLegend* mtleg = new TLegend(0.15,0.89,0.95,0.72); 
@@ -487,8 +521,14 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
 
   std::map<int, std::string> processIndexReversed;
+  std::vector<std::string> processOrder;
   for(map<std::string,int>::const_iterator it = processIndex.begin();it != processIndex.end(); ++it){
     processIndexReversed.insert(std::pair<int,std::string>(it->second, it->first));
+  }
+
+  // correct order according to increase
+  for(map<int,std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
+    processOrder.push_back(it->second);
   }
   
   for(map<int, std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
@@ -558,15 +598,17 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     fillDatacards(distribs[indexSRttZcleanPTZ], samplesOrderNames, samplesOrder, "SRttZCleanPTZ", is2017);
     fillDatacards(distribs[indexSRttZcleanCosTheta], samplesOrderNames, samplesOrder, "SRttZCleanCosTheta", is2017);
   }
-  if(crToPrint == "ttZ"){
-    fillDatacards(distribs[indexSR3L], samplesOrderNames, samplesOrder, "SR3L", is2017); 
-    fillDatacards(distribs[indexSR4L], samplesOrderNames, samplesOrder, "SR4L", is2017); 
-    fillDatacards(distribs[indexSRTTZ], samplesOrderNames, samplesOrder, "SRallTTZ", is2017); 
-    fillDatacards(distribs[indexSRWZCR], samplesOrderNames, samplesOrder, "SRWZCR", is2017); 
-    fillDatacards(distribs[indexSRZZCR], samplesOrderNames, samplesOrder, "SRZZCR", is2017); 
-    fillDatacards(distribs[indexSRTTCR], samplesOrderNames, samplesOrder, "SRTTCR", is2017); 
-  }
   */
+  // no need to fill datacards when running over 2016 and 2017 together
+  if(showLegendOption == 2) return;
+  if(crToPrint == "ttZ"){
+    fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSR4L], processOrder, "SR4L", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSRWZCR], processOrder, "SRWZCR", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSRZZCR], processOrder, "SRZZCR", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSRTTCR], processOrder, "SRTTCR", (bool)showLegendOption); 
+  }
 }
 
 int main(int argc, const char **argv)

@@ -86,14 +86,12 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
         }
 
         // pdf uncertainties, taes quite a lot for time to initialize them, for convenience atm are commented 
-        /*
         if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ || i == indexSRTTCR || i == indexSRWZCR || i == indexSRZZCR){
             for(unsigned int pdf = 0; pdf < 100; pdf++){
                 name = Form("pdf_%d_%d_%d",i,j,pdf);
                 distribs[i].vectorHistoPDF[j].var[pdf] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
             }
         }
-        */
         
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
