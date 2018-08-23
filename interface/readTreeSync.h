@@ -306,6 +306,8 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"SRTTCR", {"N_{j}", 45, -0.5, static_cast<double>(theSRLabelOptionsForTTCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTCR.size()), false}},
                                                  {"SRttZCleanPTZ", {"p_{T}^{Z} [GeV]", 46, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanPTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanPTZ.size()), true}},
                                                  {"SRttZCleanCosTheta", {"cos(#theta^{*})", 47, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanCosTheta.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanCosTheta.size()), false}},
+                                                 {"flavour3L", {"", 48, 0.5, static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor3L.size()), false}},
+                                                 {"flavour4L", {"", 49, 0.5, static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor4L.size()), false}},
                                            };
 
 const int nVars  = figNames.size() ;
@@ -318,7 +320,9 @@ const unsigned int indexSRWZCR = 43;
 const unsigned int indexSRTTZ = 42;
 const unsigned int indexSR3L = 8;
 const unsigned int indexSR4L = 9;
-//const unsigned int indexFlavour = 8;
+
+const unsigned int indexFlavour3L = 48;
+const unsigned int indexFlavour4L = 49;
 
 std::map<std::string, std::vector<TString>> listToPrint;
 
@@ -330,5 +334,11 @@ std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0},
                                            {"Xgamma", 0.2}, 
                                            {"rare", 0.5}, 
 };
+
+std::vector<double> ttZISRUpW = {1.03, 1.02, 1.005, 0.98, 1.02, 1.01, 0.99, 0.945, 1.035, 1.025, 1.00, 0.95, 0.98, 0.995}; // 14 SRs
+std::vector<double> ttZISRDownW = {0.965, 0.975, 1.00, 1.025, 0.98, 0.99, 1.015, 1.07, 0.96, 0.97, 1.00, 1.065, 1.025, 1.005}; // 14 SRs
+
+std::vector<double> ttZFSRUpW = {0.96, 0.965, 0.99, 0.985, 0.99, 1.00, 1.00, 1.00, 1.01, 1.02, 1.025, 1.03, 0.98, 1.015}; // 14 SRs
+std::vector<double> ttZFSRDownW = {1.07, 1.06, 1.02, 1.005, 1.025, 1.01, 0.99, 0.975, 0.98, 0.97, 0.96, 0.97, 1.075, 0.98}; // 14 SRs
 
 #endif 

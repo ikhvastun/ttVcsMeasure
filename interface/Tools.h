@@ -112,9 +112,10 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
 
     
 void setLabelsForHistos(){
-    /*
-    for(auto & histo: distribs[indexFlavour].vectorHisto) {
-      for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L)){
+
+    // flavour 3L
+    for(auto & histo: distribs[indexFlavour3L].vectorHisto) {
+      for(const auto & i: flavourLabelOptionsFor3L){
         histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
       }
 
@@ -122,7 +123,38 @@ void setLabelsForHistos(){
       histo.GetXaxis()->SetTitleSize(0.25);
       histo.GetXaxis()->SetLabelOffset(0.02);
     }
-    */
+
+    for(auto & histo: distribs[indexFlavour3L].vectorHistoUncUp) 
+        for(const auto & i: flavourLabelOptionsFor3L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexFlavour3L].vectorHistoUncDown) 
+        for(const auto & i: flavourLabelOptionsFor3L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    // flavour 4L
+    for(auto & histo: distribs[indexFlavour4L].vectorHisto) {
+      for(const auto & i: flavourLabelOptionsFor4L){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetLabelSize(0.1);
+      histo.GetXaxis()->SetTitleSize(0.25);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexFlavour4L].vectorHistoUncUp) 
+        for(const auto & i: flavourLabelOptionsFor4L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexFlavour4L].vectorHistoUncDown) 
+        for(const auto & i: flavourLabelOptionsFor4L)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
 
     // ------------------ WZ CR 
     for(auto & histo: distribs[indexSRWZCR].vectorHisto) {
@@ -406,19 +438,18 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
 
 void initListsToPrint(const std::string & selection){
 
-  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar"};
-  listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
-  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll"};
-  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll"};
+  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L"};
+  listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
+  listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll", "flavour3L"};
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
-  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th"};
-  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar"};
-  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta"};
-  listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar"};
+  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4L"};
+  listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "flavour3L"};
+  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L"};
+  listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
   listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR"};
-  //listToPrint["ttZ"] = {"SRZZCR"};
 
   if(listToPrint.find(selection) == listToPrint.end()){
       std::cerr << "control region selection is incorrect, please double check" << std::endl;

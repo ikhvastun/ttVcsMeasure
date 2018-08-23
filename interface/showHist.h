@@ -328,7 +328,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ) //  && info.index != indexFlavour
+    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ && info.index != indexFlavour3L && info.index != indexFlavour4L)
         stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     else
         stackCopy->GetXaxis()->SetLabelSize(0.25);
