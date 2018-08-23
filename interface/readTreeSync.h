@@ -214,10 +214,12 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
     };
 
 // trees for BDT
+/*
 TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
 TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
 TTree* signalTree = new TTree("signalTree","signalTree");
 TTree* bkgTree = new TTree("bkgTree","bkgTree");
+*/
 
 double _weightEventInTree;
     

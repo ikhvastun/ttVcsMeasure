@@ -148,13 +148,17 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
       }
       fileout <<  systShapeNames.at(syst) << " shape     " ;
       vector<int> newString;
-      if(systShapeNames[syst] != "WZbb"){
-        newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
-        newString[1] = 999; // don't consider uncertainty on nonprompt
-      }
-      else{
+      if(systShapeNames[syst] == "WZbb"){
         newString = formEmptyStringInt(numberOfBKG + 1);
         newString[2] = 1;
+      }
+      else if(systShapeNames[syst] == "ISRAcc" || systShapeNames[syst] == "FSRAcc"){
+        newString = formEmptyStringInt(numberOfBKG + 1);
+        newString[0] = 1.;
+      }
+      else{
+        newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
+        newString[1] = 999; // don't consider uncertainty on nonprompt
       }
       fillString(fileout, newString);
    }
