@@ -27,7 +27,7 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
 
     if(!lepIsLoose(l)) return false;
 
-    if(debug) cout << "lepton with pt " << _lPt[l] << " is clean? " <<  eleIsClean(l) << endl;
+    //if(debug) cout << "lepton with pt " << _lPt[l] << " is clean? " <<  eleIsClean(l) << endl;
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
@@ -38,7 +38,7 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
         if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
     }
 
-    if(debug) cout << "info about FO leptons with pt " << _lPt[l] << " (closest jet deep csv): " << _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]  << endl;
+    //if(debug) cout << "info about FO leptons with pt " << _lPt[l] << " (closest jet deep csv): " << _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]  << endl;
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
 
     if(lepSel != 4 && _leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[leptonSelection]){
@@ -224,7 +224,7 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
 unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool is2017){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
-        if(debug) cout << "jet with pt: " << _jetPt[j] << " " << _jetEta[j] << " " << _jetPhi[j] << endl;
+        if(debug) cout << "jet with pt: " << _jetPt[j] << " " << _jetEta[j] << " " << _jetPhi[j] << ", and flavour: " << _jetHadronFlavor[j] << endl;
         if(jetIsGood(j, 30, unc, clean, is2017)) {
             if(debug) cout << "passed selection" << endl;
             ++nJets;
@@ -577,6 +577,7 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
             if(njets == 0) return -999.;
             return njets-1; // SR 0, 1, 2, 3
         }
+        /*
         else if(passttbarCRSelection(nbjets, dMZ, mlll)){
             //if(njets < 2) return -999.;
             int nbjetsInd = nbjets < 2 ? nbjets : 2;
@@ -584,23 +585,26 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
             int njetsInd = njets < 3 ? 0 : (njets == 3 ? 1 : 2);
             return 8 + nbjetsInd * 3 + njetsInd; // 8, 9, 10, 11, 12, 13, 14, 15, 16
         }
+        */
         else if(passTTZSelection(njets, dMZ)){
             if(nbjets < 1)  return -999.;
             int nbjetsInd = nbjets < 2 ? 0 : 1;
             int njetsInd = njets < 5 ? njets-2 : 3;
-            return 17 + nbjetsInd * 4 + njetsInd; // 17, 18, 19, 20, 21, 22, 23, 24
+            return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
         }
     }
     else if(leptonSelection == 4){
+        /*
         if(passZZCRSelection(ind, indOf2LonZ, njets)){
             if(njets < 1) return -999.;
             int nbjetsInd = nbjets < 1 ? 0 : 1;
             int njetsInd = njets < 2 ? 0 : 1;
             return 4 + nbjetsInd * 2 + njetsInd; // 4, 5, 6, 7
         }
-        else if(passTTZ4LSelection(ind, indOf2LonZ, njets)){
+        */
+        if(passTTZ4LSelection(ind, indOf2LonZ, njets)){
             int nbjetsInd = nbjets < 1 ? 0 : 1;
-            return 25 + nbjetsInd;
+            return 12 + nbjetsInd; // 12, 13
         }
     }
     return -999;

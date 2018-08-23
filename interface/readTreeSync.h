@@ -8,10 +8,10 @@ const int nFlavors = 2;
 
 const int leptonSelectionAnalysis = 3;
 
-const int nSamples = 20;
+const int nSamples = 11;
 const int dataSample = 0;
 
-const int numberOfSyst = 9;
+const int numberOfSyst = 11;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
@@ -37,6 +37,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsForttZCleanCosTheta = {
 
 std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
 
+    /*
       {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
       {2, "2"},
       {3, "3"},
@@ -64,7 +65,21 @@ std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
       {25, "8"},
       {26, "9"}, // ttZ 4L, nbjets = 0, 1
       {27, "10"},
-
+      */
+      {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
+      {2, "2"},
+      {3, "3"},
+      {4, "> 3"},
+      {5, "2"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      {6, "3"},
+      {7, "4"},
+      {8, "> 4"},
+      {9, "2"},
+      {10, "3"},
+      {11, "4"},
+      {12, "> 4"},
+      {13, "0"}, // ttZ 4L, nbjets = 0, 1
+      {14, "> 0"},
 };
 
 std::vector<BinLabelOptions> theSRLabelOptionsForWZCR = {
@@ -72,14 +87,14 @@ std::vector<BinLabelOptions> theSRLabelOptionsForWZCR = {
       {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
       {2, "2"},
       {3, "3"},
-      {4, "4"},
+      {4, "> 3"},
 };
 
 std::vector<BinLabelOptions> theSRLabelOptionsForZZCR = {
-      {1, "1"}, // ZZ CR, nbjets = 0, njets = 1, > 1; nbjets > 0, njets 1, > 1
-      {2, "2"},
-      {3, "3"},
-      {4, "4"},
+      {1, "nb=0, nj=1"}, // ZZ CR, nbjets = 0, njets = 1, > 1; nbjets > 0, njets 1, > 1
+      {2, "nb=0, nj>1"},
+      {3, "nb>0, nj=1"},
+      {4, "nb>0, nj>1"},
 };
 
 std::vector<BinLabelOptions> theSRLabelOptionsForTTCR = {
@@ -286,7 +301,7 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"BDTmm",   {"BDT in mm category", 40, -1, 1, 10, false}},
                                                  {"HT",     {"H_{T} [GeV]", 41, 0, 400, 20, true}},
                                                  {"SRallTTZ", {"", 42, -0.5, static_cast<double>(theSRLabelOptionsForTTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTZ.size()), false}},
-                                                 {"SRWZCR", {"", 43, -0.5, static_cast<double>(theSRLabelOptionsForWZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForWZCR.size()), false}},
+                                                 {"SRWZCR", {"N_{j}", 43, -0.5, static_cast<double>(theSRLabelOptionsForWZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForWZCR.size()), false}},
                                                  {"SRZZCR", {"", 44, -0.5, static_cast<double>(theSRLabelOptionsForZZCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForZZCR.size()), false}},
                                                  {"SRTTCR", {"N_{j}", 45, -0.5, static_cast<double>(theSRLabelOptionsForTTCR.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTCR.size()), false}},
                                                  {"SRttZCleanPTZ", {"p_{T}^{Z} [GeV]", 46, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanPTZ.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanPTZ.size()), true}},
@@ -306,5 +321,14 @@ const unsigned int indexSR4L = 9;
 //const unsigned int indexFlavour = 8;
 
 std::map<std::string, std::vector<TString>> listToPrint;
+
+std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0}, 
+                                           {"ttH", 0.11}, 
+                                           {"ttX", 0.11}, 
+                                           {"WZ", 0.1}, 
+                                           {"ZZ", 0.2}, 
+                                           {"Xgamma", 0.2}, 
+                                           {"rare", 0.5}, 
+};
 
 #endif 

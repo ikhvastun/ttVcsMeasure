@@ -29,6 +29,8 @@ void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
 void setUpSystUnc(DistribsAll &, TH1D *);
 void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
 void printInfoOnPlot3L();
+void printInfoOnPlotNPCR();
+void printInfoOnXaxisAllTTZ();
 void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
     double xPad = 0.25; // 0.25
 
@@ -42,8 +44,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
-    //if(is2017) // keep it blinded for 2017
-    //    dataHist->Reset("ICE");
+    if(showLegendOption > 0 && info.index == indexSRTTZ){ // keep it blinded for 2017, showLegendOption = 1 and 2 for 2017 and comb of 2 datasets
+        for(unsigned int bin = 1; bin < dataHist->GetNbinsX()+1; bin++){
+            if(bin < 5) continue;
+            dataHist->SetBinContent(bin, 0.);
+        }
+    }
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle("");
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
@@ -115,9 +121,13 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     line->Draw("same");
 
     mtlegRatio->Draw("same");
-    //if(!is2017)
-    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
 
+    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+    if(info.index == indexSRTTZ){
+        printInfoOnXaxisAllTTZ();
+    }
+
+    pad2->cd();
     pad2->RedrawAxis();
     pad2->Update();
 
@@ -134,11 +144,15 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     systAndStatUnc->Draw("e2same");
     dataHist->Draw("E0same");
 
-    if(info.index == indexSR3L){
+    if(info.index == indexSRTTZ){
        dataHist->GetXaxis()->SetTitleSize(0.07);
        dataHist->GetXaxis()->SetTitleOffset(0.8);
-       if(leptonSelectionAnalysis == 3)
-         printInfoOnPlot3L();
+       printInfoOnPlot3L();
+    }
+    if(info.index == indexSRTTCR){
+       dataHist->GetXaxis()->SetTitleSize(0.07);
+       dataHist->GetXaxis()->SetTitleOffset(0.8);
+       printInfoOnPlotNPCR();
     }
 
     pad1->cd();
@@ -147,17 +161,53 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
 }
 
-void printInfoOnPlot3L(){
+void printInfoOnXaxisAllTTZ(){
 
-    TLine *line1 = new TLine(3.5, 0, 3.5, 1125);
+    TLine *line1 = new TLine(3.5, 0, 3.5, 2);
     line1->SetLineStyle(2);
+
+    TLine *line2 = new TLine(7.5, 0, 7.5, 2);
+    line2->SetLineStyle(2);
+    
+    TLine *line3 = new TLine(11.5, -1, 11.5, 2);
+    line3->SetLineStyle(2);
+    
     line1->Draw("same");
+    line2->Draw("same");
+    line3->Draw("same");
+
+    TLatex njetsSign;
+    njetsSign.SetNDC();
+    njetsSign.SetTextAngle(0);
+    njetsSign.SetTextColor(kBlack);
+
+    njetsSign.SetTextFont(42);
+    njetsSign.SetTextAlign(31);
+    njetsSign.SetTextSize(0.22);
+    njetsSign.DrawLatex(0.84, 0.08,"N_{j}");
+
+    TLatex nbjetsSign;
+    nbjetsSign.SetNDC();
+    nbjetsSign.SetTextAngle(0);
+    nbjetsSign.SetTextColor(kBlack);
+
+    nbjetsSign.SetTextFont(42);
+    nbjetsSign.SetTextAlign(31);
+    nbjetsSign.SetTextSize(0.22);
+    nbjetsSign.DrawLatex(0.96, 0.08,"N_{b}");
+
+}
+
+void printInfoOnPlotNPCR(){
+
+    TLine *line1 = new TLine(2.5, 0, 2.5, 1125);
+    line1->SetLineStyle(2);
 
     TLine *line2 = new TLine(5.5, 0, 5.5, 1125);
     line2->SetLineStyle(2);
     
-    // need only one for the moment
-    //line2->Draw("same");
+    line1->Draw("same");
+    line2->Draw("same");
 
     TLatex nbjetsEq0region;
     nbjetsEq0region.SetNDC();
@@ -167,7 +217,7 @@ void printInfoOnPlot3L(){
     nbjetsEq0region.SetTextFont(42);
     nbjetsEq0region.SetTextAlign(31);
     nbjetsEq0region.SetTextSize(0.05);
-    //nbjetsEq0region.DrawLatex(0.35, 0.56,"N_{b} = 0");
+    nbjetsEq0region.DrawLatex(0.31, 0.58,"N_{b} = 0");
 
     TLatex nbjetsEq1region;
     nbjetsEq1region.SetNDC();
@@ -177,7 +227,7 @@ void printInfoOnPlot3L(){
     nbjetsEq1region.SetTextFont(42);
     nbjetsEq1region.SetTextAlign(31);
     nbjetsEq1region.SetTextSize(0.05);
-    nbjetsEq1region.DrawLatex(0.64, 0.56,"N_{b} = 1");
+    nbjetsEq1region.DrawLatex(0.55, 0.58,"N_{b} = 1");
 
     TLatex nbjetsEq2region;
     nbjetsEq2region.SetNDC();
@@ -187,7 +237,74 @@ void printInfoOnPlot3L(){
     nbjetsEq2region.SetTextFont(42);
     nbjetsEq2region.SetTextAlign(31);
     nbjetsEq2region.SetTextSize(0.05);
-    nbjetsEq2region.DrawLatex(0.91, 0.56,"N_{b} > 1");
+    nbjetsEq2region.DrawLatex(0.79, 0.58,"N_{b} > 1");
+
+}
+
+void printInfoOnPlot3L(){
+
+    TLine *line1 = new TLine(3.5, 0, 3.5, 1125);
+    line1->SetLineStyle(2);
+    line1->Draw("same");
+
+    TLine *line2 = new TLine(7.5, 0, 7.5, 1125);
+    line2->SetLineStyle(2);
+    
+    TLine *line3 = new TLine(11.5, 0, 11.5, 1125);
+    line3->SetLineStyle(2);
+    
+    line2->Draw("same");
+    line3->Draw("same");
+
+    TLatex threeLregion;
+    threeLregion.SetNDC();
+    threeLregion.SetTextAngle(0);
+    threeLregion.SetTextColor(kBlack);
+
+    threeLregion.SetTextFont(42);
+    threeLregion.SetTextAlign(31);
+    threeLregion.SetTextSize(0.05);
+    threeLregion.DrawLatex(0.62, 0.68,"3 leptons");
+
+    TLatex nbjetsEq0region;
+    nbjetsEq0region.SetNDC();
+    nbjetsEq0region.SetTextAngle(0);
+    nbjetsEq0region.SetTextColor(kBlack);
+
+    nbjetsEq0region.SetTextFont(42);
+    nbjetsEq0region.SetTextAlign(31);
+    nbjetsEq0region.SetTextSize(0.05);
+    nbjetsEq0region.DrawLatex(0.31, 0.58,"N_{b} = 0");
+
+    TLatex nbjetsEq1region;
+    nbjetsEq1region.SetNDC();
+    nbjetsEq1region.SetTextAngle(0);
+    nbjetsEq1region.SetTextColor(kBlack);
+
+    nbjetsEq1region.SetTextFont(42);
+    nbjetsEq1region.SetTextAlign(31);
+    nbjetsEq1region.SetTextSize(0.05);
+    nbjetsEq1region.DrawLatex(0.55, 0.58,"N_{b} = 1");
+
+    TLatex nbjetsEq2region;
+    nbjetsEq2region.SetNDC();
+    nbjetsEq2region.SetTextAngle(0);
+    nbjetsEq2region.SetTextColor(kBlack);
+
+    nbjetsEq2region.SetTextFont(42);
+    nbjetsEq2region.SetTextAlign(31);
+    nbjetsEq2region.SetTextSize(0.05);
+    nbjetsEq2region.DrawLatex(0.79, 0.58,"N_{b} > 1");
+
+    TLatex fourLregion;
+    fourLregion.SetNDC();
+    fourLregion.SetTextAngle(0);
+    fourLregion.SetTextColor(kBlack);
+
+    fourLregion.SetTextFont(42);
+    fourLregion.SetTextAlign(31);
+    fourLregion.SetTextSize(0.05);
+    fourLregion.DrawLatex(0.92, 0.58,"4 leptons");
 }
 
 void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, histInfo & info, double xPad){

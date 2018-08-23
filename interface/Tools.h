@@ -124,6 +124,66 @@ void setLabelsForHistos(){
     }
     */
 
+    // ------------------ WZ CR 
+    for(auto & histo: distribs[indexSRWZCR].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsForWZCR){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexSRWZCR].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsForWZCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSRWZCR].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsForWZCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    // ------------------ ZZ CR 
+    for(auto & histo: distribs[indexSRZZCR].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsForZZCR){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexSRZZCR].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsForZZCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSRZZCR].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsForZZCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    // ------------------ NP CR 
+    for(auto & histo: distribs[indexSRTTCR].vectorHisto) {
+      for(const auto & i: theSRLabelOptionsForTTCR){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetTitleSize(0.15);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexSRTTCR].vectorHistoUncUp) 
+        for(const auto & i: theSRLabelOptionsForTTCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexSRTTCR].vectorHistoUncDown) 
+        for(const auto & i: theSRLabelOptionsForTTCR)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
     // ------------------ 3L
     for(auto & histo: distribs[indexSR3L].vectorHisto) {
       for(const auto & i: theSRLabelOptionsFor3L){
