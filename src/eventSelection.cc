@@ -351,7 +351,7 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                         ptZ = l1p4.Pt();
                         Zboson = l1p4;
                         lnegative = _lCharge[l0] == -1 ? l0p4 : (l1p4 - l0p4);
-                        if(leptonSelection == 3 || leptonSelection == 4){
+                        if(leptonSelection == 3){
                             for(auto & lepThird : ind){
                                 if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;
                                 third = lepThird;
@@ -360,6 +360,14 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                                 l2p4.SetPtEtaPhiE(ptcor3 ,_lEta[lepThird],_lPhi[lepThird],_lE[lepThird] * ptcor3 / _lPt[lepThird]);
                                 ptNonZ = ptcor3;
                                 mlll = (l1p4+l2p4).M();
+                            }
+                        }
+                        if(leptonSelection == 4){
+                            // here for 3rd lepton let's pick highest pt lepton
+                            for(auto & lepThird : ind){
+                                if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;
+                                if(_lPt[lepThird] > ptNonZ)
+                                    ptNonZ = _lPt[lepThird];
                             }
                         }
                                 
@@ -486,9 +494,16 @@ bool treeReader::passTTZSelection(const int njets, const double dMZ) const{
 }
 
 bool treeReader::passTTZCleanSelection(const int njets, const int nbjets, const double dMZ) const{
-    if(njets < 3) return false;
-    if(nbjets < 1) return false;
-    if(dMZ > 10) return false;
+    if(leptonSelection == 3){
+        if(njets < 3) return false;
+        if(nbjets < 1) return false;
+        if(dMZ > 10) return false;
+    }
+    else if(leptonSelection == 4){
+        if(njets < 2) return false;
+        if(nbjets < 1) return false;
+        if(dMZ > 20) return false;
+    }
     return true;
 }
 

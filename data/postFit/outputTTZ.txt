@@ -1,0 +1,9 @@
+Channel                        Process                         signal+background Fit  bkg-only Fit
+bin1                           WZ                             2753.580 2684.918 2544.763
+bin1                           Xgamma                         403.500 409.962 451.710
+bin1                           ZZ                             435.580 454.708 511.588
+bin1                           nonpromptData                  370.510 368.298 366.679
+bin1                           rare                            62.640  83.308 186.235
+bin1                           ttH                              9.260   9.671  23.389
+bin1                           ttX                            155.620 162.565 389.130
+bin1                           ttZ                            268.290 338.260   0.000

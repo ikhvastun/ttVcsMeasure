@@ -155,6 +155,27 @@ void setLabelsForHistos(){
             for(unsigned int k = 0; k < numberOfSyst; k++)
                 histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
+    // flavour 4L ZZ
+    for(auto & histo: distribs[indexFlavour4LZZ].vectorHisto) {
+      for(const auto & i: flavourLabelOptionsFor4LZZ){
+        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+      }
+
+      histo.GetXaxis()->SetLabelSize(0.1);
+      histo.GetXaxis()->SetTitleSize(0.25);
+      histo.GetXaxis()->SetLabelOffset(0.02);
+    }
+
+    for(auto & histo: distribs[indexFlavour4LZZ].vectorHistoUncUp) 
+        for(const auto & i: flavourLabelOptionsFor4LZZ)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
+    for(auto & histo: distribs[indexFlavour4LZZ].vectorHistoUncDown) 
+        for(const auto & i: flavourLabelOptionsFor4LZZ)
+            for(unsigned int k = 0; k < numberOfSyst; k++)
+                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+
 
     // ------------------ WZ CR 
     for(auto & histo: distribs[indexSRWZCR].vectorHisto) {
@@ -315,6 +336,11 @@ double flavourCategory4L(int nLocEle){
   return double(1 + nLocEle);
 }
 
+double flavourCategory4LZZ(int nLocEle){
+  return double(1 + nLocEle / 2);
+}
+
+/*
 void addBranchToBDTTreeVariables(){
     signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
     signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
@@ -422,6 +448,7 @@ void fillBDTvariables(vector<Float_t> & varForBDT){
     usermll_ss = varForBDT.at(16);
     usermt2ll_ss = varForBDT.at(17);
 }
+*/
 
 void setStackColors(Color_t & color, int sam){
 
@@ -438,18 +465,39 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
 
 void initListsToPrint(const std::string & selection){
 
-  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L"};
+  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L", "SRWZCR"};
   listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
-  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L", "SRTTCR"};
   listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll", "flavour3L"};
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
-  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4L"};
+  listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4LZZ", "SRZZCR"};
   listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "flavour3L"};
   listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L"};
+  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L"};
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
   listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR"};
+
+  if(selection == "ttZclean"){
+    figNames["njets"].varMin = 1.5;
+    figNames["njets"].nBins = 6;
+
+    figNames["nbjets"].varMin = 0.5;
+    figNames["nbjets"].nBins = 3;
+  }
+
+  if(selection == "ZZ"){
+    figNames["njets"].varMax = 5.5;
+    figNames["njets"].nBins = 6;
+
+    figNames["nbjets"].varMax = 2.5;
+    figNames["nbjets"].nBins = 3;
+
+    figNames["mll"].varMin = 71.;
+    figNames["mll"].varMax = 111.;
+    figNames["mll"].nBins = 20;
+  }
 
   if(listToPrint.find(selection) == listToPrint.end()){
       std::cerr << "control region selection is incorrect, please double check" << std::endl;

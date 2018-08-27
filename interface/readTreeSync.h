@@ -213,6 +213,14 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
       
     };
 
+std::vector<BinLabelOptions> flavourLabelOptionsFor4LZZ = {
+      
+      {1, "#mu#mu#mu#mu"},
+      {2, "#mu#mu ee"},
+      {3, "eeee"},
+      
+    };
+
 // trees for BDT
 /*
 TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
@@ -258,21 +266,19 @@ struct histInfo{
   bool isEnVar;
 };
 
-std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_{T} [GeV]", 0, 0, 300, 30, true}},
-                                                 {"sublead", {"Sub-leading lepton p_{T} [GeV]", 1, 0, 200, 20, true}},
-                                                 {"trail",   {"Trailing lepton p_{T} [GeV]", 2, 0, 200, 20, true}},
-                                                 {"pt4th",   {"4th lepton p_{T} [GeV]", 3, 0, 100, 20, true}},
+std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_{T} [GeV]", 0, 40, 300, 13, true}},
+                                                 {"sublead", {"Sub-leading lepton p_{T} [GeV]", 1, 20, 200, 18, true}},
+                                                 {"trail",   {"Trailing lepton p_{T} [GeV]", 2, 10, 120, 11, true}},
+                                                 {"pt4th",   {"4th lepton p_{T} [GeV]", 3, 10, 100, 18, true}},
                                                  {"mtW",     {"m_{T}^{W} [GeV]", 4, 0, 200, 20, true}},
                                                  {"njets",   {"N_{j}", 5, -0.5, 7.5, 8, false}},
-                                                 {"nbjets",  {"N_{b}", 6, -0.5, 4.5, 5, false}},
+                                                 {"nbjets",  {"N_{b}", 6, -0.5, 3.5, 4, false}},
                                                  {"BDTpp",   {"BDT in pp category", 7, -1, 1, 10, false}},
-                                                 //{"flavour", {"", 8, 0.5, (leptonSelectionAnalysis == 2 ? (static_cast<double>(flavourLabelOptionsFor2L.size()) + 0.5) : (leptonSelectionAnalysis == 3 ? (static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5) : (static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5))), (leptonSelectionAnalysis == 2 ? (static_cast<int>(flavourLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? (static_cast<int>(flavourLabelOptionsFor3L.size())) : (static_cast<int>(flavourLabelOptionsFor4L.size())))), false}},
-                                                 //{"SR",      {leptonSelectionAnalysis == 2 ? "" : (leptonSelectionAnalysis == 3 ? "N_{j}" : "N_{b}"), 9, -0.5, leptonSelectionAnalysis == 2 ? (static_cast<double>(theSRLabelOptionsFor2L.size()) - 0.5) : (leptonSelectionAnalysis == 3 ? static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5 : static_cast<double>(theSRLabelOptionsFor4L.size()) - 0.5), leptonSelectionAnalysis == 2 ? (static_cast<int>(theSRLabelOptionsFor2L.size())) : (leptonSelectionAnalysis == 3 ? static_cast<int>(theSRLabelOptionsFor3L.size()) : static_cast<int>(theSRLabelOptionsFor4L.size())), false}},
                                                  {"SR3L",    {"N_{j}", 8, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
                                                  {"SR4L",    {"N_{b}", 9, -0.5, static_cast<double>(theSRLabelOptionsFor4L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor4L.size()), false}},
                                                  {"mll",     {"M(ll) [GeV]", 10, 81., 101., 10, true}},
                                                  {"ptZ",     {"p_{T}^{Z} [GeV]", 11, 0, 400, 16, true}},
-                                                 {"ptNonZ",  {"Non-Z lepton p_{T} [GeV]", 12, 0, 200, 20, true}},
+                                                 {"ptNonZ",  {"Non-Z lepton p_{T} [GeV]", 12, 10, 200, 19, true}},
                                                  {"mll3e",   {"M(ll) in 3e [GeV]", 13, 0, 200, 20, true}},
                                                  {"mll2e1mu",{"M(ll) in 2e1mu [GeV]", 14, 0, 200, 20, true}},
                                                  {"mll1e2mu",{"M(ll) in 1e2mu [GeV]", 15, 0, 200, 20, true}},
@@ -310,6 +316,7 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"SRttZCleanCosTheta", {"cos(#theta^{*})", 47, -0.5, static_cast<double>(theSRLabelOptionsForttZCleanCosTheta.size()) - 0.5, static_cast<int>(theSRLabelOptionsForttZCleanCosTheta.size()), false}},
                                                  {"flavour3L", {"", 48, 0.5, static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor3L.size()), false}},
                                                  {"flavour4L", {"", 49, 0.5, static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor4L.size()), false}},
+                                                 {"flavour4LZZ", {"", 50, 0.5, static_cast<double>(flavourLabelOptionsFor4LZZ.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor4LZZ.size()), false}},
                                            };
 
 const int nVars  = figNames.size() ;
@@ -325,6 +332,7 @@ const unsigned int indexSR4L = 9;
 
 const unsigned int indexFlavour3L = 48;
 const unsigned int indexFlavour4L = 49;
+const unsigned int indexFlavour4LZZ = 50;
 
 std::map<std::string, std::vector<TString>> listToPrint;
 
@@ -332,7 +340,7 @@ std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0},
                                            {"ttH", 0.11}, 
                                            {"ttX", 0.11}, 
                                            {"WZ", 0.1}, 
-                                           {"ZZ", 0.2}, 
+                                           {"ZZ", 0.1}, 
                                            {"Xgamma", 0.2}, 
                                            {"rare", 0.5}, 
 };

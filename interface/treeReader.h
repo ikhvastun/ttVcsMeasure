@@ -338,7 +338,7 @@ class treeReader {
         bool is2017() { return currentSample.is2017(); }
         bool is2016() { return currentSample.is2016(); }                  //if sample is not 2017 it is automatically 2016
         double lumi2016 = 35.9;
-        double lumi2017 = 41.9;
+        double lumi2017 = 41.5;
         //bool isData() { return currentSample.isData(); }
         //bool isMC() { return currentSample.isMC(); } 
 

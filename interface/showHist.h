@@ -56,18 +56,24 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     dataHist->GetYaxis()->SetTitle(("Events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
     dataHist->SetMinimum(0.01);
     dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
-    if(plotInLog)
+    if(plotInLog){
+        dataHist->SetMinimum(0.5);
         dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num * 5);
+    }
     dataHist->GetXaxis()->SetLabelOffset(0.02);
-    
-    dataHist->Draw("E0");
-    //distribs.stack.Draw("histsame");
-    //dataHist->Draw("E0same");
+
+    TGraphAsymmErrors* dataGraph = new TGraphAsymmErrors(dataHist);
+    for(int b = 1; b < dataHist->GetNbinsX() + 1; ++b){
+        dataGraph->SetPointError(b - 1, 0, 0, dataHist->GetBinErrorLow(b), (dataHist->GetBinContent(b) == 0 ) ? 0 : dataHist->GetBinErrorUp(b) );
+    }
+
+    dataHist->Draw("axis");
+    dataGraph->Draw("pe1 same");
 
     leg->Draw("same");
     double lumi = 35.9;
-    if(showLegendOption == 1) lumi = 41.9;
-    else if (showLegendOption == 2) lumi = 77.8;
+    if(showLegendOption == 1) lumi = 41.5;
+    else if (showLegendOption == 2) lumi = 77.5;
     CMS_lumi( pad1, iPeriod, iPos, lumi);
 
     pad1->cd();
@@ -107,9 +113,13 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     mtlegRatio->SetTextFont(42);
 
     mtlegRatio->AddEntry(stackCopy, "Stat", "f");
-    mtlegRatio->AddEntry(histSystAndStatUnc, "Stat+Syst", "f");
+    mtlegRatio->AddEntry(histSystAndStatUnc, "Syst+Stat", "f");
 
     // Draw finally the things
+    if(info.index == 5){
+        stackCopy->GetXaxis()->SetNdivisions(108); // 108,505,
+    }
+
     stackCopy->Draw("axis");
     histSystAndStatUnc->Draw("e2same");
     stackCopy->Draw("e2same");
@@ -123,6 +133,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     mtlegRatio->Draw("same");
 
     dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+
     if(info.index == indexSRTTZ){
         printInfoOnXaxisAllTTZ();
     }
@@ -142,7 +153,9 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     systAndStatUnc->SetFillColor(kGray+2);
     systAndStatUnc->SetMarkerStyle(1);
     systAndStatUnc->Draw("e2same");
-    dataHist->Draw("E0same");
+
+    //dataHist->Draw("E0same");
+    dataGraph->Draw("pe1 same");
 
     if(info.index == indexSRTTZ){
        dataHist->GetXaxis()->SetTitleSize(0.07);
@@ -305,6 +318,16 @@ void printInfoOnPlot3L(){
     fourLregion.SetTextAlign(31);
     fourLregion.SetTextSize(0.05);
     fourLregion.DrawLatex(0.92, 0.58,"4 leptons");
+
+    TLatex fourLregionNjets;
+    fourLregionNjets.SetNDC();
+    fourLregionNjets.SetTextAngle(0);
+    fourLregionNjets.SetTextColor(kBlack);
+
+    fourLregionNjets.SetTextFont(42);
+    fourLregionNjets.SetTextAlign(31);
+    fourLregionNjets.SetTextSize(0.05);
+    fourLregionNjets.DrawLatex(0.92, 0.38,"N_{j} #geq 2");
 }
 
 void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, histInfo & info, double xPad){
@@ -318,6 +341,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
 
     stackCopy->SetFillStyle(1001);
     stackCopy->SetFillColor(kCyan - 4);
+    stackCopy->SetLineColor(kCyan - 4);
     stackCopy->SetMarkerStyle(1);
 
     stackCopy->SetTitle("");
@@ -328,7 +352,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ && info.index != indexFlavour3L && info.index != indexFlavour4L)
+    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ && info.index != indexFlavour3L && info.index != indexFlavour4L && info.index != indexFlavour4LZZ && info.index != indexSRTTCR)
         stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     else
         stackCopy->GetXaxis()->SetLabelSize(0.25);
@@ -357,7 +381,8 @@ void calculateRatioUnc(TGraphAsymmErrors * dataGraph, TH1D * data, TH1D * stack)
       uncRatio[0] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[1], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[1], 2));
       uncRatio[1] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[2], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[2], 2));
 
-      dataGraph->SetPointError(i, dataGraph->GetErrorXlow(i), dataGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
+      //dataGraph->SetPointError(i, dataGraph->GetErrorXlow(i), dataGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
+      dataGraph->SetPointError(i, 0., 0., uncRatio[1], uncRatio[0]);
     }
 }
 
@@ -411,6 +436,7 @@ void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
     }
 
     histSystAndStatUnc->SetFillStyle(1001);
+    histSystAndStatUnc->SetLineColor(kOrange - 4);
     histSystAndStatUnc->SetFillColor(kOrange - 4);
     histSystAndStatUnc->SetMarkerStyle(1);
     histSystAndStatUnc->Draw("same");

@@ -41,6 +41,7 @@
 
 #include "../interface/analysisTools.h"
 #include "../interface/fillDatacards.h"
+#include "../interface/PostFitScaler.h"
 
 #include "tdrStyle.C"
 
@@ -56,7 +57,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   leptonSelection = leptonSelectionAnalysis;
   initListsToPrint(selection);
   //Set CMS plotting style
-  setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   cout << "reading sample file...." << endl;
@@ -79,6 +79,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   std::ofstream myfile;
   myfile.open("myevents.txt");
+
+  PostFitScaler scaler("data/postFit/outputTTZ.txt");
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
@@ -214,7 +216,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double mll = 99999;
           double mlll = 99999;
           double ptZ = 999999;
-          double ptNonZ = 999999;
+          double ptNonZ = -999999;
 
           nJLoc = nJets(0, true, indJets, samples[sam].is2017());
           int nJLocDown = nJets(1, true, indJetsJECDown, samples[sam].is2017());
@@ -245,6 +247,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             if(selection == "ttZ4L" && !passTTZ4LSelection(ind, indOf2LonZ, nJLoc)) continue;
             if(selection == "ZZ" && !passZZCRSelection(ind, indOf2LonZ, nJLoc)) continue;
             if(selection == "ttZ" && !(passTTZ4LSelection(ind, indOf2LonZ, nJLoc) || passZZCRSelection(ind, indOf2LonZ, nJLoc))) continue;
+            if(selection == "ttZclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
           }
 
           if(leptonSelection == 3){
@@ -253,6 +256,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             if(selection == "tZq" &&!passttbarCRintZqSelection(nJLoc, nBLoc, dMZ)) continue;
             if(selection == "ttZ3L" && !passTTZSelection(nJLoc, dMZ)) continue;
             if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
+            if(selection == "ttZclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
             if(selection == "WZ" && !passWZCRSelection(nBLoc, dMZ)) continue;
             if(selection == "DY" && !passDYCRSelection(dMZ, ptNonZ, third, _met, _metPhi, nJLoc, nBLoc)) continue;
 
@@ -308,6 +312,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
                                    };
 
           vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -326,6 +331,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
                                    };
 
           vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -344,6 +350,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
                                    };
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
                                      "mtW", "njets", "nbjets", "BDTpp", 
@@ -358,7 +365,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "cosThetaStar", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "BDTmm", "HT",
                                      "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR",
                                      "SRttZCleanPTZ", "SRttZCleanCosTheta",
-                                     "flavour3L", "flavour4L"
+                                     "flavour3L", "flavour4L", "flavour4LZZ", 
                                    };
                                    
           //if(debug) cout << "lep sf: " << leptonWeight(0) << " " << leptonWeight(1) << " " << leptonWeight(2) << endl;
@@ -380,6 +387,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             btagL = bTagWeight_udsg(0); btagLUp = bTagWeight_udsg(1); btagLDown = bTagWeight_udsg(2);
             btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
             btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
+
+            // for post fit scaling
+            weight *= scaler.postFitScaling(samples[sam].getProcessName());
 
           }
           if(debug){
@@ -565,12 +575,20 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     if(selection == "ZZ" || selection == "ttZ4L"){
       if(it->second == "WZ") continue;
     }
-    if(it->second != "nonpromptData" && it->second != "Xgamma")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],it->second.c_str(),"f");
-    else if(it->second == "nonpromptData")
+
+    if(it->second == "nonpromptData")
       mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"Nonprompt","f");
     else if(it->second == "Xgamma")
       mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"X#gamma","f");
+    else if(it->second == "rare")
+      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"Rare","f");
+    else if(it->second == "ttZ")
+      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"t#bar{t}Z","f");
+    else if(it->second == "ttX")
+      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"t(#bar{t})X","f");
+    else
+      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],it->second.c_str(),"f");
+    
   }
 
   // plots to make with systematics and stat uncertainty on them
