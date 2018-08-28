@@ -154,3 +154,15 @@ double treeReader::CMIDRateWeight(const unsigned unc){
     }
     return fr;
 }
+
+//jet prefiring probability 
+double treeReader::jetPrefiringWeight(){
+    double sf = 1.;
+    for(unsigned j = 0; j < _nJets; ++j){
+        if( jetIsGood(j, 30., 0, true, currentSample.is2017()) ){
+            double prefiringProbability = reweighter->jetPrefiringProbability( _jetPt[j], _jetEta[j] );
+            sf *= ( 1. - prefiringProbability );
+        }
+    }
+    return sf;
+}

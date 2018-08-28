@@ -213,10 +213,10 @@ void printInfoOnXaxisAllTTZ(){
 
 void printInfoOnPlotNPCR(){
 
-    TLine *line1 = new TLine(2.5, 0, 2.5, 1125);
+    TLine *line1 = new TLine(2.5, 0, 2.5, 550);
     line1->SetLineStyle(2);
 
-    TLine *line2 = new TLine(5.5, 0, 5.5, 1125);
+    TLine *line2 = new TLine(5.5, 0, 5.5, 550);
     line2->SetLineStyle(2);
     
     line1->Draw("same");
@@ -240,7 +240,7 @@ void printInfoOnPlotNPCR(){
     nbjetsEq1region.SetTextFont(42);
     nbjetsEq1region.SetTextAlign(31);
     nbjetsEq1region.SetTextSize(0.05);
-    nbjetsEq1region.DrawLatex(0.55, 0.58,"N_{b} = 1");
+    nbjetsEq1region.DrawLatex(0.65, 0.58,"N_{b} = 1");
 
     TLatex nbjetsEq2region;
     nbjetsEq2region.SetNDC();
@@ -250,7 +250,7 @@ void printInfoOnPlotNPCR(){
     nbjetsEq2region.SetTextFont(42);
     nbjetsEq2region.SetTextAlign(31);
     nbjetsEq2region.SetTextSize(0.05);
-    nbjetsEq2region.DrawLatex(0.79, 0.58,"N_{b} > 1");
+    nbjetsEq2region.DrawLatex(0.89, 0.58,"N_{b} > 1");
 
 }
 

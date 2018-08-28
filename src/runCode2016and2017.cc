@@ -389,7 +389,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
 
             // for post fit scaling
-            weight *= scaler.postFitScaling(samples[sam].getProcessName());
+            //weight *= scaler.postFitScaling(samples[sam].getProcessName());
 
           }
           if(debug){

@@ -293,6 +293,7 @@ class treeReader {
         double sfWeight();
         double fakeRateWeight(const unsigned unc = 0);
         double CMIDRateWeight(const unsigned unc = 0);
+        double jetPrefiringWeight();
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -325,7 +326,7 @@ class treeReader {
         double sumSimulatedEventWeightsScaleDown = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
-        double dataLumi = 41.9;                                          //in units of 1/fb
+        double dataLumi = 41.5;                                          //in units of 1/fb
         int nonPromptSample = -999;
         int CMIDSample = -999;
         std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
