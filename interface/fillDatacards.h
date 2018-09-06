@@ -20,20 +20,15 @@ void fillString(ofstream & file, vector<int> & str);
 vector<double> formEmptyString(int);
 vector<int> formEmptyStringInt(int);
 vector<int> formUnityStringInt(int);
-void fillExperUnc(ofstream &, vector<std::string> & );
+void fillExperUnc(ofstream &, vector<std::string> &, std::vector<TString> &, std::vector<double> &);
+double largestAmongAll(const std::vector<double> & weights);
+double smallestAmongAll(const std::vector<double> & weights);
 
-std::vector<double> experUnc      = {1.025, 1.02}; 
-std::vector<TString> experUncName = {"lumi", "trigger"}; //"JES", "btagl", "btagb", "PDF", "Q2"};
-std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
-
-
-// just an example, nameOfProcessForDatacards: data, ttZ, ttW, etc.
-// obsolete information, should be erased asap
-// distribsOrderForYields = 0, 1, 3, ...., 
-// 0 - data
-// so 1 + 2 = ttZ
-// 3 = ttW
 void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false){
+
+  std::vector<double> experUnc      = {1.025, 1.01};  // for trigger agreed to reduce it to 1%
+  std::vector<TString> experUncName = {"lumi" + (std::string)(is2017 ? "2017" : "2016"), "trigger" + (std::string)(is2017 ? "2017" : "2016")}; //"JES", "btagl", "btagb", "PDF", "Q2"};
+  std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
   const int SRNumber = figNames[name].nBins;
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
@@ -62,12 +57,12 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    fileout << "imax 1 number of channels " <<  endl;
    fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
    //fileout << "kmax " << (lepSel == 2 ? 195 : (lepSel == 34 ? 129 : (lepSel == 3 ? 96 : 33))) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
-   fileout << "kmax 100 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   fileout << "kmax 130 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "----------- " <<  endl;
    TFile *file = TFile::Open("datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root", "RECREATE");
    fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
    fileout << "-----------  " <<  endl;
-   fileout << "bin  1" <<  endl;
+   fileout << "bin  bin1" <<  endl;
    fileout << "observation  " << intYield[0] << endl;
    fileout << "-----------  " <<  endl;
 
@@ -76,7 +71,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    vector<double> rateVector;
 
    for(int i = 1; i < nCategories; i++){ // here -1 we don't consider data
-      datastrVector.push_back(std::to_string(1));
+      datastrVector.push_back("bin" + std::to_string(1));
       processNumberVector.push_back(std::to_string(i - 1));
       rateVector.push_back(intYield[i] < 0.01 ? 0.01 : intYield[i]);
    }     
@@ -130,10 +125,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    }
 
    fileout << "----------- " <<  endl;
-   fillExperUnc(fileout, nameOfProcessesForDatacard);
+   fillExperUnc(fileout, nameOfProcessesForDatacard, experUncName, experUnc);
    
    // here fill all syst shape uncertainties 
-   std::vector<std::string> systShapeNames = {"lepSF", "pileup", "bTag_udsg" + (std::string)(is2017 ? "2017" : "2016"), "bTag_bc" + (std::string)(is2017 ? "2017" : "2016"), "jec", "WZbb", "ISRAcc", "FSRAcc"};
+   std::vector<std::string> systShapeNames = {"lepSFsyst", "lepSFstat" + (std::string)(is2017 ? "2017" : "2016"), "lepSFReco", "pileup", "bTag_udsg" + (std::string)(is2017 ? "2017" : "2016"), "bTag_bc" + (std::string)(is2017 ? "2017" : "2016"), "jec", "jer", "WZbb"}; // , "ISRandFSR"
    for(int syst = 0; syst < systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *histStUp, *histStDown;
@@ -150,22 +145,63 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
       vector<int> newString;
       if(systShapeNames[syst] == "WZbb"){
         newString = formEmptyStringInt(numberOfBKG + 1);
-        newString[2] = 1;
+        newString[3] = 1;
       }
-      else if(systShapeNames[syst] == "ISRAcc" || systShapeNames[syst] == "FSRAcc"){
+      /*
+      else if(systShapeNames[syst] == "ISRandFSR"){
         newString = formEmptyStringInt(numberOfBKG + 1);
         newString[0] = 1.;
       }
+      */
       else{
         newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
-        newString[1] = 999; // don't consider uncertainty on nonprompt
+        newString[7] = 999; // don't consider uncertainty on nonprompt
       }
       fillString(fileout, newString);
    }
 
+   std::vector<std::string> systISRFSRNames = {"ISR", "FSR"};
+   for(int cat = 1; cat < nCategories; cat++){ 
+        if(cat != 1) continue;
+        TH1D *histISRandFSRUp, *histISRandFSRDown, *histISRUp, *histISRDown, *histFSRUp, *histFSRDown;
+
+        histISRandFSRUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[systShapeNames.size()].Clone("histISRandFSRUp");
+        histISRandFSRDown  = (TH1D*)distribs.vectorHistoUncDown[cat].unc[systShapeNames.size()].Clone("histISRandFSRDown");
+
+        histISRUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[systShapeNames.size()].Clone("histISRUp");
+        histISRDown  = (TH1D*)distribs.vectorHistoUncDown[cat].unc[systShapeNames.size()].Clone("histISRDown");
+        histFSRUp = (TH1D*)distribs.vectorHistoUncUp[cat].unc[systShapeNames.size()+1].Clone("histFSRUp");
+        histFSRDown  = (TH1D*)distribs.vectorHistoUncDown[cat].unc[systShapeNames.size()+1].Clone("histFSRDown");
+
+        for(int sr = 0; sr < SRNumber; sr++){
+       
+            std::vector<double> valueDev;
+            valueDev.clear();
+            valueDev.push_back(histISRUp->GetBinContent(sr+1));
+            valueDev.push_back(histISRDown->GetBinContent(sr+1));
+            valueDev.push_back(histFSRUp->GetBinContent(sr+1));
+            valueDev.push_back(histFSRDown->GetBinContent(sr+1));
+
+            histISRandFSRUp->SetBinContent(sr+1, largestAmongAll(valueDev));
+            histISRandFSRDown->SetBinContent(sr+1, smallestAmongAll(valueDev));
+        }
+
+        histISRandFSRUp->SetName((nameOfProcessesForDatacard[cat-1] + "_ISRandFSRUp").c_str());
+        histISRandFSRDown->SetName((nameOfProcessesForDatacard[cat-1] + "_ISRandFSRDown").c_str());
+
+        histISRandFSRUp->Write();
+        histISRandFSRDown->Write();
+
+        fileout <<  "ISRandFSR shape     " ;
+        vector<int> newString;
+        newString = formEmptyStringInt(numberOfBKG + 1);
+        newString[0] = 1.;
+        fillString(fileout, newString);
+   }
+
    // here fill all syst shape uncertainties that have acceptance uncertainty 
    std::vector<std::string> systShapeAcceptNames = {"scaleAcc", "pdfAcc"};
-   for(int syst = systShapeNames.size(); syst < systShapeAcceptNames.size() + systShapeNames.size(); syst++){
+   for(int syst = systShapeNames.size() + systISRFSRNames.size(); syst < systShapeAcceptNames.size() + systShapeNames.size() + systISRFSRNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *hist, *histStUp, *histStDown, *histAccUp, *histAccDown;
           hist = (TH1D*)distribs.vectorHisto[cat].Clone("hist");
@@ -185,15 +221,15 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
           }
 
 
-          histAccUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size()) + "Up").c_str());
-          histAccDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size()) + "Down").c_str());
+          histAccUp->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size() - systISRFSRNames.size()) + "Up").c_str());
+          histAccDown->SetName((nameOfProcessesForDatacard[cat-1] + "_" + systShapeAcceptNames.at(syst - systShapeNames.size() - systISRFSRNames.size()) + "Down").c_str());
 
           histAccUp->Write();
           histAccDown->Write();
       }
-      fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size()) << " shape     " ;
+      fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size() - systISRFSRNames.size()) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
-      newString[1] = 999; // don't consider uncertainty on nonprompt
+      newString[7] = 999; // don't consider uncertainty on nonprompt
       //if(lepSel == 2)
       //    newString[3] = 999;
       fillString(fileout, newString);
@@ -240,7 +276,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    newString = formEmptyString(numberOfBKG + 1);
    for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
       if(nameOfProcessesForDatacard.at(i) == "ZZ")
-        newString[i] = 1.2;
+        newString[i] = 1.1;
    }
    fillString(fileout, newString);
 
@@ -333,7 +369,7 @@ vector<int> formUnityStringInt(int numberOfProcesses){
 }
 
 
-void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatacard){
+void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatacard, std::vector<TString> & experUncName, std::vector<double> & experUnc){
   for(int i = 0; i < experUnc.size(); i++){
     file << experUncName.at(i) << "      lnN  ";
     for(int statInd = 0; statInd < nameOfProcessesForDatacard.size(); statInd++){
@@ -352,5 +388,22 @@ void fillExperUnc(ofstream & file, vector<std::string> & nameOfProcessesForDatac
 
 }
 
+double largestAmongAll(const std::vector<double> & weights){
+
+    double max_value = weights.front() ;
+    for( std::size_t i = 1 ; i < weights.size() ; ++i ) 
+        if( weights[i] > max_value ) max_value = weights[i] ;
+    return max_value;
+
+}
+
+double smallestAmongAll(const std::vector<double> & weights){
+
+    double min_value = weights.front() ;
+    for( std::size_t i = 1 ; i < weights.size() ; ++i ) 
+        if( weights[i] < min_value ) min_value = weights[i] ;
+    return min_value;
+
+}
 
 #endif  // fillDatacards

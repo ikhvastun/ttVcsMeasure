@@ -30,6 +30,10 @@ class Reweighter{
         //b-tagging efficiency
         double bTagEff(const unsigned jetFlavor, const double jetPt, const double jetEta) const;
 
+        //tracking + reconstruction weights
+        double muonRecoWeight(const double eta, const unsigned unc) const;
+        double electronRecoWeight(const double superClusterEta, const double pt, const unsigned unc) const;
+
         //lepton id + reconstruction weight
         double muonTightWeight(const double pt, const double eta, const unsigned unc) const{ 
             // no reco SF, email from Sergio and Sandro on 30th of July, 2018, they removed as well recommendations from twiki, varOne is always considered as 0
@@ -38,6 +42,8 @@ class Reweighter{
             return muonTightIdWeight(pt,eta, unc);
         }
 
+        // split into 2 functions, separately reco and tight, 29th Aug 2018
+        /*
         double electronTightWeight(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{ 
             int var = unc == 2 ? -1 : int(unc);
             double varOne = (var != 0 ? fabs(electronRecoWeight(superClusterEta, pt, unc) - electronRecoWeight(superClusterEta, pt, 0)) : 0.);
@@ -48,7 +54,13 @@ class Reweighter{
             //if(var == 2) std::cout << "electron tight id weight is " << valueOne*valueTwo + (var != 0 ? var * uncorUncCalc(valueOne, valueTwo, varOne, varTwo) : 0.) << std::endl;
             return valueOne*valueTwo + (var != 0 ? var * uncorUncCalc(valueOne, valueTwo, varOne, varTwo) : 0.);
         }
-
+        */
+        double electronTightWeightOnlyStat(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{ 
+            return electronTightIdWeightOnlyStat(pt,superClusterEta, unc);
+        }
+        double electronTightWeightOnlySyst(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{ 
+            return electronTightIdWeightOnlySyst(pt,superClusterEta, unc);
+        }
         double muonLooseWeight(const double pt, const double eta, const unsigned unc) const{
             return  muonRecoWeight(eta, unc)*muonLooseIdWeight(pt,eta, unc);
         }
@@ -96,11 +108,14 @@ class Reweighter{
         //muon id scale factors
         std::shared_ptr<TH2D> muonLooseToRecoSF;
         std::shared_ptr<TH2D> muonTightToLooseSF;
+        std::shared_ptr<TH2D> muonTightToRecoSF;
         std::shared_ptr<TH2D> muonChargeConsToTightSF;
 
         //electron id scale factors
         std::shared_ptr<TH2D> electronLooseToRecoSF;
         std::shared_ptr<TH2D> electronTightToLooseSF;
+        std::shared_ptr<TH2D> electronTightToRecoSF_syst;
+        std::shared_ptr<TH2D> electronTightToRecoSF_stat;
         std::shared_ptr<TH2D> electronChargeConsToTightSF;
 
 
@@ -126,17 +141,14 @@ class Reweighter{
         //jet prefiring probabilities
         std::shared_ptr<TH2D> prefiringMap;
 
-        //tracking + reconstruction weights
-        double muonRecoWeight(const double eta, const unsigned unc) const;
-        double electronRecoWeight(const double superClusterEta, const double pt, const unsigned unc) const;
-
         //loose id weights
         double muonLooseIdWeight(const double pt, const double eta, const unsigned unc) const;
         double electronLooseIdWeight(const double pt, const double eta, const unsigned unc) const;
 
         //tight id weights
         double muonTightIdWeight(const double pt, const double eta, const unsigned unc) const;
-        double electronTightIdWeight(const double pt, const double eta, const unsigned unc) const;
+        double electronTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const;
+        double electronTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const;
 
         //read pu weights for a given list of samples
         void initializePuWeights(const std::vector< Sample >&); 

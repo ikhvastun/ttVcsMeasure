@@ -28,6 +28,7 @@ using Output::DistribsAll;
 void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
 void setUpSystUnc(DistribsAll &, TH1D *);
 void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
+void printInfoOnPlotTTZ();
 void printInfoOnPlot3L();
 void printInfoOnPlotNPCR();
 void printInfoOnXaxisAllTTZ();
@@ -44,7 +45,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
-    if(showLegendOption > 0 && info.index == indexSRTTZ){ // keep it blinded for 2017, showLegendOption = 1 and 2 for 2017 and comb of 2 datasets
+    if(showLegendOption > 0 && (info.index == indexSRTTZ || info.index == indexSR3L || info.index == indexSR4L || info.index == indexSR3L3m || info.index == indexSR3L2m1e || info.index == indexSR3L1m2e || info.index == indexSR3L3e)){ // keep it blinded for 2017, showLegendOption = 1 and 2 for 2017 and comb of 2 datasets
         for(unsigned int bin = 1; bin < dataHist->GetNbinsX()+1; bin++){
             if(bin < 5) continue;
             dataHist->SetBinContent(bin, 0.);
@@ -160,12 +161,17 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     if(info.index == indexSRTTZ){
        dataHist->GetXaxis()->SetTitleSize(0.07);
        dataHist->GetXaxis()->SetTitleOffset(0.8);
-       printInfoOnPlot3L();
+       printInfoOnPlotTTZ();
     }
     if(info.index == indexSRTTCR){
        dataHist->GetXaxis()->SetTitleSize(0.07);
        dataHist->GetXaxis()->SetTitleOffset(0.8);
        printInfoOnPlotNPCR();
+    }
+    if(info.index == indexSR3L || info.index == indexSR3L3m || info.index == indexSR3L2m1e || info.index == indexSR3L1m2e || info.index == indexSR3L3e){
+       dataHist->GetXaxis()->SetTitleSize(0.07);
+       dataHist->GetXaxis()->SetTitleOffset(0.8);
+       printInfoOnPlot3L();
     }
 
     pad1->cd();
@@ -308,6 +314,62 @@ void printInfoOnPlot3L(){
     nbjetsEq2region.SetTextAlign(31);
     nbjetsEq2region.SetTextSize(0.05);
     nbjetsEq2region.DrawLatex(0.79, 0.58,"N_{b} > 1");
+}
+
+void printInfoOnPlotTTZ(){
+
+    TLine *line1 = new TLine(3.5, 0, 3.5, 1125);
+    line1->SetLineStyle(2);
+    line1->Draw("same");
+
+    TLine *line2 = new TLine(7.5, 0, 7.5, 1125);
+    line2->SetLineStyle(2);
+    
+    TLine *line3 = new TLine(11.5, 0, 11.5, 1125);
+    line3->SetLineStyle(2);
+    
+    line2->Draw("same");
+    line3->Draw("same");
+
+    TLatex threeLregion;
+    threeLregion.SetNDC();
+    threeLregion.SetTextAngle(0);
+    threeLregion.SetTextColor(kBlack);
+
+    threeLregion.SetTextFont(42);
+    threeLregion.SetTextAlign(31);
+    threeLregion.SetTextSize(0.05);
+    threeLregion.DrawLatex(0.62, 0.68,"3 leptons");
+
+    TLatex nbjetsEq0region;
+    nbjetsEq0region.SetNDC();
+    nbjetsEq0region.SetTextAngle(0);
+    nbjetsEq0region.SetTextColor(kBlack);
+
+    nbjetsEq0region.SetTextFont(42);
+    nbjetsEq0region.SetTextAlign(31);
+    nbjetsEq0region.SetTextSize(0.05);
+    nbjetsEq0region.DrawLatex(0.31, 0.58,"N_{b} = 0");
+
+    TLatex nbjetsEq1region;
+    nbjetsEq1region.SetNDC();
+    nbjetsEq1region.SetTextAngle(0);
+    nbjetsEq1region.SetTextColor(kBlack);
+
+    nbjetsEq1region.SetTextFont(42);
+    nbjetsEq1region.SetTextAlign(31);
+    nbjetsEq1region.SetTextSize(0.05);
+    nbjetsEq1region.DrawLatex(0.55, 0.58,"N_{b} = 1");
+
+    TLatex nbjetsEq2region;
+    nbjetsEq2region.SetNDC();
+    nbjetsEq2region.SetTextAngle(0);
+    nbjetsEq2region.SetTextColor(kBlack);
+
+    nbjetsEq2region.SetTextFont(42);
+    nbjetsEq2region.SetTextAlign(31);
+    nbjetsEq2region.SetTextSize(0.05);
+    nbjetsEq2region.DrawLatex(0.79, 0.58,"N_{b} > 1");
 
     TLatex fourLregion;
     fourLregion.SetNDC();
@@ -352,7 +414,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
     stackCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
-    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ && info.index != indexFlavour3L && info.index != indexFlavour4L && info.index != indexFlavour4LZZ && info.index != indexSRTTCR)
+    if(info.index != indexSR3L && info.index != indexSR4L && info.index != indexSRTTZ && info.index != indexFlavour3L && info.index != indexFlavour4L && info.index != indexFlavour3L4L && info.index != indexFlavour4LZZ && info.index != indexSRTTCR)
         stackCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     else
         stackCopy->GetXaxis()->SetLabelSize(0.25);
@@ -387,6 +449,34 @@ void calculateRatioUnc(TGraphAsymmErrors * dataGraph, TH1D * data, TH1D * stack)
 }
 
 void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
+
+    /*
+    histSystAndStatUnc->Reset("ICE");
+    for(unsigned int bin = 0; bin < histSystAndStatUnc->GetNbinsX(); bin++){
+        double err = 0.;
+        cout << "#### bin number " << bin << endl;
+        for(unsigned int cat = distribs.vectorHisto.size()-1; cat != 0; cat--){
+            // content in particular bin in stack
+            double catBinContent = distribs.vectorHisto[cat].GetBinContent(bin+1);
+            if(catBinContent == 0) continue;
+            double catBinError = distribs.vectorHisto[cat].GetBinError(bin+1);
+
+            // stat uncertainty is here
+            if(catBinContent != 0.) err += TMath::Power(catBinError/catBinContent,2);
+            cout << "stat unc is " << TMath::Sqrt(err) << endl; 
+
+            for(unsigned int syst = 0; syst < numberOfSyst; syst++) {
+                if(syst == pdfUncIndex) continue;
+                if(catBinContent != 0.) {
+                    err += TMath::Power(TMath::Max(distribs.vectorHistoUncUp[cat].unc[syst].GetBinContent(bin+1) - catBinContent, catBinContent - distribs.vectorHistoUncUp[cat].unc[syst].GetBinContent(bin+1)) / catBinContent, 2);
+                    cout << "unc after syst " << syst << " is " << TMath::Sqrt(err) << endl; 
+                }
+            }
+        }
+        histSystAndStatUnc->SetBinContent(bin+1, 1.);
+        histSystAndStatUnc->SetBinError(bin+1, TMath::Sqrt(err) > 1 ? 1. : TMath::Sqrt(err));
+    }
+    */
 
     // histSystAndStatUnc - a histogram with central value at 1 and with applied one of the uncertainties on top: JEC, JES and Uncl
     //TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));

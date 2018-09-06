@@ -113,219 +113,44 @@ void initdistribs(std::vector<std::string> & namesOfSamples){
     
 void setLabelsForHistos(){
 
-    // flavour 3L
-    for(auto & histo: distribs[indexFlavour3L].vectorHisto) {
-      for(const auto & i: flavourLabelOptionsFor3L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
+    std::vector<std::vector<BinLabelOptions>> labelVector = {flavourLabelOptionsFor3L, flavourLabelOptionsFor4L, flavourLabelOptionsFor4LZZ, theSRLabelOptionsForWZCR, theSRLabelOptionsForZZCR, theSRLabelOptionsForTTCR, theSRLabelOptionsFor3L, theSRLabelOptionsFor4L, theSRLabelOptionsForTTZ, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, flavourLabelOptionsFor3L4L, theSRLabelOptionsForTTZ8SR3L};
+    std::vector<unsigned int> indeces = {indexFlavour3L, indexFlavour4L, indexFlavour4LZZ, indexSRWZCR, indexSRZZCR, indexSRTTCR, indexSR3L, indexSR4L, indexSRTTZ, indexSR3L3m, indexSR3L2m1e, indexSR3L1m2e, indexSR3L3e, indexFlavour3L4L, indexSRTTZ8SR3L};
+    for(int ind = 0; ind < labelVector.size(); ind++){
+        for(auto & histo: distribs[indeces.at(ind)].vectorHisto) {
+            for(const auto & i: labelVector.at(ind)){
+                histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+            }
 
-      histo.GetXaxis()->SetLabelSize(0.1);
-      histo.GetXaxis()->SetTitleSize(0.25);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexFlavour3L].vectorHistoUncUp) 
-        for(const auto & i: flavourLabelOptionsFor3L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexFlavour3L].vectorHistoUncDown) 
-        for(const auto & i: flavourLabelOptionsFor3L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // flavour 4L
-    for(auto & histo: distribs[indexFlavour4L].vectorHisto) {
-      for(const auto & i: flavourLabelOptionsFor4L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetLabelSize(0.1);
-      histo.GetXaxis()->SetTitleSize(0.25);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexFlavour4L].vectorHistoUncUp) 
-        for(const auto & i: flavourLabelOptionsFor4L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexFlavour4L].vectorHistoUncDown) 
-        for(const auto & i: flavourLabelOptionsFor4L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // flavour 4L ZZ
-    for(auto & histo: distribs[indexFlavour4LZZ].vectorHisto) {
-      for(const auto & i: flavourLabelOptionsFor4LZZ){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetLabelSize(0.1);
-      histo.GetXaxis()->SetTitleSize(0.25);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexFlavour4LZZ].vectorHistoUncUp) 
-        for(const auto & i: flavourLabelOptionsFor4LZZ)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexFlavour4LZZ].vectorHistoUncDown) 
-        for(const auto & i: flavourLabelOptionsFor4LZZ)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-
-    // ------------------ WZ CR 
-    for(auto & histo: distribs[indexSRWZCR].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsForWZCR){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSRWZCR].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsForWZCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSRWZCR].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsForWZCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // ------------------ ZZ CR 
-    for(auto & histo: distribs[indexSRZZCR].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsForZZCR){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSRZZCR].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsForZZCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSRZZCR].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsForZZCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // ------------------ NP CR 
-    for(auto & histo: distribs[indexSRTTCR].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsForTTCR){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSRTTCR].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsForTTCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSRTTCR].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsForTTCR)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // ------------------ 3L
-    for(auto & histo: distribs[indexSR3L].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsFor3L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSR3L].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsFor3L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSR3L].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsFor3L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // ------------------ 4L
-    for(auto & histo: distribs[indexSR4L].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsFor4L){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSR4L].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsFor4L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSR4L].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsFor4L)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    // --------------- all TTZ
-
-    for(auto & histo: distribs[indexSRTTZ].vectorHisto) {
-      for(const auto & i: theSRLabelOptionsForTTZ){
-        histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-      }
-
-      histo.GetXaxis()->SetTitleSize(0.15);
-      histo.GetXaxis()->SetLabelOffset(0.02);
-    }
-
-    for(auto & histo: distribs[indexSRTTZ].vectorHistoUncUp) 
-        for(const auto & i: theSRLabelOptionsForTTZ)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    for(auto & histo: distribs[indexSRTTZ].vectorHistoUncDown) 
-        for(const auto & i: theSRLabelOptionsForTTZ)
-            for(unsigned int k = 0; k < numberOfSyst; k++)
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-    /*
-    for(auto & histo: distribs[indexFlavour].vectorHistoUncUp) {
-        for(unsigned int k = 0; k < numberOfSyst; k++){
-            for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
-
-            histo.unc[k].GetXaxis()->SetLabelSize(0.1);
-            histo.unc[k].GetXaxis()->SetTitleSize(0.25);
-            histo.unc[k].GetXaxis()->SetLabelOffset(0.02);
+            histo.GetXaxis()->SetLabelSize(0.1);
+            histo.GetXaxis()->SetTitleSize(0.25);
+            histo.GetXaxis()->SetLabelOffset(0.02);
         }
-    }
 
-    for(auto & histo: distribs[indexFlavour].vectorHistoUncDown) {
-        for(unsigned int k = 0; k < numberOfSyst; k++){
-            for(const auto & i: leptonSelection == 2 ? flavourLabelOptionsFor2L : (leptonSelection == 3 ? flavourLabelOptionsFor3L : flavourLabelOptionsFor4L))
-                histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
+        for(auto & histo: distribs[indeces.at(ind)].vectorHistoUncUp) 
+            for(const auto & i: labelVector.at(ind))
+                for(unsigned int k = 0; k < numberOfSyst; k++)
+                    histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
-            histo.unc[k].GetXaxis()->SetLabelSize(0.1);
-            histo.unc[k].GetXaxis()->SetTitleSize(0.25);
-            histo.unc[k].GetXaxis()->SetLabelOffset(0.02);
-        }
+        for(auto & histo: distribs[indeces.at(ind)].vectorHistoUncDown) 
+            for(const auto & i: labelVector.at(ind))
+                for(unsigned int k = 0; k < numberOfSyst; k++)
+                    histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
     }
-    */
 
 }
 
 double flavourCategory2L(int nLocEle, int chargesTwoLepton){
   return double(1 + nLocEle + 3 * (chargesTwoLepton > 0 ? 1 : 0));
+}
+
+double flavourCategory3L4L(int lepSel, int nLocEle){
+  if(lepSel == 3)
+    return double(1 + nLocEle);
+  else if(lepSel == 4){
+    int elCat = nLocEle < 2 ? nLocEle : (nLocEle == 4 ? 3 : 2);
+    return 1 + elCat;
+  }
+  return -999.;
 }
 
 double flavourCategory3L(int nLocEle){
@@ -474,14 +299,23 @@ void initListsToPrint(const std::string & selection){
   listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4LZZ", "SRZZCR"};
   listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "flavour3L"};
   listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L"};
-  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L"};
+  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L"};
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
-  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR"};
+  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L"};
+  //listToPrint["ttZ"] = {"SRallTTZ"};
 
   if(selection == "ttZclean"){
     figNames["njets"].varMin = 1.5;
     figNames["njets"].nBins = 6;
+
+    figNames["nbjets"].varMin = 0.5;
+    figNames["nbjets"].nBins = 3;
+  }
+
+  if(selection == "ttZ3Lclean"){
+    figNames["njets"].varMin = 2.5;
+    figNames["njets"].nBins = 5;
 
     figNames["nbjets"].varMin = 0.5;
     figNames["nbjets"].nBins = 3;

@@ -11,7 +11,8 @@ const int leptonSelectionAnalysis = 3;
 const int nSamples = 11;
 const int dataSample = 0;
 
-const int numberOfSyst = 11;
+const int numberOfSyst = 23;
+const int pdfUncIndex = 12;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
@@ -70,7 +71,8 @@ std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
       {2, "2"},
       {3, "3"},
       {4, "> 3"},
-      {5, "2"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      //{5, "1"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      {5, "2"},
       {6, "3"},
       {7, "4"},
       {8, "> 4"},
@@ -78,6 +80,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsForTTZ = {
       {10, "3"},
       {11, "4"},
       {12, "> 4"},
+      //{14, "nj1nb1"}, // ttZ 4L, nbjets = 0, 1
       {13, "0"}, // ttZ 4L, nbjets = 0, 1
       {14, "> 0"},
 };
@@ -152,6 +155,18 @@ std::vector<BinLabelOptions> theSRLabelOptionsForTTCR = {
     };
       
       
+std::vector<BinLabelOptions> theSRLabelOptionsForTTZ8SR3L = {
+
+      {1, "2"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      {2, "3"},
+      {3, "4"},
+      {4, "> 4"},
+      {5, "2"},
+      {6, "3"},
+      {7, "4"},
+      {8, "> 4"},
+    };
+
 std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
 
     /*
@@ -165,6 +180,7 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
       {8, "3"},
       {9, ">3"},
       */
+    /*
       {1, "2"},
       {2, "3"},
       {3, "4"},
@@ -173,10 +189,26 @@ std::vector<BinLabelOptions> theSRLabelOptionsFor3L = {
       {6, "3"},
       {7, "4"},
       {8, ">4"},
+      */
+
+      {1, "1"}, // WZ CR, first 4 bins, nbjets = 0, njets = 1, 2, 3, > 3
+      {2, "2"},
+      {3, "3"},
+      {4, "> 3"},
+      //{5, "1"},
+      {5, "2"},// ttZ 3L, nbjets = 1, njets = 2,3,4,>4; nbjets >1, njets = 2,3,4,>4
+      {6, "3"},
+      {7, "4"},
+      {8, "> 4"},
+      {9, "2"},
+      {10, "3"},
+      {11, "4"},
+      {12, "> 4"},
     };
 
 std::vector<BinLabelOptions> theSRLabelOptionsFor4L = {
 
+      //{1, "nj1nb1"},
       {1, "0"},
       {2, ">0"},
       
@@ -193,6 +225,15 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor2L = {
       {5, "#mu^{+}e^{+}"},
       {6, "e^{+}e^{+}"},
       };
+
+std::vector<BinLabelOptions> flavourLabelOptionsFor3L4L = {
+      
+      {1, "(#mu)#mu#mu#mu"},
+      {2, "(#mu)#mu#mu e"},
+      {3, "(#mu/e)#mu ee"},
+      {4, "(e)eee"},
+      
+    };
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
@@ -317,9 +358,22 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"flavour3L", {"", 48, 0.5, static_cast<double>(flavourLabelOptionsFor3L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor3L.size()), false}},
                                                  {"flavour4L", {"", 49, 0.5, static_cast<double>(flavourLabelOptionsFor4L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor4L.size()), false}},
                                                  {"flavour4LZZ", {"", 50, 0.5, static_cast<double>(flavourLabelOptionsFor4LZZ.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor4LZZ.size()), false}},
+                                                 {"SR3L3m",    {"N_{j}", 51, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"SR3L2m1e",    {"N_{j}", 52, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"SR3L1m2e",    {"N_{j}", 53, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"SR3L3e",    {"N_{j}", 54, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
+                                                 {"flavour3L4L", {"", 55, 0.5, static_cast<double>(flavourLabelOptionsFor3L4L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor3L4L.size()), false}},
+                                                 {"SRTTZ8SR3L", {"", 56, -0.5, static_cast<double>(theSRLabelOptionsForTTZ8SR3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTZ8SR3L.size()), false}},
                                            };
 
 const int nVars  = figNames.size() ;
+
+const unsigned int indexSR3L3m = 51;
+const unsigned int indexSR3L2m1e = 52;
+const unsigned int indexSR3L1m2e = 53;
+const unsigned int indexSR3L3e = 54;
+const unsigned int indexFlavour3L4L = 55;
+const unsigned int indexSRTTZ8SR3L = 56;
 
 const unsigned int indexSRttZcleanCosTheta = 47;
 const unsigned int indexSRttZcleanPTZ = 46;
@@ -337,6 +391,7 @@ const unsigned int indexFlavour4LZZ = 50;
 std::map<std::string, std::vector<TString>> listToPrint;
 
 std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0}, 
+                                           {"ttW", 0.11}, 
                                            {"ttH", 0.11}, 
                                            {"ttX", 0.11}, 
                                            {"WZ", 0.1}, 
@@ -345,10 +400,19 @@ std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0},
                                            {"rare", 0.5}, 
 };
 
+/*
+// effect of ISR and FSR for ttZ to be varied by factor 2
 std::vector<double> ttZISRUpW = {1.03, 1.02, 1.005, 0.98, 1.02, 1.01, 0.99, 0.945, 1.035, 1.025, 1.00, 0.95, 0.98, 0.995}; // 14 SRs
 std::vector<double> ttZISRDownW = {0.965, 0.975, 1.00, 1.025, 0.98, 0.99, 1.015, 1.07, 0.96, 0.97, 1.00, 1.065, 1.025, 1.005}; // 14 SRs
 
 std::vector<double> ttZFSRUpW = {0.96, 0.965, 0.99, 0.985, 0.99, 1.00, 1.00, 1.00, 1.01, 1.02, 1.025, 1.03, 0.98, 1.015}; // 14 SRs
 std::vector<double> ttZFSRDownW = {1.07, 1.06, 1.02, 1.005, 1.025, 1.01, 0.99, 0.975, 0.98, 0.97, 0.96, 0.97, 1.075, 0.98}; // 14 SRs
+*/
+
+std::vector<double> ttZISRUpW = {1.03, 1.025, 1.01, 1.045, 1.03, 1.015, 1.015, 1.07, 1.035, 1.025, 1.015, 1.065, 1.025, 1.01}; // 14 SRs
+std::vector<double> ttZISRDownW = {0.965, 0.975, 0.995, 0.965, 0.965, 0.985, 0.99, 0.945, 0.96, 0.97, 0.98, 0.95, 0.98, 0.995}; // 14 SRs
+
+std::vector<double> ttZFSRUpW = {1.03, 1.025, 1.01, 1.045, 1.03, 1.015, 1.015, 1.07, 1.035, 1.025, 1.015, 1.065, 1.025, 1.01}; // 14 SRs
+std::vector<double> ttZFSRDownW = {0.965, 0.975, 0.995, 0.965, 0.965, 0.985, 0.99, 0.945, 0.96, 0.97, 0.98, 0.95, 0.98, 0.995}; // 14 SRs
 
 #endif 

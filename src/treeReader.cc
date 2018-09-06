@@ -76,6 +76,15 @@ void treeReader::initSample(const Sample& samp){
         sumSimulatedEventWeightsScaleUp = lheCounter->GetBinContent(9) != 0 ? lheCounter->GetBinContent(9) : sumSimulatedEventWeights;
         sumSimulatedEventWeightsScaleDown = lheCounter->GetBinContent(5) != 0 ? lheCounter->GetBinContent(5) : sumSimulatedEventWeights;
         
+        TH1D* psCounter = new TH1D("psCounter", "Events counter", 14, 0, 14);
+        psCounter->Read("psCounter"); 
+
+        sumSimulatedEventWeightsISRScaleUp = psCounter->GetBinContent(8) != 0 ? psCounter->GetBinContent(8) : sumSimulatedEventWeights;
+        sumSimulatedEventWeightsISRScaleDown = psCounter->GetBinContent(6) != 0 ? psCounter->GetBinContent(6) : sumSimulatedEventWeights;
+        
+        sumSimulatedEventWeightsFSRScaleUp = psCounter->GetBinContent(5) != 0 ? psCounter->GetBinContent(5) : sumSimulatedEventWeights;
+        sumSimulatedEventWeightsFSRScaleDown = psCounter->GetBinContent(3) != 0 ? psCounter->GetBinContent(3) : sumSimulatedEventWeights;
+        
         for(unsigned lhe = 9; lhe < 110; ++lhe){
             double variedSumOfWeights = lheCounter->GetBinContent(lhe + 1) != 0 ? lheCounter->GetBinContent(lhe + 1) : sumSimulatedEventWeights;
             crossSectionRatio[currentSampleIndex][lhe-9] = sumSimulatedEventWeights /( variedSumOfWeights );
@@ -205,6 +214,11 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetPt_JECDown", _jetPt_JECDown, &b__jetPt_JECDown);
     fChain->SetBranchAddress("_jetPt_JERUp", _jetPt_JERUp, &b__jetPt_JERUp);
     fChain->SetBranchAddress("_jetPt_JERDown", _jetPt_JERDown, &b__jetPt_JERDown);
+    fChain->SetBranchAddress("_jetSmearedPt", _jetSmearedPt, &b__jetSmearedPt);
+    fChain->SetBranchAddress("_jetSmearedPt_JECDown", _jetSmearedPt_JECDown, &b__jetSmearedPt_JECDown);
+    fChain->SetBranchAddress("_jetSmearedPt_JECUp", _jetSmearedPt_JECUp, &b__jetSmearedPt_JECUp);
+    fChain->SetBranchAddress("_jetSmearedPt_JERDown", _jetSmearedPt_JERDown, &b__jetSmearedPt_JERDown);
+    fChain->SetBranchAddress("_jetSmearedPt_JERUp", _jetSmearedPt_JERUp, &b__jetSmearedPt_JERUp);
     fChain->SetBranchAddress("_jetEta", _jetEta, &b__jetEta);
     fChain->SetBranchAddress("_jetPhi", _jetPhi, &b__jetPhi);
     fChain->SetBranchAddress("_jetE", _jetE, &b__jetE);

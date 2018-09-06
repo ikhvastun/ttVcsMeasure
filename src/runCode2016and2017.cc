@@ -41,6 +41,7 @@
 
 #include "../interface/analysisTools.h"
 #include "../interface/fillDatacards.h"
+#include "../interface/fillTables.h"
 #include "../interface/PostFitScaler.h"
 
 #include "tdrStyle.C"
@@ -90,7 +91,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       setStackColors(color, samCategory);
 
       //if(!(samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
+      if(!(samples[sam].getFileName().find("ST_tWll_") != std::string::npos)) continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
+      //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "WZ") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
       if(samples[sam].getProcessName() == "nonpromptData"){
@@ -210,6 +213,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           std::vector<unsigned> indJets;
           std::vector<unsigned> indJetsJECUp;
           std::vector<unsigned> indJetsJECDown;
+          std::vector<unsigned> indJetsJERUp;
+          std::vector<unsigned> indJetsJERDown;
           std::vector<unsigned> indJetsNotB;
 
           unsigned third = -9999;
@@ -221,10 +226,14 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           nJLoc = nJets(0, true, indJets, samples[sam].is2017());
           int nJLocDown = nJets(1, true, indJetsJECDown, samples[sam].is2017());
           int nJLocUp = nJets(2, true, indJetsJECUp, samples[sam].is2017());
+          int nJLocJERDown = nJets(3, true, indJetsJERDown, samples[sam].is2017());
+          int nJLocJERUp = nJets(4, true, indJetsJERUp, samples[sam].is2017());
           nJLocNotB = nJetsNotB(0, true, indJetsNotB, 2, samples[sam].is2017());
           nBLoc = nBJets(0, true, true, 1, samples[sam].is2017());
           int nBLocDown = nBJets(1, true, true, 1, samples[sam].is2017());
           int nBLocUp = nBJets(2, true, true, 1, samples[sam].is2017());
+          int nBLocJERDown = nBJets(3, true, true, 1, samples[sam].is2017());
+          int nBLocJERUp = nBJets(4, true, true, 1, samples[sam].is2017());
 
           TLorentzVector Zboson, lnegative;
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
@@ -237,6 +246,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           HTLoc = HTCalc(indJets);
           double HTLocJECUp = HTCalc(indJetsJECUp);
           double HTLocJECDown  = HTCalc(indJetsJECDown);
+          double HTLocJERUp = HTCalc(indJetsJERUp);
+          double HTLocJERDown  = HTCalc(indJetsJERDown);
           
           double mt1 = 9999;
           if(leptonSelection == 4){
@@ -298,9 +309,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
                                    // currently here we will have ttZ3L and ttZ4L categories
-                                   //(leptonSelection == 4 ? flavourCategory4L(nLocEle) : (leptonSelection == 3 ? flavourCategory3L(nLocEle) : flavourCategory2L(nLocEle,_lCharge[ind.at(0)]))), 
-                                   //(leptonSelection == 4 ? SRID4L(nBLoc) : (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc) : SRID2L(mvaVL, _lCharge[ind.at(0)]))),
-                                   (leptonSelection == 3 && passTTZSelection(nJLoc, dMZ) ? SRID3L(nJLoc, nBLoc) : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
@@ -309,17 +318,21 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
                                    SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
-                                   SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
+                                   (leptonSelection == 3 && nJLoc > 2 && nBLoc > 0 ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && nJLoc > 2 && nBLoc > 0 ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
                                    };
 
           vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocUp), double(nBLocUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
-                                   //(leptonSelection == 4 ? flavourCategory4L(nLocEle) : (leptonSelection == 3 ? flavourCategory3L(nLocEle) : flavourCategory2L(nLocEle,_lCharge[ind.at(0)]))), 
-                                   //(leptonSelection == 4 ? SRID4L(nBLocUp) : (leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp) : SRID2L(mvaVLJECUp, _lCharge[ind.at(0)]))),
-                                   (leptonSelection == 3 && passTTZSelection(nJLocUp, dMZ) ? SRID3L(nJLocUp, nBLocUp) : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocUp)? SRID4L(nJLocUp, nBLocUp) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
@@ -328,17 +341,21 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJECUp,
                                    SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll),
-                                   SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
+                                   (leptonSelection == 3 && nJLocUp > 2 && nBLocUp > 0 ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && nJLocUp > 2 && nBLocUp > 0 ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    };
 
           vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocDown), double(nBLocDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
-                                   //(leptonSelection == 4 ? flavourCategory4L(nLocEle) : (leptonSelection == 3 ? flavourCategory3L(nLocEle) : flavourCategory2L(nLocEle,_lCharge[ind.at(0)]))), 
-                                   //(leptonSelection == 4 ? SRID4L(nBLocDown) : (leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown) : SRID2L(mvaVLJECDown, _lCharge[ind.at(0)]))),
-                                   (leptonSelection == 3 && passTTZSelection(nJLocDown, dMZ) ? SRID3L(nJLocDown, nBLocDown) : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocDown)? SRID4L(nJLocDown, nBLocDown) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
@@ -347,11 +364,64 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
                                    SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll),
-                                   SRIDPTZ(ptZ), SRIDCosTheta(cosTSt),
+                                   (leptonSelection == 3 && nJLocDown > 2 && nBLocDown > 0 ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && nJLocDown > 2 && nBLocDown > 0 ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    };
+
+          vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocJERUp), double(nBLocJERUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERUp)? SRID4L(nJLocJERUp, nBLocJERUp) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJERUp,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ, mlll), SRIDWZCR(nJLocJERUp, nBLocJERUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp), SRIDTTCR(nJLocJERUp, nBLocJERUp, dMZ, mlll),
+                                   (leptonSelection == 3 && nJLocJERUp > 2 && nBLocJERUp > 0 ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && nJLocJERUp > 2 && nBLocJERUp > 0 ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   };
+
+          vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocJERDown), double(nBLocJERDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERDown)? SRID4L(nJLocJERDown, nBLocJERDown) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ, mlll), SRIDWZCR(nJLocJERDown, nBLocJERDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown), SRIDTTCR(nJLocJERDown, nBLocJERDown, dMZ, mlll),
+                                   (leptonSelection == 3 && nJLocJERDown > 2 && nBLocJERDown > 0 ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && nJLocJERDown > 2 && nBLocJERDown > 0 ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   };
+
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
                                      "mtW", "njets", "nbjets", "BDTpp", 
                                      //"flavour", 
@@ -366,12 +436,16 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR",
                                      "SRttZCleanPTZ", "SRttZCleanCosTheta",
                                      "flavour3L", "flavour4L", "flavour4LZZ", 
+                                     "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
+                                     "flavour3L4L",
+                                     "SRTTZ8SR3L"
                                    };
                                    
-          //if(debug) cout << "lep sf: " << leptonWeight(0) << " " << leptonWeight(1) << " " << leptonWeight(2) << endl;
-
           //start = std::chrono::high_resolution_clock::now();
-          double lepSF = 1.; double lepSFUp = 1.; double lepSFDown = 1.;
+          double lepSF = 1.;
+          double lepSFSystUp = 1.; double lepSFSystDown = 1.; 
+          double lepSFStatUp = 1.; double lepSFStatDown = 1.;
+          double lepSFRecoUp = 1.; double lepSFRecoDown = 1.;
 
           double puW = 1.; double puWUp = 1.; double puWDown = 1.;
 
@@ -379,8 +453,20 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double btagC = 1.; double btagCUp = 1.; double btagCDown = 1.;
           double btagB = 1.; double btagBUp = 1.; double btagBDown = 1.;
 
+          double jetPrefW = 1.;
+
           if((samples[sam].getProcessName()) != "data"){
-            lepSF = leptonWeight(0); lepSFUp = leptonWeight(1); lepSFDown = leptonWeight(2);
+            double lepWOnlySyst = leptonWeightOnlySyst(0); double lepWOnlySystUp = leptonWeightOnlySyst(1); double lepWOnlySystDown = leptonWeightOnlySyst(2);
+            double lepWOnlyStat = leptonWeightOnlyStat(0); double lepWOnlyStatUp = leptonWeightOnlyStat(1); double lepWOnlyStatDown = leptonWeightOnlyStat(2);
+            double lepWOnlyReco = leptonWeightOnlyReco(0); double lepWOnlyRecoUp = leptonWeightOnlyReco(1); double lepWOnlyRecoDown = leptonWeightOnlyReco(2);
+
+            lepSF = lepWOnlySyst * lepWOnlyStat * lepWOnlyReco; 
+            lepSFSystUp = lepWOnlySystUp * lepWOnlyStat * lepWOnlyReco; 
+            lepSFSystDown = lepWOnlySystDown * lepWOnlyStat * lepWOnlyReco;
+            lepSFStatUp = lepWOnlySyst * lepWOnlyStatUp * lepWOnlyReco; 
+            lepSFStatDown = lepWOnlySyst * lepWOnlyStatDown * lepWOnlyReco; 
+            lepSFRecoUp = lepWOnlySyst * lepWOnlyStat * lepWOnlyRecoUp; 
+            lepSFRecoDown = lepWOnlySyst * lepWOnlyStat * lepWOnlyRecoDown; 
 
             puW = puWeight(0); puWUp = puWeight(1); puWDown = puWeight(2);
 
@@ -388,8 +474,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
             btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
 
+            //jetPrefW = jetPrefiringWeight();
+
             // for post fit scaling
-            //weight *= scaler.postFitScaling(samples[sam].getProcessName());
+            weight *= scaler.postFitScaling(samples[sam].getProcessName());
 
           }
           if(debug){
@@ -408,56 +496,85 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
             if((samples[sam].getProcessName()) != "data"){
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFUp / lepSF);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFDown / lepSF);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFSystUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFSystDown / lepSF);
+                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFStatUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFStatDown / lepSF);
+                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFRecoUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFRecoDown / lepSF);
+                
+                //distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * jetPrefW);
+                //distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * jetPrefW);
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight*puWUp/puW);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight*puWDown/puW);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*puWUp/puW);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*puWDown/puW);
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight*btagLUp/btagL);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight*btagLDown/btagL);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*btagLUp/btagL);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*btagLDown/btagL);
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJerUp.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJerDw.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
 
                 if(samples[sam].getProcessName() == "WZ" && nBLoc > 0){ // 8 % uncertainty for WZ + bb background in high nbjets categories
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight * 1.08);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight * 0.92);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight * 1.08);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight * 0.92);
                 }
                 else{
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
                 if((samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos || samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos) && samples[sam].is2017()){ 
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[8]); // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - up factor 2, 6, 7 - down factor 2
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[6]);
+                    // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - up factor 2, 6, 7 - down factor 2, 30th Aug Daniel said in ttX chat that for FSR factor sqrt(2) should be used, indeces 3 and 5
+                    // as well from https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio there is an instruction to use envelope uncertrtainty, i.e. largest between ISR and FSR
+                    // let's take largest deviation from unity for upward and downward fluction
+                    /*
+                    std::vector<double> psWeights = {_psWeight[8], _psWeight[5], _psWeight[6], _psWeight[3]};
+                    double psWUp = largestAmongAll(psWeights);
+                    double psWDown = smallestAmongAll(psWeights);
 
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[9]);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[7]);
+                    if(debug) cout << "all weights, order is (ISR, FSR up) and (ISR, FSR down): " << _psWeight[8] << " " << _psWeight[5] << " " << _psWeight[6] << " " << _psWeight[3] << endl;
+                    if(debug) cout << "ps weight up and down: " << psWUp << " " << psWDown << endl;
 
-                    //if(debug) cout << "ISR Up/Down: " << _psWeight[8] << " " << _psWeight[6] << "; FSR Up/Down: " << _psWeight[9] << " " << _psWeight[7] << endl;
+                    //double psWUp = fabs(_psWeight[8] - 1) > fabs(_psWeight[5] - 1) ? _psWeight[8] : _psWeight[5];
+                    //double psWDown = fabs(_psWeight[6] - 1) > fabs(_psWeight[3] - 1) ? _psWeight[6] : _psWeight[3];
+                    */
+
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[6]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleDown); 
+
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[5]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[3]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleDown); 
                 }
                 else if(samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos && samples[sam].is2016() && dist == indexSRTTZ){ // apply same weights as in 2017
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight*ttZISRUpW[fillVar.at(dist)]); 
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight*ttZISRDownW[fillVar.at(dist)]);
+                    // here let's take for the moment largest deviation from unity
+                    double psWUp = ttZISRUpW[fillVar.at(dist)] > ttZFSRUpW[fillVar.at(dist)] ? ttZISRUpW[fillVar.at(dist)] : ttZFSRUpW[fillVar.at(dist)];
+                    double psWDown = ttZISRDownW[fillVar.at(dist)] > ttZFSRDownW[fillVar.at(dist)] ? ttZISRDownW[fillVar.at(dist)] : ttZFSRDownW[fillVar.at(dist)];
 
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*ttZFSRUpW[fillVar.at(dist)]);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight*ttZFSRDownW[fillVar.at(dist)]);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
+
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
                 }
                 else{
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
 
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 11,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
 
                 if(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR){
                     for(int varPDF = 0; varPDF < 100; varPDF++){
@@ -465,19 +582,31 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                     }
                 }
                 else{
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
+                for(int cat = 0; cat < 8; cat++){
+                    if(cat == samCategory){
+                        distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
+                        distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight*(1-uncOnNorm[samples[sam].getProcessName()]));
+                    }
+                    else{
+                        distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                        distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    }
+                }
 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*(1-uncOnNorm[samples[sam].getProcessName()]));
-
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight * 1.025); // 2.5% for lumi
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight * 0.975);
+                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 1.01); // 1% for trigger 
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 0.99);
                 
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * 1.3);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * 0.7);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight);
 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight);
@@ -509,6 +638,41 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
 
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 14, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 14, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 15, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 15, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 16, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 16, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 17, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 17, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 18, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 18, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 19, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 19, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*1.3);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*0.7);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
             }
           }
       }
@@ -530,7 +694,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     for(unsigned sam = 0; sam < processIndex.size(); ++sam){
       if(sam == dataSample) continue;
       if(sam == nonPromptSample) continue;
-      for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[sam].unc.at(9).GetNbinsX() + 1; ++bin){
+      for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[sam].unc.at(pdfUncIndex).GetNbinsX() + 1; ++bin){
           double pdfVarRms = 0.;
           for(unsigned pdf = 0; pdf < 100; ++pdf){
               double variedBin = distribs[dist].vectorHistoPDF[sam].var[pdf].GetBinContent(bin);
@@ -540,8 +704,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           }
           pdfVarRms = sqrt( 0.01 * pdfVarRms );
           //cout << "pdf rms for bin " << bin << " is equal to " << pdfVarRms << endl;
-          distribs[dist].vectorHistoUncUp[sam].unc.at(9).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) + pdfVarRms);
-          distribs[dist].vectorHistoUncDown[sam].unc.at(9).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) - pdfVarRms);
+          distribs[dist].vectorHistoUncUp[sam].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) + pdfVarRms);
+          distribs[dist].vectorHistoUncDown[sam].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) - pdfVarRms);
       }
     }
   }
@@ -577,17 +741,21 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     }
 
     if(it->second == "nonpromptData")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"Nonprompt","f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Nonprompt","f");
     else if(it->second == "Xgamma")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"X#gamma","f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"X#gamma","f");
     else if(it->second == "rare")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"Rare","f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Rare","f");
     else if(it->second == "ttZ")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"t#bar{t}Z","f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}Z","f");
+    else if(it->second == "ttW")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}W","f");
+    else if(it->second == "ttH")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}H","f");
     else if(it->second == "ttX")
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],"t(#bar{t})X","f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t(#bar{t})X","f");
     else
-      mtleg->AddEntry(&distribs[0].vectorHisto[it->first],it->second.c_str(),"f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],it->second.c_str(),"f");
     
   }
 
@@ -604,7 +772,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
   else{
     if(filesToAnalyse.at(0).find("2017") != std::string::npos){
-      cout << "file to analysis is " << filesToAnalyse.at(0) << endl;
       folderToStorePlots = "2017/";
       showLegendOption = 1;
     }
@@ -646,14 +813,27 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   */
   // no need to fill datacards when running over 2016 and 2017 together
   if(showLegendOption == 2) return;
+  if(crToPrint == "ttZclean"){
+    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
+  }
   if(crToPrint == "ttZ"){
+
+    fillTablesSRTTZ(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption);
+    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
+
+    fillDatacards(distribs[indexSRTTZ8SR3L], processOrder, "SRTTZ8SR3L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSR4L], processOrder, "SR4L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSR3L3m], processOrder, "SR3L3m", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSR3L2m1e], processOrder, "SR3L2m1e", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSR3L1m2e], processOrder, "SR3L1m2e", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSR3L3e], processOrder, "SR3L3e", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRWZCR], processOrder, "SRWZCR", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRZZCR], processOrder, "SRZZCR", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRTTCR], processOrder, "SRTTCR", (bool)showLegendOption); 
   }
+  return;
 }
 
 int main(int argc, const char **argv)

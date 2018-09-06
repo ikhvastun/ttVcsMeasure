@@ -1,3 +1,13 @@
+MVAtrainings/
+data/dumps/
+datacards/
+fileDummy.root
+main
+output.txt
+output/
+plotsForSave/
+myevents.txt
+tables/
 # Prerequisites
 *.d
 

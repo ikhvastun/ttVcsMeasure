@@ -17,7 +17,7 @@ bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
         if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
     }
 
-    if(debug) cout << "lepton with flavour " << _lFlavor[l] << ", charge " << _lCharge[l] << ", pt " << _lPt[l] << ", eta " << _lEta[l] << ", phi " << _lPhi[l] << " and lepton MVA " << _leptonMvatZqTTV[l] << " is tight for " << lepSel << " selection" << endl;
+    //if(debug) cout << "lepton with flavour " << _lFlavor[l] << ", charge " << _lCharge[l] << ", pt " << _lPt[l] << ", eta " << _lEta[l] << ", phi " << _lPhi[l] << " and lepton MVA " << _leptonMvatZqTTV[l] << " is tight for " << lepSel << " selection" << endl;
     return true;
 }
 
@@ -193,7 +193,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
 
 bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
     TLorentzVector jet;	
-    jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]);
+    jet.SetPtEtaPhiE(isData ? _jetPt[ind] : _jetSmearedPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind] * _jetSmearedPt[ind] /  _jetPt[ind]); 
     for(unsigned l = 0; l < _nLight; ++l){
         if(lepIsFOGood(l, lepSel)){ // cleaning with FO objects
             TLorentzVector lep;
@@ -211,11 +211,11 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
     // temporary fix to sync with Daniel, 9 july 2018
     //if(!_jetIsTight[ind]) return false;
     switch(unc){
-        case 0: if(_jetPt[ind] < ptCut) return false; break;
-        case 1: if(_jetPt_JECDown[ind] < ptCut) return false; break;
-        case 2: if(_jetPt_JECUp[ind] < ptCut) return false; break;
-        case 3: if(_jetPt_JERDown[ind] < ptCut) return false; break;
-        case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;
+        case 0: if((isData ? _jetPt[ind] : _jetSmearedPt[ind]) < ptCut) return false; break;
+        case 1: if(_jetSmearedPt_JECDown[ind] < ptCut) return false; break;
+        case 2: if(_jetSmearedPt_JECUp[ind] < ptCut) return false; break;
+        case 3: if(_jetSmearedPt_JERDown[ind] < ptCut) return false; break;
+        case 4: if(_jetSmearedPt_JERUp[ind] < ptCut) return false; break;
         default: ;
     }
     return !clean || jetIsClean(ind, leptonSelection);
@@ -224,9 +224,9 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
 unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool is2017){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
-        if(debug) cout << "jet with pt: " << _jetPt[j] << " " << _jetEta[j] << " " << _jetPhi[j] << ", and flavour: " << _jetHadronFlavor[j] << endl;
+        //if(debug) cout << "jet with pt: " << _jetPt[j] << " " << _jetEta[j] << " " << _jetPhi[j] << ", and flavour: " << _jetHadronFlavor[j] << endl;
         if(jetIsGood(j, 30, unc, clean, is2017)) {
-            if(debug) cout << "passed selection" << endl;
+            //if(debug) cout << "passed selection" << endl;
             ++nJets;
             ind.push_back(j);
         }
@@ -273,7 +273,7 @@ unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool c
 double treeReader::HTCalc(const std::vector<unsigned>& ind){
     double HT = 0;
     for(auto & i : ind)
-        HT += _jetPt[i];
+        HT += isData ? _jetPt[i] : _jetSmearedPt[i];
     return HT;
 }
 
@@ -448,6 +448,7 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "ttZ") return 91;
     if(name == "ttW") return 98;
     if(name == "ttH") return kRed-10;
+    //if(name == "ttH") return kMagenta-7;
     if(name == "ttX") return kRed-10;
     if(name == "WZ") return 51;
     if(name == "ZZ") return kGreen+3;
@@ -485,6 +486,17 @@ double treeReader::cosThetaStar(const TLorentzVector & Z_tlv, const TLorentzVect
     //cout << "beta: " << beta << endl;
     return (-beta + cosTheta) / (1 - beta*cosTheta);
 
+}
+
+bool treeReader::passTTZSRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets, const int nbjets, const double dMZ){
+    if(leptonSelection == 3){
+        if(njets > 0 && passWZCRSelection(nbjets, dMZ)) return true;
+        if(nbjets > 0 && passTTZSelection(njets, dMZ)) return true;
+    }
+    if(leptonSelection == 4){
+        if(passTTZ4LSelection(ind, indOf2LonZ, njets)) return true;
+    }
+    return false;
 }
 
 bool treeReader::passTTZSelection(const int njets, const double dMZ) const{
@@ -579,8 +591,8 @@ bool treeReader::passTTZ4LSelection(const std::vector<unsigned>& ind, std::vecto
     vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(0)), vectorRemoved.end());
     vectorRemoved.erase(std::remove(vectorRemoved.begin(), vectorRemoved.end(), indOf2LonZ.at(1)), vectorRemoved.end());
     double seconddMZ = deltaMZ(vectorRemoved, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
-    if(debug) cout << "delta MZ of second pair is " << seconddMZ << endl;
-    if(debug && seconddMZ != 999999.) cout << "indexes of second pair leptons are " << indOf2LonZ.at(0) << " " << indOf2LonZ.at(1) << endl;
+    //if(debug) cout << "delta MZ of second pair is " << seconddMZ << endl;
+    //if(debug && seconddMZ != 999999.) cout << "indexes of second pair leptons are " << indOf2LonZ.at(0) << " " << indOf2LonZ.at(1) << endl;
     if(seconddMZ < 20) return false; // remove second onZ pair
     return true;
 }
@@ -590,7 +602,7 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
     if(leptonSelection == 3){
         if(passWZCRSelection(nbjets, dMZ)){
             if(njets == 0) return -999.;
-            return njets-1; // SR 0, 1, 2, 3
+            return njets < 4 ? njets-1 : 3; // SR 0, 1, 2, 3
         }
         /*
         else if(passttbarCRSelection(nbjets, dMZ, mlll)){
@@ -604,7 +616,15 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
         else if(passTTZSelection(njets, dMZ)){
             if(nbjets < 1)  return -999.;
             int nbjetsInd = nbjets < 2 ? 0 : 1;
-            int njetsInd = njets < 5 ? njets-2 : 3;
+            int njetsInd  = njets < 5 ? njets-2 : 3;
+            /*
+            int njetsInd; 
+            if(nbjetsInd == 0)
+                njetsInd = njets < 5 ? njets-1 : 4;
+            if(nbjetsInd == 1)
+                njetsInd = njets < 5 ? njets-2 : 3;
+            return 4 + nbjetsInd * 5 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11, 12 // added nbjets = 1, njets = 1 bin
+            */
             return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
         }
     }
@@ -619,15 +639,30 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
         */
         if(passTTZ4LSelection(ind, indOf2LonZ, njets)){
             int nbjetsInd = nbjets < 1 ? 0 : 1;
-            return 12 + nbjetsInd; // 12, 13
+            return 12 + nbjetsInd; // 12, 13, 14 // nj1nb1, nj2nb0, nj2nb1
+            //int returnIndex = (njets == 1 ? (nbjets == 1 ? 13 : -999) : (nbjets == 0 ? 14 : 15 ));
+            //return returnIndex;
         }
     }
     return -999;
 
 }
 
+double treeReader::SRID8SR3L(int & njets, int & nbjets, const double & dMZ) {
 
-double treeReader::SRID3L(int & njets, int & nbjets) {
+    if(leptonSelection == 3){
+        if(passTTZSelection(njets, dMZ)){
+            if(nbjets < 1)  return -999.;
+            int nbjetsInd = nbjets < 2 ? 0 : 1;
+            int njetsInd = njets < 5 ? njets-2 : 3;
+            return nbjetsInd * 4 + njetsInd; // 0, 1, 2, 3, 4, 5, 6, 7
+        }
+    }
+    return -999;
+}
+
+double treeReader::SRID3L(int & njets, int & nbjets, const double & dMZ) {
+    /*
     double index = -1.;
     
     const int njetsCategories = 4;
@@ -646,7 +681,28 @@ double treeReader::SRID3L(int & njets, int & nbjets) {
     index = nbjetsIndex * njetsCategories + njetsIndex;
 
     return index;
-
+    */
+    if(leptonSelection == 3){
+        if(passWZCRSelection(nbjets, dMZ)){
+            if(njets == 0) return -999.;
+            return njets < 4 ? njets-1 : 3; // SR 0, 1, 2, 3
+        }
+        else if(passTTZSelection(njets, dMZ)){
+            if(nbjets < 1)  return -999.;
+            int nbjetsInd = nbjets < 2 ? 0 : 1;
+            int njetsInd = njets < 5 ? njets-2 : 3;
+            return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
+            /*
+            int njetsInd;
+            if(nbjetsInd == 0)
+                njetsInd = njets < 5 ? njets-1 : 4;
+            if(nbjetsInd == 1)
+                njetsInd = njets < 5 ? njets-2 : 3;
+            return 4 + nbjetsInd * 5 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11, 12 // added nbjets = 1, njets = 1 bin
+            */
+        }
+    }
+    return -999;
 }
 
 double treeReader::SRIDPTZ(const double & ptZ) const{
@@ -666,6 +722,10 @@ double treeReader::SRIDCosTheta(const double & cosTheta) const{
 double treeReader::SRID4L(int & njets, int & nbjets){
     if(nbjets == 0) return 0.;
     else if(nbjets > 0) return 1.;
+    /*
+    int returnIndex = njets == 1 ? (nbjets == 1 ? 0 : -999) : (nbjets == 0 ? 1 : 2 );
+    return returnIndex;
+    */
 }
 
 double treeReader::SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ){
@@ -673,7 +733,7 @@ double treeReader::SRIDWZCR(const int & njets, const int & nbjets, const double 
     if(leptonSelection == 3){
         if(passWZCRSelection(nbjets, dMZ)){
             if(njets == 0) return -999.;
-            return njets-1; // SR 0, 1, 2, 3
+            return njets < 4 ? njets-1 : 3; // SR 0, 1, 2, 3
         }
     }
     return -999;
@@ -754,4 +814,22 @@ double treeReader::sumAllLeptonsCharge(const std::vector<unsigned>& ind){
     for(auto & i : ind)
         sum += _lCharge[i];
     return sum;
+}
+
+double treeReader::largestAmongAll(const std::vector<double> & weights){
+
+    double max_value = weights.front() ;
+    for( std::size_t i = 1 ; i < weights.size() ; ++i ) 
+        if( weights[i] > max_value ) max_value = weights[i] ;
+    return max_value;
+
+}
+
+double treeReader::smallestAmongAll(const std::vector<double> & weights){
+
+    double min_value = weights.front() ;
+    for( std::size_t i = 1 ; i < weights.size() ; ++i ) 
+        if( weights[i] < min_value ) min_value = weights[i] ;
+    return min_value;
+
 }

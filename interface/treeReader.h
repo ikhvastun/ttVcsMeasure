@@ -168,6 +168,11 @@ class treeReader {
         Double_t        _jetPt_JECDown[nJets_max];   
         Double_t        _jetPt_JERUp[nJets_max];   
         Double_t        _jetPt_JERDown[nJets_max];   
+        Double_t        _jetSmearedPt[nJets_max];
+        Double_t        _jetSmearedPt_JECDown[nJets_max];
+        Double_t        _jetSmearedPt_JECUp[nJets_max];
+        Double_t        _jetSmearedPt_JERDown[nJets_max];
+        Double_t        _jetSmearedPt_JERUp[nJets_max];
         Double_t        _jetEta[nJets_max];   
         Double_t        _jetPhi[nJets_max];   
         Double_t        _jetE[nJets_max];   
@@ -263,11 +268,13 @@ class treeReader {
         double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
         double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets);
         double SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ);
-        double SRID3L(int & njets, int & nbjets);
+        double SRID3L(int & njets, int & nbjets, const double & dMZ);
         double SRID4L(int & njets, int & nbjets);
         double SRIDPTZ(const double & ptZ) const;
         double SRIDCosTheta(const double & cosTheta) const;
         double sumAllLeptonsCharge(const std::vector<unsigned>& ind);
+        double SRID8SR3L(int & njets, int & nbjets, const double & dMZ);
+        bool passTTZSRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets, const int nbjets, const double dMZ);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);
@@ -287,13 +294,18 @@ class treeReader {
         double bTagWeight_c(const unsigned unc = 0);
         double bTagWeight_b(const unsigned unc = 0);
         double bTagWeight(const unsigned unc = 0);
-        double leptonWeight(const unsigned unc = 0);
+        double leptonWeightOnlyStat(const unsigned unc = 0);
+        double leptonWeightOnlySyst(const unsigned unc = 0);
+        double leptonWeightOnlyReco(const unsigned unc = 0);
         double triggerWeight();
         void initializeWeights();
         double sfWeight();
         double fakeRateWeight(const unsigned unc = 0);
         double CMIDRateWeight(const unsigned unc = 0);
         double jetPrefiringWeight();
+
+        double largestAmongAll(const std::vector<double> & weights);
+        double smallestAmongAll(const std::vector<double> & weights);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -324,6 +336,10 @@ class treeReader {
         double sumSimulatedEventWeights = 0;
         double sumSimulatedEventWeightsScaleUp = 0;
         double sumSimulatedEventWeightsScaleDown = 0;
+        double sumSimulatedEventWeightsISRScaleUp = 0;
+        double sumSimulatedEventWeightsISRScaleDown = 0;
+        double sumSimulatedEventWeightsFSRScaleUp = 0;
+        double sumSimulatedEventWeightsFSRScaleDown = 0;
         double weight = 1;                                                      //weight of given event
         unsigned long nEntries = 0;
         double dataLumi = 41.5;                                          //in units of 1/fb
@@ -493,6 +509,11 @@ class treeReader {
         TBranch        *b__jetPt_JECDown;   
         TBranch        *b__jetPt_JERUp;   
         TBranch        *b__jetPt_JERDown;   
+        TBranch        *b__jetSmearedPt;
+        TBranch        *b__jetSmearedPt_JECDown;
+        TBranch        *b__jetSmearedPt_JECUp;
+        TBranch        *b__jetSmearedPt_JERDown;
+        TBranch        *b__jetSmearedPt_JERUp;
         TBranch        *b__jetEta;   
         TBranch        *b__jetPhi;   
         TBranch        *b__jetE;   
