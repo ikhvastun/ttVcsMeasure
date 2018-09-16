@@ -49,6 +49,10 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
     double scaleForMC = distribs.vectorHistoEras[dataSample].runEras[option].Integral() / histoStackCopy->Integral();
     for(unsigned int j = distribs.vectorHisto.size()-1; j != 0; j--){      
         distribs.vectorHistoEras[j].runEras[option].Scale(scaleForMC);
+        for(unsigned int i = 0; i < 3; i++){
+            distribs.vectorHistoEras[j].runErasUncUp[option].unc[i].Scale(scaleForMC);;
+            distribs.vectorHistoEras[j].runErasUncDown[option].unc[i].Scale(scaleForMC);;
+        }
         stack->Add(&distribs.vectorHistoEras[j].runEras[option]);
     }
 
@@ -179,8 +183,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, string title, string titl
             stackUncUp[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncUp[option].unc[i]);
             stackUncDown[i]->Add((TH1D*)&distribs.vectorHistoEras[j].runErasUncDown[option].unc[i]);
         }
-        stackUncUp[i]->Scale(scaleForMC);
-        stackUncDown[i]->Scale(scaleForMC);
+        //stackUncUp[i]->Scale(scaleForMC);
+        //stackUncDown[i]->Scale(scaleForMC);
     }  
 
     for(unsigned int i = 0; i < histCopyUnc[0]->GetNbinsX(); i++){

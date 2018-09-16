@@ -58,7 +58,7 @@ void treeReader::Analyze(){
   //gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   //readSamples("samples_Zll_2017data.txt");
-  readSamples("data/samples_Zll_2017data_2018MoriondMC.txt");
+  readSamples("data/samples_Zll_2017data_2018MoriondMC_METv2.txt");
   //readSamples("test.txt");
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
