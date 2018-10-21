@@ -6,7 +6,7 @@
 
 //pu SF 
 double treeReader::puWeight(const unsigned unc){
-    //if(debug) std::cout << "pile up true int " << _nTrueInt << "; pu weight: " << reweighter->puWeight(_nTrueInt, currentSample, unc) << std::endl;
+    if(debug) std::cout << "pile up true int " << _nTrueInt << "; pu weight: " << reweighter->puWeight(_nTrueInt, currentSample, unc) << std::endl;
     return reweighter->puWeight(_nTrueInt, currentSample, unc);
 }
 
@@ -18,10 +18,10 @@ double treeReader::bTagWeight(const unsigned jetFlavor, const unsigned unc){
     for(unsigned j = 0; j < _nJets; ++j){
         if(_jetHadronFlavor[j] == jetFlavor){
             //QUESTION: should JEC and b-tag weights also be varied up and down at the same time when computing systematics?
-            if(jetIsGood(j, 30., 0, true, currentSample.is2017()) && fabs(_jetEta[j]) < 2.4){
+            if(jetIsGood(j, 30., 0, true, currentSample.is2017())){
                 double sf = reweighter->bTagWeight(_jetHadronFlavor[j], _jetSmearedPt[j], _jetEta[j], _closestJetDeepCsv_b[j] + _closestJetDeepCsv_bb[j], unc);
                 double eff = reweighter->bTagEff(_jetHadronFlavor[j], _jetSmearedPt[j], _jetEta[j]);
-                //std::cout << "jet with pt: " << _jetPt[j] << "; has btagEffcalc: " << eff << "; and centralValue: " << sf << std::endl;
+                //if(debug) std::cout << "jet with pt: " << _jetPt[j] << "; has btagEffcalc: " << eff << "; and centralValue: " << sf << "; csv value: " << _closestJetDeepCsv_b[j] + _closestJetDeepCsv_bb[j] << std::endl;
                 if(bTaggedDeepCSV(j, 1)){
                     pMC *= eff;
                     pData *= eff*sf;
@@ -63,10 +63,11 @@ double treeReader::leptonWeightOnlySyst(const unsigned unc){
     for(unsigned l = 0; l < _nLight; ++l){
         if( lepIsGood(l, leptonSelection) ){
             if( isMuon(l) ){
-                sf *= reweighter->muonTightWeight(_lPt[l], _lEta[l], unc);
+                sf *= reweighter->muonTightWeightOnlySyst(_lPt[l], _lEta[l], unc);
             } else if( isElectron(l) ){
                 sf *= reweighter->electronTightWeightOnlySyst(_lPt[l], _lEta[l], _lEtaSC[l], unc);
             }
+            if(debug) std::cout << "sf after the lepton with pt " << _lPt[l] << " and flavour " << _lFlavor[l] << " is " << sf << std::endl;
         } 
     }
     return sf;
@@ -76,14 +77,13 @@ double treeReader::leptonWeightOnlyStat(const unsigned unc){
     double sf = 1.;
     for(unsigned l = 0; l < _nLight; ++l){
         if( lepIsGood(l, leptonSelection) ){
-            /*
             if( isMuon(l) ){
-                sf *= reweighter->muonTightWeight(_lPt[l], _lEta[l], unc);
+                sf *= reweighter->muonTightWeightOnlyStat(_lPt[l], _lEta[l], unc);
             } else 
-            */
             if( isElectron(l) ){
                 sf *= reweighter->electronTightWeightOnlyStat(_lPt[l], _lEta[l], _lEtaSC[l], unc);
             }
+            if(debug) std::cout << "sf after the lepton with pt " << _lPt[l] << " and flavour " << _lFlavor[l] << " is " << sf << std::endl;
         } 
     }
     return sf;
@@ -102,6 +102,7 @@ double treeReader::leptonWeightOnlyReco(const unsigned unc){
             if( isElectron(l) ){
                 sf *= reweighter->electronRecoWeight(_lEtaSC[l], _lPt[l], unc);
             }
+            if(debug) std::cout << "reco sf after the lepton with pt " << _lPt[l] << " and flavour " << _lFlavor[l] << " is " << sf << std::endl;
         } 
     }
     return sf;
@@ -127,9 +128,10 @@ double treeReader::sfWeight(){
     initializeWeights();
     double sf = puWeight();
     sf *= bTagWeight();
-    sf *= leptonWeightOnlyStat() * leptonWeightOnlySyst() * leptonWeightOnlyReco();
-    if(leptonSelection != 4)
-        sf *= fakeRateWeight();
+    //sf *= leptonWeightOnlyStat() * leptonWeightOnlySyst() * leptonWeightOnlyReco();
+    sf *= leptonWeightOnlySyst() * leptonWeightOnlyReco(); // consider only one because central value is the same for stat and syst
+    //if(leptonSelection != 4)
+    //    sf *= fakeRateWeight();
     sf *= triggerWeight();
     if( sf == 0){
         std::cerr << "Error: event sf is zero! This has to be debugged! evNumber: " << _eventNb << "; sf(pu, btag, lep(Reco, Stat and Syst), fr, trigger): " << puWeight() << " " << bTagWeight() << " " << leptonWeightOnlyReco()  << " " << leptonWeightOnlyStat()  << " " << leptonWeightOnlySyst() << " " << fakeRateWeight() << " " << triggerWeight() << std::endl;

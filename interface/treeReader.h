@@ -128,6 +128,7 @@ class treeReader {
         Double_t        _leptonMvaSUSY[nL_max];   //[_nLight]
         Double_t        _leptonMvaTTH[nL_max];   //[_nLight]
         Double_t        _leptonMvatZqTTV[nL_max];   //[_nLight]
+        Double_t        _leptonMvatZqTTV16[nL_max];   //[_nLight]
         Bool_t          _lHNLoose[nL_max];   
         Bool_t          _lHNFO[nL_max];   
         Bool_t          _lHNTight[nL_max];   
@@ -229,22 +230,28 @@ class treeReader {
         unsigned dilFlavorComb(const std::vector<unsigned>&);
         double coneCorr(const unsigned);
         void setConePt();
+        bool lepIsGoodFortZq(const unsigned);
         bool lepIsGood(const unsigned, const int);
+        bool lepIsFOGoodFortZq(const unsigned);
         bool lepIsFOGood(const unsigned, const int);
         unsigned selectLep(std::vector<unsigned>&, const int);
         unsigned selectFakeLep(std::vector<unsigned>&, const int);
+        unsigned selectLooseLep(std::vector<unsigned>&, const int);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
+        bool passPtCuts2LOF(const std::vector<unsigned>&);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
         bool passPtCuts4L(const std::vector<unsigned>&);
         bool jetIsClean(const unsigned, const int);
-        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool is2017 = false);
-        unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&, bool);
+        bool jetIsGood(const unsigned, const unsigned ptCut = 25, const unsigned unc = 0, const bool clean = true, bool is2017 = false, const double eta = 2.4);
+        unsigned nJets(const unsigned unc, const bool clean, std::vector<unsigned>&, bool, const double eta = 2.4);
+        bool isForwardJetPresent(bool is2017);
         unsigned nJetsNotB(const unsigned unc, const bool clean, std::vector<unsigned>&, const unsigned wp, bool);
         double deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept, const bool deepCSV = true);
         bool bTaggedDeepCSV(const unsigned unc, const unsigned wp = 1);
         bool bTaggedCSVv2(const unsigned uncm, const unsigned wp = 1);
-        unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, const unsigned wp = 1, bool nonpromptSample = false);
+        //unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, std::vector<unsigned>& ind = vector<unsigned>(), const unsigned wp = 1, bool nonpromptSample = false);
+        unsigned nBJets(const unsigned unc, const bool deepCSV, const bool clean, std::vector<unsigned>& ind, const unsigned wp, bool nonpromptSample);
         double HTCalc(const std::vector<unsigned>& ind);
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&, TLorentzVector &, TLorentzVector &);
         bool invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind);
@@ -265,6 +272,7 @@ class treeReader {
         bool passTTZ4LSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets);
         bool passZZCRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets);
         double SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
+        double SRIDTTZ1L(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
         double SRIDTTCR(const int & njets, const int & nbjets, const double & dMZ, const double & mlll);
         double SRIDZZCR(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets);
         double SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ);
@@ -469,6 +477,7 @@ class treeReader {
         TBranch        *b__leptonMvaSUSY;   //!
         TBranch        *b__leptonMvaTTH;   //! 
         TBranch        *b__leptonMvatZqTTV;   //! 
+        TBranch        *b__leptonMvatZqTTV16;   //! 
         TBranch        *b__lHNLoose;   
         TBranch        *b__lHNFO;   
         TBranch        *b__lHNTight;   

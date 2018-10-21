@@ -27,11 +27,14 @@ using Output::DistribsAll;
 
 void setUpRatioFeatures(TH1D *, TGraphAsymmErrors *, histInfo & info, double);
 void setUpSystUnc(DistribsAll &, TH1D *);
+void setUpSystUncCorr(DistribsAll &, TH1D *, DistribsAll &, TH1D *);
 void calculateRatioUnc(TGraphAsymmErrors *, TH1D *, TH1D *);
 void printInfoOnPlotTTZ();
 void printInfoOnPlot3L();
 void printInfoOnPlotNPCR();
 void printInfoOnXaxisAllTTZ();
+void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog, bool normalizedToData, const int showLegendOption); // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
+void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight);
 void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
     double xPad = 0.25; // 0.25
 
@@ -105,6 +108,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
     TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
     setUpSystUnc(distribs, histSystAndStatUnc);
+    histSystAndStatUnc->Draw("same");
 
     TLegend* mtlegRatio = new TLegend(0.17,0.39,0.85,0.58);
     mtlegRatio->SetNColumns(4);
@@ -117,7 +121,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     mtlegRatio->AddEntry(histSystAndStatUnc, "Syst+Stat", "f");
 
     // Draw finally the things
-    if(info.index == 5){
+    if(info.index == 5){ // Njets
         stackCopy->GetXaxis()->SetNdivisions(108); // 108,505,
     }
 
@@ -155,7 +159,6 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     systAndStatUnc->SetMarkerStyle(1);
     systAndStatUnc->Draw("e2same");
 
-    //dataHist->Draw("E0same");
     dataGraph->Draw("pe1 same");
 
     if(info.index == indexSRTTZ){
@@ -179,6 +182,168 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     pad1->Update();
 
 }
+
+void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight){ 
+    double xPad = 0.0; // 0.25
+
+    TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
+    pad1->SetTopMargin(0.07);
+    if(xPad != 0)
+        pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+    pad1->cd();
+    
+    TH1D * dataHistLoose = &distribsLoose.vectorHisto[dataSample];
+    TH1D * dataHistTight = &distribsTight.vectorHisto[dataSample];
+    
+    dataHistTight->SetMarkerSize(1);
+    dataHistTight->SetTitle("");
+    dataHistTight->GetXaxis()->SetTitle("p_{T} [GeV]");
+    dataHistTight->GetYaxis()->SetTitle("Events");
+    dataHistTight->SetMinimum(0.);
+    dataHistTight->SetMaximum(1.2);
+    dataHistTight->GetXaxis()->SetLabelOffset(0.02);
+    dataHistTight->SetFillStyle(0); 
+    dataHistTight->Divide(dataHistLoose);
+
+    TH1D *stackLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone("stackLoose");
+    TH1D *stackTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone("stackTight");
+
+    stackTight->Divide(stackLoose);
+    dataHistTight->Draw("hist");
+    stackTight->SetFillStyle(0); 
+    stackTight->Draw("histsame");
+
+    // this part is not fully correct
+    // variation of uncertainty should be done simultaneously for loose and tight, tag electron is the same so uncertainty should be compensated 
+    /*
+    TH1D *histSystAndStatUncLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncLoose"));
+    setUpSystUnc(distribsLoose, histSystAndStatUncLoose);
+
+    TH1D *histSystAndStatUncTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncTight"));
+    setUpSystUnc(distribsTight, histSystAndStatUncTight);
+    histSystAndStatUncTight->Divide(histSystAndStatUncLoose);
+    */
+    TH1D *histSystAndStatUncLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncLoose"));
+    TH1D *histSystAndStatUncTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncTight"));
+    setUpSystUncCorr(distribsTight, histSystAndStatUncTight, distribsLoose, histSystAndStatUncLoose);
+
+    TH1D *systAndStatHistUnc = (TH1D*)stackTight->Clone("systAndStatHistUnc");
+    for(unsigned int i = 0; i < systAndStatHistUnc->GetNbinsX(); i++){
+        systAndStatHistUnc->SetBinError(i+1, histSystAndStatUncTight->GetBinError(i+1));
+    }
+    systAndStatHistUnc->SetFillStyle(3004);
+    systAndStatHistUnc->SetFillColor(kRed);
+    systAndStatHistUnc->SetMarkerStyle(1);
+    systAndStatHistUnc->Draw("e2same");
+
+    TH1D *dataHistTightUnc = (TH1D*)dataHistTight->Clone("dataHistTightUnc");
+    /*
+    for(int b = 1; b < dataHistTightUnc->GetNbinsX() + 1; ++b){
+       if(dataHistTightUnc->GetBinContent(b) + dataHistTightUnc->GetBinError(b) > 1)
+           dataHistTightUnc->SetBinError(b, 1 - dataHistTightUnc->GetBinContent(b));
+    }
+    */
+    dataHistTightUnc->SetFillStyle(3005);
+    dataHistTightUnc->SetFillColor(kBlack);
+    dataHistTightUnc->SetMarkerStyle(1);
+    dataHistTightUnc->Draw("e2same");
+
+    TLegend* mtlegRatio = new TLegend(0.17,0.79,0.85,0.98);
+    mtlegRatio->SetNColumns(2);
+    mtlegRatio->SetFillColor(0);
+    mtlegRatio->SetFillStyle(0);
+    mtlegRatio->SetBorderSize(0);
+    mtlegRatio->SetTextFont(42);
+
+    mtlegRatio->AddEntry(dataHistTight, "data efficiency", "lep");
+    mtlegRatio->AddEntry(stackTight, "MC efficiency", "lep");
+    mtlegRatio->AddEntry(dataHistTightUnc, "data efficiency unc.", "f");
+    mtlegRatio->AddEntry(systAndStatHistUnc, "MC efficiency unc.", "f");
+    mtlegRatio->Draw("same");
+
+    double lumi = 35.9;
+    CMS_lumi( pad1, iPeriod, iPos, lumi);
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+}
+
+void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
+    double xPad = 0.; // 0.25
+
+    TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
+    pad1->SetTopMargin(0.07);
+    if(xPad != 0)
+        pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+    pad1->cd();
+    if(plotInLog)
+        pad1->SetLogy();
+    
+    // here just use ttW instead of others
+    //TH1D * dataHist = &distribs.vectorHisto[ttWSample];
+    TH1D * dataHist = (TH1D*)distribs.vectorHisto[ttWSample].Clone("dataHist");
+
+    TH1D *stackCopy = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("stackCopy");
+    dataHist->Scale(stackCopy->Integral() / dataHist->Integral());
+
+    dataHist->SetFillStyle(0);
+    dataHist->SetMarkerSize(1);
+    dataHist->SetTitle("");
+    dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
+    dataHist->GetYaxis()->SetTitle(("Events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
+    dataHist->SetMinimum(0.01);
+    dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), dataHist->GetMaximum()) * num);
+    if(plotInLog){
+        dataHist->SetMinimum(0.5);
+        dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), dataHist->GetMaximum()) * num * 5);
+    }
+    dataHist->GetXaxis()->SetLabelOffset(0.02);
+
+    TGraphAsymmErrors* dataGraph = new TGraphAsymmErrors(dataHist);
+    for(int b = 1; b < dataHist->GetNbinsX() + 1; ++b){
+        dataGraph->SetPointError(b - 1, 0, 0, dataHist->GetBinErrorLow(b), (dataHist->GetBinContent(b) == 0 ) ? 0 : dataHist->GetBinErrorUp(b) );
+    }
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
+    dataHist->Draw("axis");
+    dataHist->Draw("histsame");
+    //dataGraph->Draw("pe1 same");
+
+    double lumi = 35.9;
+    if(showLegendOption == 1) lumi = 41.5;
+    else if (showLegendOption == 2) lumi = 77.5;
+    CMS_lumi( pad1, iPeriod, iPos, lumi);
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
+    c1->cd();
+    pad1->cd();
+
+    TH1D *systAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone("systAndStatUnc");
+    distribs.stack.Draw("histsame");
+    systAndStatUnc->SetFillStyle(3005);
+    systAndStatUnc->SetFillColor(kGray+2);
+    systAndStatUnc->SetMarkerStyle(1);
+    systAndStatUnc->Draw("e2same");
+
+    //dataGraph->Draw("pe1 same");
+    dataHist->Draw("histsame");
+    leg->Draw("same");
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
+}
+
 
 void printInfoOnXaxisAllTTZ(){
 
@@ -529,7 +694,70 @@ void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
     histSystAndStatUnc->SetLineColor(kOrange - 4);
     histSystAndStatUnc->SetFillColor(kOrange - 4);
     histSystAndStatUnc->SetMarkerStyle(1);
-    histSystAndStatUnc->Draw("same");
+    //histSystAndStatUnc->Draw("same");
+}
+
+void setUpSystUncCorr(DistribsAll & distribsTight, TH1D * histSystAndStatUncTight, DistribsAll & distribsLoose, TH1D * histSystAndStatUncLoose){
+
+    // histSystAndStatUnc - a histogram with central value at 1 and with applied one of the uncertainties on top: JEC, JES and Uncl
+    //TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
+    TH1D *stackCopyTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone("stackCopyTight");
+    TH1D *stackCopyLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone("stackCopyLoose");
+    // stack of MC with varied up and down of 3 different types of uncertainties
+    TH1D *stackUncTightUp[numberOfSyst];
+    TH1D *stackUncTightDown[numberOfSyst];
+    TH1D *stackUncLooseUp[numberOfSyst];
+    TH1D *stackUncLooseDown[numberOfSyst];
+
+    for(unsigned int i = 0; i < numberOfSyst; i++){
+
+        stackUncTightUp[i] = (TH1D*)distribsTight.vectorHisto[1].Clone(Form("stackUncTightUp_%d", i));
+        stackUncTightDown[i] = (TH1D*)distribsTight.vectorHisto[1].Clone(Form("stackUncTightDown_%d", i));
+        stackUncLooseUp[i] = (TH1D*)distribsLoose.vectorHisto[1].Clone(Form("stackUncLooseUp_%d", i));
+        stackUncLooseDown[i] = (TH1D*)distribsLoose.vectorHisto[1].Clone(Form("stackUncLooseDown_%d", i));
+
+        stackUncTightUp[i]->Reset("ICE");
+        stackUncTightDown[i]->Reset("ICE");
+        stackUncLooseUp[i]->Reset("ICE");
+        stackUncLooseDown[i]->Reset("ICE");
+
+        for(unsigned int j = distribsTight.vectorHistoUncUp.size()-1; j != 0; j--){
+            stackUncTightUp[i]->Add((TH1D*)&distribsTight.vectorHistoUncUp[j].unc[i]);
+            stackUncTightDown[i]->Add((TH1D*)&distribsTight.vectorHistoUncDown[j].unc[i]);
+            stackUncLooseUp[i]->Add((TH1D*)&distribsLoose.vectorHistoUncUp[j].unc[i]);
+            stackUncLooseDown[i]->Add((TH1D*)&distribsLoose.vectorHistoUncDown[j].unc[i]);
+        }
+    }
+
+    for(unsigned int i = 0; i < histSystAndStatUncTight->GetNbinsX(); i++){
+        // content in particular bin in stack
+        double stackBinContentTight = ((TH1D*)distribsTight.stack.GetStack()->Last())->GetBinContent(i+1);
+        double stackBinErrorTight = ((TH1D*)distribsTight.stack.GetStack()->Last())->GetBinError(i+1);
+        double stackBinContentLoose = ((TH1D*)distribsLoose.stack.GetStack()->Last())->GetBinContent(i+1);
+        double stackBinErrorLoose = ((TH1D*)distribsLoose.stack.GetStack()->Last())->GetBinError(i+1);
+
+        double errTight = TMath::Power(stackBinErrorTight, 2);
+        double errLoose = TMath::Power(stackBinErrorLoose, 2);
+        cout << "stat uncertainties are " << TMath::Sqrt(errTight) << " " << TMath::Sqrt(errLoose) << endl;
+
+        for(unsigned int j = 0; j < numberOfSyst; j++){
+            // consider largest deviation between the upward and downward variations
+            errTight += TMath::Power(TMath::Max(stackUncTightUp[j]->GetBinContent(i+1) - stackBinContentTight, stackBinContentTight - stackUncTightDown[j]->GetBinContent(i+1)), 2);
+            errLoose += TMath::Power(TMath::Max(stackUncLooseUp[j]->GetBinContent(i+1) - stackBinContentLoose, stackBinContentLoose - stackUncLooseDown[j]->GetBinContent(i+1)), 2);
+            cout << "unc after applying " << j << " syst tight " << TMath::Sqrt(errTight) << " and syst loose " << TMath::Sqrt(errLoose)  << endl;
+        }
+        // if uncertainty is greater than 100% consider 100% uncertainty
+        cout << "so all numbers in bin " << i+1 << " are " << stackBinContentTight << " " << TMath::Sqrt(errTight) << " " << stackBinContentLoose << " " << TMath::Sqrt(errLoose) << endl;
+        histSystAndStatUncTight->SetBinError(i+1, (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) - stackBinContentTight/stackBinContentLoose);
+        //histSystAndStatUncTight->SetBinError(i+1, (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) < 1 ? (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) - stackBinContentTight/stackBinContentLoose : 1 - stackBinContentTight/stackBinContentLoose);
+        // here I simply subtract (2L + stat) - (1L + stat) uncertainty
+        //histSystAndStatUncTight->SetBinError(i+1, TMath::Sqrt(errTight/stackBinContentTight - errLoose/stackBinContentLoose)*stackBinContentTight/stackBinContentLoose);
+    }
+
+    histSystAndStatUncTight->SetFillStyle(1001);
+    histSystAndStatUncTight->SetLineColor(kOrange - 4);
+    histSystAndStatUncTight->SetFillColor(kOrange - 4);
+    histSystAndStatUncTight->SetMarkerStyle(1);
 }
 
 #endif  // showHist

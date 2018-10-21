@@ -39,7 +39,7 @@ echo "...Job Ended!"
 
 " > submit.sh ;
 
-qsub submit.sh -l walltime=04:00:00;
+qsub submit.sh -l walltime=12:00:00;
 #echo 'output files are', out_err_${selection}_${year}
 #echo 'everything is fine'
 rm submit.sh

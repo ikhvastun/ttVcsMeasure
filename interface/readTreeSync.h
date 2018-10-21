@@ -10,6 +10,7 @@ const int leptonSelectionAnalysis = 3;
 
 const int nSamples = 11;
 const int dataSample = 0;
+const int ttWSample = 1;
 
 const int numberOfSyst = 23;
 const int pdfUncIndex = 12;
@@ -263,12 +264,22 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4LZZ = {
     };
 
 // trees for BDT
-/*
 TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
 TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
 TTree* signalTree = new TTree("signalTree","signalTree");
 TTree* bkgTree = new TTree("bkgTree","bkgTree");
-*/
+
+double _jetPt1, _jetEta1, _jetPhi1, _jetE1, _jetCSV1;
+double _jetPt2, _jetEta2, _jetPhi2, _jetE2, _jetCSV2;
+double _jetPt3, _jetEta3, _jetPhi3, _jetE3, _jetCSV3;
+double _jetPt4, _jetEta4, _jetPhi4, _jetE4, _jetCSV4;
+double _jetPt5, _jetEta5, _jetPhi5, _jetE5, _jetCSV5;
+double _jetPt6, _jetEta6, _jetPhi6, _jetE6, _jetCSV6;
+
+double _lepPt1, _lepEta1, _lepPhi1, _lepE1, _lepCharge1;
+double _lepPt2, _lepEta2, _lepPhi2, _lepE2, _lepCharge2;
+
+double _metPt1, _metEta1, _metPhi1, _metE1;
 
 double _weightEventInTree;
     
@@ -294,7 +305,61 @@ double mll_ss;
 double ll_deltaR;
 double mt2ll_ss;
 
-Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertrailpt, userleadeta, usertraileta, userleadingjetpt, usertrailjetpt, userminDeltaRlead, userminDeltaR, usernJLoc, usernBLoc, userchargeOfLeptons, usermll_ss, userll_deltaR, usermt2ll_ss;
+// lepton + jet
+double minMLeptonJet;
+double maxMLeptonJet;
+double minDeltaRLeptonJet;
+double maxDeltaRLeptonJet;
+double minDeltaPhiLeptonJet;
+double maxDeltaPhiLeptonJet;
+double minpTLeptonJet;
+double maxpTLeptonJet;
+
+//lepton bjet
+double minMLeptonbJet;
+double maxMLeptonbJet;
+double minDeltaRLeptonbJet;
+double maxDeltaRLeptonbJet;
+double minDeltaPhiLeptonbJet;
+double maxDeltaPhiLeptonbJet;
+double minpTLeptonbJet;
+double maxpTLeptonbJet;
+
+//jet jet
+double minMJetJet;
+double maxMJetJet;
+double minDeltaRJetJet;
+double maxDeltaRJetJet;
+double minDeltaPhiJetJet;
+double maxDeltaPhiJetJet;
+double minpTJetJet;
+double maxpTJetJet;
+
+//lepton + MET 
+double minDeltaPhiLeptonMET;
+double maxDeltaPhiLeptonMET;
+double minmTLeptonMET;
+double maxmTLeptonMET;
+double minpTLeptonMET;
+double maxpTLeptonMET;
+
+//jet + MET
+double minDeltaPhiJetMET;
+double maxDeltaPhiJetMET;
+double minmTJetMET;
+double maxmTJetMET;
+double minpTJetMET;
+double maxpTJetMET;
+
+//bjet + MET 
+double minDeltaPhiBJetMET;
+double maxDeltaPhiBJetMET;
+double minmTBJetMET;
+double maxmTBJetMET;
+double minpTBJetMET;
+double maxpTBJetMET; 
+
+Float_t userHTLoc, user_met, userele_mll, usermt, usermtlow, userleadpt, usertrailpt, userleadeta, usertraileta, userleadingjetpt, usertrailjetpt, userminDeltaRlead, userminDeltaR, usernJLoc, usernBLoc, userchargeOfLeptons, usermll_ss, userll_deltaR, usermt2ll_ss, user_maxMJetJet, user_maxDeltaPhiJetJet, user_maxMLeptonbJet, user_maxMLeptonJet, user_maxpTLeptonJet, user_maxpTLeptonbJet, user_maxpTJetJet, user_minDeltaPhiJetJet, user_minDeltaRJetJet, user_minMJetJet;
 
 // here we define histos
 struct histInfo{
@@ -364,7 +429,58 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"SR3L3e",    {"N_{j}", 54, -0.5, static_cast<double>(theSRLabelOptionsFor3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsFor3L.size()), false}},
                                                  {"flavour3L4L", {"", 55, 0.5, static_cast<double>(flavourLabelOptionsFor3L4L.size()) + 0.5, static_cast<int>(flavourLabelOptionsFor3L4L.size()), false}},
                                                  {"SRTTZ8SR3L", {"", 56, -0.5, static_cast<double>(theSRLabelOptionsForTTZ8SR3L.size()) - 0.5, static_cast<int>(theSRLabelOptionsForTTZ8SR3L.size()), false}},
+
+                                                 {"minMLeptonJet", {"M_{l + jet}^{min} (GeV)", 57, 0, 200, 30, true}},
+                                                 {"maxMLeptonJet", {"M_{l + jet}^{max} (GeV)", 58, 0, 800, 30, true}},
+                                                 {"minDeltaRLeptonJet", {"min(#DeltaR(l, jet))", 59, 0, 7, 30, false}},
+                                                 {"maxDeltaRLeptonJet", {"max(#DeltaR(l, jet))", 60, 0, 10, 30, false}},
+                                                 {"minDeltaPhiLeptonJet", {"min(#Delta#Phi(l, jet))", 61, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiLeptonJet", {"max(#Delta#Phi(l, jet))", 62, 0, 3.15, 30, false}},
+                                                 {"minpTLeptonJet", {"P_{T}^{min}(l + jet) (GeV)", 63, 0, 200, 30, true}},
+                                                 {"maxpTLeptonJet", {"P_{T}^{max}(l + jet) (GeV)", 64, 0, 300, 30, true}},
+
+                                                 {"minMLeptonbJet", {"M_{l + bjet}^{min} (GeV)", 65, 0, 300, 30, true}},
+                                                 {"maxMLeptonbJet", {"M_{l + bjet}^{max} (GeV)", 66, 0, 800, 30, true}},
+                                                 {"minDeltaRLeptonbJet", {"min(#DeltaR(l, bjet))", 67, 0, 7, 30, false}},
+                                                 {"maxDeltaRLeptonbJet", {"max(#DeltaR(l, bjet))", 68, 0, 10, 30, false}},
+                                                 {"minDeltaPhiLeptonbJet", {"min(#Delta#Phi(l, bjet))", 69, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiLeptonbJet", {"max(#Delta#Phi(l, bjet))", 70, 0, 3.15, 30, false}},
+                                                 {"minpTLeptonbJet", {"P_{T}^{min}(l + bjet) (GeV)", 71, 0, 200, 30, true}},
+                                                 {"maxpTLeptonbJet", {"P_{T}^{max}(l + bjet) (GeV)", 72, 0, 300, 30, true}},
+
+                                                 {"minMJetJet", {"M_{jet + jet}^{min} (GeV)", 73, 0, 600, 30, true}},
+                                                 {"maxMJetJet", {"M_{jet + jet}^{max} (GeV)", 74, 0, 1200, 30, true}},
+                                                 {"minDeltaRJetJet", {"min(#DeltaR(jet, jet))", 75, 0, 7, 30, false}},
+                                                 {"maxDeltaRJetJet", {"max(#DeltaR(jet, jet))", 76, 0, 10, 30, false}},
+                                                 {"minDeltaPhiJetJet", {"min(#Delta#Phi(jet, jet))", 77, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiJetJet", {"max(#Delta#Phi(jet, jet))", 78, 0, 3.15, 30, false}},
+                                                 {"minpTJetJet", {"P_{T}^{min}(jet + jet) (GeV)", 79, 0, 200, 30, true}},
+                                                 {"maxpTJetJet", {"P_{T}^{max}(jet + jet) (GeV)", 80, 0, 300, 30, true}},
+
+                                                 {"minDeltaPhiLeptonMET", {"min(#Delta#Phi(l, MET))", 81, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiLeptonMET", {"max(#Delta#Phi(l, MET))", 82, 0, 3.15, 30, false}},
+                                                 {"minmTLeptonMET", {"min(M_{T}(l + MET)) (GeV)", 83, 0, 300, 30, true}},
+                                                 {"maxmTLeptonMET", {"max(M_{T}(l + MET)) (GeV)", 84, 0, 400, 30, true}},
+                                                 {"minpTLeptonMET", {"min(P_{T}(l + MET))", 85, 0, 300, 30, true}},
+                                                 {"maxpTLeptonMET", {"max(P_{T}(l + MET))", 86, 0, 400, 30, true}},
+
+                                                 {"minDeltaPhiJetMET", {"min(#Delta#Phi(jet, MET))", 87, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiJetMET", {"max(#Delta#Phi(jet, MET))", 88, 0, 3.15, 30, false}},
+                                                 {"minmTJetMET", {"min(M_{T}(jet + MET)) (GeV)", 89, 0, 300, 30, true}},
+                                                 {"maxmTJetMET", {"max(M_{T}(jet + MET)) (GeV)", 90, 0, 400, 30, true}},
+                                                 {"minpTJetMET", {"min(P_{T}(jet + MET))", 91, 0, 300, 30, true}},
+                                                 {"maxpTJetMET", {"max(P_{T}(jet + MET))", 92, 0, 400, 30, true}},
+
+                                                 {"minDeltaPhiBJetMET", {"min(#Delta#Phi(bjet, MET))", 93, 0, 3.15, 30, false}},
+                                                 {"maxDeltaPhiBJetMET", {"max(#Delta#Phi(bjet, MET))", 94, 0, 3.15, 30, false}},
+                                                 {"minmTBJetMET", {"min(M_{T}(bjet + MET)) (GeV)", 95, 0, 300, 30, true}},
+                                                 {"maxmTBJetMET", {"max(M_{T}(bjet + MET)) (GeV)", 96, 0, 400, 30, true}},
+                                                 {"minpTBJetMET", {"min(P_{T}(bjet + MET))", 97, 0, 300, 30, true}},
+                                                 {"maxpTBJetMET", {"max(P_{T}(bjet + MET))", 98, 0, 400, 30, true}},
+                                                 {"ptMuonPassedTight",  {"Leading lepton p_{T} [GeV]", 99, 10, 200, 38, true}},
+                                                 {"etaMuonPassedTight",  {"Leading lepton #eta", 100, -2.5, 2.5, 20, false}},
                                            };
+
 
 const int nVars  = figNames.size() ;
 

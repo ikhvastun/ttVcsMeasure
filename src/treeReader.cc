@@ -50,8 +50,8 @@ void treeReader::initSample(const Sample& samp){
 
     //update current sample
     currentSample = samp;
-    sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
-    //sampleFile = samp.getFile("/Users/illiakhvastunov/Desktop/CERN/MCsamples/94X/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    //sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/wverbeke/ntuples_ewkino/"); //  + (TString)(is2017 ? "" : "newReReco/") 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
     initTree(fChain, samp.isData());
@@ -180,7 +180,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lElectronMissingHits", _lElectronMissingHits, &b__lElectronMissingHits);
     fChain->SetBranchAddress("_leptonMvaSUSY", _leptonMvaSUSY, &b__leptonMvaSUSY);
     fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvaTTH, &b__leptonMvaTTH);
-    fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
+    //fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
+    fChain->SetBranchAddress("_leptonMvatZqTTV16", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
 
     fChain->SetBranchAddress("_lPOGLoose", _lPOGLoose, &b__lPOGLoose);
     fChain->SetBranchAddress("_lPOGMedium", _lPOGMedium, &b__lPOGMedium);

@@ -35,12 +35,15 @@ class Reweighter{
         double electronRecoWeight(const double superClusterEta, const double pt, const unsigned unc) const;
 
         //lepton id + reconstruction weight
+        /*
+        // split into 2 functions, separately reco and tight, 14th of September, substitued with one SF, tight on top for reco
         double muonTightWeight(const double pt, const double eta, const unsigned unc) const{ 
             // no reco SF, email from Sergio and Sandro on 30th of July, 2018, they removed as well recommendations from twiki, varOne is always considered as 0
             //double varOne = TMath::Abs(muonRecoWeight(eta, 0) - muonRecoWeight(eta, 0));
             //std::cout << "muon sf with unc " << unc << " is " << muonTightIdWeight(pt,eta, unc) << std::endl;
             return muonTightIdWeight(pt,eta, unc);
         }
+        */
 
         // split into 2 functions, separately reco and tight, 29th Aug 2018
         /*
@@ -55,6 +58,13 @@ class Reweighter{
             return valueOne*valueTwo + (var != 0 ? var * uncorUncCalc(valueOne, valueTwo, varOne, varTwo) : 0.);
         }
         */
+        double muonTightWeightOnlyStat(const double pt, const double eta, const unsigned unc) const{ 
+            return muonTightIdWeightOnlyStat(pt,eta, unc);
+        }
+        double muonTightWeightOnlySyst(const double pt, const double eta, const unsigned unc) const{ 
+            return muonTightIdWeightOnlySyst(pt,eta, unc);
+        }
+        
         double electronTightWeightOnlyStat(const double pt, const double eta, const double superClusterEta, const unsigned unc) const{ 
             return electronTightIdWeightOnlyStat(pt,superClusterEta, unc);
         }
@@ -110,6 +120,8 @@ class Reweighter{
         std::shared_ptr<TH2D> muonTightToLooseSF;
         std::shared_ptr<TH2D> muonTightToRecoSF;
         std::shared_ptr<TH2D> muonChargeConsToTightSF;
+        std::shared_ptr<TH2D> muonTightToRecoSF_syst;
+        std::shared_ptr<TH2D> muonTightToRecoSF_stat;
 
         //electron id scale factors
         std::shared_ptr<TH2D> electronLooseToRecoSF;
@@ -146,7 +158,8 @@ class Reweighter{
         double electronLooseIdWeight(const double pt, const double eta, const unsigned unc) const;
 
         //tight id weights
-        double muonTightIdWeight(const double pt, const double eta, const unsigned unc) const;
+        double muonTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const;
+        double muonTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const;
         double electronTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const;
         double electronTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const;
 

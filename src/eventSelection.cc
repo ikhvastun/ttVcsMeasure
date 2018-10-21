@@ -4,6 +4,15 @@
 
 using namespace std;
 
+bool treeReader::lepIsGoodFortZq(const unsigned l){
+    // what is used in leptonMVA analysis
+    //cout << "lepton info: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _leptonMvatZqTTV[l] << " " << _lPOGMedium[l] << " " << _lCharge[l] << endl;
+    if(!lepIsFOGoodFortZq(l)) return false;
+    if(_leptonMvatZqTTV[l] < 0.8) return false;
+
+    return true;
+}
+
 bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
     // what is used in leptonMVA analysis
     //cout << "lepton info: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _leptonMvatZqTTV[l] << " " << _lPOGMedium[l] << " " << _lCharge[l] << endl;
@@ -24,7 +33,6 @@ bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
 bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
 
     if(_lPt[l] < 10) return false;
-
     if(!lepIsLoose(l)) return false;
 
     //if(debug) cout << "lepton with pt " << _lPt[l] << " is clean? " <<  eleIsClean(l) << endl;
@@ -56,6 +64,27 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
     }
     //cout << "info about FO leptons: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _lCharge[l] << " " << _leptonMvatZqTTV[l]  << endl;
 
+    return true;
+}
+
+bool treeReader::lepIsFOGoodFortZq(const unsigned l){
+
+    if(_lPt[l] < 10) return false;
+    if(!lepIsLoose(l)) return false;
+
+    //if(debug) cout << "lepton with pt " << _lPt[l] << " is clean? " <<  eleIsClean(l) << endl;
+    if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
+    if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
+
+    //if(debug) cout << "info about FO leptons with pt " << _lPt[l] << " (closest jet deep csv): " << _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]  << endl;
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
+
+    if(_leptonMvatZqTTV[l] < 0.8){
+        if(_ptRatio[l] < (currentSample.is2017() ? 0.6 : 0.6)) return false; // 0.3 for 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.3 : 0.4)) return false;
+        double electronMVAvalue = currentSample.is2017() ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        if(_lFlavor[l] == 0 && electronMVAvalue < (currentSample.is2017() ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(currentSample.is2017() ? 0.3 : 0.3)) return false;
+    }
     return true;
 }
 
@@ -114,6 +143,24 @@ unsigned treeReader::selectFakeLep(std::vector<unsigned>& ind, const int lepSel 
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
         if(lepIsFOGood(l, lepSel)){
+            ++lCount;
+            ptMap.push_back({_lPt[l], l});
+        }
+    }
+    //if(lCount < 2) return 0;
+    std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
+    for(unsigned l = 0; l < lCount; ++l){
+        ind.push_back(ptMap[l].second);
+    }
+    return lCount;  
+}
+
+unsigned treeReader::selectLooseLep(std::vector<unsigned>& ind, const int lepSel = 3){
+    unsigned lCount = 0;
+    std::vector<std::pair<double, unsigned>> ptMap;
+    for(unsigned l = 0; l < _nLight; ++l){
+        if(_lPt[l] < 10) continue;
+        if(lepIsLoose(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
@@ -191,11 +238,32 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     return true;
 }
 
+bool treeReader::passPtCuts2LOF(const std::vector<unsigned>& ind){
+    
+    std::vector<std::pair<double, unsigned>> ptMap;
+    for(auto & i : ind){
+        double ptcor = _lPt[i];
+        ptMap.push_back({ptcor, i});
+    }
+    std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
+
+    ptCorrV.clear();
+    for(auto & i : ptMap)
+        ptCorrV.push_back(i);
+
+    if(ptMap[0].first < 25) return false;
+    if(ptMap[1].first < 10) return false;
+       
+    return true;
+}
+
 bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
     TLorentzVector jet;	
-    jet.SetPtEtaPhiE(isData ? _jetPt[ind] : _jetSmearedPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind] * _jetSmearedPt[ind] /  _jetPt[ind]); 
+    //jet.SetPtEtaPhiE(isData ? _jetPt[ind] : _jetSmearedPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind] * _jetSmearedPt[ind] /  _jetPt[ind]); 
+    jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]); 
     for(unsigned l = 0; l < _nLight; ++l){
-        if(lepIsFOGood(l, lepSel)){ // cleaning with FO objects
+        if(lepIsFOGoodFortZq(l)){ // cleaning with FO objects
+        //if(lepIsFOGood(l, lepSel)){ // cleaning with FO objects
             TLorentzVector lep;
             lep.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
             //cout << "jet lepton cleaning is going on, delta R is: " << lep.DeltaR(jet) << endl;
@@ -205,27 +273,35 @@ bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
     return true;
 }
 
-bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool is2017){
-    if(fabs(_jetEta[ind]) > 2.4) return false;
+bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, bool is2017, const double eta){
+    if(fabs(_jetEta[ind]) > eta) return false;
     if(is2017 && !_jetIsTight[ind]) return false;
     // temporary fix to sync with Daniel, 9 july 2018
     //if(!_jetIsTight[ind]) return false;
     switch(unc){
+        /*
         case 0: if((isData ? _jetPt[ind] : _jetSmearedPt[ind]) < ptCut) return false; break;
         case 1: if(_jetSmearedPt_JECDown[ind] < ptCut) return false; break;
         case 2: if(_jetSmearedPt_JECUp[ind] < ptCut) return false; break;
         case 3: if(_jetSmearedPt_JERDown[ind] < ptCut) return false; break;
         case 4: if(_jetSmearedPt_JERUp[ind] < ptCut) return false; break;
+        */
+
+        case 0: if((_jetPt[ind]) < ptCut) return false; break;
+        case 1: if(_jetPt_JECDown[ind] < ptCut) return false; break;
+        case 2: if(_jetPt_JECUp[ind] < ptCut) return false; break;
+        case 3: if(_jetPt_JERDown[ind] < ptCut) return false; break;
+        case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;
         default: ;
     }
     return !clean || jetIsClean(ind, leptonSelection);
 }
 
-unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool is2017){
+unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<unsigned>& ind, bool is2017, const double eta){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
         //if(debug) cout << "jet with pt: " << _jetPt[j] << " " << _jetEta[j] << " " << _jetPhi[j] << ", and flavour: " << _jetHadronFlavor[j] << endl;
-        if(jetIsGood(j, 30, unc, clean, is2017)) {
+        if(jetIsGood(j, 30, unc, clean, is2017, eta)) {
             //if(debug) cout << "passed selection" << endl;
             ++nJets;
             ind.push_back(j);
@@ -234,10 +310,22 @@ unsigned treeReader::nJets(const unsigned unc, const bool clean, std::vector<uns
     return nJets;
 }
 
-unsigned treeReader::nJetsNotB(const unsigned unc, const bool clean, std::vector<unsigned>& ind, const unsigned btagWP, bool nonpromptSample){
+bool treeReader::isForwardJetPresent(bool is2017){
+    bool presence = false;
+    for(unsigned j = 0; j < _nJets; ++j){
+        if(is2017 && !_jetIsTight[j]) continue;
+        if(_jetPt[j] < 50) continue;
+        if(TMath::Abs(_jetEta[j]) < 2.4) continue;
+        if(!jetIsClean(j, leptonSelection)) continue;
+        presence = true;
+    }
+    return presence;
+}
+
+unsigned treeReader::nJetsNotB(const unsigned unc, const bool clean, std::vector<unsigned>& ind, const unsigned btagWP, bool is2017){
     unsigned nJets = 0;
     for(unsigned j = 0; j < _nJets; ++j){
-        if(jetIsGood(j, 30, unc, clean, nonpromptSample) && !bTaggedDeepCSV(j, btagWP)) {
+        if(jetIsGood(j, 30, unc, clean, is2017) && !bTaggedDeepCSV(j, btagWP)) {
             ++nJets;
             ind.push_back(j);
         }
@@ -255,15 +343,14 @@ bool treeReader::bTaggedCSVv2(const unsigned ind, const unsigned wp){
     return _jetCsvV2[ind] > bTagWP[wp];
 }
 
-unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool clean, const unsigned wp, bool is2017){
+unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool clean, std::vector<unsigned>& ind, const unsigned wp, bool is2017){
     unsigned nbJets = 0;
     //cout << "nbjets calculation is starting here >>>>>>>>>>>>>>> " << endl;
     for(unsigned j = 0; j < _nJets; ++j){
         if(jetIsGood(j, 30, unc, clean, is2017)){
             //if(fabs(_jetEta[j]) > 2.4) continue;
-            
-            if(deepCSV && bTaggedDeepCSV(j, wp)) ++nbJets;
-            else if(!deepCSV && bTaggedCSVv2(j, wp)) ++nbJets;
+            if(deepCSV && bTaggedDeepCSV(j, wp)){ ++nbJets; ind.push_back(j);}
+            else if(!deepCSV && bTaggedCSVv2(j, wp)){ ++nbJets; ind.push_back(j);}
             
         }
     }
@@ -273,7 +360,8 @@ unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool c
 double treeReader::HTCalc(const std::vector<unsigned>& ind){
     double HT = 0;
     for(auto & i : ind)
-        HT += isData ? _jetPt[i] : _jetSmearedPt[i];
+        //HT += isData ? _jetPt[i] : _jetSmearedPt[i];
+        HT += _jetPt[i];
     return HT;
 }
 
@@ -455,6 +543,11 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "rare") return 8;
     if(name == "Xgamma") return kGreen;
     if(name == "DY") return kBlue-9;
+    if(name == "WJets") return kGreen;
+    if(name == "VV") return 51;
+    if(name == "tX") return 91;
+    if(name == "TTto2L") return 98;
+    if(name == "TTto1L") return kGreen+3;
 
     return kBlack;
 }
@@ -642,6 +735,24 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
             return 12 + nbjetsInd; // 12, 13, 14 // nj1nb1, nj2nb0, nj2nb1
             //int returnIndex = (njets == 1 ? (nbjets == 1 ? 13 : -999) : (nbjets == 0 ? 14 : 15 ));
             //return returnIndex;
+        }
+    }
+    return -999;
+
+}
+
+double treeReader::SRIDTTZ1L(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int & njets, const int & nbjets, const double & dMZ, const double & mlll){
+    
+    if(leptonSelection == 3){
+        if(nbjets == 0){
+            if(njets == 0) return -999.;
+            return njets < 4 ? njets-1 : 3; // SR 0, 1, 2, 3
+        }
+        else if(nbjets != 0){
+            if(nbjets < 1)  return -999.;
+            int nbjetsInd = nbjets < 2 ? 0 : 1;
+            int njetsInd  = njets < 5 ? njets-2 : 3;
+            return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
         }
     }
     return -999;

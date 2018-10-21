@@ -8,6 +8,8 @@ output/
 plotsForSave/
 myevents.txt
 tables/
+scripts/submit.sh.*
+
 # Prerequisites
 *.d
 

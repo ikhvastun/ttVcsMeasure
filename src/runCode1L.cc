@@ -123,7 +123,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           // trigger and met filters
           if(debug) cout << "trigger decision: " << _passTrigger_e << " " << _passTrigger_m << " " << _passTrigger_ee << " " << _passTrigger_em << " " << _passTrigger_mm << " " << _passTrigger_eee << " " << _passTrigger_eem << " " << _passTrigger_emm << " " << _passTrigger_mmm << endl;
-          if(!(_passTrigger_e || _passTrigger_m || _passTrigger_ee || _passTrigger_em || _passTrigger_mm || _passTrigger_eee || _passTrigger_eem || _passTrigger_emm || _passTrigger_mmm)) continue;
+          if(!(_passTrigger_e || _passTrigger_m)) continue;
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
@@ -151,32 +151,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           std::vector<unsigned> ind;
           
-          if(lCount4L == 4){
-              if(lCount4LLoose != 4) continue;
-              if(selection == "ttZ3L" || selection == "ttZ3Lclean" || selection == "DY" || selection == "Xgamma" || selection == "WZ" || selection == "ttbar") continue;
-              leptonSelection = 4;
-              //samCategory = sam;
-              ind = indTight4L;
-          }
-          else if (lCount == 3){
-              if(lCountFake != 3) continue;
-              if(selection == "ZZ" || selection == "ttZ4L") continue;
-              //samCategory = sam;
-              ind = indTight;
-          }
-          else if (lCount < 3) {
-              if(lCountFake != 3) continue;
-              if(selection == "ZZ" || selection == "ttZ4L") continue;
-              samCategory = nonPromptSample;
-              ind = indFake;
-          }
-          else continue;
-
-          if(debug) cout << "invariant mass of any fake pair is below 12 GeV: " << (leptonSelection == 3 ? invMassOfAny2Lbelow12GeV(indFake) : invMassOfAny2Lbelow12GeV(indLoose4L)) << endl;
-          if(leptonSelection == 3 ? invMassOfAny2Lbelow12GeV(indFake) : invMassOfAny2Lbelow12GeV(indLoose4L)) continue; 
-
-          if(debug) cout << "sum of all lepton charges: " << sumAllLeptonsCharge(ind) << endl;
-          if(leptonSelection == 4 && sumAllLeptonsCharge(ind) != 0) continue;
+          if(lCount != 1) continue;
+          if(lCountFake != 1) continue;
+          ind = indTight;
 
           // consider only prompt leptons from the MC, all nonprompt should be taken into account by DD estimation
           bool allLeptonsArePrompt = true;
@@ -194,19 +171,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                                        || (samples[sam].getProcessName()) == "WZ" || (samples[sam].getProcessName()) == "Xgamma"  || (samples[sam].getProcessName()) == "ZZ" 
                                                        || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
           }
-          if(leptonSelection == 4){
-            // WZ goes to nonprompt here
-            if((samples[sam].getProcessName()) == "WZ") samCategory = nonPromptSample;
-            if(!allLeptonsArePrompt) samCategory = nonPromptSample;
-          }
           int nLocEle = getElectronNumber(ind);
           //if(nLocEle != 3) continue;
-
-          // lepton pt criteria
-          if(leptonSelection == 4)
-            if(!passPtCuts4L(ind)) continue;
-          if(leptonSelection == 3)
-            if(!passPtCuts3L(ind)) continue;
 
           // select here jets, bjets, delta from M of Z boson, HT
           std::vector<unsigned> indJets;
@@ -229,6 +195,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double ptNonZ = -999999;
 
           nJLoc = nJets(0, true, indJets, samples[sam].is2017());
+          if(debug) cout << "number of jets is " << nJLoc << endl;
+          if(nJLoc < 2) continue;
           int nJLocDown = nJets(1, true, indJetsJECDown, samples[sam].is2017());
           int nJLocUp = nJets(2, true, indJetsJECUp, samples[sam].is2017());
           int nJLocJERDown = nJets(3, true, indJetsJERDown, samples[sam].is2017());
@@ -255,44 +223,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double HTLocJERDown  = HTCalc(indJetsJERDown);
           
           double mt1 = 9999;
-          if(leptonSelection == 4){
-            // used both in ttZ 4L and ZZ control region
-            if(dMZ > 20) continue; 
-            mll1stpair = mll;
-            cosTSt = cosThetaStar(Zboson, lnegative);
-            if(selection == "ttZ4L" && !passTTZ4LSelection(ind, indOf2LonZ, nJLoc)) continue;
-            if(selection == "ZZ" && !passZZCRSelection(ind, indOf2LonZ, nJLoc)) continue;
-            if(selection == "ttZ" && !(passTTZ4LSelection(ind, indOf2LonZ, nJLoc) || passZZCRSelection(ind, indOf2LonZ, nJLoc))) continue;
-            if(selection == "ttZclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
-          }
-
-          if(leptonSelection == 3){
-            
-            if(selection == "ttZ" && !(passTTZSelection(nJLoc, dMZ) || passWZCRSelection(nBLoc, dMZ) || passttbarCRSelection(nBLoc, dMZ, mlll))) continue;
-            if(selection == "tZq" &&!passttbarCRintZqSelection(nJLoc, nBLoc, dMZ)) continue;
-            if(selection == "ttZ3L" && !passTTZSelection(nJLoc, dMZ)) continue;
-
-            // here are some thoughts: clean selection is defined with njets >= 3, nbjets >= 1 cuts, if it's defined here at selection step then no events with njets == 2 selection and having 3 jets with upward variation will not enter the selection
-            // should consider njets == 2 selection and later when filling the histograms ask for 3 jets with variation to pass selection 
-            //if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue; 
-            
-            if(selection == "ttZ3Lclean" && !passTTZSelection(nJLoc, dMZ)) continue;
-            if(selection == "ttZclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
-            if(selection == "WZ" && !passWZCRSelection(nBLoc, dMZ)) continue;
-            if(selection == "DY" && !passDYCRSelection(dMZ, ptNonZ, third, _met, _metPhi, nJLoc, nBLoc)) continue;
-
-            // if Z boson is reconstructed then we can calculate mt for 3 rd lepton and cos theta star
-            if(dMZ < 10){
-                TLorentzVector l0p4;
-                l0p4.SetPtEtaPhiE(ptNonZ, _lEta[third], _lPhi[third], _lE[third] * ptNonZ / _lPt[third]);
-                mt1 = mtCalc(l0p4, _met, _metPhi);
-                cosTSt = cosThetaStar(Zboson, lnegative);
-            }
-            if(selection == "ttbar" &&!passttbarCRSelection(nBLoc, dMZ, mlll)) continue;
-            if(selection == "Xgamma" && !passZGCRSelection(mlll, dMZ)) continue;
-
-          }
-
+          
           double mvaVL = 0;
           double mvaVLJECUp = 0;
           double mvaVLJECDown = 0;
@@ -313,21 +244,21 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           int mvaValueRegion = 0;
 
-          if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) << endl; 
+          if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ1L(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) << endl; 
           if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
 
-          vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVar = {0., 0., 0., 0.,
                                    mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
                                    // currently here we will have ttZ3L and ttZ4L categories
                                    (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                    0., 0., 0., 0.,
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
+                                   SRIDTTZ1L(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
                                    (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
@@ -340,17 +271,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
                                    };
 
-          vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJecUp = {
+                                    0., 0., 0., 0.,
                                    mt1, double(nJLocUp), double(nBLocUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocUp)? SRID4L(nJLocUp, nBLocUp) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                    0., 0., 0., 0.,
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJECUp,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll),
+                                   SRIDTTZ1L(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll),
                                    (leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
@@ -363,17 +295,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    };
 
-          vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJecDw = {
+                                   0., 0., 0., 0.,
                                    mt1, double(nJLocDown), double(nBLocDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocDown)? SRID4L(nJLocDown, nBLocDown) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   0., 0., 0., 0.,
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll),
+                                   SRIDTTZ1L(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll),
                                    (leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
@@ -386,17 +319,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    };
 
-          vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJerUp = {
+                                   0., 0., 0., 0.,
                                    mt1, double(nJLocJERUp), double(nBLocJERUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERUp)? SRID4L(nJLocJERUp, nBLocJERUp) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   0., 0., 0., 0.,
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJERUp,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ, mlll), SRIDWZCR(nJLocJERUp, nBLocJERUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp), SRIDTTCR(nJLocJERUp, nBLocJERUp, dMZ, mlll),
+                                   SRIDTTZ1L(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ, mlll), SRIDWZCR(nJLocJERUp, nBLocJERUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp), SRIDTTCR(nJLocJERUp, nBLocJERUp, dMZ, mlll),
                                    (leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
@@ -409,17 +343,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    };
 
-          vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJerDw = {
+                                   0., 0., 0., 0.,
                                    mt1, double(nJLocJERDown), double(nBLocJERDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERDown)? SRID4L(nJLocJERDown, nBLocJERDown) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
                                    _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   0., 0., 0., 0.,
                                    (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
                                    cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
                                    (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ, mlll), SRIDWZCR(nJLocJERDown, nBLocJERDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown), SRIDTTCR(nJLocJERDown, nBLocJERDown, dMZ, mlll),
+                                   SRIDTTZ1L(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ, mlll), SRIDWZCR(nJLocJERDown, nBLocJERDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown), SRIDTTCR(nJLocJERDown, nBLocJERDown, dMZ, mlll),
                                    (leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDCosTheta(cosTSt) : -999),
                                    (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
                                    (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
@@ -705,6 +640,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       cout << endl;
   }
 
+  if(debug) return;
 
   // this should be done to be fully correct in PDF, takes a lot of time, an effect estimated with ttZ sample, uncertainty on acceptance is under 1%, simply assign flat uncertainty of 1 % to all signal and bkg
   // for the moment draw this uncertainty only for SR and will propagate them to datacards 
@@ -800,45 +736,15 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
        showLegendOption = 0;
     }
   }
-  gSystem->Exec("rm plotsForSave/" + folderToStorePlots + processToStore + "/*.{pdf,png,root}");
-  gSystem->Exec("rmdir plotsForSave/" + folderToStorePlots + processToStore);
-  gSystem->Exec("mkdir plotsForSave/" + folderToStorePlots + processToStore);
-  double scale_num = 1.6;
-  
-  TCanvas* plot[nVars];
-  for(int i = 0; i < nVars; i++){
-      plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
-  }
-
-  std::string crToPrint = selection;
-
-  for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
-    plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");
-    plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
-  }
   
   // no need to fill datacards when running over 2016 and 2017 together
   if(showLegendOption == 2) return;
+  std::string crToPrint = selection;
   if(crToPrint == "ttZ3Lclean"){
     fillDatacards(distribs[indexSRttZcleanPTZ], processOrder, "SRttZCleanPTZ", (bool)showLegendOption);
     fillDatacards(distribs[indexSRttZcleanCosTheta], processOrder, "SRttZCleanCosTheta", (bool)showLegendOption);
   }
-  if(crToPrint == "ttZclean"){
-    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
-  }
   if(crToPrint == "ttZ"){
-
-    fillTablesSRTTZ(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption);
-    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
-
     fillDatacards(distribs[indexSRTTZ8SR3L], processOrder, "SRTTZ8SR3L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSR4L], processOrder, "SR4L", (bool)showLegendOption); 
