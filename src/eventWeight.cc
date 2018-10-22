@@ -68,7 +68,13 @@ double treeReader::leptonWeightOnlySyst(const unsigned unc){
                 sf *= reweighter->electronTightWeightOnlySyst(_lPt[l], _lEta[l], _lEtaSC[l], unc);
             }
             if(debug) std::cout << "sf after the lepton with pt " << _lPt[l] << " and flavour " << _lFlavor[l] << " is " << sf << std::endl;
-        } 
+        } else if( lepIsLoose(l) ){
+            if( isMuon(l) ){
+                sf *= reweighter->muonLooseWeight(_lPt[l], _lEta[l], unc);
+            } else if( isElectron(l) ){
+                sf *= reweighter->electronLooseWeight(_lPt[l], _lEta[l], _lEtaSC[l], unc);
+            }
+        }  
     }
     return sf;
 }
@@ -84,6 +90,12 @@ double treeReader::leptonWeightOnlyStat(const unsigned unc){
                 sf *= reweighter->electronTightWeightOnlyStat(_lPt[l], _lEta[l], _lEtaSC[l], unc);
             }
             if(debug) std::cout << "sf after the lepton with pt " << _lPt[l] << " and flavour " << _lFlavor[l] << " is " << sf << std::endl;
+        }else if( lepIsLoose(l) ){
+            if( isMuon(l) ){
+                sf *= reweighter->muonLooseWeight(_lPt[l], _lEta[l], unc);
+            } else if( isElectron(l) ){
+                sf *= reweighter->electronLooseWeight(_lPt[l], _lEta[l], _lEtaSC[l], unc);
+            }
         } 
     }
     return sf;

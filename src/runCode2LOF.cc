@@ -164,7 +164,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           // ---------------------------------------------------------------------------
           // lepton pt criteria
-          if(!passPtCuts2LOF(ind)) continue;
+          //if(!passPtCuts2LOF(ind)) continue;
 
           // ---------------------------------------------------------------------------
           // select here jets, bjets, delta from M of Z boson, HT

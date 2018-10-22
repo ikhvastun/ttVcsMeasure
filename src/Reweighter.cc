@@ -143,9 +143,10 @@ void Reweighter::initializeElectronWeights(){
     } else {
         electronIdFile = TFile::Open("data/leptonSF/scaleFactors_electrons_2017_upd.root");
     } 
-    /*
+
     electronLooseToRecoSF = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLoose") );
     electronLooseToRecoSF->SetDirectory(gROOT);
+    /*
     if(leptonSelection == 2)
         electronTightToLooseSF = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("TTVLooseToTTVLeptonMvattW") );
     if(leptonSelection == 3)
