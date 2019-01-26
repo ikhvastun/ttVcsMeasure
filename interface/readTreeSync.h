@@ -12,7 +12,8 @@ const int nSamples = 11;
 const int dataSample = 0;
 const int ttWSample = 1;
 
-const int numberOfSyst = 23;
+const int numberOfSyst = 24;
+//const int numberOfSyst = 3;
 const int pdfUncIndex = 12;
 
 TString flavorsString[2] = {"el", "mu"};
@@ -385,10 +386,10 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"mll",     {"M(ll) [GeV]", 10, 81., 101., 10, true}},
                                                  {"ptZ",     {"p_{T}^{Z} [GeV]", 11, 0, 400, 16, true}},
                                                  {"ptNonZ",  {"Non-Z lepton p_{T} [GeV]", 12, 10, 200, 19, true}},
-                                                 {"mll3e",   {"M(ll) in 3e [GeV]", 13, 0, 200, 20, true}},
-                                                 {"mll2e1mu",{"M(ll) in 2e1mu [GeV]", 14, 0, 200, 20, true}},
-                                                 {"mll1e2mu",{"M(ll) in 1e2mu [GeV]", 15, 0, 200, 20, true}},
-                                                 {"mll3mu",  {"M(ll) in 3mu [GeV]", 16, 0, 200, 20, true}},
+                                                 {"mll3e",   {"M(ll) in 3e [GeV]", 13, 81, 101, 10, true}},
+                                                 {"mll2e1mu",{"M(ll) in 2e1mu [GeV]", 14, 81, 101, 10, true}},
+                                                 {"mll1e2mu",{"M(ll) in 1e2mu [GeV]", 15, 81, 101, 10, true}},
+                                                 {"mll3mu",  {"M(ll) in 3mu [GeV]", 16, 81, 101, 10, true}},
                                                  {"met",     {"E_{T}^{miss} [GeV]", 17, 0, 300, 15, true}},
                                                  {"deltaR",  {"#Delta R(jet, trailing lepton)", 18, 0.4, 3., 13, false}},
                                                  {"deltaRlead",  {"#Delta R(jet, leading lepton)", 19, 0.4, 3., 13, false}},
@@ -398,7 +399,7 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"trailJetPt", {"Trailing non-b jet p_{T} [GeV]", 23, 30, 310, 14, true}},
                                                  {"SRnpCR", {"", 24, -0.5, 2.5, 3, false}},
                                                  {"nPV", {"number of PV", 25, -0.5, 49.5, 25, false}},
-                                                 {"mlll", {"M(lll) [GeV]", 26, 81., 101., 10, true}},
+                                                 {"mlll", {"M(lll) [GeV]", 26, 0, 200, 50, true}},
                                                  {"etaLead", {"Leading lepton #eta", 27, -2.5, 2.5, 20, false}},
                                                  {"etaSubl", {"Sub-leading lepton #eta", 28, -2.5, 2.5, 20, false}},
                                                  {"etaTrail", {"Trailing lepton #eta", 29, -2.5, 2.5, 20, false}},
@@ -479,6 +480,16 @@ std::map<TString, histInfo> figNames  =         {{"ptlead",  {"Leading lepton p_
                                                  {"maxpTBJetMET", {"max(P_{T}(bjet + MET))", 98, 0, 400, 30, true}},
                                                  {"ptMuonPassedTight",  {"Leading lepton p_{T} [GeV]", 99, 10, 200, 38, true}},
                                                  {"etaMuonPassedTight",  {"Leading lepton #eta", 100, -2.5, 2.5, 20, false}},
+
+                                                 {"ptLepPassedLooseForEff",  {"Leading lepton p_{T} [GeV]", 101, 10, 200, 38, true}},
+                                                 {"etaLepPassedLooseForEff",  {"Leading lepton #eta", 102, -2.5, 2.5, 20, false}},
+                                                 {"ptLepPassedTightForEff",  {"Leading lepton p_{T} [GeV]", 103, 10, 200, 38, true}},
+                                                 {"etaLepPassedTightForEff",  {"Leading lepton #eta", 104, -2.5, 2.5, 20, false}},
+
+                                                 {"etaLepPassedLooseForEffLowPt",  {"Muon #eta (p_{T} < 25 GeV)", 105, -2.5, 2.5, 20, false}},
+                                                 {"etaLepPassedTightForEffLowPt",  {"Muon #eta (p_{T} < 25 GeV)", 106, -2.5, 2.5, 20, false}},
+                                                 {"etaLepPassedLooseForEffHighPt",  {"Muon #eta (p_{T} > 25 GeV)", 107, -2.5, 2.5, 20, false}},
+                                                 {"etaLepPassedTightForEffHighPt",  {"Muon #eta (p_{T} > 25 GeV)", 108, -2.5, 2.5, 20, false}},
                                            };
 
 
@@ -530,5 +541,10 @@ std::vector<double> ttZISRDownW = {0.965, 0.975, 0.995, 0.965, 0.965, 0.985, 0.9
 
 std::vector<double> ttZFSRUpW = {1.03, 1.025, 1.01, 1.045, 1.03, 1.015, 1.015, 1.07, 1.035, 1.025, 1.015, 1.065, 1.025, 1.01}; // 14 SRs
 std::vector<double> ttZFSRDownW = {0.965, 0.975, 0.995, 0.965, 0.965, 0.985, 0.99, 0.945, 0.96, 0.97, 0.98, 0.95, 0.98, 0.995}; // 14 SRs
+
+//std::vector<double> osToss = {1.28, 1.23, 1.24, 1.17, 1.1, 1.}; // for nbjets >= 1
+std::vector<double> osToss = {1.26, 1.23, 1.25, 1.15, 1.08, 1.}; // for nbjets = 1
+//std::vector<double> osToss = {1.37, 1.22, 1.2, 1.19, 1.12, 1.}; // for nbjets >= 2
+//std::vector<double> osToss = {1.19, 1.13, 1.22, 1.17, 1.1, 1.}; // for nbjets = 0 for ttbar
 
 #endif 

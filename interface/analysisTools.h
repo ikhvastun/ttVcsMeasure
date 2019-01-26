@@ -56,5 +56,9 @@ namespace tools{
 
     //add trailing / to directoryName if needed
     std::string formattedDirectoryName(const std::string&);     
+
+    //Set negative histogram bins to zero
+    void setNegativeBinsToZero(TH1D&);
+    void setNegativeBinsToZero(const std::shared_ptr<TH1D>&);
 }
 #endif

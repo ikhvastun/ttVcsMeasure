@@ -39,7 +39,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
-    pad1->SetTopMargin(0.07);
+    pad1->SetTopMargin(0.09);
     if(xPad != 0)
         pad1->SetBottomMargin(0.02);
     pad1->Draw();
@@ -48,12 +48,15 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
+    // finally we are unblinded, 23 Oct 2018
+    /*
     if(showLegendOption > 0 && (info.index == indexSRTTZ || info.index == indexSR3L || info.index == indexSR4L || info.index == indexSR3L3m || info.index == indexSR3L2m1e || info.index == indexSR3L1m2e || info.index == indexSR3L3e)){ // keep it blinded for 2017, showLegendOption = 1 and 2 for 2017 and comb of 2 datasets
         for(unsigned int bin = 1; bin < dataHist->GetNbinsX()+1; bin++){
             if(bin < 5) continue;
             dataHist->SetBinContent(bin, 0.);
         }
     }
+    */
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle("");
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
@@ -183,8 +186,8 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
 }
 
-void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight){ 
-    double xPad = 0.0; // 0.25
+void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight, const int nonPromptSample){ 
+    double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
     pad1->SetTopMargin(0.07);
@@ -193,9 +196,24 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
     pad1->Draw();
     pad1->cd();
     
-    TH1D * dataHistLoose = &distribsLoose.vectorHisto[dataSample];
-    TH1D * dataHistTight = &distribsTight.vectorHisto[dataSample];
+    TH1D * dataHistLoose = (TH1D*)distribsLoose.vectorHisto[dataSample].Clone("dataHistLoose");
+    TH1D * dataHistTight = (TH1D*)distribsTight.vectorHisto[dataSample].Clone("dataHistTight");
     
+    TH1D *stackLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone("stackLoose");
+    TH1D *stackTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone("stackTight");
+
+    TH1D* npLoose = &distribsLoose.vectorHisto[nonPromptSample];
+    TH1D* npTight = &distribsTight.vectorHisto[nonPromptSample];
+
+    // subtract the nonprompt from both histos
+    dataHistLoose->Add(npLoose, -1);
+    dataHistTight->Add(npTight, -1);
+    stackLoose->Add(npLoose, -1);
+    stackTight->Add(npTight, -1);
+
+    TGraphAsymmErrors* graph_data = new TGraphAsymmErrors( dataHistTight, dataHistLoose);
+    TGraphAsymmErrors* graph_MC = new TGraphAsymmErrors( stackTight, stackLoose);
+
     dataHistTight->SetMarkerSize(1);
     dataHistTight->SetTitle("");
     dataHistTight->GetXaxis()->SetTitle("p_{T} [GeV]");
@@ -204,50 +222,34 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
     dataHistTight->SetMaximum(1.2);
     dataHistTight->GetXaxis()->SetLabelOffset(0.02);
     dataHistTight->SetFillStyle(0); 
-    dataHistTight->Divide(dataHistLoose);
 
-    TH1D *stackLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone("stackLoose");
-    TH1D *stackTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone("stackTight");
+    dataHistTight->Divide(dataHistLoose);
+    dataHistTight->Draw("hist");
 
     stackTight->Divide(stackLoose);
-    dataHistTight->Draw("hist");
     stackTight->SetFillStyle(0); 
     stackTight->Draw("histsame");
 
-    // this part is not fully correct
-    // variation of uncertainty should be done simultaneously for loose and tight, tag electron is the same so uncertainty should be compensated 
-    /*
-    TH1D *histSystAndStatUncLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncLoose"));
-    setUpSystUnc(distribsLoose, histSystAndStatUncLoose);
-
-    TH1D *histSystAndStatUncTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncTight"));
-    setUpSystUnc(distribsTight, histSystAndStatUncTight);
-    histSystAndStatUncTight->Divide(histSystAndStatUncLoose);
-    */
     TH1D *histSystAndStatUncLoose = (TH1D*)(distribsLoose.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncLoose"));
     TH1D *histSystAndStatUncTight = (TH1D*)(distribsTight.stack.GetStack()->Last())->Clone(Form("histSystAndStatUncTight"));
     setUpSystUncCorr(distribsTight, histSystAndStatUncTight, distribsLoose, histSystAndStatUncLoose);
 
-    TH1D *systAndStatHistUnc = (TH1D*)stackTight->Clone("systAndStatHistUnc");
-    for(unsigned int i = 0; i < systAndStatHistUnc->GetNbinsX(); i++){
-        systAndStatHistUnc->SetBinError(i+1, histSystAndStatUncTight->GetBinError(i+1));
+    for( int b = 0 ; b < histSystAndStatUncTight->GetNbinsX(); ++b){
+        graph_MC->SetPointEYlow(b, histSystAndStatUncTight->GetBinError(b+1));
+        graph_MC->SetPointEYhigh(b, histSystAndStatUncTight->GetBinError(b+1));
     }
-    systAndStatHistUnc->SetFillStyle(3004);
-    systAndStatHistUnc->SetFillColor(kRed);
-    systAndStatHistUnc->SetMarkerStyle(1);
-    systAndStatHistUnc->Draw("e2same");
+    graph_data->SetFillStyle(3005);
+    graph_data->SetLineWidth(2);
+    graph_data->Draw("e2psame");
+    graph_MC->SetFillStyle(3004);
+    graph_MC->SetLineColor(kRed);
+    graph_MC->SetLineWidth(2);
+    graph_MC->Draw("e2psame");
 
     TH1D *dataHistTightUnc = (TH1D*)dataHistTight->Clone("dataHistTightUnc");
-    /*
-    for(int b = 1; b < dataHistTightUnc->GetNbinsX() + 1; ++b){
-       if(dataHistTightUnc->GetBinContent(b) + dataHistTightUnc->GetBinError(b) > 1)
-           dataHistTightUnc->SetBinError(b, 1 - dataHistTightUnc->GetBinContent(b));
-    }
-    */
     dataHistTightUnc->SetFillStyle(3005);
     dataHistTightUnc->SetFillColor(kBlack);
     dataHistTightUnc->SetMarkerStyle(1);
-    dataHistTightUnc->Draw("e2same");
 
     TLegend* mtlegRatio = new TLegend(0.17,0.79,0.85,0.98);
     mtlegRatio->SetNColumns(2);
@@ -258,8 +260,8 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
 
     mtlegRatio->AddEntry(dataHistTight, "data efficiency", "lep");
     mtlegRatio->AddEntry(stackTight, "MC efficiency", "lep");
-    mtlegRatio->AddEntry(dataHistTightUnc, "data efficiency unc.", "f");
-    mtlegRatio->AddEntry(systAndStatHistUnc, "MC efficiency unc.", "f");
+    mtlegRatio->AddEntry(graph_data, "data stat + nonprompt", "f");
+    mtlegRatio->AddEntry(graph_MC, "Lepton SF unc.", "f");
     mtlegRatio->Draw("same");
 
     double lumi = 35.9;
@@ -268,6 +270,70 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
     pad1->cd();
     pad1->RedrawAxis();
     pad1->Update();
+
+    if(xPad == 0) return;
+
+    c1->cd();
+
+    TPad *pad2 = new TPad("pad2","pad2",0,0,1,xPad);
+
+    pad2->SetBottomMargin((1.-xPad)/xPad*0.13);
+    pad2->SetTopMargin(0.06);
+
+    pad2->Draw();
+    pad2->RedrawAxis();
+    pad2->cd();
+
+    TH1D * dataHistTightCopy = (TH1D *) dataHistTight->Clone("dataHistTightCopy");
+
+    dataHistTightCopy->SetTitle("");
+    dataHistTightCopy->GetYaxis()->SetTitle("data/MC eff");
+
+    dataHistTightCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
+    dataHistTightCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataHistTightCopy->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    dataHistTightCopy->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    dataHistTightCopy->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+
+    dataHistTightCopy->SetMaximum(2.0);
+    dataHistTightCopy->SetMinimum(0.0);
+    dataHistTightCopy->SetMarkerStyle(20);
+    dataHistTightCopy->SetMarkerSize(0.2);
+
+    dataHistTightCopy->Divide(stackTight);
+
+    dataHistTightCopy->Draw("hist");
+
+    TGraphAsymmErrors * dataGraph = new TGraphAsymmErrors(dataHistTightCopy);
+    dataGraph->SetFillStyle(3005);
+    dataGraph->SetLineWidth(2);
+
+    for(int i = 0; i < graph_data->GetN(); i++){
+
+      double dataPoint[3] = {dataHistTight->GetBinContent(i+1), graph_data->GetErrorYhigh(i), graph_data->GetErrorYlow(i)};
+      double theMCPoint[3] = {stackTight->GetBinContent(i+1), graph_MC->GetErrorYhigh(i), graph_MC->GetErrorYlow(i)};
+
+      double uncRatio[2];
+
+      // calculating the uncertainty for a / b
+      // using formula: delta Unc ^ 2 = ( (a/b)'_a (delta a) ) ^ 2 + ( (a/b)'_b (delta b) ) ^ 2
+
+      uncRatio[0] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[1], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[1], 2));
+      uncRatio[1] = TMath::Sqrt(TMath::Power(1 / theMCPoint[0] * dataPoint[2], 2) + TMath::Power(dataPoint[0] / TMath::Power(theMCPoint[0],2) * theMCPoint[2], 2));
+
+      dataGraph->SetPointError(i, dataGraph->GetErrorXlow(i), dataGraph->GetErrorXhigh(i), uncRatio[1], uncRatio[0]);
+      //dataGraph->SetPointError(i, 0., 0., uncRatio[1], uncRatio[0]);
+    }
+
+    //dataHistTightUncCopy->Draw("e2same");
+    dataGraph->Draw("e2psame");
+
+    double xmin = dataHistTightCopy->GetXaxis()->GetXmin();
+    double xmax = dataHistTightCopy->GetXaxis()->GetXmax();
+    TLine *line = new TLine(xmin, 1, xmax, 1);
+    line->SetLineStyle(2);
+    line->Draw("same");
+    
 }
 
 void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
@@ -744,14 +810,24 @@ void setUpSystUncCorr(DistribsAll & distribsTight, TH1D * histSystAndStatUncTigh
             // consider largest deviation between the upward and downward variations
             errTight += TMath::Power(TMath::Max(stackUncTightUp[j]->GetBinContent(i+1) - stackBinContentTight, stackBinContentTight - stackUncTightDown[j]->GetBinContent(i+1)), 2);
             errLoose += TMath::Power(TMath::Max(stackUncLooseUp[j]->GetBinContent(i+1) - stackBinContentLoose, stackBinContentLoose - stackUncLooseDown[j]->GetBinContent(i+1)), 2);
-            cout << "unc after applying " << j << " syst tight " << TMath::Sqrt(errTight) << " and syst loose " << TMath::Sqrt(errLoose)  << endl;
+            //cout << "unc after applying " << j << " syst tight " << TMath::Sqrt(errTight) << " and syst loose " << TMath::Sqrt(errLoose)  << endl;
         }
         // if uncertainty is greater than 100% consider 100% uncertainty
-        cout << "so all numbers in bin " << i+1 << " are " << stackBinContentTight << " " << TMath::Sqrt(errTight) << " " << stackBinContentLoose << " " << TMath::Sqrt(errLoose) << endl;
-        histSystAndStatUncTight->SetBinError(i+1, (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) - stackBinContentTight/stackBinContentLoose);
+        //cout << "so all numbers in bin " << i+1 << " are " << stackBinContentTight << " " << TMath::Sqrt(errTight) << " " << stackBinContentLoose << " " << TMath::Sqrt(errLoose) << endl;
+        //histSystAndStatUncTight->SetBinError(i+1, (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) - stackBinContentTight/stackBinContentLoose);
         //histSystAndStatUncTight->SetBinError(i+1, (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) < 1 ? (stackBinContentTight + TMath::Sqrt(errTight))/(stackBinContentLoose + TMath::Sqrt(errLoose)) - stackBinContentTight/stackBinContentLoose : 1 - stackBinContentTight/stackBinContentLoose);
         // here I simply subtract (2L + stat) - (1L + stat) uncertainty
         //histSystAndStatUncTight->SetBinError(i+1, TMath::Sqrt(errTight/stackBinContentTight - errLoose/stackBinContentLoose)*stackBinContentTight/stackBinContentLoose);
+
+        // uncertainty will be calculated according to the formula
+        // R = X / Y, dR / R = sqrt((dX/X)^2 + (dY/Y)^2)
+        // this is in principle not correct for efficiency plot, 1L tight electron + 1 muon loose are the same so uncertainty should be completely divided out, the only uncertainty that has to be shown is tight to loose
+        // errTight is the squared sum of uncertainty for tight selection, errLoose is the same for Loose
+        //histSystAndStatUncTight->SetBinError(i+1, TMath::Sqrt(errTight/(stackBinContentTight * stackBinContentTight) + errLoose/(stackBinContentLoose * stackBinContentLoose))*stackBinContentTight/stackBinContentLoose);
+        // should be a correct one 
+        //histSystAndStatUncTight->SetBinError(i+1, TMath::Sqrt(errTight/(stackBinContentTight * stackBinContentTight) - errLoose/(stackBinContentLoose * stackBinContentLoose))*stackBinContentTight/stackBinContentLoose);
+        // in the end we agreed to use only uncertainty on the tight
+        histSystAndStatUncTight->SetBinError(i+1, TMath::Sqrt(errTight/(stackBinContentTight * stackBinContentTight))*stackBinContentTight/stackBinContentLoose);
     }
 
     histSystAndStatUncTight->SetFillStyle(1001);

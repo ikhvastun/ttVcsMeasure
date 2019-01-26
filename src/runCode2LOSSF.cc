@@ -124,7 +124,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
           //select leptons relative to the analysis
@@ -133,6 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
           const unsigned lCountLoose = selectLooseLep(indLoose, leptonSelection);
 
+          if(lCountLoose != 2) continue;
           if(lCount != 2) continue;
           std::vector<unsigned> ind = indTight;
           
@@ -147,7 +148,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           int nLocEle = getElectronNumber(ind);
 
           // lepton pt criteria
-          if(!passPtCuts2LOF(ind)) continue;
+          if(!passPtCuts2LOSSF(ind)) continue;
 
           // select here jets, bjets, delta from M of Z boson, HT
           std::vector<unsigned> indJets;
@@ -196,7 +197,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double HTLocJERDown  = HTCalc(indJetsJERDown);
           
           // here let's select emu pair, e should pass tight selection criteria
-          if(_lFlavor[ind[0]] != _lFlavor[ind[1]]) continue;
           if(dMZ > 10) continue;
           if(nLocEle != 2) continue;
 
@@ -295,19 +295,16 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             lepSFRecoUp = lepWOnlySyst * lepWOnlyRecoUp; 
             lepSFRecoDown = lepWOnlySyst * lepWOnlyRecoDown; 
 
+            /*
             puW = puWeight(0); puWUp = puWeight(1); puWDown = puWeight(2);
 
             btagL = bTagWeight_udsg(0); btagLUp = bTagWeight_udsg(1); btagLDown = bTagWeight_udsg(2);
             btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
             btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
+            */
 
             // here from data we will subtract nonprompt contribution
           }
-          if(debug){
-              if(leptonSelection == 3 && nJLoc == 2 && nBLoc  == 1)
-                cout << "weights are (lepSF/pu/btagL/btagBC) : " << lepSF << " " << puW << " " << btagL << " " << btagC*btagB << endl;
-          }
-
           //finish = std::chrono::high_resolution_clock::now();
           //elapsed = finish - start;
           //std::cout << "time needed to estimate all sf and deviations: " << elapsed.count() << std::endl;
@@ -328,24 +325,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFRecoUp / lepSF);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFRecoDown / lepSF);
                 
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 3, figNames[fncName.at(counter)].varMax-0.1, weight*puWUp/puW);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 3, figNames[fncName.at(counter)].varMax-0.1, weight*puWDown/puW);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 4, figNames[fncName.at(counter)].varMax-0.1, weight*btagLUp/btagL);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 4, figNames[fncName.at(counter)].varMax-0.1, weight*btagLDown/btagL);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 5, figNames[fncName.at(counter)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 5, figNames[fncName.at(counter)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(counter), 6, figNames[fncName.at(counter)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(counter), 6, figNames[fncName.at(counter)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJerUp.at(counter), 7, figNames[fncName.at(counter)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJerDw.at(counter), 7, figNames[fncName.at(counter)].varMax-0.1, weight);
-
-                for(int cat = 0; cat < 13; cat++){
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 8+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 8+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
+                for(int cat = 0; cat < 18; cat++){
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 3+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 3+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
                 }
 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 21, figNames[fncName.at(counter)].varMax-0.1, weight * 1.025); // 2.5% for lumi

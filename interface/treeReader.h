@@ -239,6 +239,7 @@ class treeReader {
         unsigned selectLooseLep(std::vector<unsigned>&, const int);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2LOF(const std::vector<unsigned>&);
+        bool passPtCuts2LOSSF(const std::vector<unsigned>&);
         bool passPtCuts2L(const std::vector<unsigned>&);
         bool passPtCuts3L(const std::vector<unsigned>&);
         bool passPtCuts4L(const std::vector<unsigned>&);
@@ -255,6 +256,7 @@ class treeReader {
         double HTCalc(const std::vector<unsigned>& ind);
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&, TLorentzVector &, TLorentzVector &);
         bool invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind);
+        bool invMassOfAny2Lbelow20GeV(const std::vector<unsigned>& ind);
         int getElectronNumber(const std::vector<unsigned>& ind);
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);
@@ -302,9 +304,9 @@ class treeReader {
         double bTagWeight_c(const unsigned unc = 0);
         double bTagWeight_b(const unsigned unc = 0);
         double bTagWeight(const unsigned unc = 0);
-        double leptonWeightOnlyStat(const unsigned unc = 0);
-        double leptonWeightOnlySyst(const unsigned unc = 0);
-        double leptonWeightOnlyReco(const unsigned unc = 0);
+        double leptonWeightOnlyStat(const unsigned unc = 0, const bool ignoreMuon = false, const bool ignoreEle = false);
+        double leptonWeightOnlySyst(const unsigned unc = 0, const bool ignoreMuon = false, const bool ignoreEle = false);
+        double leptonWeightOnlyReco(const unsigned unc = 0, const bool ignoreMuon = false, const bool ignoreEle = false);
         double triggerWeight();
         void initializeWeights();
         double sfWeight();

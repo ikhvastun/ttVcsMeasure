@@ -18,7 +18,7 @@ void setUpSystUncForIntegral(DistribsAll & distribs, TH1D * histSystAndStatUnc, 
 double setUpSystUncForIntegralInCategory(DistribsAll & distribs, int cat);
 double setUpSystUncForIntegralTotal(DistribsAll & distribs, int nCategories);
 
-void fillTablesSRTTZ(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false){
+void fillTablesSRTTZ(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, int period = 0){
   const int SRNumber = figNames[name].nBins;
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
 
@@ -43,7 +43,7 @@ void fillTablesSRTTZ(DistribsAll & distribs, vector<std::string> nameOfProcesses
   for(int srCat = 0; srCat < srCategoriesLabel.size(); srCat++){
 
     ofstream tableBkg;
-    tableBkg.open("tables/tableSR" + std::to_string(srCat) + "_" + (TString)(is2017 ? "2017" : "2016") + ".tex");
+    tableBkg.open("tables/tableSR" + std::to_string(srCat) + "_" + (TString)(period == 1 ? "2017" : (period == 0 ? "2016" : "comb")) + ".tex");
     tableBkg<<"\\begin{table}\n";
     tableBkg<<"\\begin{adjustbox}{width=1\\textwidth}\n";
     tableBkg<<"\\begin{tabular}{|c|c|c|c|c|}\\hline\n";
@@ -90,7 +90,7 @@ void fillTablesSRTTZ(DistribsAll & distribs, vector<std::string> nameOfProcesses
 
 }
 
-void fillTablesForFlavour(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false){
+void fillTablesForFlavour(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, int period = 0){
 
   const int SRNumber = figNames[name].nBins;
   const int nCategories = nameOfProcessesForDatacard.size(); // nameOfProcessesForDatacard - all MC + 1 for data
@@ -100,7 +100,7 @@ void fillTablesForFlavour(DistribsAll & distribs, vector<std::string> nameOfProc
   setUpSystUncForIntegral(distribs, histSystAndStatUnc, nCategories);
 
   ofstream tableBkg;
-  tableBkg.open("tables/tableFlavour" + (TString)(is2017 ? "2017" : "2016") + ".tex");
+  tableBkg.open("tables/tableFlavour" + (TString)(period == 1 ? "2017" : (period == 0 ? "2016" : "comb")) + ".tex");
   tableBkg<<"\\begin{table}\n";
   tableBkg<<"\\begin{adjustbox}{width=1\\textwidth}\n";
   tableBkg<<"\\begin{tabular}{|c|c|c|c|c||c|}\\hline\n";

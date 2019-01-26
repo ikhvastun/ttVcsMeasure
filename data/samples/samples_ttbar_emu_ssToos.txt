@@ -1,0 +1,3 @@
+data data_combined_dilepton_2016.root                                        				1
+TTto1L TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root   182.8
+TTto1L TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Summer16.root      182.8

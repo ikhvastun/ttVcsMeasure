@@ -13,6 +13,7 @@ Class that extracts post-fit normalizations from Combine's output and retrieves 
 
 class PostFitScaler{
     public: 
+        PostFitScaler() = default;
         PostFitScaler( const std::string& inputFileName );
 
         double postFitYield( const double preFitYield ) const;
@@ -21,7 +22,11 @@ class PostFitScaler{
         double postFitScaling( const std::string& process, const double preFitYield ) const;
         double postFitScaling(const std::string& process) const;
 
+        void setInputFile(const std::string& inputFileName){fileName = inputFileName;}
+        void setPostfitYields();
+
     private:
+        std::string fileName;
         std::map< std::string, std::vector< std::pair < double, double  > > > postAndPreFitYields;
 
         //retrieve which process and bin corresponds to a certain pre fit yield

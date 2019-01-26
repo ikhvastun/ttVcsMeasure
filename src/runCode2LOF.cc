@@ -92,9 +92,16 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
       //if(!(samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
-      //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "WZ") continue;
+      //if(samples[sam].getProcessName() != "TTto1L") continue;
+      //if(samples[sam].getProcessName() != "WJets") continue;
+      //if(samples[sam].getProcessName() != "TTto1L" && samples[sam].getProcessName() != "WJets") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
+      if(samples[sam].getProcessName() == "nonpromptData"){
+          cout << "Total number of events: " << distribs[0].vectorHisto[samCategory].Integral() << endl;
+          continue;
+      }
+
 
       std::cout<<"Entries in "<< (samples[sam].getFileName()) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -122,11 +129,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           // here we should ask only for single electron trigger,
           // dilepton can bias muon selection
           if(!_passTrigger_e) continue;
+          //if(!_passTrigger_m) continue;
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          //if(it > nEntries / 10) break;
 
           // lepton selection
           // ---------------------------------------------------------------------------
@@ -142,14 +150,31 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           int nLocEle = getElectronNumber(ind);
           if(nLocEle != 1) continue;
-          // this is used only when np is calculated from MC 
-          //if(_lCharge[ind[0]] == _lCharge[ind[1]]) continue;
           
           // here let's select emu pair, e should pass tight select
           int muonIndex = _lFlavor[ind[0]] == 1 ? ind[0] : ind[1]; 
           int eleIndex = _lFlavor[ind[0]] == 0 ? ind[0] : ind[1]; 
-          //if(!lepIsGood(eleIndex, leptonSelection) || _lPt[eleIndex] < 40) continue;
-          if(!lepIsGoodFortZq(eleIndex) || _lPt[eleIndex] < 40) continue;
+
+          // here explicitely we put cuts on the tag lepton
+          if(!lepIsGood(eleIndex, leptonSelection) || _lPt[eleIndex] < 40) continue;
+          //if(!lepIsGoodFortZq(eleIndex) || _lPt[eleIndex] < 40) continue;
+          
+          //if(!lepIsGood(muonIndex, leptonSelection) || _lPt[muonIndex] < 40) continue;
+
+          if(debug) cout << "invariant mass of any fake pair is below 20 GeV: " << invMassOfAny2Lbelow20GeV(ind) << endl;
+          if(invMassOfAny2Lbelow20GeV(ind)) continue;
+          
+          // in this block we put cuts on the charge of the leptons
+          // this is used only when np is calculated from MC 
+          //if(_lCharge[ind[0]] == _lCharge[ind[1]]) continue;
+          // also for the check to see the contribution in ss2l final state we'll ask for 2 leptons to be the same charge
+          //if(_lCharge[ind[0]] != _lCharge[ind[1]]) continue;
+          /*
+          if(_lCharge[ind[0]] == _lCharge[ind[1]])
+              samCategory = 2;
+          if(_lCharge[ind[0]] != _lCharge[ind[1]])
+              samCategory = dataSample;
+          */
 
           // ---------------------------------------------------------------------------
           // consider only prompt leptons from the MC, all nonprompt should be taken into account by DD estimation
@@ -164,7 +189,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           // ---------------------------------------------------------------------------
           // lepton pt criteria
-          //if(!passPtCuts2LOF(ind)) continue;
+          if(!passPtCuts2LOF(ind)) continue;
 
           // ---------------------------------------------------------------------------
           // select here jets, bjets, delta from M of Z boson, HT
@@ -214,7 +239,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double HTLocJERDown  = HTCalc(indJetsJERDown);
           
           if(nJLoc < 2) continue;
-          if(nBLoc < 1) continue;
+          if(nBLoc != 1) continue;
           
           // ---------------------------------------------------------------------------
           // weight estimation for event
@@ -224,6 +249,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double lepSFStatUp = 1.; double lepSFStatDown = 1.;
           double lepSFRecoUp = 1.; double lepSFRecoDown = 1.;
 
+          double lepWOnlySystOnlyEle = 1.; double lepWOnlySystOnlyEleUp = 1.; double lepWOnlySystOnlyEleDown = 1.;
+          double lepWOnlyStatOnlyEle = 1.; double lepWOnlyStatOnlyEleUp = 1.; double lepWOnlyStatOnlyEleDown = 1.;
+          double lepWOnlyRecoOnlyEle = 1.; double lepWOnlyRecoOnlyEleUp = 1.; double lepWOnlyRecoOnlyEleDown = 1.;
+
           double puW = 1.; double puWUp = 1.; double puWDown = 1.;
 
           double btagL = 1.; double btagLUp = 1.; double btagLDown = 1.;
@@ -232,12 +261,32 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           double jetPrefW = 1.;
 
+          int muonBin = 0;
+          if(_lPt[muonIndex] > 15 && _lPt[muonIndex] < 20)
+              muonBin = 1;
+          if(_lPt[muonIndex] > 20 && _lPt[muonIndex] < 25)
+              muonBin = 2;
+          if(_lPt[muonIndex] > 25 && _lPt[muonIndex] < 30)
+              muonBin = 3;
+          if(_lPt[muonIndex] > 30 && _lPt[muonIndex] < 35)
+              muonBin = 4;
+          if(_lPt[muonIndex] > 35)
+              muonBin = 5;
+
           if((samples[sam].getProcessName()) != "data"){
             weight *= sfWeight();
 
             double lepWOnlySyst = leptonWeightOnlySyst(0); double lepWOnlySystUp = leptonWeightOnlySyst(1); double lepWOnlySystDown = leptonWeightOnlySyst(2);
             double lepWOnlyStat = leptonWeightOnlyStat(0); double lepWOnlyStatUp = leptonWeightOnlyStat(1); double lepWOnlyStatDown = leptonWeightOnlyStat(2);
             double lepWOnlyReco = leptonWeightOnlyReco(0); double lepWOnlyRecoUp = leptonWeightOnlyReco(1); double lepWOnlyRecoDown = leptonWeightOnlyReco(2);
+
+            //double lepWOnlySystOnlyMuon = leptonWeightOnlySyst(0, false, true); double lepWOnlySystOnlyMuonUp = leptonWeightOnlySyst(1, false, true); double lepWOnlySystOnlyMuonDown = leptonWeightOnlySyst(2, false, true);
+            //double lepWOnlyStatOnlyMuon = leptonWeightOnlyStat(0, false, true); double lepWOnlyStatOnlyMuonUp = leptonWeightOnlyStat(1, false, true); double lepWOnlyStatOnlyMuonDown = leptonWeightOnlyStat(2, false, true);
+            //double lepWOnlyRecoOnlyMuon = leptonWeightOnlyReco(0, false, true); double lepWOnlyRecoOnlyMuonUp = leptonWeightOnlyReco(1, false, true); double lepWOnlyRecoOnlyMuonDown = leptonWeightOnlyReco(2, false, true);
+
+            lepWOnlySystOnlyEle = leptonWeightOnlySyst(0, true, false); lepWOnlySystOnlyEleUp = leptonWeightOnlySyst(1, true, false); lepWOnlySystOnlyEleDown = leptonWeightOnlySyst(2, true, false);
+            lepWOnlyStatOnlyEle = leptonWeightOnlyStat(0, true, false); lepWOnlyStatOnlyEleUp = leptonWeightOnlyStat(1, true, false); lepWOnlyStatOnlyEleDown = leptonWeightOnlyStat(2, true, false);
+            lepWOnlyRecoOnlyEle = leptonWeightOnlyReco(0, true, false); lepWOnlyRecoOnlyEleUp = leptonWeightOnlyReco(1, true, false); lepWOnlyRecoOnlyEleDown = leptonWeightOnlyReco(2, true, false);
 
             lepSF = lepWOnlySyst * lepWOnlyReco; // consider only one between syst and stat, central value is the same
             lepSFSystUp = lepWOnlySystUp * lepWOnlyReco; 
@@ -247,37 +296,29 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             lepSFRecoUp = lepWOnlySyst * lepWOnlyRecoUp; 
             lepSFRecoDown = lepWOnlySyst * lepWOnlyRecoDown; 
 
-            /*
-            puW = puWeight(0); puWUp = puWeight(1); puWDown = puWeight(2);
-
-            btagL = bTagWeight_udsg(0); btagLUp = bTagWeight_udsg(1); btagLDown = bTagWeight_udsg(2);
-            btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
-            btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
-            */
-
-            // here from data we will subtract nonprompt contribution
+            // here from data we subtract nonprompt contribution, only can be used with MC nonprompt
             if(!allLeptonsArePrompt){
                 samCategory = dataSample;
                 weight *= -1;
             }
+            
             // we'll take ss dilepton events from MC, this event should be subtracted from SS data events, we multiply them by OS / SS ratio measured in ttbar semileptonic MC, which is 1.62733 / 1.22763 according to Willem, 18 Oct 2018, Skype chat
+            // these two numbers are quite magical, real number to be used is approximately 1.15
+            // P.S. later this number is measured as a function of lepton pt, here we use the measured corrections, they vary from 1.3 for first pt bin to 1 which should be applied for all pts > 35 GeV 
             if(_lCharge[ind[0]] == _lCharge[ind[1]]){
-              weight *= 1.62733 / 1.22763;
-              samCategory = dataSample;
+              weight *= -1 * osToss[muonBin];
+              samCategory = nonPromptSample;
             } 
-
           }
-          //auto start = std::chrono::high_resolution_clock::now();
           // here we implement data driven method of nonprompt background estimation, 
           // we'll take ss dilepton events from data and multiply them by OS / SS ratio measured in ttbar semileptonic MC, which is 1.62733 / 1.22763 according to Willem, 18 Oct 2018, Skype chat
+          // P.S. later this number is measured as a function of lepton pt, here we use the measured corrections, they vary from 1.3 for first pt bin to 1 which should be applied for all pts > 35 GeV 
           if(samples[sam].getProcessName() == "data"){
             if(_lCharge[ind[0]] == _lCharge[ind[1]]){
-                weight = -1 * 1.62733 / 1.22763;
+                weight *= osToss[muonBin];
+                samCategory = nonPromptSample;
             } 
           }
-          //auto finish = std::chrono::high_resolution_clock::now();
-          //std::chrono::duration<double> elapsed = finish - start;
-          //std::cout << "time needed to estimate event weight: " << elapsed.count() << std::endl;
 
           if(debug) cout << "weight of event is " << weight << endl;
           // ---------------------------------------------------------------------------
@@ -285,62 +326,27 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           vector<double> fillVar = {
                                    _lPt[muonIndex], _lPt[eleIndex], 
                                    _lEta[muonIndex], _lEta[eleIndex], 
+                                   //_lPt[eleIndex], _lPt[muonIndex], 
+                                   //_lEta[eleIndex], _lEta[muonIndex], 
                                    double(nJLoc), double(nBLoc), 
                                    _met, double(_nVertex), 
                                    HTLoc,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
-                                   lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
-                                   lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
+                                   lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
+                                   lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
+                                   //lepIsGood(eleIndex, leptonSelection) ? _lPt[eleIndex] : 0.,
+                                   //lepIsGood(eleIndex, leptonSelection) ? _lEta[eleIndex] : -999.,
+                                   //lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
+                                   //lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
+                                   _lPt[muonIndex], _lEta[muonIndex], lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0., lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
+                                   //_lPt[muonIndex], _lEta[muonIndex], lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0., lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
+                                   _lEta[muonIndex], lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999., _lEta[muonIndex], lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
+                                   //_lEta[muonIndex], lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999., _lEta[muonIndex], lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
                                    };
 
-          vector<double> fillVarJecUp = {
-                                   _lPt[muonIndex], _lPt[eleIndex], 
-                                   _lEta[muonIndex], _lEta[eleIndex], 
-                                   double(nJLocUp), double(nBLocUp), 
-                                   _met, double(_nVertex), 
-                                   HTLocJECUp,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
-                                   lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
-                                   lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
-                                   };
-
-          vector<double> fillVarJecDw = {
-                                   _lPt[muonIndex], _lPt[eleIndex], 
-                                   _lEta[muonIndex], _lEta[eleIndex], 
-                                   double(nJLocDown), double(nBLocDown), 
-                                   _met, double(_nVertex), 
-                                   HTLocJECDown,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
-                                   lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
-                                   lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
-                                   };
-
-          vector<double> fillVarJerUp = {
-                                   _lPt[muonIndex], _lPt[eleIndex], 
-                                   _lEta[muonIndex], _lEta[eleIndex], 
-                                   double(nJLocUp), double(nBLocUp), 
-                                   _met, double(_nVertex), 
-                                   HTLocJECUp,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
-                                   lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
-                                   lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
-                                   };
-
-          vector<double> fillVarJerDw = {
-                                   _lPt[muonIndex], _lPt[eleIndex], 
-                                   _lEta[muonIndex], _lEta[eleIndex], 
-                                   double(nJLocDown), double(nBLocDown), 
-                                   _met, double(_nVertex), 
-                                   HTLocJECDown,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lPt[muonIndex] : 0.,
-                                   //lepIsGood(muonIndex, leptonSelection) ? _lEta[muonIndex] : -999.,
-                                   lepIsGoodFortZq(muonIndex) ? _lPt[muonIndex] : 0.,
-                                   lepIsGoodFortZq(muonIndex) ? _lEta[muonIndex] : -999.,
-                                   };
+          vector<double> fillVarJecUp = fillVar; fillVarJecUp[4] = double(nJLocUp); fillVarJecUp[5] = double(nBLocUp); fillVarJecUp[8] = HTLocJECUp;
+          vector<double> fillVarJecDw = fillVar; fillVarJecDw[4] = double(nJLocDown); fillVarJecDw[5] = double(nBLocDown); fillVarJecDw[8] = HTLocJECDown;
+          vector<double> fillVarJerUp = fillVarJecUp;
+          vector<double> fillVarJerDw = fillVarJecDw;
 
           vector<TString> fncName = {"ptlead", "sublead",  
                                      "etaLead", "etaSubl",  
@@ -348,16 +354,49 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "met", "nPV", 
                                      "HT",
                                      "ptMuonPassedTight",
-                                     "etaMuonPassedTight"
+                                     "etaMuonPassedTight",
+                                     "ptLepPassedLooseForEff", "etaLepPassedLooseForEff", "ptLepPassedTightForEff", "etaLepPassedTightForEff",
+                                     "etaLepPassedLooseForEffLowPt", "etaLepPassedTightForEffLowPt", "etaLepPassedLooseForEffHighPt",       "etaLepPassedTightForEffHighPt"
                                    };
                                    
           for(int counter = 0; counter < fillVar.size(); counter++){
             int dist = figNames[fncName.at(counter)].index;
             if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[counter]) == listToPrint[selection].end()) continue;
-            distribs[dist].vectorHisto[samCategory].Fill(TMath::Min(fillVar.at(counter),figNames[fncName.at(counter)].varMax-0.1),weight);
+            
+            // this is needed because otherwise it's impossible to draw the tgraph, number events in numerator should be always lower or equal in each bin than in denominator
+            // for tZq
+            /*
+            if((fncName.at(counter) == "ptLepPassedTightForEff" || fncName.at(counter) == "etaLepPassedTightForEff") && !lepIsGoodFortZq(muonIndex)) continue;
+            if((fncName.at(counter) == "etaLepPassedTightForEffLowPt") && (!lepIsGoodFortZq(muonIndex) || _lPt[muonIndex] > 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedLooseForEffLowPt") && (_lPt[muonIndex] > 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedTightForEffHighPt") && (!lepIsGoodFortZq(muonIndex) || _lPt[muonIndex] < 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedLooseForEffHighPt") && (_lPt[muonIndex] < 25)) continue;
+            */
+            
+            if((fncName.at(counter) == "ptLepPassedTightForEff" || fncName.at(counter) == "etaLepPassedTightForEff") && !lepIsGood(muonIndex, leptonSelection)) continue;
+            if((fncName.at(counter) == "etaLepPassedTightForEffLowPt") && (!lepIsGood(muonIndex, leptonSelection) || _lPt[muonIndex] > 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedLooseForEffLowPt") && (_lPt[muonIndex] > 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedTightForEffHighPt") && (!lepIsGood(muonIndex, leptonSelection) || _lPt[muonIndex] < 25)) continue;
+            if((fncName.at(counter) == "etaLepPassedLooseForEffHighPt") && (_lPt[muonIndex] < 25)) continue;
+            if((fncName.at(counter) == "ptLepPassedTightForEff" || fncName.at(counter) == "etaLepPassedTightForEff") && !lepIsGood(muonIndex, leptonSelection)) continue;
+            //if((fncName.at(counter) == "ptMuonPassedTight" || fncName.at(counter) == "etaMuonPassedTight") && !lepIsGood(eleIndex, leptonSelection)) continue;
+            
+            // here we fill out the variables, the distributions for efficiency measuremt should be filled with only muon SF
+            if((fncName.at(counter) == "ptLepPassedTightForEff" || fncName.at(counter) == "etaLepPassedTightForEff" || fncName.at(counter) == "ptLepPassedLooseForEff" || fncName.at(counter) == "etaLepPassedLooseForEff" || fncName.at(counter) == "etaLepPassedLooseForEffLowPt" || fncName.at(counter) == "etaLepPassedLooseForEffHighPt" || fncName.at(counter) == "etaLepPassedTightForEffLowPt" || fncName.at(counter) == "etaLepPassedTightForEffHighPt") && samples[sam].getProcessName() != "data"){
+                //weight /= lepWOnlySystOnlyEle * lepWOnlyRecoOnlyEle;
+                lepSF /= lepWOnlySystOnlyEle * lepWOnlyRecoOnlyEle;
+                lepSFSystUp /= lepWOnlySystOnlyEleUp * lepWOnlyRecoOnlyEle;
+                lepSFSystDown /= lepWOnlySystOnlyEleDown * lepWOnlyRecoOnlyEle;
+                lepSFStatUp /= lepWOnlyStatOnlyEleUp * lepWOnlyRecoOnlyEle;
+                lepSFStatDown /= lepWOnlyStatOnlyEleDown * lepWOnlyRecoOnlyEle;
+                lepSFRecoUp /= lepWOnlyStatOnlyEle * lepWOnlyRecoOnlyEleUp;
+                lepSFRecoDown /= lepWOnlyStatOnlyEle * lepWOnlyRecoOnlyEleDown;
+            }
+            distribs[dist].vectorHisto[samCategory].Fill(TMath::Min(fillVar.at(counter),figNames[fncName.at(counter)].varMax-0.001),weight);
 
             if((samples[sam].getProcessName()) != "data"){
 
+                // here we want to fill distribution which will be later used for systematic uncertainty measurement 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 0, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFSystUp / lepSF);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 0, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFSystDown / lepSF);
                 
@@ -366,43 +405,17 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFRecoUp / lepSF);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight * lepSFRecoDown / lepSF);
-                
-                /*
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 3, figNames[fncName.at(counter)].varMax-0.1, weight*puWUp/puW);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 3, figNames[fncName.at(counter)].varMax-0.1, weight*puWDown/puW);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 4, figNames[fncName.at(counter)].varMax-0.1, weight*btagLUp/btagL);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 4, figNames[fncName.at(counter)].varMax-0.1, weight*btagLDown/btagL);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 5, figNames[fncName.at(counter)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 5, figNames[fncName.at(counter)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(counter), 6, figNames[fncName.at(counter)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(counter), 6, figNames[fncName.at(counter)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJerUp.at(counter), 7, figNames[fncName.at(counter)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJerDw.at(counter), 7, figNames[fncName.at(counter)].varMax-0.1, weight);
-                */
-
-                for(int cat = 0; cat < 20; cat++){
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 3+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 3+cat, figNames[fncName.at(counter)].varMax-0.1, weight);
-                }
-
-                /*
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 21, figNames[fncName.at(counter)].varMax-0.1, weight * 1.025); // 2.5% for lumi
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 21, figNames[fncName.at(counter)].varMax-0.1, weight * 0.975);
-                
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 22, figNames[fncName.at(counter)].varMax-0.1, weight * 1.01); // 1% for trigger 
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 22, figNames[fncName.at(counter)].varMax-0.1, weight * 0.99);
-                */
-                
             }
-            else if(samCategory == nonPromptSample && leptonSelection != 4){
-                for(int cat = 0; cat < 23; cat++){
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), cat, figNames[fncName.at(counter)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), cat, figNames[fncName.at(counter)].varMax-0.1, weight);
-                }
+            else if(samCategory == nonPromptSample){
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 0, figNames[fncName.at(counter)].varMax-0.1, weight * 1.3);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 0, figNames[fncName.at(counter)].varMax-0.1, weight * 0.7);
+                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 1, figNames[fncName.at(counter)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 1, figNames[fncName.at(counter)].varMax-0.1, weight);
+                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(counter), 2, figNames[fncName.at(counter)].varMax-0.1, weight);
+                
             }
           }
       }
@@ -410,7 +423,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       cout << endl;
       samCategory = processIndex.at(samples[sam].getProcessName());
       cout << "Total number of events: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[samCategory].Integral() << endl;
-      cout << "Total number of events in data after nonprompt subtraction: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample].Integral() << endl;
+      //cout << "Total number of events in data after nonprompt subtraction: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample].Integral() << endl;
+      cout << "Total number of events in nonprompt after prompt subtraction: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
       cout << endl;
   }
 
@@ -423,6 +437,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetTextFont(42);
 
   mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
+  //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"OS ttbar 1L","lep"); //data
+  //mtleg->AddEntry(&distribs[0].vectorHisto[2],"SS ttbar 1L","f"); //data
 
   std::map<int, std::string> processIndexReversed;
   std::vector<std::string> processOrder;
@@ -510,16 +526,28 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
 
   TCanvas* plotRatio = new TCanvas("plotRatio","",500,450);
-  showHistEff(plotRatio, distribs[figNames["ptlead"].index], distribs[figNames["ptMuonPassedTight"].index]);
+  showHistEff(plotRatio, distribs[figNames["ptLepPassedLooseForEff"].index], distribs[figNames["ptLepPassedTightForEff"].index], nonPromptSample);
   plotRatio->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatio.pdf");
   plotRatio->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatio.png");
   plotRatio->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatio.root");
   
   TCanvas* plotRatioEta = new TCanvas("plotRatioEta","",500,450);
-  showHistEff(plotRatioEta, distribs[figNames["etaLead"].index], distribs[figNames["etaMuonPassedTight"].index]);
+  showHistEff(plotRatioEta, distribs[figNames["etaLepPassedLooseForEff"].index], distribs[figNames["etaLepPassedTightForEff"].index], nonPromptSample);
   plotRatioEta->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEta.pdf");
   plotRatioEta->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEta.png");
   plotRatioEta->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEta.root");
+  
+  TCanvas* plotRatioEtaLowPt = new TCanvas("plotRatioEtaLowPt","",500,450);
+  showHistEff(plotRatioEtaLowPt, distribs[figNames["etaLepPassedLooseForEffLowPt"].index], distribs[figNames["etaLepPassedTightForEffLowPt"].index], nonPromptSample);
+  plotRatioEtaLowPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaLowPt.pdf");
+  plotRatioEtaLowPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaLowPt.png");
+  plotRatioEtaLowPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaLowPt.root");
+  
+  TCanvas* plotRatioEtaHighPt = new TCanvas("plotRatioEtaHighPt","",500,450);
+  showHistEff(plotRatioEtaHighPt, distribs[figNames["etaLepPassedLooseForEffHighPt"].index], distribs[figNames["etaLepPassedTightForEffHighPt"].index], nonPromptSample);
+  plotRatioEtaHighPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaHighPt.pdf");
+  plotRatioEtaHighPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaHighPt.png");
+  plotRatioEtaHighPt->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/muonEffRatioEtaHighPt.root");
   
   return;
 }

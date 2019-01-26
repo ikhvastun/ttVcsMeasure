@@ -42,6 +42,38 @@ PostFitScaler::PostFitScaler( const std::string& inputFileName ){
     }
 }
 
+void PostFitScaler::setPostfitYields(){
+
+    //read input file
+    std::ifstream fileStream( fileName );   
+
+    //read each line of the input file 
+    std::string line;
+
+    //skip first line 
+    std::getline( fileStream, line ); 
+
+    //check whether txt file has the correct format, it should atleast have four columns
+    if( systemTools::numberOfColumnsInFile( fileName ) < 4 ){
+        std::cerr << "Error in PostFitScaler constructor : input txt file has less than 4 columns and can not be processed. Yields will be left empty!" << std::endl;
+        return;
+    } 
+
+    while( std::getline( fileStream, line ) ){
+        
+        //values to be read
+        std::string channel, process;
+        double preFitYield, postFitYield; 
+
+        //split line and read each part 
+        std::istringstream lineStream( line );
+        lineStream >> channel >> process >> preFitYield >> postFitYield; 
+    
+        postAndPreFitYields[process].push_back( {preFitYield, postFitYield} );
+        
+    }
+}
+
 std::pair< std::string, size_t > PostFitScaler::findProcessAndBin( const double preFitYield ) const{
     std::string process;
     size_t bin;

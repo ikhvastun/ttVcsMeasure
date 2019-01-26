@@ -113,12 +113,14 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
 }
 
     
-void setLabelsForHistos(){
+void setLabelsForHistos(const std::string & selection){
 
     std::vector<std::vector<BinLabelOptions>> labelVector = {flavourLabelOptionsFor3L, flavourLabelOptionsFor4L, flavourLabelOptionsFor4LZZ, theSRLabelOptionsForWZCR, theSRLabelOptionsForZZCR, theSRLabelOptionsForTTCR, theSRLabelOptionsFor3L, theSRLabelOptionsFor4L, theSRLabelOptionsForTTZ, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, flavourLabelOptionsFor3L4L, theSRLabelOptionsForTTZ8SR3L};
-    std::vector<unsigned int> indeces = {indexFlavour3L, indexFlavour4L, indexFlavour4LZZ, indexSRWZCR, indexSRZZCR, indexSRTTCR, indexSR3L, indexSR4L, indexSRTTZ, indexSR3L3m, indexSR3L2m1e, indexSR3L1m2e, indexSR3L3e, indexFlavour3L4L, indexSRTTZ8SR3L};
+    std::vector<unsigned int> indices = {indexFlavour3L, indexFlavour4L, indexFlavour4LZZ, indexSRWZCR, indexSRZZCR, indexSRTTCR, indexSR3L, indexSR4L, indexSRTTZ, indexSR3L3m, indexSR3L2m1e, indexSR3L1m2e, indexSR3L3e, indexFlavour3L4L, indexSRTTZ8SR3L};
+    std::vector<TString> namesOfIndices = {"flavour3L", "flavour4L", "flavour4LZZ", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L", "SR4L", "SRallTTZ", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "flavour3L4L", "SRTTZ8SR3L"};
     for(int ind = 0; ind < labelVector.size(); ind++){
-        for(auto & histo: distribs[indeces.at(ind)].vectorHisto) {
+        if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), namesOfIndices.at(ind)) == listToPrint[selection].end()) continue;
+        for(auto & histo: distribs[indices.at(ind)].vectorHisto) {
             for(const auto & i: labelVector.at(ind)){
                 histo.GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
             }
@@ -128,12 +130,12 @@ void setLabelsForHistos(){
             histo.GetXaxis()->SetLabelOffset(0.02);
         }
 
-        for(auto & histo: distribs[indeces.at(ind)].vectorHistoUncUp) 
+        for(auto & histo: distribs[indices.at(ind)].vectorHistoUncUp) 
             for(const auto & i: labelVector.at(ind))
                 for(unsigned int k = 0; k < numberOfSyst; k++)
                     histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
 
-        for(auto & histo: distribs[indeces.at(ind)].vectorHistoUncDown) 
+        for(auto & histo: distribs[indices.at(ind)].vectorHistoUncDown) 
             for(const auto & i: labelVector.at(ind))
                 for(unsigned int k = 0; k < numberOfSyst; k++)
                     histo.unc[k].GetXaxis()->SetBinLabel(i.index, i.labelSR.c_str());
@@ -558,7 +560,7 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
 
 void initListsToPrint(const std::string & selection){
 
-  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L", "SRWZCR"};
+  listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L", "SRWZCR", "mlll", "etaLead", "etaSubl", "etaTrail"};
   listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
   listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L", "SRTTCR"};
   listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll", "flavour3L"};
@@ -572,7 +574,7 @@ void initListsToPrint(const std::string & selection){
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
   listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L"};
 
-  listToPrint["ttbar_emu"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT", "ptMuonPassedTight", "etaMuonPassedTight"};
+  listToPrint["ttbar_emu"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT", "ptMuonPassedTight", "etaMuonPassedTight", "ptLepPassedLooseForEff", "etaLepPassedLooseForEff", "ptLepPassedTightForEff", "etaLepPassedTightForEff", "etaLepPassedLooseForEffLowPt", "etaLepPassedTightForEffLowPt", "etaLepPassedLooseForEffHighPt", "etaLepPassedTightForEffHighPt"};
   listToPrint["DYTo2L"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT"};
 
   if(selection == "ttbar_emu"){

@@ -165,10 +165,10 @@ void Reweighter::initializeElectronWeights(){
         electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("TTVLooseToTTVLeptonMvattW_stat") );
     }
     if(leptonSelection == 3){
-        //electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_sys") );
-        //electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_stat") );
-        electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_sys") );
-        electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_stat") );
+        electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_sys") );
+        electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_stat") );
+        //electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_sys") );
+        //electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_stat") );
     }
     if(leptonSelection == 4){
         electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ4l_sys") );
@@ -223,10 +223,10 @@ void Reweighter::initializeMuonWeights(){
         muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattW_stat") );
     }
     if(leptonSelection == 3){
-        //muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_sys") );
-        //muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_stat") );
-        muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_sys") );
-        muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_stat") );
+        muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_sys") );
+        muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_stat") );
+        //muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_sys") );
+        //muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_stat") );
     }
     if(leptonSelection == 4){
         muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ4l_sys") );

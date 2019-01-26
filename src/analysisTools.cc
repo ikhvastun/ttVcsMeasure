@@ -254,3 +254,16 @@ std::string tools::formattedDirectoryName(const std::string& directory){
     if(formated.back() != '/') formated.append("/");
     return formated;
 }
+
+void tools::setNegativeBinsToZero( TH1D & h ){
+
+    //check each bin of the histogram, and set its binContent to 0 if it is negative
+    for(int b = 1; b < h.GetNbinsX() + 1; ++b){
+        if(h.GetBinContent(b) < 0.) h.SetBinContent(b, 0.);
+    }
+}
+
+
+void tools::setNegativeBinsToZero( const std::shared_ptr< TH1D >& h){
+    tools::setNegativeBinsToZero( *h.get() );
+}

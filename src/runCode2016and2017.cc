@@ -76,12 +76,27 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   cout << "initiating histos...." << endl;
   initdistribs(namesOfProcesses, selection);
   cout << "finished with initiating of histos"<< endl;
-  setLabelsForHistos();
+  setLabelsForHistos(selection);
 
   std::ofstream myfile;
   myfile.open("myevents.txt");
 
-  PostFitScaler scaler("data/postFit/outputTTZ.txt");
+  PostFitScaler scaler;
+  if(filesToAnalyse.size() == 2){
+    scaler.setInputFile("data/postFit/outputTTZ_comb.txt");
+    scaler.setPostfitYields();
+  }
+  else{
+    if(filesToAnalyse.at(0).find("2017") != std::string::npos){
+        scaler.setInputFile("data/postFit/outputTTZ_2017.txt");
+        scaler.setPostfitYields();
+    }
+    else{
+        scaler.setInputFile("data/postFit/outputTTZ_2016.txt");
+        scaler.setPostfitYields();
+    }
+  }
+
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
@@ -128,7 +143,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 20) break;
+          //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
@@ -296,6 +311,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double mvaVL = 0;
           double mvaVLJECUp = 0;
           double mvaVLJECDown = 0;
+
+          //if(SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) != 12) continue;
+          //if(nJLoc < 3) continue;
 
           // weight estimation for event
           //auto start = std::chrono::high_resolution_clock::now();
@@ -555,19 +573,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 if((samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos || samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos) && samples[sam].is2017()){ 
                     // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - up factor 2, 6, 7 - down factor 2, 30th Aug Daniel said in ttX chat that for FSR factor sqrt(2) should be used, indeces 3 and 5
                     // as well from https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio there is an instruction to use envelope uncertrtainty, i.e. largest between ISR and FSR
-                    // let's take largest deviation from unity for upward and downward fluction
-                    /*
-                    std::vector<double> psWeights = {_psWeight[8], _psWeight[5], _psWeight[6], _psWeight[3]};
-                    double psWUp = largestAmongAll(psWeights);
-                    double psWDown = smallestAmongAll(psWeights);
-
-                    if(debug) cout << "all weights, order is (ISR, FSR up) and (ISR, FSR down): " << _psWeight[8] << " " << _psWeight[5] << " " << _psWeight[6] << " " << _psWeight[3] << endl;
-                    if(debug) cout << "ps weight up and down: " << psWUp << " " << psWDown << endl;
-
-                    //double psWUp = fabs(_psWeight[8] - 1) > fabs(_psWeight[5] - 1) ? _psWeight[8] : _psWeight[5];
-                    //double psWDown = fabs(_psWeight[6] - 1) > fabs(_psWeight[3] - 1) ? _psWeight[6] : _psWeight[3];
-                    */
-
+                    // description of the order for the PS weights: https://twiki.cern.ch/twiki/bin/view/CMS/TopModGen#Event_Generation
                     distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleUp); 
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[6]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleDown); 
 
@@ -622,68 +628,23 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 1.01); // 1% for trigger 
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 0.99);
-                
+
+                if(samples[sam].getProcessName() == "WZ" && nJLoc > 2){ // 20 % uncertainty in tails of njets, namely in njets >= 3
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight * 1.2);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight * 0.8);
+                }
+                else{
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
+                }
+
+
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2,figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 14, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 14, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 15, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 15, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 16, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 16, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 17, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 17, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 18, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 18, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 19, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 19, figNames[fncName.at(dist)].varMax-0.1, weight);
+                for(int cat = 0; cat < 20; cat++){
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                }
 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*1.3);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*0.7);
@@ -693,8 +654,24 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
             }
           }
+      }
+
+      if(samCategory != nonPromptSample && samCategory != dataSample){
+        for(auto & name : listToPrint[selection]){
+            int dist = figNames[name].index;
+            for(int b = 1; b < distribs[dist].vectorHisto[samCategory].GetNbinsX() + 1; ++b){
+               if(distribs[dist].vectorHisto[samCategory].GetBinContent(b) < 0.) distribs[dist].vectorHisto[samCategory].SetBinContent(b, 0.);
+                for(int cat = 0; cat < numberOfSyst; cat++){
+                    if(distribs[dist].vectorHistoUncUp[samCategory].unc[cat].GetBinContent(b) < 0.) distribs[dist].vectorHistoUncUp[samCategory].unc[cat].SetBinContent(b, 0.);
+                    if(distribs[dist].vectorHistoUncDown[samCategory].unc[cat].GetBinContent(b) < 0.) distribs[dist].vectorHistoUncDown[samCategory].unc[cat].SetBinContent(b, 0.);
+                }
+            }
+        }
       }
 
       cout << endl;
@@ -705,6 +682,17 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       cout << endl;
   }
 
+  // after prompt subtraction from non-prompt we set all the negative yields to 0
+  for(auto & name : listToPrint[selection]){
+        int dist = figNames[name].index;
+        for(int b = 1; b < distribs[dist].vectorHisto[nonPromptSample].GetNbinsX() + 1; ++b){
+               if(distribs[dist].vectorHisto[nonPromptSample].GetBinContent(b) < 0.) distribs[dist].vectorHisto[nonPromptSample].SetBinContent(b, 0.);
+                for(int cat = 0; cat < numberOfSyst; cat++){
+                    if(distribs[dist].vectorHistoUncUp[nonPromptSample].unc[cat].GetBinContent(b) < 0.) distribs[dist].vectorHistoUncUp[nonPromptSample].unc[cat].SetBinContent(b, 0.);
+                    if(distribs[dist].vectorHistoUncDown[nonPromptSample].unc[cat].GetBinContent(b) < 0.) distribs[dist].vectorHistoUncDown[nonPromptSample].unc[cat].SetBinContent(b, 0.);
+                }
+        }
+  }
 
   // this should be done to be fully correct in PDF, takes a lot of time, an effect estimated with ttZ sample, uncertainty on acceptance is under 1%, simply assign flat uncertainty of 1 % to all signal and bkg
   // for the moment draw this uncertainty only for SR and will propagate them to datacards 
@@ -731,14 +719,15 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
 
   // legend to print
-  TLegend* mtleg = new TLegend(0.15,0.89,0.95,0.72); 
+  TLegend* mtleg = new TLegend(0.18,0.89,0.92,0.72); 
   mtleg->SetNColumns(4);
   mtleg->SetFillColor(0);
   mtleg->SetFillStyle(0);
   mtleg->SetBorderSize(0);
   mtleg->SetTextFont(42);
+  mtleg->SetTextSize(0.06);
 
-  mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
+  mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","lep"); //data
 
   std::map<int, std::string> processIndexReversed;
   std::vector<std::string> processOrder;
@@ -807,7 +796,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   
   TCanvas* plot[nVars];
   for(int i = 0; i < nVars; i++){
-      plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
+      plot[i] = new TCanvas(Form("plot_%d", i),"",500,500);
   }
 
   std::string crToPrint = selection;
@@ -825,19 +814,21 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
   }
   
+  if(crToPrint == "ttZ"){
+    fillTablesSRTTZ(distribs[indexSRTTZ], processOrder, "SRallTTZ", showLegendOption);
+    //fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", showLegendOption);
+  }
+  if(crToPrint == "ttZclean"){
+    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", showLegendOption);
+  }
+
   // no need to fill datacards when running over 2016 and 2017 together
   if(showLegendOption == 2) return;
   if(crToPrint == "ttZ3Lclean"){
     fillDatacards(distribs[indexSRttZcleanPTZ], processOrder, "SRttZCleanPTZ", (bool)showLegendOption);
     fillDatacards(distribs[indexSRttZcleanCosTheta], processOrder, "SRttZCleanCosTheta", (bool)showLegendOption);
   }
-  if(crToPrint == "ttZclean"){
-    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
-  }
   if(crToPrint == "ttZ"){
-
-    fillTablesSRTTZ(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption);
-    fillTablesForFlavour(distribs[indexFlavour3L4L], processOrder, "flavour3L4L", (bool)showLegendOption);
 
     fillDatacards(distribs[indexSRTTZ8SR3L], processOrder, "SRTTZ8SR3L", (bool)showLegendOption); 
     fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption); 

@@ -10,6 +10,12 @@ bool treeReader::lepIsGoodFortZq(const unsigned l){
     if(!lepIsFOGoodFortZq(l)) return false;
     if(_leptonMvatZqTTV[l] < 0.8) return false;
 
+    /*
+    if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+    if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+    if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
+    */
+
     return true;
 }
 
@@ -251,19 +257,38 @@ bool treeReader::passPtCuts2LOF(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
         ptCorrV.push_back(i);
 
-    if(ptMap[0].first < 25) return false;
+    if(ptMap[0].first < 10) return false;
     if(ptMap[1].first < 10) return false;
+       
+    return true;
+}
+
+bool treeReader::passPtCuts2LOSSF(const std::vector<unsigned>& ind){
+    
+    std::vector<std::pair<double, unsigned>> ptMap;
+    for(auto & i : ind){
+        double ptcor = _lPt[i];
+        ptMap.push_back({ptcor, i});
+    }
+    std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
+
+    ptCorrV.clear();
+    for(auto & i : ptMap)
+        ptCorrV.push_back(i);
+
+    if(ptMap[0].first < 40) return false;
+    if(ptMap[1].first < 25) return false;
        
     return true;
 }
 
 bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
     TLorentzVector jet;	
-    //jet.SetPtEtaPhiE(isData ? _jetPt[ind] : _jetSmearedPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind] * _jetSmearedPt[ind] /  _jetPt[ind]); 
-    jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]); 
+    jet.SetPtEtaPhiE(isData ? _jetPt[ind] : _jetSmearedPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind] * _jetSmearedPt[ind] /  _jetPt[ind]); 
+    //jet.SetPtEtaPhiE(_jetPt[ind], _jetEta[ind], _jetPhi[ind], _jetE[ind]); 
     for(unsigned l = 0; l < _nLight; ++l){
-        if(lepIsFOGoodFortZq(l)){ // cleaning with FO objects
-        //if(lepIsFOGood(l, lepSel)){ // cleaning with FO objects
+        //if(lepIsFOGoodFortZq(l)){ // cleaning with FO objects
+        if(lepIsFOGood(l, lepSel)){ // cleaning with FO objects
             TLorentzVector lep;
             lep.SetPtEtaPhiE(_lPt[l], _lEta[l], _lPhi[l], _lE[l]);
             //cout << "jet lepton cleaning is going on, delta R is: " << lep.DeltaR(jet) << endl;
@@ -279,19 +304,19 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
     // temporary fix to sync with Daniel, 9 july 2018
     //if(!_jetIsTight[ind]) return false;
     switch(unc){
-        /*
         case 0: if((isData ? _jetPt[ind] : _jetSmearedPt[ind]) < ptCut) return false; break;
         case 1: if(_jetSmearedPt_JECDown[ind] < ptCut) return false; break;
         case 2: if(_jetSmearedPt_JECUp[ind] < ptCut) return false; break;
         case 3: if(_jetSmearedPt_JERDown[ind] < ptCut) return false; break;
         case 4: if(_jetSmearedPt_JERUp[ind] < ptCut) return false; break;
-        */
 
+        /*
         case 0: if((_jetPt[ind]) < ptCut) return false; break;
         case 1: if(_jetPt_JECDown[ind] < ptCut) return false; break;
         case 2: if(_jetPt_JECUp[ind] < ptCut) return false; break;
         case 3: if(_jetPt_JERDown[ind] < ptCut) return false; break;
         case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;
+        */
         default: ;
     }
     return !clean || jetIsClean(ind, leptonSelection);
@@ -360,8 +385,8 @@ unsigned treeReader::nBJets(const unsigned unc, const bool deepCSV, const bool c
 double treeReader::HTCalc(const std::vector<unsigned>& ind){
     double HT = 0;
     for(auto & i : ind)
-        //HT += isData ? _jetPt[i] : _jetSmearedPt[i];
-        HT += _jetPt[i];
+        HT += isData ? _jetPt[i] : _jetSmearedPt[i];
+        //HT += _jetPt[i];
     return HT;
 }
 
@@ -385,7 +410,6 @@ double treeReader::deltaRCalc(const std::vector<unsigned>& ind, unsigned & lept,
 bool treeReader::invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind){
                         
     TLorentzVector l0p4, l1p4;
-
     bool belowMllheavyFlavourResonances = false;
 
     for (unsigned l0 = 0; l0 < ind.size(); l0++) {
@@ -397,6 +421,26 @@ bool treeReader::invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind){
             double mdiL = l1p4.M();
                 
             if (mdiL < 12) belowMllheavyFlavourResonances = true;       
+        }
+    }
+
+    return belowMllheavyFlavourResonances;
+}
+
+bool treeReader::invMassOfAny2Lbelow20GeV(const std::vector<unsigned>& ind){
+                        
+    TLorentzVector l0p4, l1p4;
+    bool belowMllheavyFlavourResonances = false;
+
+    for (unsigned l0 = 0; l0 < ind.size(); l0++) {
+        l0p4.SetPtEtaPhiE(_lPt[ind.at(l0)],_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] );          
+        for(unsigned l1 = l0+1; l1 < ind.size(); l1++){
+
+            l1p4.SetPtEtaPhiE(_lPt[ind.at(l1)],_lEta[ind.at(l1)],_lPhi[ind.at(l1)],_lE[ind.at(l1)]);
+            l1p4+=l0p4;
+            double mdiL = l1p4.M();
+                
+            if (mdiL < 20) belowMllheavyFlavourResonances = true;       
         }
     }
 
@@ -542,7 +586,7 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "ZZ") return kGreen+3;
     if(name == "rare") return 8;
     if(name == "Xgamma") return kGreen;
-    if(name == "DY") return kBlue-9;
+    if(name == "DY") return 8;
     if(name == "WJets") return kGreen;
     if(name == "VV") return 51;
     if(name == "tX") return 91;

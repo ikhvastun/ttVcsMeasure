@@ -15,6 +15,7 @@ WZ   WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root             
 Xgamma ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root              131.3 
 Xgamma TGJets_TuneCUETP8M1_13TeV_amcatnlo_madspin_pythia8_Summer16.root  					2.967
 Xgamma TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_Summer16.root	    		3.697
+Xgamma WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root 						585
 ZZ ZZTo4L_13TeV_powheg_pythia8_Summer16.root                                             1.3816
 ZZ   GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8_Summer16.root 0.005423
 ZZ   GluGluToContinToZZTo2e2tau_13TeV_MCFM701_pythia8_Summer16.root 0.005423
@@ -26,7 +27,6 @@ ZZ   VBF_HToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8_Summer16.root 0.001034
 ZZ   WplusH_HToZZTo4L_M125_13TeV_powheg2-minlo-HWJ_JHUgenV6_pythia8_Summer16.root 0.0002339
 ZZ   WminusH_HToZZTo4L_M125_13TeV_powheg2-minlo-HWJ_JHUgenV6_pythia8_Summer16.root 0.0001471
 ZZ   ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUgenV6_pythia8_Summer16.root 0.000652
-rare WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Summer16.root 						585
 rare WZG_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Summer16.root        						0.04123
 rare ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Summer16.root								0.01398
 rare WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Summer16.root								0.05565
