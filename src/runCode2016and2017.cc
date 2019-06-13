@@ -785,9 +785,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
        showLegendOption = 0;
     }
   }
+
   gSystem->Exec("rm plotsForSave/" + folderToStorePlots + processToStore + "/*.{pdf,png,root}");
   gSystem->Exec("rmdir plotsForSave/" + folderToStorePlots + processToStore);
-  gSystem->Exec("mkdir plotsForSave/" + folderToStorePlots + processToStore);
+  gSystem->Exec("mkdir -p plotsForSave/" + folderToStorePlots + processToStore);
   double scale_num = 1.6;
   
   TCanvas* plot[nVars];
