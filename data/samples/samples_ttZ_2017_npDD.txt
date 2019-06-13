@@ -1,11 +1,11 @@
 data data_combined_Fall17.root                                        				1
-ttZ  TTZToLLNuNu_M-10_TuneCP5_PSweights_13TeV-amcatnlo-pythia8_realistic_v14_Fall17.root                   0.2728
+ttZ  TTZToLLNuNu_M-10_TuneCP5_PSweights_13TeV-amcatnlo-pythia8_realistic_v14_Fall17.root                   0.2529
 ttH  ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_realistic_v10_Fall17.root 		0.215
 ttX  tZq_ll_4f_ckm_NLO_TuneCP5_PSweights_13TeV-amcatnlo-pythia8_realistic_v14_Fall17.root										0.09418
-ttX  THQ_4f_Hincl_13TeV_madgraph_pythia8_realistic_v14_Fall17.root 0.261
 ttX  ST_tWll_5f_LO_TuneCP5_PSweights_13TeV-madgraph-pythia8_realistic_v14_Fall17.root 0.01123
-ttX  THW_5f_Hincl_13TeV_madgraph_pythia8_realistic_v11_Fall17.root 0.01561
 ttX  TTWJetsToLNu_TuneCP5_PSweights_13TeV-amcatnloFXFX-madspin-pythia8_realistic_v14_Fall17.root  		0.2043
+ttX  THQ_4f_Hincl_13TeV_madgraph_pythia8_realistic_v14_Fall17.root 0.261
+ttX  THW_5f_Hincl_13TeV_madgraph_pythia8_realistic_v11_Fall17.root 0.01561
 ttX  TTZToLL_M-1to10_TuneCP5_13TeV-amcatnlo-pythia8_realistic_v10_Fall17.root                    0.0493
 ttX  TTTT_TuneCP5_13TeV-amcatnlo-pythia8_realistic_v10_Fall17.root                              0.009103
 ttX  TTWW_TuneCP5_13TeV-madgraph-pythia8_realistic_v10_Fall17.root                          7.829e-3

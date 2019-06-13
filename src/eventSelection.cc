@@ -10,12 +10,6 @@ bool treeReader::lepIsGoodFortZq(const unsigned l){
     if(!lepIsFOGoodFortZq(l)) return false;
     if(_leptonMvatZqTTV[l] < 0.8) return false;
 
-    /*
-    if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
-    if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
-    if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
-    */
-
     return true;
 }
 
@@ -592,6 +586,11 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "tX") return 91;
     if(name == "TTto2L") return 98;
     if(name == "TTto1L") return kGreen+3;
+    // ttX check
+    if(name == "tWZ") return 51;
+    if(name == "tZq") return kGreen+3;
+    if(name == "tHq") return kGreen;
+    if(name == "ttWZ") return 8;
 
     return kBlack;
 }
@@ -741,44 +740,17 @@ double treeReader::SRIDTTZ(const std::vector<unsigned>& ind, std::vector<unsigne
             if(njets == 0) return -999.;
             return njets < 4 ? njets-1 : 3; // SR 0, 1, 2, 3
         }
-        /*
-        else if(passttbarCRSelection(nbjets, dMZ, mlll)){
-            //if(njets < 2) return -999.;
-            int nbjetsInd = nbjets < 2 ? nbjets : 2;
-            //int njetsInd = njets < 4 ? njets-2 : 2;
-            int njetsInd = njets < 3 ? 0 : (njets == 3 ? 1 : 2);
-            return 8 + nbjetsInd * 3 + njetsInd; // 8, 9, 10, 11, 12, 13, 14, 15, 16
-        }
-        */
         else if(passTTZSelection(njets, dMZ)){
             if(nbjets < 1)  return -999.;
             int nbjetsInd = nbjets < 2 ? 0 : 1;
             int njetsInd  = njets < 5 ? njets-2 : 3;
-            /*
-            int njetsInd; 
-            if(nbjetsInd == 0)
-                njetsInd = njets < 5 ? njets-1 : 4;
-            if(nbjetsInd == 1)
-                njetsInd = njets < 5 ? njets-2 : 3;
-            return 4 + nbjetsInd * 5 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11, 12 // added nbjets = 1, njets = 1 bin
-            */
             return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
         }
     }
     else if(leptonSelection == 4){
-        /*
-        if(passZZCRSelection(ind, indOf2LonZ, njets)){
-            if(njets < 1) return -999.;
-            int nbjetsInd = nbjets < 1 ? 0 : 1;
-            int njetsInd = njets < 2 ? 0 : 1;
-            return 4 + nbjetsInd * 2 + njetsInd; // 4, 5, 6, 7
-        }
-        */
         if(passTTZ4LSelection(ind, indOf2LonZ, njets)){
             int nbjetsInd = nbjets < 1 ? 0 : 1;
             return 12 + nbjetsInd; // 12, 13, 14 // nj1nb1, nj2nb0, nj2nb1
-            //int returnIndex = (njets == 1 ? (nbjets == 1 ? 13 : -999) : (nbjets == 0 ? 14 : 15 ));
-            //return returnIndex;
         }
     }
     return -999;
@@ -817,26 +789,6 @@ double treeReader::SRID8SR3L(int & njets, int & nbjets, const double & dMZ) {
 }
 
 double treeReader::SRID3L(int & njets, int & nbjets, const double & dMZ) {
-    /*
-    double index = -1.;
-    
-    const int njetsCategories = 4;
-
-    int njetsIndex = -999;
-    if (njets == 2) njetsIndex = 0;
-    else if (njets == 3) njetsIndex = 1;
-    else if (njets == 4) njetsIndex = 2;
-    else if (njets >= 5) njetsIndex = 3;
-    
-    int nbjetsIndex = -999;
-    if (nbjets == 1) nbjetsIndex = 0;
-    else if (nbjets >= 2) nbjetsIndex = 1;
-    //else if (nbjets >= 2) nbjetsIndex = 2;
-
-    index = nbjetsIndex * njetsCategories + njetsIndex;
-
-    return index;
-    */
     if(leptonSelection == 3){
         if(passWZCRSelection(nbjets, dMZ)){
             if(njets == 0) return -999.;
@@ -847,14 +799,6 @@ double treeReader::SRID3L(int & njets, int & nbjets, const double & dMZ) {
             int nbjetsInd = nbjets < 2 ? 0 : 1;
             int njetsInd = njets < 5 ? njets-2 : 3;
             return 4 + nbjetsInd * 4 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11
-            /*
-            int njetsInd;
-            if(nbjetsInd == 0)
-                njetsInd = njets < 5 ? njets-1 : 4;
-            if(nbjetsInd == 1)
-                njetsInd = njets < 5 ? njets-2 : 3;
-            return 4 + nbjetsInd * 5 + njetsInd; // 4, 5, 6, 7, 8, 9, 10, 11, 12 // added nbjets = 1, njets = 1 bin
-            */
         }
     }
     return -999;
@@ -877,10 +821,6 @@ double treeReader::SRIDCosTheta(const double & cosTheta) const{
 double treeReader::SRID4L(int & njets, int & nbjets){
     if(nbjets == 0) return 0.;
     else if(nbjets > 0) return 1.;
-    /*
-    int returnIndex = njets == 1 ? (nbjets == 1 ? 0 : -999) : (nbjets == 0 ? 1 : 2 );
-    return returnIndex;
-    */
 }
 
 double treeReader::SRIDWZCR(const int & njets, const int & nbjets, const double & dMZ){

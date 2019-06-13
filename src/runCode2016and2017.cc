@@ -81,21 +81,11 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   std::ofstream myfile;
   myfile.open("myevents.txt");
 
-  PostFitScaler scaler;
-  if(filesToAnalyse.size() == 2){
-    scaler.setInputFile("data/postFit/outputTTZ_comb.txt");
-    scaler.setPostfitYields();
-  }
-  else{
-    if(filesToAnalyse.at(0).find("2017") != std::string::npos){
-        scaler.setInputFile("data/postFit/outputTTZ_2017.txt");
-        scaler.setPostfitYields();
-    }
-    else{
-        scaler.setInputFile("data/postFit/outputTTZ_2016.txt");
-        scaler.setPostfitYields();
-    }
-  }
+  PostFitScaler scaler2016, scaler2017;
+  scaler2016.setInputFile("data/postFit/outputTTZ_2016_new.txt");
+  scaler2016.setPostfitYields();
+  scaler2017.setInputFile("data/postFit/outputTTZ_2017_new.txt");
+  scaler2017.setPostfitYields();
 
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
@@ -105,9 +95,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, samCategory);
 
-      //if(!(samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
+      //if(!(samples[sam].getFileName().find("ttHToNonbb") != std::string::npos || samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "WZ") continue;
+      if(samples[sam].getProcessName() == "data") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
       if(samples[sam].getProcessName() == "nonpromptData"){
@@ -205,9 +196,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if((samples[sam].getProcessName()) == "Nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
           if(leptonSelection == 3){
-            if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ" || (samples[sam].getProcessName()) == "ttX" 
-                                                       || (samples[sam].getProcessName()) == "WZ" || (samples[sam].getProcessName()) == "Xgamma"  || (samples[sam].getProcessName()) == "ZZ" 
-                                                       || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
+            if(((samples[sam].getProcessName()) == "ttW" || (samples[sam].getProcessName()) == "ttH" || (samples[sam].getProcessName()) == "ttZ"     || (samples[sam].getProcessName()) == "ttX" 
+                                                         || (samples[sam].getProcessName()) == "WZ"  || (samples[sam].getProcessName()) == "Xgamma"  || (samples[sam].getProcessName()) == "ZZ" 
+                                                         || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
           }
           if(leptonSelection == 4){
             // WZ goes to nonprompt here
@@ -215,7 +206,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             if(!allLeptonsArePrompt) samCategory = nonPromptSample;
           }
           int nLocEle = getElectronNumber(ind);
-          //if(nLocEle != 3) continue;
+          //if(nLocEle != 0) continue;
 
           // lepton pt criteria
           if(leptonSelection == 4)
@@ -289,9 +280,11 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
             // here are some thoughts: clean selection is defined with njets >= 3, nbjets >= 1 cuts, if it's defined here at selection step then no events with njets == 2 selection and having 3 jets with upward variation will not enter the selection
             // should consider njets == 2 selection and later when filling the histograms ask for 3 jets with variation to pass selection 
-            //if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue; 
+            // this option is used to answer the question from Giovanni, 6th of Feb 2019
+            if(selection == "ttZ3Lclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue; 
             
-            if(selection == "ttZ3Lclean" && !passTTZSelection(nJLoc, dMZ)) continue;
+            // this option should be used to get the datacards to Joscha
+            //if(selection == "ttZ3Lclean" && !passTTZSelection(nJLoc, dMZ)) continue;
             if(selection == "ttZclean" && !passTTZCleanSelection(nJLoc, nBLoc, dMZ)) continue;
             if(selection == "WZ" && !passWZCRSelection(nBLoc, dMZ)) continue;
             if(selection == "DY" && !passDYCRSelection(dMZ, ptNonZ, third, _met, _metPhi, nJLoc, nBLoc)) continue;
@@ -312,9 +305,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double mvaVLJECUp = 0;
           double mvaVLJECDown = 0;
 
-          //if(SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) != 12) continue;
-          //if(nJLoc < 3) continue;
-
           // weight estimation for event
           //auto start = std::chrono::high_resolution_clock::now();
           
@@ -332,7 +322,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           int mvaValueRegion = 0;
 
           if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) << endl; 
-          if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
+          //if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
+          if(samples[sam].getProcessName() == "data" && samCategory == dataSample) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
 
           vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
@@ -356,6 +347,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
                                    };
 
           vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -379,6 +371,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
                                    };
 
           vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -402,6 +395,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
                                    };
 
           vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -425,6 +419,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
                                    };
 
           vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -448,6 +443,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
                                    };
 
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
@@ -466,7 +462,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "flavour3L", "flavour4L", "flavour4LZZ", 
                                      "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
                                      "flavour3L4L",
-                                     "SRTTZ8SR3L"
+                                     "SRTTZ8SR3L",
+                                     "mllnoZcut"
                                    };
                                    
           //start = std::chrono::high_resolution_clock::now();
@@ -483,39 +480,38 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           double jetPrefW = 1.;
 
-          if((samples[sam].getProcessName()) != "data"){
+          //if((samples[sam].getProcessName()) != "data"){
+          if(samCategory != dataSample){
             double lepWOnlySyst = leptonWeightOnlySyst(0); double lepWOnlySystUp = leptonWeightOnlySyst(1); double lepWOnlySystDown = leptonWeightOnlySyst(2);
             double lepWOnlyStat = leptonWeightOnlyStat(0); double lepWOnlyStatUp = leptonWeightOnlyStat(1); double lepWOnlyStatDown = leptonWeightOnlyStat(2);
             double lepWOnlyReco = leptonWeightOnlyReco(0); double lepWOnlyRecoUp = leptonWeightOnlyReco(1); double lepWOnlyRecoDown = leptonWeightOnlyReco(2);
 
-            /*
-            lepSF = lepWOnlySyst * lepWOnlyStat * lepWOnlyReco; 
-            lepSFSystUp = lepWOnlySystUp * lepWOnlyStat * lepWOnlyReco; 
-            lepSFSystDown = lepWOnlySystDown * lepWOnlyStat * lepWOnlyReco;
-            lepSFStatUp = lepWOnlySyst * lepWOnlyStatUp * lepWOnlyReco; 
-            lepSFStatDown = lepWOnlySyst * lepWOnlyStatDown * lepWOnlyReco; 
-            lepSFRecoUp = lepWOnlySyst * lepWOnlyStat * lepWOnlyRecoUp; 
-            lepSFRecoDown = lepWOnlySyst * lepWOnlyStat * lepWOnlyRecoDown; 
-            */
+            if(samCategory != nonPromptSample){
+                lepSF = lepWOnlySyst * lepWOnlyReco; // consider only one between syst and stat, central value is the same
+                lepSFSystUp = lepWOnlySystUp * lepWOnlyReco; 
+                lepSFSystDown = lepWOnlySystDown * lepWOnlyReco;
+                lepSFStatUp = lepWOnlyStatUp * lepWOnlyReco; 
+                lepSFStatDown = lepWOnlyStatDown * lepWOnlyReco; 
+                lepSFRecoUp = lepWOnlySyst * lepWOnlyRecoUp; 
+                lepSFRecoDown = lepWOnlySyst * lepWOnlyRecoDown; 
 
-            lepSF = lepWOnlySyst * lepWOnlyReco; // consider only one between syst and stat, central value is the same
-            lepSFSystUp = lepWOnlySystUp * lepWOnlyReco; 
-            lepSFSystDown = lepWOnlySystDown * lepWOnlyReco;
-            lepSFStatUp = lepWOnlyStatUp * lepWOnlyReco; 
-            lepSFStatDown = lepWOnlyStatDown * lepWOnlyReco; 
-            lepSFRecoUp = lepWOnlySyst * lepWOnlyRecoUp; 
-            lepSFRecoDown = lepWOnlySyst * lepWOnlyRecoDown; 
+                puW = puWeight(0); puWUp = puWeight(1); puWDown = puWeight(2);
 
-            puW = puWeight(0); puWUp = puWeight(1); puWDown = puWeight(2);
-
-            btagL = bTagWeight_udsg(0); btagLUp = bTagWeight_udsg(1); btagLDown = bTagWeight_udsg(2);
-            btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
-            btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
+                btagL = bTagWeight_udsg(0); btagLUp = bTagWeight_udsg(1); btagLDown = bTagWeight_udsg(2);
+                btagC = bTagWeight_c(0); btagCUp = bTagWeight_c(1); btagCDown = bTagWeight_c(2);
+                btagB = bTagWeight_b(0); btagBUp = bTagWeight_b(1); btagBDown = bTagWeight_b(2);
+            }
 
             //jetPrefW = jetPrefiringWeight();
 
             // for post fit scaling
-            weight *= scaler.postFitScaling(samples[sam].getProcessName());
+            // used previously
+            // weight *= scaler.postFitScaling(samples[sam].getProcessName());
+            
+            if(samples[sam].is2016())
+                weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+            else
+                weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
 
           }
           if(debug){
@@ -727,7 +723,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetTextFont(42);
   mtleg->SetTextSize(0.06);
 
-  mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","lep"); //data
+  mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","p"); //data
 
   std::map<int, std::string> processIndexReversed;
   std::vector<std::string> processOrder;

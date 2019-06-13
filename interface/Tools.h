@@ -1,6 +1,3 @@
-//const unsigned int indexSR = 9;
-//const unsigned int indexFlavour = 8; 
-
 #include "errors.h"
 #include "treeReader.h"
 #include "mt2_bisect.h"
@@ -14,56 +11,6 @@ double SRID2L (double mvaVL, double chargesLepton) {
     if(mvaVL < -1) return -1;
     else return floor((mvaVL + 1) / 0.2) + 10 * chargesLeptonIndex;
 }
-    /*
-double SRID2L (int njets, int nbjets, int mvaValueRegion, double chargesLepton) {
-    double index = -1;
-
-    int chargesLeptonIndex = (chargesLepton == 1.);
-    if(mvaValueRegion == 2) chargesLeptonIndex = 0.;
-
-    if(njets == 2)
-        index = 0 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;
-
-    if(njets == 3 && nbjets == 1)
-        index = 1 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;
-
-    if(njets == 3 && nbjets > 1)
-        index = 2 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;   
-
-    if(njets > 3 && nbjets == 1)
-        index = 3 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;
-
-    if(njets > 3 && nbjets > 1)
-        index = 4 + 5 * mvaValueRegion + 10 * chargesLeptonIndex;
-    
-    if(mvaValueRegion == 2 && njets == 2) 
-        index = 20;
-    if(mvaValueRegion == 2 && njets == 3) 
-        index = 21;
-    if(mvaValueRegion == 2 && njets > 3) 
-        index = 22;
-
-    if(njets == 2)
-        index = 0 + 5 * chargesLeptonIndex;
-
-    if(njets == 3 && nbjets == 1)
-        index = 1 + 5 * chargesLeptonIndex;
-
-    if(njets == 3 && nbjets > 1)
-        index = 2 + 5 * chargesLeptonIndex;   
-
-    if(njets > 3 && nbjets == 1)
-        index = 3 + 5 * chargesLeptonIndex;
-
-    if(njets > 3 && nbjets > 1)
-        index = 4 + 5 * chargesLeptonIndex;
-    
-  
-    return index;
-
-}
-    */
-
 
 void initdistribs(std::vector<std::string> & namesOfSamples, const std::string & selection){
 
@@ -115,9 +62,9 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
     
 void setLabelsForHistos(const std::string & selection){
 
-    std::vector<std::vector<BinLabelOptions>> labelVector = {flavourLabelOptionsFor3L, flavourLabelOptionsFor4L, flavourLabelOptionsFor4LZZ, theSRLabelOptionsForWZCR, theSRLabelOptionsForZZCR, theSRLabelOptionsForTTCR, theSRLabelOptionsFor3L, theSRLabelOptionsFor4L, theSRLabelOptionsForTTZ, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, flavourLabelOptionsFor3L4L, theSRLabelOptionsForTTZ8SR3L};
-    std::vector<unsigned int> indices = {indexFlavour3L, indexFlavour4L, indexFlavour4LZZ, indexSRWZCR, indexSRZZCR, indexSRTTCR, indexSR3L, indexSR4L, indexSRTTZ, indexSR3L3m, indexSR3L2m1e, indexSR3L1m2e, indexSR3L3e, indexFlavour3L4L, indexSRTTZ8SR3L};
-    std::vector<TString> namesOfIndices = {"flavour3L", "flavour4L", "flavour4LZZ", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L", "SR4L", "SRallTTZ", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "flavour3L4L", "SRTTZ8SR3L"};
+    std::vector<std::vector<BinLabelOptions>> labelVector = {flavourLabelOptionsFor3L, flavourLabelOptionsFor4L, flavourLabelOptionsFor4LZZ, theSRLabelOptionsForWZCR, theSRLabelOptionsForZZCR, theSRLabelOptionsForTTCR, theSRLabelOptionsFor3L, theSRLabelOptionsFor4L, theSRLabelOptionsForTTZ, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, theSRLabelOptionsFor3L, flavourLabelOptionsFor3L4L, theSRLabelOptionsForTTZ8SR3L, theSRLabelOptionsForttZCleanPTZ, theSRLabelOptionsForttZCleanCosTheta};
+    std::vector<unsigned int> indices = {indexFlavour3L, indexFlavour4L, indexFlavour4LZZ, indexSRWZCR, indexSRZZCR, indexSRTTCR, indexSR3L, indexSR4L, indexSRTTZ, indexSR3L3m, indexSR3L2m1e, indexSR3L1m2e, indexSR3L3e, indexFlavour3L4L, indexSRTTZ8SR3L, indexSRttZcleanPTZ, indexSRttZcleanCosTheta};
+    std::vector<TString> namesOfIndices = {"flavour3L", "flavour4L", "flavour4LZZ", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L", "SR4L", "SRallTTZ", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "flavour3L4L", "SRTTZ8SR3L", "SRttZCleanPTZ", "SRttZCleanCosTheta"};
     for(int ind = 0; ind < labelVector.size(); ind++){
         if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), namesOfIndices.at(ind)) == listToPrint[selection].end()) continue;
         for(auto & histo: distribs[indices.at(ind)].vectorHisto) {
@@ -562,14 +509,14 @@ void initListsToPrint(const std::string & selection){
 
   listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L", "SRWZCR", "mlll", "etaLead", "etaSubl", "etaTrail"};
   listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
-  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L", "SRTTCR"};
+  listToPrint["ttbar"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L", "SRTTCR", "etaLead", "etaSubl", "etaTrail"};
   listToPrint["DY"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "mlll", "flavour3L"};
   listToPrint["ttW"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "BDTpp", "BDTmm", "minMLeptonJet", "maxMLeptonJet", "minDeltaRLeptonJet", "maxDeltaRLeptonJet", "minDeltaPhiLeptonJet", "maxDeltaPhiLeptonJet", "minpTLeptonJet", "maxpTLeptonJet", "minMLeptonbJet", "maxMLeptonbJet", "minDeltaRLeptonbJet", "maxDeltaRLeptonbJet", "minDeltaPhiLeptonbJet", "maxDeltaPhiLeptonbJet", "minpTLeptonbJet", "maxpTLeptonbJet", "minMJetJet", "maxMJetJet", "minDeltaRJetJet", "maxDeltaRJetJet", "minDeltaPhiJetJet", "maxDeltaPhiJetJet", "minpTJetJet", "maxpTJetJet", "minDeltaPhiLeptonMET", "maxDeltaPhiLeptonMET", "minmTLeptonMET", "maxmTLeptonMET", "minpTLeptonMET", "maxpTLeptonMET", "minDeltaPhiJetMET", "maxDeltaPhiJetMET", "minmTJetMET", "maxmTJetMET", "minpTJetMET", "maxpTJetMET", "minDeltaPhiBJetMET", "maxDeltaPhiBJetMET", "minmTBJetMET", "maxmTBJetMET", "minpTBJetMET", "maxpTBJetMET"}; 
   listToPrint["ttWclean"] = {"ptlead", "sublead", "njets", "nbjets", "HT", "met", "nPV", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "etaLead", "etaSubl",     "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "SR", "BDTpp", "BDTmm"}; 
   listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4LZZ", "SRZZCR"};
   listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "flavour3L"};
-  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L"};
-  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L"};
+  listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu"};
+  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L", "mllnoZcut"};
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
   listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L"};

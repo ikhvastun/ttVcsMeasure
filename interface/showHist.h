@@ -48,6 +48,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         pad1->SetLogy();
     
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
+    // here is the code for blinding, number of events in data is set to 0
     // finally we are unblinded, 23 Oct 2018
     /*
     if(showLegendOption > 0 && (info.index == indexSRTTZ || info.index == indexSR3L || info.index == indexSR4L || info.index == indexSR3L3m || info.index == indexSR3L2m1e || info.index == indexSR3L1m2e || info.index == indexSR3L3e)){ // keep it blinded for 2017, showLegendOption = 1 and 2 for 2017 and comb of 2 datasets
@@ -60,7 +61,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     dataHist->SetMarkerSize(1);
     dataHist->SetTitle("");
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
-    dataHist->GetYaxis()->SetTitle(("Events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
+    dataHist->GetYaxis()->SetTitle(("Number of events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
     dataHist->SetMinimum(0.01);
     dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
     if(plotInLog){
@@ -111,7 +112,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
     TH1D *histSystAndStatUnc = (TH1D*)(distribs.stack.GetStack()->Last())->Clone(Form("histSystAndStatUnc"));
     setUpSystUnc(distribs, histSystAndStatUnc);
-    histSystAndStatUnc->Draw("same");
+    //histSystAndStatUnc->Draw("same");
 
     TLegend* mtlegRatio = new TLegend(0.17,0.39,0.85,0.58);
     mtlegRatio->SetNColumns(4);
@@ -325,7 +326,7 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
       //dataGraph->SetPointError(i, 0., 0., uncRatio[1], uncRatio[0]);
     }
 
-    //dataHistTightUncCopy->Draw("e2same");
+    dataHistTightUncCopy->Draw("e2same");
     dataGraph->Draw("e2psame");
 
     double xmin = dataHistTightCopy->GetXaxis()->GetXmin();
@@ -639,7 +640,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
 
     stackCopy->SetTitle("");
     stackCopy->GetXaxis()->SetTitle(info.fancyName.c_str());
-    stackCopy->GetYaxis()->SetTitle("data/pred");
+    stackCopy->GetYaxis()->SetTitle("Data/pred");
 
     stackCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
