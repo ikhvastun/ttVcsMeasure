@@ -16,7 +16,7 @@ To run the code use the following semantics:
 
 The following possible options are:
 
-- [files to run on]: use 1 or 2 files from data/samples/ directory, if you wanna use 2 files use ',' as a separator
+- [files to run on]: use 1 or 2 files from `data/samples/` directory, if you wanna use 2 files use `,` as a separator
 ```bash
 ./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt runFullSelection selection:ttZclean
 ```
@@ -36,5 +36,11 @@ The following possible options are:
   ```
 
 - [selections you wanna use] : specify selection (you wanna look into control region WZ or ttZ enriched region). Put selection: before the name of the selection. Possible options are: (ttZ3L, ttZ4L, ttZ, ttZclean, WZ, ZZ, ttbar, DY, Xgamma)
+
+To submit code on T2 use `submitCR.sh` code in `scripts/` directory.
+
+```bash
+sh submitCR.sh
+```
 
 
