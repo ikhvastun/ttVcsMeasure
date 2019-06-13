@@ -326,7 +326,6 @@ void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & dis
       //dataGraph->SetPointError(i, 0., 0., uncRatio[1], uncRatio[0]);
     }
 
-    dataHistTightUncCopy->Draw("e2same");
     dataGraph->Draw("e2psame");
 
     double xmin = dataHistTightCopy->GetXaxis()->GetXmin();
