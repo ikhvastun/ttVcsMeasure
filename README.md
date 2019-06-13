@@ -17,23 +17,23 @@ usage: git [--version] [--help] [-C <path>] [-c name=value]
 
 The following possible options are:
 
-1. [files to run on]: use 1 or 2 files from data/samples/ directory, if you wanna use 2 files use ',' as a separator
+- [files to run on]: use 1 or 2 files from data/samples/ directory, if you wanna use 2 files use ',' as a separator
 ```bash
 ./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt runFullSelection selection:ttZclean
 ```
 
-2. [options to run]: (runFullSelection, runOnOneProcess, debug)
-   a. runFullSelection -> runs the whole code over all files specified in previous option
-   b. runOnOneProcess -> run on one specific process, for example ttZ, ttX, etc. If you wanna use it, put the process to run on in the end of the command
+- [options to run]: (runFullSelection, runOnOneProcess, debug)
+   * runFullSelection -> runs the whole code over all files specified in previous option
+   * runOnOneProcess -> run on one specific process, for example ttZ, ttX, etc. If you wanna use it, put the process to run on in the end of the command
 ```bash
 ./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt runOnOneProcess selection:ttZclean ttZ
 ```
-   c. debug -> shows all possible information (lepton pt, jet pt, etc), in this case specify in the end process to run on and event number
+   * debug -> shows all possible information (lepton pt, jet pt, etc), in this case specify in the end process to run on and event number
 
 ```bash
 ./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt debug selection:ttZ data 1594370560
 ```
 
-3. [selections you wanna use] : specify selection (you wanna look into control region WZ or ttZ enriched region). Put selection: before the name of the selection. Possible options are: (ttZ3L, ttZ4L, ttZ, ttZclean, WZ, ZZ, ttbar, DY, Xgamma)
+- [selections you wanna use] : specify selection (you wanna look into control region WZ or ttZ enriched region). Put selection: before the name of the selection. Possible options are: (ttZ3L, ttZ4L, ttZ, ttZclean, WZ, ZZ, ttbar, DY, Xgamma)
 
 
