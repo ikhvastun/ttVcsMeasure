@@ -121,6 +121,41 @@ bool treeReader::lepIsLoose(const unsigned ind){
     return true;
 }
 
+bool treeReader::lepIsGoodForLeptonMVA(const unsigned ind){
+    if(_lFlavor[ind] == 2) return false;  //don't consider taus here
+    if(_lPt[ind] <= 10) return false;
+    if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
+    if(fabs(_dxy[ind]) >= 0.05) return false;
+    if(fabs(_dz[ind]) >= 0.1) return false;
+    if(_3dIPSig[ind] >= 8) return false;
+    if(_miniIso[ind] >= 0.4) return false;
+    if(_lFlavor[ind] == 1){
+        if(!_lPOGLoose[ind]) return false;
+        if(!_lPOGMedium[ind]) return false;
+    } else if(_lFlavor[ind] == 0){
+        if(_lElectronMissingHits[ind] > 1) return false;
+        if(!_lElectronPassEmu[ind]) return false;
+    }
+    return true;
+}
+
+unsigned treeReader::selectLepGoodForLeptonMVA(std::vector<unsigned>& ind){
+    unsigned lCount = 0;
+    std::vector<std::pair<double, unsigned>> ptMap;
+    for(unsigned l = 0; l < _nLight; ++l){
+        if(lepIsGoodForLeptonMVA(l)){
+            ++lCount;
+            ptMap.push_back({_lPt[l], l});
+        }
+    }
+    //if(lCount < 2) return 0;
+    std::sort(ptMap.begin(), ptMap.end(), [](std::pair<double, unsigned>& p1, std::pair<double, unsigned>& p2){return p1.first > p2.first;} );
+    for(unsigned l = 0; l < lCount; ++l){
+        ind.push_back(ptMap[l].second);
+    }
+    return lCount;	
+}
+
 unsigned treeReader::selectLep(std::vector<unsigned>& ind, const int lepSel = 3){
     unsigned lCount = 0;
     std::vector<std::pair<double, unsigned>> ptMap;
@@ -927,4 +962,74 @@ double treeReader::smallestAmongAll(const std::vector<double> & weights){
         if( weights[i] < min_value ) min_value = weights[i] ;
     return min_value;
 
+}
+
+void treeReader::addVariablesToBDT(){
+
+    readerLeptonMVAele->AddVariable( "pt", &user_pt);
+    readerLeptonMVAele->AddVariable( "eta", &user_eta);
+    readerLeptonMVAele->AddVariable( "trackMultClosestJet", &user_trackMult);
+    readerLeptonMVAele->AddVariable( "miniIsoCharged", &user_miniIsoCharged);
+    readerLeptonMVAele->AddVariable( "miniIsoNeutral", &user_miniIsoNeutral);
+    readerLeptonMVAele->AddVariable( "pTRel", &user_ptrel);
+    readerLeptonMVAele->AddVariable( "ptRatio", &user_ptratio);
+    readerLeptonMVAele->AddVariable( "relIso", &user_relIso);
+    readerLeptonMVAele->AddVariable( "deepCsvClosestJet", &user_jetBtagCSV);
+    readerLeptonMVAele->AddVariable( "sip3d", &user_sip3d);
+    readerLeptonMVAele->AddVariable( "dxy", &user_dxy);
+    readerLeptonMVAele->AddVariable( "dz", &user_dz);
+    if(currentSample.is2017())
+        readerLeptonMVAele->AddVariable( "electronMvaFall17NoIso", &user_eleMVA);
+    else
+        readerLeptonMVAele->AddVariable( "electronMvaSpring16GP", &user_eleMVA);
+
+    readerLeptonMVAmu->AddVariable( "pt", &user_pt);
+    readerLeptonMVAmu->AddVariable( "eta", &user_eta);
+    readerLeptonMVAmu->AddVariable( "trackMultClosestJet", &user_trackMult);
+    readerLeptonMVAmu->AddVariable( "miniIsoCharged", &user_miniIsoCharged);
+    readerLeptonMVAmu->AddVariable( "miniIsoNeutral", &user_miniIsoNeutral);
+    readerLeptonMVAmu->AddVariable( "pTRel", &user_ptrel);
+    readerLeptonMVAmu->AddVariable( "ptRatio", &user_ptratio);
+    readerLeptonMVAmu->AddVariable( "relIso", &user_relIso);
+    readerLeptonMVAmu->AddVariable( "deepCsvClosestJet", &user_jetBtagCSV);
+    readerLeptonMVAmu->AddVariable( "sip3d", &user_sip3d);
+    readerLeptonMVAmu->AddVariable( "dxy", &user_dxy);
+    readerLeptonMVAmu->AddVariable( "dz", &user_dz);
+    readerLeptonMVAmu->AddVariable( "segmentCompatibility", &user_segmComp);
+
+    TString methodName = TString("BDTG method");
+    TString weightfile;
+    if(currentSample.is2017())
+        weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2017MC/WillemFiles/BDTG/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_electron_2017.weights.xml";
+    else
+        weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2016MC/WillemFiles/BDTG/toBeTested/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_electron.weights.xml";
+    readerLeptonMVAele->BookMVA( methodName, weightfile );
+
+    methodName = TString("BDTG method");
+    if(currentSample.is2017())
+        weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2017MC/WillemFiles/BDTG/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_muon_2017.weights.xml";
+    else
+        weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2016MC/WillemFiles/BDTG/toBeTested/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_muon.weights.xml";
+    readerLeptonMVAmu->BookMVA( methodName, weightfile );
+
+}
+
+void treeReader::fillBDTvariables(std::vector<Float_t> & varForBDT, int flavor){
+
+    user_pt =  varForBDT.at(0);
+    user_eta = varForBDT.at(1);
+    user_trackMult = varForBDT.at(2);
+    user_miniIsoCharged = varForBDT.at(3);
+    user_miniIsoNeutral = varForBDT.at(4);
+    user_ptrel = varForBDT.at(5);
+    user_ptratio = varForBDT.at(6);
+    user_relIso = varForBDT.at(7);
+    user_jetBtagCSV = varForBDT.at(8);
+    user_sip3d = varForBDT.at(9);
+    user_dxy = varForBDT.at(10);
+    user_dz = varForBDT.at(11);
+    if(flavor == 0)
+       user_eleMVA = varForBDT.at(12);
+    if(flavor == 1)
+       user_segmComp = varForBDT.at(12);
 }

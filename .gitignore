@@ -9,6 +9,7 @@ plotsForSave/
 myevents.txt
 tables/
 scripts/submit.sh.*
+skimTree
 
 # Prerequisites
 *.d

@@ -9,6 +9,10 @@
 #include "TGraph.h"
 #include "TLorentzVector.h"
 
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
+
 #include <TF1.h>
 #include <TH1.h>
 
@@ -237,6 +241,7 @@ class treeReader {
         unsigned selectLep(std::vector<unsigned>&, const int);
         unsigned selectFakeLep(std::vector<unsigned>&, const int);
         unsigned selectLooseLep(std::vector<unsigned>&, const int);
+        unsigned selectLepGoodForLeptonMVA(std::vector<unsigned>& ind);
         unsigned tightLepCount(const std::vector<unsigned>&, const unsigned);
         bool passPtCuts2LOF(const std::vector<unsigned>&);
         bool passPtCuts2LOSSF(const std::vector<unsigned>&);
@@ -261,6 +266,7 @@ class treeReader {
         bool elePassVLooseMvaIDSUSY(const unsigned ind);
         bool eleIsClean(const unsigned ind);
         bool lepIsLoose(const unsigned ind);
+        bool lepIsGoodForLeptonMVA(const unsigned ind);
         bool passTTZSelection(const int, const double) const;
         bool passTTZCleanSelection(const int, const int, const double) const;
         bool passWZCRSelection(const int, const double) const;
@@ -316,6 +322,8 @@ class treeReader {
 
         double largestAmongAll(const std::vector<double> & weights);
         double smallestAmongAll(const std::vector<double> & weights);
+        void addVariablesToBDT();
+        void fillBDTvariables(std::vector<Float_t> & varForBDT, int flavor);
 
         std::vector<std::pair<double, unsigned>>  ptCorrV;
 
@@ -368,6 +376,9 @@ class treeReader {
         double lumi2017 = 41.5;
         //bool isData() { return currentSample.isData(); }
         //bool isMC() { return currentSample.isMC(); } 
+        Float_t user_pt, user_eta, user_trackMult,  user_miniIsoCharged, user_miniIsoNeutral, user_ptrel, user_ptratio, user_jetBtagCSV, user_sip3d, user_dxy, user_dz, user_segmComp, user_eleMVA, user_relIso;
+        TMVA::Reader *readerLeptonMVAele = new TMVA::Reader( "!Color:!Silent" );
+        TMVA::Reader *readerLeptonMVAmu = new TMVA::Reader( "!Color:!Silent" );
 
         bool isElectron(const unsigned leptonIndex) const { return (_lFlavor[leptonIndex] == 0); }
         bool isMuon(const unsigned leptonIndex) const { return (_lFlavor[leptonIndex] == 1); }

@@ -5,7 +5,7 @@ The code is used to run the ttV cross section measurement with 2016 and 2017 dat
 To compile the code use [MAKE](http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/)
 
 ```make
-make -f makeTTZ clean; make -f makeTTZ
+make -f makefiles/makeTTZ clean; make -f makefiles/makeTTZ
 ```
 ## Usage
 To run the code use the following semantics: 
