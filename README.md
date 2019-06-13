@@ -26,9 +26,9 @@ The following possible options are:
   * runFullSelection -> runs the whole code over all files specified in previous option
   * runOnOneProcess -> run on one specific process, for example ttZ, ttX, etc. If you wanna use it, put the process to run on in the end of the command
 
-```bash
-./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt runOnOneProcess selection:ttZclean ttZ
-```
+  ```bash
+  ./main data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt runOnOneProcess selection:ttZclean ttZ
+  ```
 
   * debug -> shows all possible information (lepton pt, jet pt, etc), in this case specify in the end process to run on and event number
 
