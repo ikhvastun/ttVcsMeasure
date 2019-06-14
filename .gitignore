@@ -10,6 +10,9 @@ myevents.txt
 tables/
 scripts/submit.sh.*
 skimTree
+sftp-config.json
+src/ttVcsMeasure.sublime-project
+src/ttVcsMeasure.sublime-workspace
 
 # Prerequisites
 *.d
