@@ -20,6 +20,8 @@ Use `skimTuples.sh` from `scripts/` folder to submit on the whole sample
 bash skimTuples.sh 
 ```
 
+The output of the latter command is a bunch of small root files, which the one should combine in an aggregate root file for a particular sample
+
 ## Plots/Tables/Datacards production for particular analysis 
 To run the code to produce plots/tables/datacards for ttZ cross section measurement, use the following semantics: 
 
