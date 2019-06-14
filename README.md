@@ -19,8 +19,25 @@ Use `skimTuples.sh` from `scripts/` folder to submit on the whole sample
 ```bash
 bash skimTuples.sh 
 ```
-
 The output of the latter command is a bunch of small root files, which the one should combine in an aggregate root file for a particular sample
+
+## Merging together small files
+
+To merge together all the files produced in the previous step do the following: 
+
+```bash
+source mergeTuples.sh
+mergeTuples
+```
+
+to run interactively, or 
+
+```bash
+source mergeTuples.sh
+submitMergeTuples
+```
+
+to submit jobs for merging to T2 cluster
 
 ## Plots/Tables/Datacards production for particular analysis 
 To run the code to produce plots/tables/datacards for ttZ cross section measurement, use the following semantics: 
