@@ -11,8 +11,8 @@ tables/
 scripts/submit.sh.*
 skimTree
 sftp-config.json
-src/ttVcsMeasure.sublime-project
-src/ttVcsMeasure.sublime-workspace
+ttVcsMeasure.sublime-project
+ttVcsMeasure.sublime-workspace
 
 # Prerequisites
 *.d
