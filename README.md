@@ -7,8 +7,21 @@ To compile the code use [MAKE](http://www.cs.colby.edu/maxwell/courses/tutorials
 ```make
 make -f makefiles/makeTTZ clean; make -f makefiles/makeTTZ
 ```
-## Usage
-To run the code use the following semantics: 
+## Running 2nd skimming
+Before producing nice plots, the one should run 2nd skimming on the tuples produced by the [ntuplizer](https://github.com/GhentAnalysis/heavyNeutrino). In this 2nd skimming, the one can put tighter selection on the leptons, jets, invariant mass of 2 leptons, etc. To run 2nd skimming:
+
+```bash
+./skimTree [one file to run on] 
+```
+
+Use `skimTuples.sh` from `scripts/` folder to submit on the whole sample
+
+```bash
+bash skimTuples.sh 
+```
+
+## Plots/Tables/Datacards production for particular analysis 
+To run the code to produce plots/tables/datacards for ttZ cross section measurement, use the following semantics: 
 
 ```bash
 ./main [files to run on] [options to run] [selections you wanna use] [process to run on] [event number]
