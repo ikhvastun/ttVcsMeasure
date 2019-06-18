@@ -98,7 +98,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       //if(!(samples[sam].getFileName().find("ttHToNonbb") != std::string::npos || samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "WZ") continue;
-      if(samples[sam].getProcessName() == "data") continue;
+      //if(samples[sam].getProcessName() == "data") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
       if(samples[sam].getProcessName() == "nonpromptData"){
@@ -133,7 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
-          //if(it > 10000) break;
+          if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
@@ -716,14 +716,16 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   // legend to print
   TLegend* mtleg = new TLegend(0.18,0.89,0.92,0.72); 
-  mtleg->SetNColumns(4);
+  mtleg->SetNColumns(3);
+  if(selection == "ZZ" || selection == "ttZ4L")
+    mtleg->SetNColumns(4);
   mtleg->SetFillColor(0);
   mtleg->SetFillStyle(0);
   mtleg->SetBorderSize(0);
   mtleg->SetTextFont(42);
   mtleg->SetTextSize(0.06);
 
-  mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","p"); //data
+  mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","ep"); //data
 
   std::map<int, std::string> processIndexReversed;
   std::vector<std::string> processOrder;
@@ -763,6 +765,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],it->second.c_str(),"f");
     
   }
+
+  TH1D* histStatAndSystBand = (TH1D*)distribs[figNames[listToPrint[selection].at(0)].index].stack.GetStack()->Last();
+  histStatAndSystBand ->SetFillStyle(3005);
+  histStatAndSystBand ->SetLineColor(kGray+2);
+  histStatAndSystBand ->SetFillColor(kGray+2);
+  histStatAndSystBand ->SetMarkerStyle(1);
+  mtleg->AddEntry(histStatAndSystBand, "Total unc." ,"f");
 
   // plots to make with systematics and stat uncertainty on them
   std::string processToStore = selection;

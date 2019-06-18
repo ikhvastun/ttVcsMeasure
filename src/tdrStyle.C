@@ -130,7 +130,9 @@ void setTDRStyle() {
   tdrStyle->SetAxisColor(1, "XYZ");
   tdrStyle->SetStripDecimals(kTRUE);
   tdrStyle->SetTickLength(0.03, "XYZ");
+  tdrStyle->SetTickLength(0.05, "X");
   tdrStyle->SetNdivisions(505, "XYZ");
+  //tdrStyle->SetNdivisions(103, "Y");
   tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
   tdrStyle->SetPadTickY(1);
 

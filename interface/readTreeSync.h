@@ -230,18 +230,18 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor2L = {
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor3L4L = {
       
-      {1, "(#mu)#mu#mu#mu"},
-      {2, "(#mu)#mu#mu e"},
-      {3, "(#mu/e)#mu ee"},
-      {4, "(e)eee"},
+      {1, "#mu#mu#mu(#mu)"},
+      {2, "#mu#mue(#mu)"},
+      {3, "#muee(#mu/e)"},
+      {4, "eee(e)"},
       
     };
 
 std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
       
       {1, "#mu#mu#mu"},
-      {2, "#mu#mu e"},
-      {3, "#mu ee"},
+      {2, "#mu#mue"},
+      {3, "#muee"},
       {4, "eee"},
       
     };
@@ -249,9 +249,9 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor3L = {
 std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
       
       {1, "#mu#mu#mu#mu"},
-      {2, "#mu#mu#mu e"},
-      {3, "#mu#mu ee"},
-      {4, "#mu eee"},
+      {2, "#mu#mu#mue"},
+      {3, "#mu#muee"},
+      {4, "#mueee"},
       {5, "eeee"},
       
     };
@@ -259,7 +259,7 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4L = {
 std::vector<BinLabelOptions> flavourLabelOptionsFor4LZZ = {
       
       {1, "#mu#mu#mu#mu"},
-      {2, "#mu#mu ee"},
+      {2, "#mu#muee"},
       {3, "eeee"},
       
     };

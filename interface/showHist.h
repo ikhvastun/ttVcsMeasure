@@ -75,6 +75,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         dataGraph->SetPointError(b - 1, 0, 0, dataHist->GetBinErrorLow(b), (dataHist->GetBinContent(b) == 0 ) ? 0 : dataHist->GetBinErrorUp(b) );
     }
 
+    if(info.index == 5){ // Njets
+        dataHist->GetXaxis()->SetNdivisions(108); // 108,505,
+    }
+    if(info.index == 6){ // Nbjets
+        dataHist->GetXaxis()->SetNdivisions(104); // 108,505,
+    }
     dataHist->Draw("axis");
     dataGraph->Draw("pe1 same");
 
@@ -121,17 +127,27 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     mtlegRatio->SetBorderSize(0);
     mtlegRatio->SetTextFont(42);
 
-    mtlegRatio->AddEntry(stackCopy, "Stat", "f");
-    mtlegRatio->AddEntry(histSystAndStatUnc, "Syst+Stat", "f");
+    if(info.index == 42){ // SR all TTZ
+        mtlegRatio->AddEntry(stackCopy, "Stat", "f");
+        mtlegRatio->AddEntry(histSystAndStatUnc, "Total", "f");
+    }
+    else{
+        mtlegRatio->AddEntry(histSystAndStatUnc, "Uncertainty", "f");
+    }
 
     // Draw finally the things
     if(info.index == 5){ // Njets
         stackCopy->GetXaxis()->SetNdivisions(108); // 108,505,
     }
+    if(info.index == 6){ // Njets
+        stackCopy->GetXaxis()->SetNdivisions(104); // 108,505,
+    }
 
+    stackCopy->GetYaxis()->SetNdivisions(303); // 108,505,
     stackCopy->Draw("axis");
     histSystAndStatUnc->Draw("e2same");
-    stackCopy->Draw("e2same");
+    if(info.index == 42) // SR all TTZ
+        stackCopy->Draw("e2same");
 
     double xmin = distribs.vectorHisto[dataSample].GetXaxis()->GetXmin();
     double xmax = distribs.vectorHisto[dataSample].GetXaxis()->GetXmax();
@@ -621,6 +637,27 @@ void printInfoOnPlotTTZ(){
     fourLregionNjets.SetTextAlign(31);
     fourLregionNjets.SetTextSize(0.05);
     fourLregionNjets.DrawLatex(0.92, 0.38,"N_{j} #geq 2");
+
+    TLatex addNjetsSign1;
+    addNjetsSign1.SetNDC();
+    addNjetsSign1.SetTextAngle(0);
+    addNjetsSign1.SetTextColor(kBlack);
+
+    addNjetsSign1.SetTextFont(42);
+    addNjetsSign1.SetTextAlign(31);
+    addNjetsSign1.SetTextSize(0.05);
+    addNjetsSign1.DrawLatex(0.12, 0.18,"N_{j}");
+
+    TLatex addNjetsSign2;
+    addNjetsSign2.SetNDC();
+    addNjetsSign2.SetTextAngle(0);
+    addNjetsSign2.SetTextColor(kBlack);
+
+    addNjetsSign2.SetTextFont(42);
+    addNjetsSign2.SetTextAlign(31);
+    addNjetsSign2.SetTextSize(0.05);
+    addNjetsSign2.DrawLatex(0.52, 0.18,"N_{j}");
+
 }
 
 void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, histInfo & info, double xPad){
@@ -639,7 +676,7 @@ void setUpRatioFeatures(TH1D * stackCopy, TGraphAsymmErrors * dataCopyGraph, his
 
     stackCopy->SetTitle("");
     stackCopy->GetXaxis()->SetTitle(info.fancyName.c_str());
-    stackCopy->GetYaxis()->SetTitle("Data/pred");
+    stackCopy->GetYaxis()->SetTitle("Data / Pred.");
 
     stackCopy->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
     stackCopy->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
