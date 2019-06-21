@@ -133,7 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
-          if(it > 10000) break;
+          //if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
@@ -508,10 +508,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             // used previously
             // weight *= scaler.postFitScaling(samples[sam].getProcessName());
             
+            /*
             if(samples[sam].is2016())
                 weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
             else
                 weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+              */
 
           }
           if(debug){
@@ -719,6 +721,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetNColumns(3);
   if(selection == "ZZ" || selection == "ttZ4L")
     mtleg->SetNColumns(4);
+  if(selection == "ttZ")
+    mtleg->SetNColumns(5);
   mtleg->SetFillColor(0);
   mtleg->SetFillStyle(0);
   mtleg->SetBorderSize(0);

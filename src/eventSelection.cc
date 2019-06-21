@@ -245,7 +245,7 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     
     if(ptMap[0].first < 40) return false;
     if(ptMap[1].first < 20) return false;
-    if(ptMap[2].first < 10) return false;
+    if(ptMap[2].first < 20) return false;
     
     return true;
 }

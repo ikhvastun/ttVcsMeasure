@@ -429,10 +429,10 @@ void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info
 
 void printInfoOnXaxisAllTTZ(){
 
-    TLine *line1 = new TLine(3.5, 0, 3.5, 2);
+    TLine *line1 = new TLine(3.5, -1, 3.5, 2);
     line1->SetLineStyle(2);
 
-    TLine *line2 = new TLine(7.5, 0, 7.5, 2);
+    TLine *line2 = new TLine(7.5, -1, 7.5, 2);
     line2->SetLineStyle(2);
     
     TLine *line3 = new TLine(11.5, -1, 11.5, 2);
@@ -452,6 +452,26 @@ void printInfoOnXaxisAllTTZ(){
     njetsSign.SetTextSize(0.22);
     njetsSign.DrawLatex(0.84, 0.08,"N_{j}");
 
+    TLatex njetsSign1;
+    njetsSign1.SetNDC();
+    njetsSign1.SetTextAngle(0);
+    njetsSign1.SetTextColor(kBlack);
+
+    njetsSign1.SetTextFont(42);
+    njetsSign1.SetTextAlign(31);
+    njetsSign1.SetTextSize(0.22);
+    njetsSign1.DrawLatex(0.58, 0.08,"N_{j}");
+
+    TLatex njetsSign2;
+    njetsSign2.SetNDC();
+    njetsSign2.SetTextAngle(0);
+    njetsSign2.SetTextColor(kBlack);
+
+    njetsSign2.SetTextFont(42);
+    njetsSign2.SetTextAlign(31);
+    njetsSign2.SetTextSize(0.22);
+    njetsSign2.DrawLatex(0.32, 0.08,"N_{j}");
+
     TLatex nbjetsSign;
     nbjetsSign.SetNDC();
     nbjetsSign.SetTextAngle(0);
@@ -460,7 +480,7 @@ void printInfoOnXaxisAllTTZ(){
     nbjetsSign.SetTextFont(42);
     nbjetsSign.SetTextAlign(31);
     nbjetsSign.SetTextSize(0.22);
-    nbjetsSign.DrawLatex(0.96, 0.08,"N_{b}");
+    nbjetsSign.DrawLatex(0.99, 0.08,"N_{b}");
 
 }
 
@@ -637,26 +657,6 @@ void printInfoOnPlotTTZ(){
     fourLregionNjets.SetTextAlign(31);
     fourLregionNjets.SetTextSize(0.05);
     fourLregionNjets.DrawLatex(0.92, 0.38,"N_{j} #geq 2");
-
-    TLatex addNjetsSign1;
-    addNjetsSign1.SetNDC();
-    addNjetsSign1.SetTextAngle(0);
-    addNjetsSign1.SetTextColor(kBlack);
-
-    addNjetsSign1.SetTextFont(42);
-    addNjetsSign1.SetTextAlign(31);
-    addNjetsSign1.SetTextSize(0.05);
-    addNjetsSign1.DrawLatex(0.12, 0.18,"N_{j}");
-
-    TLatex addNjetsSign2;
-    addNjetsSign2.SetNDC();
-    addNjetsSign2.SetTextAngle(0);
-    addNjetsSign2.SetTextColor(kBlack);
-
-    addNjetsSign2.SetTextFont(42);
-    addNjetsSign2.SetTextAlign(31);
-    addNjetsSign2.SetTextSize(0.05);
-    addNjetsSign2.DrawLatex(0.52, 0.18,"N_{j}");
 
 }
 
