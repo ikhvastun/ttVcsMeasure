@@ -13,6 +13,7 @@ skimTree
 sftp-config.json
 ttVcsMeasure.sublime-project
 ttVcsMeasure.sublime-workspace
+*root
 
 # Prerequisites
 *.d

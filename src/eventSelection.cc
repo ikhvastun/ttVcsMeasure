@@ -243,9 +243,11 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     for(auto & i : ptMap)
     ptCorrV.push_back(i);
     
+    //if(ptMap[0].first > 100 && _lFlavor[ptMap[0].second] == 1) return false;
+
     if(ptMap[0].first < 40) return false;
     if(ptMap[1].first < 20) return false;
-    if(ptMap[2].first < 20) return false;
+    if(ptMap[2].first < 10) return false;
     
     return true;
 }

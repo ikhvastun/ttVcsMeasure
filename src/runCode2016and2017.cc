@@ -133,7 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
-          //if(it > 10000) break;
+          if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
@@ -851,6 +851,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     fillDatacards(distribs[indexSRWZCR], processOrder, "SRWZCR", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRZZCR], processOrder, "SRZZCR", (bool)showLegendOption); 
     fillDatacards(distribs[indexSRTTCR], processOrder, "SRTTCR", (bool)showLegendOption); 
+
+    fillDatacards(distribs[indexLeadPt], processOrder, "SRleadPt", (bool)showLegendOption); 
+    fillDatacards(distribs[indexTrailPt], processOrder, "SRtrailPt", (bool)showLegendOption); 
   }
   return;
 }

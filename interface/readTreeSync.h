@@ -517,6 +517,9 @@ const unsigned int indexFlavour3L = 48;
 const unsigned int indexFlavour4L = 49;
 const unsigned int indexFlavour4LZZ = 50;
 
+const unsigned int indexLeadPt = 0;
+const unsigned int indexTrailPt = 2;
+
 std::map<std::string, std::vector<TString>> listToPrint;
 
 std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0}, 
