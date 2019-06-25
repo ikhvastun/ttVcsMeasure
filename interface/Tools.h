@@ -519,7 +519,7 @@ void initListsToPrint(const std::string & selection){
   listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L", "mllnoZcut"};
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
-  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L"};
+  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L", "ptlead", "trail"};
 
   listToPrint["ttbar_emu"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT", "ptMuonPassedTight", "etaMuonPassedTight", "ptLepPassedLooseForEff", "etaLepPassedLooseForEff", "ptLepPassedTightForEff", "etaLepPassedTightForEff", "etaLepPassedLooseForEffLowPt", "etaLepPassedTightForEffLowPt", "etaLepPassedLooseForEffHighPt", "etaLepPassedTightForEffHighPt"};
   listToPrint["DYTo2L"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT"};
