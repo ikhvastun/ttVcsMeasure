@@ -3,6 +3,9 @@
 
 #include "readTreeSync.h"
 
+#include <TH1D.h>
+#include <THStack.h>
+
 namespace Output{
 
     struct Unc{

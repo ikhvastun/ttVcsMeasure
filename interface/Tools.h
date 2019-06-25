@@ -3,6 +3,10 @@
 #include "mt2_bisect.h"
 #include "readTreeSync.h"
 
+#include "Output.h"
+using Output::distribs;
+using namespace std;
+
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
 
 double SRID2L (double mvaVL, double chargesLepton) {
