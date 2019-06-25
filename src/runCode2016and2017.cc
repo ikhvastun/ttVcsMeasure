@@ -96,7 +96,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       setStackColors(color, samCategory);
 
       //if(!(samples[sam].getFileName().find("ttHToNonbb") != std::string::npos || samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos)) continue;
-      //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "nonpromptData" && samples[sam].getProcessName() != "Nonprompt") continue;
+      //if(samples[sam].getProcessName() != 
       //if(samples[sam].getProcessName() != "data" && samples[sam].getProcessName() != "WZ") continue;
       //if(samples[sam].getProcessName() == "data") continue;
 
@@ -133,7 +133,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
-          //if(it > 10000) break;
+          if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
