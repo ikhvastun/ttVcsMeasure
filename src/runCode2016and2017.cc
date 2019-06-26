@@ -58,6 +58,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   leptonSelection = leptonSelectionAnalysis;
   initListsToPrint(selection);
   //Set CMS plotting style
+  setTDRStyle(); 
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   cout << "reading sample file...." << endl;
@@ -68,7 +69,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     std::cout << sample << std::endl;
   }
   cout << "finished with reading"<< endl;
-  setTDRStyle(); 
 
   std::vector<std::string> namesOfFiles = treeReader::getNamesOfTheFiles();
   std::vector<std::string> namesOfProcesses = treeReader::getNamesOfTheProcesses();
@@ -86,7 +86,6 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   scaler2016.setPostfitYields();
   scaler2017.setInputFile("data/postFit/outputTTZ_2017_new.txt");
   scaler2017.setPostfitYields();
-
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
