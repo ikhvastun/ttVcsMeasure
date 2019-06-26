@@ -662,6 +662,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
             }
           }
+			 // break out when the event was found
+          if(debug) break;
       }
 
       if(samCategory != nonPromptSample && samCategory != dataSample){
