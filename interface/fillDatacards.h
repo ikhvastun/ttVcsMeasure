@@ -50,7 +50,9 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
   const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal
 
    gSystem->Exec("rm datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root"); // delete previous tex file
+   gSystem->Exec("mkdir -p datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root"); // delete previous tex file
    gSystem->Exec("rm datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt"); // delete previous tex file
+   gSystem->Exec("mkdir -p datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt"); // delete previous tex file
    ofstream fileout;
    fileout .open ( "datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt", ios_base::app); // create a new tex file
    fileout << fixed << showpoint << setprecision(2);

@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# 2016
+######################################################
+###                          2016                  ###
+######################################################
+
 # 2L
 #sh runCode.sh data/samples/samples_ttbar_emu.txt ttbar_emu
 #sh runCode.sh data/samples/samples_DYCR.txt DYTo2L
@@ -29,8 +32,9 @@ sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZ
 # clean here stands for 3L + 3jets + 1b or 4L + 1b
 #sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZclean
 
-###########################################################################
-# 2017
+######################################################
+#                      2017                        ###
+######################################################
 # 2L
 #sh runCode.sh data/samples/samples_ttbar_emu.txt ttbar_emu
 #sh runCode.sh data/samples/samples_DYCR_2017.txt DYTo2L

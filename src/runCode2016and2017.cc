@@ -55,7 +55,7 @@ using Output::distribs;
 void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::string option, const std::string selection, const string& sampleToDebug, long evNb){
 
   debug = (option == "debug" ? true : false);
-  leptonSelection = leptonSelectionAnalysis;
+//  leptonSelection = leptonSelectionAnalysis;
   initListsToPrint(selection);
   //Set CMS plotting style
   setTDRStyle(); 
@@ -87,6 +87,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   scaler2017.setInputFile("data/postFit/outputTTZ_2017_new.txt");
   scaler2017.setPostfitYields();
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Loop over all samples. Reads in from the text file. For each category, a spearate histograms 
+  // are declared. Important: the last entry is the nonprompt data, which uses the same data root 
+  // file. it's there to make sure the histograms are created.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
       int samCategory = processIndex.at(samples[sam].getProcessName());
@@ -728,6 +734,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetTextFont(42);
   mtleg->SetTextSize(0.06);
 
+  // fill the legend with entries.
+
   mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","ep"); //data
 
   std::map<int, std::string> processIndexReversed;
@@ -894,6 +902,7 @@ int main(int argc, const char **argv)
             if(string(argv[2]) == "runFullSelection"){
                 if(string(argv[3]).find("selection:") != std::string::npos){
                     std::string selection = string(argv[3]);
+						  // argument is "selection:..." so you need to remove the first 10 signs
                     selection.erase (selection.begin(), selection.begin()+10);
                     std::cout << "output folder is set to: " << selection<< std::endl;
                     std::vector<std::string> inputFiles;
