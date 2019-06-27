@@ -85,7 +85,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
-      int samCategory = processIndex.at(samples[sam].getProcessName());
+      int samCategory = processToCounterMap.at(samples[sam].getProcessName());
 
       Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, samCategory);
@@ -117,7 +117,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           }
 
           // in case during previous event run sam category was changed to nonprompt category 
-          samCategory = processIndex.at(samples[sam].getProcessName());
+          samCategory = processToCounterMap.at(samples[sam].getProcessName());
 
           GetEntry(it);
           if(debug && (_eventNb != evNb && evNb != -999)) continue;
@@ -421,7 +421,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       }
 
       cout << endl;
-      samCategory = processIndex.at(samples[sam].getProcessName());
+      samCategory = processToCounterMap.at(samples[sam].getProcessName());
       cout << "Total number of events: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[samCategory].Integral() << endl;
       //cout << "Total number of events in data after nonprompt subtraction: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample].Integral() << endl;
       cout << "Total number of events in nonprompt after prompt subtraction: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
@@ -440,18 +440,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"OS ttbar 1L","lep"); //data
   //mtleg->AddEntry(&distribs[0].vectorHisto[2],"SS ttbar 1L","f"); //data
 
-  std::map<int, std::string> processIndexReversed;
+  std::map<int, std::string> processToCounterMapReversed;
   std::vector<std::string> processOrder;
-  for(map<std::string,int>::const_iterator it = processIndex.begin();it != processIndex.end(); ++it){
-    processIndexReversed.insert(std::pair<int,std::string>(it->second, it->first));
+  for(map<std::string,int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
+    processToCounterMapReversed.insert(std::pair<int,std::string>(it->second, it->first));
   }
 
   // correct order according to increase
-  for(map<int,std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
+  for(map<int,std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
     processOrder.push_back(it->second);
   }
   
-  for(map<int, std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
+  for(map<int, std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
     //std::cout << it->first << " " << it->second << std::endl;
     if(it->second == "data") continue;
     if(it->second == "ttH") continue;

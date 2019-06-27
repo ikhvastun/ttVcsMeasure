@@ -16,6 +16,7 @@ treeReader::treeReader(TTree *tree) : fChain(nullptr)
 void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampleVector){
     //sampleVector.clear();    //clear current sample list
     //read sample info (names and xSec) from txt file
+	 // also creates map between process and some index/counter, which is used e.g. to identify process
     std::ifstream file(list);
     int sampleCounter = 0;
     int processCounter = 0;
@@ -24,7 +25,7 @@ void treeReader::readSamples(const std::string& list, std::vector<Sample>& sampl
         namesOfTheFiles.push_back(sampleVector.back().getProcessName());
         if(std::find(namesOfTheProcesses.begin(), namesOfTheProcesses.end(), sampleVector.back().getProcessName()) == namesOfTheProcesses.end() && sampleVector.back().getProcessName() != "") {
             namesOfTheProcesses.push_back(sampleVector.back().getProcessName());
-            processIndex.insert(std::pair<std::string,int>(sampleVector.back().getProcessName(), processCounter));
+            processToCounterMap.insert(std::pair<std::string,int>(sampleVector.back().getProcessName(), processCounter));
             if(sampleVector.back().getProcessName() == "nonpromptData")
                 nonPromptSample = processCounter;
             processCounter++;

@@ -368,7 +368,7 @@ class treeReader {
         std::shared_ptr<Reweighter> reweighter;
         double crossSectionRatio[100][100];
 
-        std::map<std::string, int> processIndex;
+        std::map<std::string, int> processToCounterMap;
 
         bool is2017() { return currentSample.is2017(); }
         bool is2016() { return currentSample.is2016(); }                  //if sample is not 2017 it is automatically 2016

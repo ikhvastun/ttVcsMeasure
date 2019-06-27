@@ -99,7 +99,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
-      int samCategory = processIndex.at(samples[sam].getProcessName());
+      int samCategory = processToCounterMap.at(samples[sam].getProcessName());
 
       Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, samCategory);
@@ -130,7 +130,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           }
 
           // in case during previous event run sam category was changed to nonprompt category 
-          samCategory = processIndex.at(samples[sam].getProcessName());
+          samCategory = processToCounterMap.at(samples[sam].getProcessName());
 
           GetEntry(it);
           if(debug && (_eventNb != evNb && evNb != -999)) continue;
@@ -882,7 +882,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       }
 
       cout << endl;
-      samCategory = processIndex.at(samples[sam].getProcessName());
+      samCategory = processToCounterMap.at(samples[sam].getProcessName());
       cout << "Total number of events: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[samCategory].Integral() << endl;
       //if(leptonSelection != 4)
       //  cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
@@ -902,7 +902,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   for(int dist = 0; dist < figNames.size(); dist++){
     if(!(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR)) continue;
 
-    for(unsigned sam = 0; sam < processIndex.size(); ++sam){
+    for(unsigned sam = 0; sam < processToCounterMap.size(); ++sam){
       if(sam == dataSample) continue;
       if(sam == nonPromptSample) continue;
       for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[sam].unc.at(pdfUncIndex).GetNbinsX() + 1; ++bin){
@@ -932,18 +932,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
 
-  std::map<int, std::string> processIndexReversed;
+  std::map<int, std::string> processToCounterMapReversed;
   std::vector<std::string> processOrder;
-  for(map<std::string,int>::const_iterator it = processIndex.begin();it != processIndex.end(); ++it){
-    processIndexReversed.insert(std::pair<int,std::string>(it->second, it->first));
+  for(map<std::string,int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
+    processToCounterMapReversed.insert(std::pair<int,std::string>(it->second, it->first));
   }
 
   // correct order according to increase
-  for(map<int,std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
+  for(map<int,std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
     processOrder.push_back(it->second);
   }
   
-  for(map<int, std::string>::const_iterator it = processIndexReversed.begin();it != processIndexReversed.end(); ++it){
+  for(map<int, std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
     //std::cout << it->first << " " << it->second << std::endl;
     if(it->second == "data") continue;
     if(it->second == "ttH") continue;
