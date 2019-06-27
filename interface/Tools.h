@@ -50,7 +50,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
         distribs[i].vectorHisto[j].SetMarkerStyle(20);
         distribs[i].vectorHisto[j].SetMarkerSize(0.5);
         distribs[i].vectorHisto[j].SetLineWidth(1);
-        if (j < nSamples)
+        if (j < nProcesses)
           distribs[i].vectorHisto[j].Sumw2();
       }
     }

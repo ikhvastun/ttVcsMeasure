@@ -22,7 +22,7 @@ namespace Output{
     };
 
 	struct DistribsAll{
-  		DistribsAll():vectorHisto(nSamples+1), vectorHistoUncUp(nSamples+1), vectorHistoUncDown(nSamples+1), vectorHistoPDF(nSamples+1){}
+  		DistribsAll():vectorHisto(nProcesses+1), vectorHistoUncUp(nProcesses+1), vectorHistoUncDown(nProcesses+1), vectorHistoPDF(nProcesses+1){}
   		std::vector<TH1D> vectorHisto;
   		TH1D vectorHistoTotalUnc;
   		std::vector<Unc> vectorHistoUncUp;

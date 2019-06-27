@@ -8,7 +8,7 @@ const int nFlavors = 2;
 
 //const int leptonSelectionAnalysis = 3;
 
-const int nSamples = 11;
+const int nProcesses = 11;
 const int dataSample = 0;
 const int ttWSample = 1;
 
