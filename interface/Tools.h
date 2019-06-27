@@ -25,10 +25,15 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
       TString name = Form("varST_%d",hist.index);
       int i = hist.index;
 
+		// we have distribs object for each process i. 
+		// for each such process we have all histograms required for the selection
       for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
         distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
+			// we make histog for each uncertainty up and down. 
+			// we acces the ditributions later in code by calling:
+			// distribs[i].vectorHistoUncUp[j].unc[k] where i refers to variable/hist, j to process and k to uncertianty
         for(unsigned int k = 0; k < numberOfSyst; k++){
           name = Form("varUp_%d_%d_%d",i,j,k);
           distribs[i].vectorHistoUncUp[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
@@ -45,6 +50,8 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
             }
         }
         
+		  // we set for all processes poissonian errors.
+
         distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
         distribs[i].vectorHisto[j].SetMarkerStyle(20);
@@ -57,7 +64,7 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
 
     for (unsigned int i=0; i!=distribs.size();++i) {
       for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
-        if(selection == "ttW" && j == ttWSample) continue;
+//        if(selection == "ttW" && j == ttWSample) continue;
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
       }
     }

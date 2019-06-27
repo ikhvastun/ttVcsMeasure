@@ -1,6 +1,10 @@
 #!/bin/bash
 
-outputDir=/user/ikhvastu/Work/ttVcsMeasure/ttVselection/output/
+# 
+#outputDir=/user/ikhvastu/Work/ttVcsMeasure/ttVselection/output/
+outputDir=$PWD/../output/
+ttVdir=$PWD/../
+mkdir -p ${outputDir}
 CMSSW="CMSSW_9_4_4"
 
 if [ -z "$1" ] && [ -z "$2" ]
@@ -25,13 +29,13 @@ fi
 
 echo "#!/bin/bash              
 
-cd /user/${USER}/${CMSSW}/src
+cd $CMSSW_BASE/src
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval \`scram runtime -sh\`
 
 echo "Job started..."
 
-cd /user/ikhvastu/Work/ttVcsMeasure/ttVselection/
+cd ${ttVdir}
 
 ./main $sampleFile runFullSelection selection:$selection > ${outputDir}/out_log_${selection}_${year}.txt 2> ${outputDir}/out_err_${selection}_${year}.txt
 
@@ -43,3 +47,5 @@ qsub submit.sh -l walltime=12:00:00;
 #echo 'output files are', out_err_${selection}_${year}
 #echo 'everything is fine'
 rm submit.sh
+
+#cd /user/${USER}/${CMSSW}/src

@@ -48,7 +48,10 @@ void treeReader::readSamples(const std::string& list){
 
 void treeReader::initSample(const Sample& samp){ 
 
-    //update current sample
+	 ///////////////////////////////////////////////////////////////////
+    // update current sample
+	 // hard coded path with input root files. !!!! IMPORTANT !!!!
+	 ///////////////////////////////////////////////////////////////////
     currentSample = samp;
     sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
     //sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/wverbeke/ntuples_ewkino/"); //  + (TString)(is2017 ? "" : "newReReco/") 

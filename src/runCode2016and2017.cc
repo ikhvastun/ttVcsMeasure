@@ -72,7 +72,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
   cout << "finished with reading"<< endl;
 
-//  std::vector<std::string> namesOfFiles = treeReader::getNamesOfTheFiles();
+  //  std::vector<std::string> namesOfFiles = treeReader::getNamesOfTheFiles();
   std::vector<std::string> namesOfProcesses = treeReader::getNamesOfTheProcesses();
 
   cout << "initiating histos...." << endl;
@@ -80,8 +80,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   cout << "finished with initiating of histos"<< endl;
   setLabelsForHistos(selection);
 
+  // event number dump for debugging/comparing
+
   std::ofstream myfile;
   myfile.open("myevents.txt");
+
+  // here you load in post fit weights, in case you have them already and want your histograms
+  // to show post fit values
 
   PostFitScaler scaler2016, scaler2017;
   scaler2016.setInputFile("data/postFit/outputTTZ_2016_new.txt");
@@ -90,7 +95,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   scaler2017.setPostfitYields();
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Loop over all samples. Reads in from the text file. For each category, a spearate histograms 
+  // Loop over all samples. Reads in from the text file. For each category, separate histograms 
   // are declared. Important: the last entry is the nonprompt data, which uses the same data root 
   // file. it's there to make sure the histograms are created.
   ///////////////////////////////////////////////////////////////////////////////////////////////////
