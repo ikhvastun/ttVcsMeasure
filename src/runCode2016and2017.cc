@@ -120,6 +120,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
       std::cout<<"Entries in "<< (samples[sam].getFileName()) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
+		// 
+		// loop over all events in a given sample
+		//
       for(long unsigned it = 0; it < nEntries; ++it){
           //print progress bar  
           if(it%100 == 0 && it != 0){
@@ -150,6 +153,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
+			 // start with 3 lepton selection, but it changes later
           leptonSelection = 3;
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
