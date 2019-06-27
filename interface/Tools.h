@@ -509,7 +509,9 @@ double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzV
     return  asymm_mt2_lester_bisect::get_mT2(l1.M(), l1.Px(), l1.Py(), l2.M(), l2.Px(), l2.Py(), metVec.Px(), metVec.Py(), 0, 0);
 }
 
-void initListsToPrint(const std::string & selection){
+// in readTreeSync.h the histos names are defined with input for th1 initialization
+
+void initListToPrint(const std::string & selection){
 
   listToPrint["WZ"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "mtW", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu", "met", "nPV", "mt_3m", "mt_2m1e",  "mt_1m2e", "mt_3e", "cosThetaStar", "flavour3L", "SRWZCR", "mlll", "etaLead", "etaSubl", "etaTrail"};
   listToPrint["Xgamma"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV", "mlll", "flavour3L"};
@@ -528,6 +530,7 @@ void initListsToPrint(const std::string & selection){
   listToPrint["ttbar_emu"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT", "ptMuonPassedTight", "etaMuonPassedTight", "ptLepPassedLooseForEff", "etaLepPassedLooseForEff", "ptLepPassedTightForEff", "etaLepPassedTightForEff", "etaLepPassedLooseForEffLowPt", "etaLepPassedTightForEffLowPt", "etaLepPassedLooseForEffHighPt", "etaLepPassedTightForEffHighPt"};
   listToPrint["DYTo2L"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT"};
 
+// for some processes the entries in the figNames are modified for process specific things.
   if(selection == "ttbar_emu"){
     figNames["ptlead"].nBins = 38;
     figNames["ptlead"].varMin = 10;

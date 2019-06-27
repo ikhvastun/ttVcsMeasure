@@ -56,7 +56,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   debug = (option == "debug" ? true : false);
 //  leptonSelection = leptonSelectionAnalysis;
-  initListsToPrint(selection);
+//  in other words, it defines at what you want to look at, e.g. 3L ttZ, WZ control region etc. 
+//  This is also used to initialize only the histograms necesarry for the considered process/region/selection
+  initListToPrint(selection);
   //Set CMS plotting style
   setTDRStyle(); 
   gROOT->SetBatch(kTRUE);
@@ -70,7 +72,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
   cout << "finished with reading"<< endl;
 
-  std::vector<std::string> namesOfFiles = treeReader::getNamesOfTheFiles();
+//  std::vector<std::string> namesOfFiles = treeReader::getNamesOfTheFiles();
   std::vector<std::string> namesOfProcesses = treeReader::getNamesOfTheProcesses();
 
   cout << "initiating histos...." << endl;
