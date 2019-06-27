@@ -154,6 +154,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
 			 // start with 3 lepton selection, but it changes later
+			 // the counts of tight/loose/tight4l/loose4l leptons are calculated here
           leptonSelection = 3;
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
