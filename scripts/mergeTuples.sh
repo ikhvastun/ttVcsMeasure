@@ -2,15 +2,15 @@
 
 #include functions to export CMSSW in submit
 source setCMSSW.sh
-outputFolder=ntuples_tzq
+outputFolder=ntuples_ttz_4l
 
 fillJob(){
     name=${1%/}
     name=${name##*/}
     name=${name#ntuples_temp_*}
     name=${name}.root
-    if [ ! -d ~/Work/ntuples_tzq ]
-        then mkdir ~/Work/ntuples_tzq
+    if [ ! -d ~/Work/${outputFolder} ]
+        then mkdir ~/Work/${outputFolder}
     fi
     echo "if [ -f ~/Work/$outputFolder/$name ]" >> $2
     echo "    then rm ~/Work/$outputFolder/$name" >> $2

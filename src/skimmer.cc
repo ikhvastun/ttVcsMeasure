@@ -74,7 +74,7 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         std::vector<unsigned> ind, indJets;
         unsigned lCount = selectLepGoodForLeptonMVA(ind);
 
-        if(lCount < 2) continue;
+        if(lCount < 4) continue;
         //if(_nJets < 2) continue;
 
         /*
@@ -106,11 +106,13 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         //if(!(_HLT_Mu3_PFJet40 || _HLT_Mu8 || _HLT_Mu17 || _HLT_Mu27 || _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || _HLT_Ele17_CaloIdM_TrackIdM_PFJet30 || _HLT_Ele23_CaloIdM_TrackIdM_PFJet30)) continue;
 
         // same sign selection
+        /*
         if(lCount < 2) continue;
         if(lCount == 2){
             if(_lCharge[ind.at(0)] * _lCharge[ind.at(1)] < 0)
                 continue;
         }
+        */
 
         // is used for ttbar emu
         /*
