@@ -93,7 +93,7 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 100000) break;
-          //if(it > nEntries / 20) break;
+          if(it > nEntries / 20) break;
           
           std::vector<unsigned> ind, indFO;
           const unsigned lCount = selectLep(ind, leptonSelection);
@@ -239,14 +239,13 @@ void treeReader::Analyze(){
     }
   }
 
-  /*
   Color_t colorFL[4] = {kBlack, kRed, kGreen, kBlue};
   TString posString[2] = {"barrel", "endcap"};
   for(int flavor = 0; flavor < 2; flavor++){
     for(int pos = 0; pos < 2; pos++){
         //if(pos == 1) continue;
-        double xmin = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmin();
-        double xmax = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmax();
+        double xmin = distribs1DForFR[flavor].vectorHisto[0].GetXaxis()->GetXmin();
+        double xmax = distribs1DForFR[flavor].vectorHisto[0].GetXaxis()->GetXmax();
 
         plot[flavor][pos]->cd();
         double xPad = 0.25; // 0.25
@@ -259,7 +258,7 @@ void treeReader::Analyze(){
         pad1->cd();
 
         for(int flComp = 0; flComp < 4; flComp++){
-            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].Divide(&distribs[flavor].vectorHisto[2*flComp+1+8*pos]);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].Divide(&distribs1DForFR[flavor].vectorHisto[2*flComp+1+8*pos]);
             distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetLineColor(colorFL[flComp]);
             distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetMarkerColor(colorFL[flComp]);
             distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetTitle(flavorsString[flavor] + " FR (" + posString[pos] + ")");
@@ -272,7 +271,6 @@ void treeReader::Analyze(){
             if(flavor == 0 && pos == 0)
                 mtleg->AddEntry(&distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos], flavorComposString[flComp], "l");
         }
-        */
         /*
         for(int flComp = 1; flComp < 4; flComp++){
             for(int pos = 0; pos < 2; pos++){
@@ -286,7 +284,6 @@ void treeReader::Analyze(){
         //distribs[flavor].vectorHisto[1].Draw("same");
         //
         */
-        /*
         mtleg->Draw("same");
 
         pad1->cd();
@@ -313,7 +310,7 @@ void treeReader::Analyze(){
 
         TH1D *flClones[4];
         for(int flComp = 0; flComp < 4; flComp++){
-           flClones[flComp] = (TH1D*)distribs[flavor].vectorHisto[2*flComp+8*pos].Clone(Form("clone_%d_%d_%d", flavor, pos, flComp));
+           flClones[flComp] = (TH1D*)distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].Clone(Form("clone_%d_%d_%d", flavor, pos, flComp));
         }
         flClones[0]->Divide(flClones[1]);
         flClones[2]->Divide(flClones[1]);
@@ -346,7 +343,6 @@ void treeReader::Analyze(){
     }
 
   }
-  */
 
   /*
   TCanvas * plotPtRatio = new TCanvas("plotPtRatio", "plotPtRatio", 500, 450);
