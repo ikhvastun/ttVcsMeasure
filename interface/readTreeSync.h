@@ -16,8 +16,8 @@ TString flavorComposString[4] = {"all", "b", "c", "light"};
 //TString flavorComposString[4] = {"B_L", "B_C_L", "B_C_T_L", "B_T_L"};
 TString additionalString[2] = {"_NC", ""};
 
-double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.8; // 0.4 for ttZ, 0.8 for 3L tZq
-double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.95; // 0.85 for ttZ, 0.95 for tZq
+double leptonMVAcutAnalysis = leptonSelectionAnalysis == 2 ? 0.6 : 0.4; // 0.4 for ttZ, 0.8 for 3L tZq
+double magicFactorAnalysis = leptonSelectionAnalysis == 2 ? 0.9 : 0.85; // 0.85 for ttZ, 0.95 for tZq
 
 struct BinLabelOptions{
   int index;

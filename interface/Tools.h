@@ -310,6 +310,7 @@ void addVariablesToBDT(){
     //TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/";  // _removePromptFromTaus
     //TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_dRMatchingToGen_removePromptFromTaus_removedIP_relIso_tryBOTHptratioANDrelISO/dataset/weights/"; 
 
+    /*
     TString dirEle    = "../checkLeptonMVAvar/MVAtrainings/2016MC/ele_relISO0p3_ptGR10/dataset/weights/";
     TString dirMu    = "../checkLeptonMVAvar/MVAtrainings/2016MC/muon_relISO0p3_ptGR10/dataset/weights/";
 
@@ -321,6 +322,7 @@ void addVariablesToBDT(){
 
     weightfile = dirMu + prefix + TString("_") + TString("BDTG") + TString(".weights.xml");
     readerLeptonMVAmu->BookMVA( methodName, weightfile ); 
+    */
 
 } 
 

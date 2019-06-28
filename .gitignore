@@ -1,3 +1,7 @@
+main
+plotsForSave/
+*root
+
 # Prerequisites
 *.d
 

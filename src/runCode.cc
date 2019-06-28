@@ -61,9 +61,9 @@ void treeReader::Analyze(){
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
   //readSamples("data/samples_FOtuning_ttbar.txt"); // 
-  readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
+  //readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
   //readSamples("data/samples_QCD.txt"); // 
-  //readSamples("data/samples_QCD_2017.txt"); // 
+  readSamples("data/samples_QCD_2017.txt"); // 
   
   std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
   initdistribs(namesOfSamples);
@@ -95,17 +95,17 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 100000) break;
-          //if(it > nEntries / 10) break;
+          //if(it > nEntries / 20) break;
           
           std::vector<unsigned> ind, indFO;
           const unsigned lCount = selectLep(ind);
           const unsigned lCountFO = selectFakeLep(indFO);
 
           // for QCD
-          //if(lCountFO != 1) continue;
+          if(lCountFO != 1) continue;
 
           // for ttbar
-          if(lCountFO < 1) continue;
+          //if(lCountFO < 1) continue;
 
           int featureCategory = -99;
           int nLocEle = getElectronNumber(indFO);
@@ -123,15 +123,14 @@ void treeReader::Analyze(){
           HTLoc = HTCalc(indJets);
           //if(HTLoc < 200) continue;
 
-          // for QCD
-          /*
+          // for QCD, maybe this is not needed in QCD MC
           if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos && sam != 0 && _lPt[indFO.at(0)] > 15) continue;
           if(_met > 20) continue;
           TLorentzVector l0p4;
           l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          //l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           double mtL = mtCalc(l0p4, _met, _metPhi);
           if(mtL > 20) continue;
-          */
 
           /*
           int qualityCategory = 0;
@@ -150,7 +149,7 @@ void treeReader::Analyze(){
             double mvaVL = -999.;
             mvaVL =  _leptonMvatZqTTV[i];
 
-            // for ttbar
+            // for ttbar (also maybe for QCD ??? )
             if(_lIsPrompt[i]) continue;
             if(_lProvenanceCompressed[i] == 0) continue;
             if(_lProvenanceCompressed[i] == 4) continue;
@@ -264,6 +263,7 @@ void treeReader::Analyze(){
   TString posString[2] = {"barrel", "endcap"};
   for(int flavor = 0; flavor < 2; flavor++){
     for(int pos = 0; pos < 2; pos++){
+        //if(pos == 1) continue;
         double xmin = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmin();
         double xmax = distribs[flavor].vectorHisto[0].GetXaxis()->GetXmax();
 
@@ -284,19 +284,38 @@ void treeReader::Analyze(){
             distribs[flavor].vectorHisto[2*flComp+8*pos].SetTitle(flavorsString[flavor] + " FR (" + posString[pos] + ")");
             distribs[flavor].vectorHisto[2*flComp+8*pos].GetXaxis()->SetTitle("p_{T}^{corr} [GeV]"); 
             distribs[flavor].vectorHisto[2*flComp+8*pos].GetYaxis()->SetTitle("FR"); 
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMinimum(0);
+            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMinimum(0.);
             distribs[flavor].vectorHisto[2*flComp+8*pos].SetMaximum(0.3);
+            //distribs[flavor].vectorHisto[2*flComp+8*pos].Scale(1. / distribs[flavor].vectorHisto[2*flComp+8*pos].Integral());
             distribs[flavor].vectorHisto[2*flComp+8*pos].Draw("same");
             if(flavor == 0 && pos == 0)
                 mtleg->AddEntry(&distribs[flavor].vectorHisto[2*flComp+8*pos], flavorComposString[flComp], "l");
         }
+        /*
+        for(int flComp = 1; flComp < 4; flComp++){
+            for(int pos = 0; pos < 2; pos++){
+                distribs[flavor].vectorHisto[0].Add(&distribs[flavor].vectorHisto[2*flComp+8*pos]);
+                //distribs[flavor].vectorHisto[1].Add(&distribs[flavor].vectorHisto[1+2*flComp+8*pos]);
+            }
+        }
+        distribs[flavor].vectorHisto[0].Scale(1. / distribs[flavor].vectorHisto[0].Integral());
+        distribs[flavor].vectorHisto[0].Draw("same");
+        //distribs[flavor].vectorHisto[1].Scale(1. / distribs[flavor].vectorHisto[1].Integral());
+        //distribs[flavor].vectorHisto[1].Draw("same");
+        //
+        */
         mtleg->Draw("same");
 
         pad1->cd();
         pad1->RedrawAxis();
         pad1->Update();
 
-        if(xPad == 0) return;
+        if(xPad == 0) {
+            plot[flavor][pos]->SaveAs("plotsForSave/FR_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
+            //distribs[flavor].vectorHisto[0].SaveAs("plotsForSave/check_" + flavorsString[flavor] + ".root");
+            //distribs[flavor].vectorHisto[1].SaveAs("plotsForSave/check_" + flavorsString[flavor] + ".root");
+            continue;
+        }
 
         plot[flavor][pos]->cd();
 

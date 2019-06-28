@@ -27,15 +27,30 @@ bool treeReader::lepIsFOGood(const unsigned l){
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
-    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
-
-    if(_leptonMvatZqTTV[l] < leptonMVAcut){
-        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.7 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.2 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))) return false; // 0.4 original one, medium WP : (is2017 ? 0.4941 : 0.6324)
-        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.5 : 0.5))) return false; // 0.8 originally and -0.1
+    if(leptonSelection == 2){
+        if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
+        if(_lFlavor[l] == 0 && !_lElectronChargeConst[l]) return false;
+        if(_lFlavor[l] == 0 && !_lElectronPassConvVeto[l]) return false;
+        if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
     }
 
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? 0.8001 : 0.8958)) return false;
+
+    // valid for tZq
+    /*
+    if(_leptonMvatZqTTV[l] < leptonMVAcut){
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.6 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.4 : 0.4) : (leptonSelection == 3 ? 0.3 : 0.3))) return false; // 0.4 original one, medium WP : (is2017 ? 0.4941 : 0.6324)
+        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.4 : 0.3))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.3 : 0.4) : (leptonSelection == 3 ? 0.3 : 0.3))) return false; // 0.8 originally and -0.1
+    }
+    */
+    if(_leptonMvatZqTTV[l] < leptonMVAcut){
+        if(_ptRatio[l] < (is2017 ? (leptonSelection == 3 ? 0.4 : 0.5) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (is2017 ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5))) return false; // 0.4 original one, medium WP : (is2017 ? 0.4941 : 0.6324)
+        double electronMVAvalue = is2017 ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
+        if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? (leptonSelection == 3 ? -0.3 : -0.1) : (leptonSelection == 3 ? -0.1 : -0.6))    +    (fabs(_lEta[l]) >= 1.479)*(is2017 ? (leptonSelection == 3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.4))) return false;
+    }
     return true;
 }
 
