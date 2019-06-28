@@ -68,7 +68,7 @@ cd $baseFolder
 #foldersMC=DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/*ewkino2016MCList-v20p1
 #foldersMC=TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_Moriond2017-v1_ewkino2016MCList-v20p1
 #foldersMC=TTJets_SingleLeptFromT*TuneCUETP8M1_13TeV-madgraphMLM-pythia8/*ewkino2016MCList-v21
-foldersMC=DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/*ewkino2016MCList-v27
+foldersMC=*/*ewkino2016MCList-v27
 #foldersMC=WJets*/*ttVMCList-v15
 #foldersMC=TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/*colorReconSamples-v1
 #foldersMC=TT_TuneCUETP8M2T4_erdON_13TeV-powheg-pythia8/crab_Moriond2017-v1_colorReconSamples-v1

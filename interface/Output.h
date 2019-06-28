@@ -31,6 +31,12 @@ namespace Output{
   		THStack stack;
 	};
 
+    struct DistribsAll2D{
+        DistribsAll2D():vectorHisto(nSamples){}
+        std::vector<TH2D> vectorHisto;
+    };
+
+    DistribsAll2D distribs2D;
 	std::vector<DistribsAll> distribs(nVars);
 };
 
