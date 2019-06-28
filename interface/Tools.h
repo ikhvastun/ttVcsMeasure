@@ -85,8 +85,7 @@ void initdistribsForFR(){
         distribs1DForFR[i].vectorHisto[j].SetMarkerStyle(20);
         distribs1DForFR[i].vectorHisto[j].SetMarkerSize(0.5);
         distribs1DForFR[i].vectorHisto[j].SetLineWidth(1);
-        if (j < nProcesses)
-          distribs1DForFR[i].vectorHisto[j].Sumw2();
+        distribs1DForFR[i].vectorHisto[j].Sumw2();
       }
     }
 

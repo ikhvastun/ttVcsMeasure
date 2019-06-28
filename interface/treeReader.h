@@ -223,8 +223,8 @@ class treeReader {
         //general function to read a list of samples
         void readSamples(const std::string&, std::vector<Sample>&);
 
-        void initSample();
-        void initSample(const Sample&);
+        void initSample(std::string option);
+        void initSample(const Sample&, std::string option);
 
         //functions to analyze tree
         void GetEntry(long unsigned entry);

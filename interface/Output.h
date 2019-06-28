@@ -33,7 +33,7 @@ namespace Output{
 	};
 
   struct DistribsAll2D{
-    DistribsAll2D():vectorHisto(nProcesses){}
+    DistribsAll2D():vectorHisto(16){}
     std::vector<TH2D> vectorHisto;
   };
 
@@ -45,7 +45,7 @@ namespace Output{
 	std::vector<DistribsAll> distribs(nVars);
   // separately FR for electrons and muons
   std::vector<DistribsAllForFR> distribs1DForFR(2);
-  std::vector<DistribsAll2D> distribs2D(nVars);
+  std::vector<DistribsAll2D> distribs2D(2);
 
 };
 

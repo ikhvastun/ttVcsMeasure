@@ -62,17 +62,17 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples_FOtuning_ttbar.txt"); // 
-  //readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
-  //readSamples("data/samples_QCD.txt"); // 
-  readSamples("data/samples_QCD_2017.txt"); // 
+  //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar.txt"); // 
+  //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar_2017.txt"); // 
+  //readSamples("data/samples/FRmeasurement/samples_QCD.txt"); // 
+  readSamples("data/samples/FRmeasurement/samples_QCD_2017.txt"); //
   initdistribsForFR();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
-      initSample();
+      initSample("FR");
 
-      Color_t color = assignColor(samples[sam].getProcessName());
-      setStackColors(color, sam);
+      //Color_t color = assignColor(samples[sam].getProcessName());
+      //setStackColors(color, sam);
 
       if(samples[sam].is2017() && (samples[sam].getProcessName()) == "loose") continue;
       //if(!(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos )) continue;

@@ -47,14 +47,17 @@ void treeReader::readSamples(const std::string& list){
     readSamples(list, this->samples);
 }
 
-void treeReader::initSample(const Sample& samp){ 
+void treeReader::initSample(const Sample& samp, std::string option){ 
 
 	 ///////////////////////////////////////////////////////////////////
     // update current sample
 	 // hard coded path with input root files. !!!! IMPORTANT !!!!
 	 ///////////////////////////////////////////////////////////////////
     currentSample = samp;
-    sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    if(option == "ttZ")
+        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    else if(option == "FR")
+        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_FR/" + std::string(samp.getFileName().find("TT") != std::string::npos ? "ttbar" : "QCD") + "/" + std::string(samp.is2017() ?    "2017" : "2016") + "MC/");
     //sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/wverbeke/ntuples_ewkino/"); //  + (TString)(is2017 ? "" : "newReReco/") 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
@@ -117,8 +120,8 @@ void treeReader::initSample(const Sample& samp){
     //++currentSampleIndex;    //increment the current sample for the next iteration
 }
 
-void treeReader::initSample(){ //initialize the next sample in the list 
-    initSample(samples[++currentSampleIndex]);
+void treeReader::initSample(std::string option){ //initialize the next sample in the list 
+    initSample(samples[++currentSampleIndex], option);
 }
 
 void treeReader::GetEntry(long unsigned entry)
