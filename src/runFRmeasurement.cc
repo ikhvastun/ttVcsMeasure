@@ -51,7 +51,7 @@ Errors LastError::lasterror = Errors::UNKNOWN;
 using Output::distribs1DForFR;
 using Output::distribs2D;
 
-void treeReader::Analyze(){
+void treeReader::AnalyzeFR(const vector<std::string> & filesToAnalyse, const std::string outputDir){
 
   // just mva cut for 3L
   // magic factor is the A factor in the correction of lepton p_T from the closest jet.
@@ -71,7 +71,9 @@ void treeReader::Analyze(){
   //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar.txt"); // 
   //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar_2017.txt"); // 
   //readSamples("data/samples/FRmeasurement/samples_QCD.txt"); // 
-  readSamples("data/samples/FRmeasurement/samples_QCD_2017.txt"); //
+//  readSamples("data/samples/FRmeasurement/samples_QCD_2017.txt"); //
+  for(auto & fileToAnalyse : filesToAnalyse)
+    readSamples(fileToAnalyse);
   initdistribsForFR();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
@@ -297,7 +299,7 @@ void treeReader::Analyze(){
         pad1->Update();
 
         if(xPad == 0) {
-            plot[flavor][pos]->SaveAs("plotsForSave/FR_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
+            plot[flavor][pos]->SaveAs("plotsForSave/FR_" + outputDir + "_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
             //distribs[flavor].vectorHisto[0].SaveAs("plotsForSave/check_" + flavorsString[flavor] + ".root");
             //distribs[flavor].vectorHisto[1].SaveAs("plotsForSave/check_" + flavorsString[flavor] + ".root");
             continue;
@@ -345,7 +347,7 @@ void treeReader::Analyze(){
         flClones[2]->Draw("same");
         flClones[3]->Draw("same");
 
-        plot[flavor][pos]->SaveAs("plotsForSave/FR_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
+        plot[flavor][pos]->SaveAs("plotsForSave/FR_" + outputDir + "_" + flavorsString[flavor] + "_" + posString[pos] + ".root");
     }
 
   }
@@ -363,9 +365,44 @@ void treeReader::Analyze(){
 
 int main(int argc, char *argv[]){
 
+    cout << "Number of input arguments " << argc << endl;
+    for(int i = 0; i < argc; ++i){
+        cout << "Argument " << i << " " << argv[i] << endl;
+    }
+    if(argc == 1){
+        std::cerr << "please specify input file with samples from data/samples directory & output prefix for directory in plotsForSave." << std::endl;
+        return 1;
+    }
+    if(argc == 2){
+        std::cerr << "please specify input file with samples from data/samples directory & output prefix for directory in plotsForSave." << std::endl;
+        return 1;
+    }
+    if(argc == 3){
+        if(string(argv[1]).find("txt") == std::string::npos || string(argv[2]).find("output:") == std::string::npos){
+                std::cerr << "first argument should be the input file, second the prefix for output dir in plotsForSave!" << std::endl;
+                return 1;
+        }
+    }
+    if(argc > 3){
+        std::cerr << "please specify input file with samples from data/samples directory & output prefix for directory in plotsForSave." << std::endl;
+        return 1;
+    }    
+
+    std::vector<std::string> inputFiles;
+    char * inF = (char*)argv[1];
+    char * pch = strtok (inF,",");
+    while (pch != NULL){
+        inputFiles.push_back(std::string(pch)); // printf ("%s\n",pch);
+        pch = strtok (NULL, ",");
+    }
+    std::string output = string(argv[2]);
+	 // argument is "output:..." so you need to remove the first 7 signs
+    output.erase (output.begin(), output.begin()+7);
+    std::cout << "output folder is set to: " << output<< std::endl;
+
     TApplication *rootapp = new TApplication("example", &argc, argv);
     treeReader reader;
-    reader.Analyze();
+    reader.AnalyzeFR(inputFiles, output);
 //    rootapp->Run();
 
     return 0;

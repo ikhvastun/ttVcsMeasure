@@ -229,6 +229,7 @@ class treeReader {
         //functions to analyze tree
         void GetEntry(long unsigned entry);
         void Analyze();
+        void AnalyzeFR(const std::vector<std::string>& fileToAnalyse, const std::string outputDir);
         void Analyze(const std::vector<std::string>& fileToAnalyse, const std::string option = "", const std::string selection = "", const std::string& sampleToDebug = "", long = -999);
         void GetEntry(const Sample&, long unsigned entry);
         void Loop(const std::string& sample, const double xSection);

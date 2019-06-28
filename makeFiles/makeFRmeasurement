@@ -5,14 +5,14 @@ LDFLAGS=-g $(shell root-config --ldflags)
 LDLIBS=$(shell root-config --libs) -lTMVA
 CFLAGS = `root-config --cflags --libs`
 
-EXECUTABLE = main
+EXECUTABLE = runFR
 
 SOURCES = src/CMS_lumi.cc src/runFRmeasurement.cc src/treeReader.cc src/analysisTools.cc src/eventSelection.cc src/Sample.cc src/stringTools.cc src/systemTools.cc
 OBJS=$(subst .cc,.o,$(SOURCES))
 
-all: main
+all: runFR
 
-main: $(OBJS)
+runFR: $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS) $(LDLIBS) 
 
 %.o: %.c 

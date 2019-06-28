@@ -25,6 +25,8 @@ scripts/.DS_Store
 *.lo
 *.o
 *.obj
+*.swp
+*.swo
 
 # Precompiled Headers
 *.gch
@@ -50,4 +52,3 @@ scripts/.DS_Store
 *.out
 *.app
 
-*.swp
