@@ -5,6 +5,7 @@
 
 #include "Output.h"
 using Output::distribs;
+using Output::distribs2D;
 using namespace std;
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
@@ -66,6 +67,36 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
       for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
 //        if(selection == "ttW" && j == ttWSample) continue;
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
+      }
+    }
+}
+
+void initdistribsForFR(){
+
+    for(unsigned int i = 0; i < distribs.size(); i++){
+      TString name = Form("varST_%d",i);
+
+      for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
+        name = Form("var_%d_%d",i,j);
+        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
+
+        distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
+
+        distribs[i].vectorHisto[j].SetMarkerStyle(20);
+        distribs[i].vectorHisto[j].SetMarkerSize(0.5);
+        distribs[i].vectorHisto[j].SetLineWidth(1);
+        if (j < nProcesses)
+          distribs[i].vectorHisto[j].Sumw2();
+      }
+    }
+
+    for(unsigned int i = 0; i < distribs2D.size(); i++){
+      for(unsigned int j = 0; j < distribs2D[i].vectorHisto.size(); j++){
+
+        TString name = Form("FRflavour_%d_%d", i, j);
+        distribs2D[i].vectorHisto[j] = std::move(TH2D(name + (TString)(j%2 == 1 ? "passed" : ""),name+";",nPt-1, ptBins, nEta-1, etaBins[i%2]));
+        distribs2D[i].vectorHisto[j].Sumw2();
+
       }
     }
 }

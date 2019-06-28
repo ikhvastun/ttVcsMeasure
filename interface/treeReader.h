@@ -167,6 +167,8 @@ class treeReader {
         Double_t        _lMuonTrackPtErr[nL_max];   //[_nMu]
         Bool_t          _lIsPrompt[nL_max];   
         Int_t           _lMatchPdgId[nL_max];   
+        UInt_t          _lProvenance[nL_max];   //[_nL]
+        UInt_t          _lProvenanceCompressed[nL_max];
         UChar_t         _nJets;
         Double_t        _jetPt[nJets_max];   
         Double_t        _jetPt_JECUp[nJets_max];   
@@ -526,6 +528,8 @@ class treeReader {
         TBranch        *b__lMuonTrackPtErr;   //!
         TBranch        *b__lIsPrompt;   
         TBranch        *b__lMatchPdgId;   
+        TBranch        *b__lProvenance;   //!
+        TBranch        *b__lProvenanceCompressed;   //!
         TBranch        *b__nJets;   
         TBranch        *b__jetPt;   
         TBranch        *b__jetPt_JECUp;   

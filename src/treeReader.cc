@@ -268,6 +268,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_gen_lIsPrompt", _gen_lIsPrompt, &b__gen_lIsPrompt);
         fChain->SetBranchAddress("_lIsPrompt", _lIsPrompt, &b__lIsPrompt);
         fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
+        fChain->SetBranchAddress("_lProvenance", _lProvenance, &b__lProvenance);
+        fChain->SetBranchAddress("_lProvenanceCompressed", _lProvenanceCompressed, &b__lProvenanceCompressed);
     }
 
     

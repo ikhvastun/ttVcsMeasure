@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "TString.h"
+
 const int nFlavors = 2;
 
 //const int leptonSelectionAnalysis = 3;
@@ -18,6 +20,9 @@ const int pdfUncIndex = 12;
 
 TString flavorsString[2] = {"el", "mu"};
 TString additionalString[2] = {"_NC", ""};
+TString flavorComposString[4] = {"all", "b", "c", "light"};
+//TString flavorComposString[4] = {"B_L", "B_C_L", "B_C_T_L", "B_T_L"};
+
 
 struct BinLabelOptions{
   int index;
@@ -551,5 +556,15 @@ std::vector<double> ttZFSRDownW = {0.965, 0.975, 0.995, 0.965, 0.965, 0.985, 0.9
 std::vector<double> osToss = {1.26, 1.23, 1.25, 1.15, 1.08, 1.}; // for nbjets = 1
 //std::vector<double> osToss = {1.37, 1.22, 1.2, 1.19, 1.12, 1.}; // for nbjets >= 2
 //std::vector<double> osToss = {1.19, 1.13, 1.22, 1.17, 1.1, 1.}; // for nbjets = 0 for ttbar
+
+
+// pt and eta ranges for FR measurement 
+const int nPt = 7;
+const double ptBins[nPt] = {10., 15., 20., 30., 45., 65., 100.};
+
+const int nEta = 4;
+double etaBins[2][nEta] = {{0., 0.8, 1.442, 2.5}, {0., 1.2, 2.1, 2.4}};
+
+double borderOfBarrelEndcap[2] = {1.479, 1.2};
 
 #endif 

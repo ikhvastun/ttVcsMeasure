@@ -4,6 +4,7 @@
 #include "readTreeSync.h"
 
 #include <TH1D.h>
+#include <TH2D.h>
 #include <THStack.h>
 
 namespace Output{
@@ -32,12 +33,12 @@ namespace Output{
 	};
 
     struct DistribsAll2D{
-        DistribsAll2D():vectorHisto(nSamples){}
+        DistribsAll2D():vectorHisto(nProcesses){}
         std::vector<TH2D> vectorHisto;
     };
 
-    DistribsAll2D distribs2D;
-	std::vector<DistribsAll> distribs(nVars);
+	  std::vector<DistribsAll> distribs(nVars);
+    std::vector<DistribsAll2D> distribs2D(nVars);
 };
 
 #endif

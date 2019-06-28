@@ -53,9 +53,11 @@ using Output::distribs2D;
 
 void treeReader::Analyze(){
 
-  leptonSelection = leptonSelectionAnalysis;
-  magicFactor = magicFactorAnalysis;
-  leptonMVAcut = leptonMVAcutAnalysis;
+  double leptonMVAcut = 0.4; // 0.4 for ttZ, 0.8 for 3L tZq
+  double magicFactor = 0.85; // 0.85 for ttZ, 0.95 for tZq
+
+  leptonSelection = 3;
+
   //Set CMS plotting style
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
@@ -64,23 +66,19 @@ void treeReader::Analyze(){
   //readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
   //readSamples("data/samples_QCD.txt"); // 
   readSamples("data/samples_QCD_2017.txt"); // 
-  
-  std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
-  initdistribs(namesOfSamples);
-
-  addVariablesToBDT();
+  initdistribsForFR();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample();
 
-      Color_t color = assignColor(std::get<0>(samples[sam]));
+      Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, sam);
 
-      if(is2017 && std::get<0>(samples[sam]) == "loose") continue;
+      if(samples[sam].is2017() && (samples[sam].getProcessName()) == "loose") continue;
       //if(!(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos )) continue;
       //if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos ) continue;
 
-      std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
+      std::cout<<"Entries in "<< (samples[sam].getFileName()) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
       for(long unsigned it = 0; it < nEntries; ++it){
           //print progress bar  
@@ -98,8 +96,8 @@ void treeReader::Analyze(){
           //if(it > nEntries / 20) break;
           
           std::vector<unsigned> ind, indFO;
-          const unsigned lCount = selectLep(ind);
-          const unsigned lCountFO = selectFakeLep(indFO);
+          const unsigned lCount = selectLep(ind, leptonSelection);
+          const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
 
           // for QCD
           if(lCountFO != 1) continue;
@@ -111,6 +109,7 @@ void treeReader::Analyze(){
           int nLocEle = getElectronNumber(indFO);
 
           std::vector<unsigned> indJets;
+          std::vector<unsigned> indBJets;
 
           unsigned third = -9999;
           double mll = 99999;
@@ -118,13 +117,13 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
+          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
+          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
           HTLoc = HTCalc(indJets);
           //if(HTLoc < 200) continue;
 
           // for QCD, maybe this is not needed in QCD MC
-          if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos && sam != 0 && _lPt[indFO.at(0)] > 15) continue;
+          if(samples[sam].getFileName().find("MuEnriched") != std::string::npos && sam != 0 && _lPt[indFO.at(0)] > 15) continue;
           if(_met > 20) continue;
           TLorentzVector l0p4;
           l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
@@ -155,12 +154,12 @@ void treeReader::Analyze(){
             if(_lProvenanceCompressed[i] == 4) continue;
             //if(_lProvenanceCompressed[i] != 1) continue;
 
-            if(lepIsGood(i)) featureCategory = 0;
+            if(lepIsGood(i, leptonSelection)) featureCategory = 0;
             else featureCategory = 1;
 
             int ptAverageBin = int((mvaVL + 1) * 40);
 
-            hAveragePt[ptAverageBin]->Fill(double(featureCategory == 0 ? _lPt[i] : _lPt[i] / _ptRatio[i]), weight);
+            //hAveragePt[ptAverageBin]->Fill(double(featureCategory == 0 ? _lPt[i] : _lPt[i] / _ptRatio[i]), weight);
 
             int additionalFlavourIndex = 0;
             if(_lProvenanceCompressed[i] == 1)
@@ -173,36 +172,15 @@ void treeReader::Analyze(){
             int additionalPositionIndex = 0;
             if(fabs(_lEta[i]) > borderOfBarrelEndcap[_lFlavor[i]])
                 additionalPositionIndex = 8;
-            /*
-            int additionalFlavourIndex = 0;
-            if(_lProvenance[i] == 8)
-                additionalFlavourIndex = 0;
-            if(_lProvenance[i] == 9)
-                additionalFlavourIndex = 2;
-            if(_lProvenance[i] == 10)
-                additionalFlavourIndex = 4;
-            if(_lProvenance[i] == 11)
-                additionalFlavourIndex = 6;
 
-            int additionalPositionIndex = 0;
-            if(fabs(_lEta[i]) > borderOfBarrelEndcap[_lFlavor[i]])
-                additionalPositionIndex = 8;
-            */
-            //weight = 1.;
-
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight); // 
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory+additionalFlavourIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
+            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight); // 
+            distribs2D[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), TMath::Abs(_lEta[i]), weight);
 
             // for total
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), weight);
-            distribs[_lFlavor[i]].vectorHisto2D[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),varMax[0]-0.001), TMath::Abs(_lEta[i]), weight);
+            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight);
+            distribs2D[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), TMath::Abs(_lEta[i]), weight);
 
-            distribsPtRatio->Fill(TMath::Min(double(magicFactor * _lPt[i] / _ptRatio[i] / _lPt[i]),varMax[16]-0.001), weight);
-            /*
-            if(featureCategory == 1){
-                distribs2D.vectorHisto[0].Fill(_gen_partonPt[i], double(_lPt[i] * (1 + std::max(_relIso[i] - 0.1, 0.))));
-            }
-            */
+            //distribsPtRatio->Fill(TMath::Min(double(magicFactor * _lPt[i] / _ptRatio[i] / _lPt[i]),varMax[16]-0.001), weight);
           }
           
       }
@@ -212,9 +190,11 @@ void treeReader::Analyze(){
       std::cout << std::endl;
   }
 
+  /*
   for(int i = 0; i < 80; i++){
     cout << hAveragePt[i]->GetMean() << " ";
   }
+  */
   cout << endl;
 
   TLegend* mtleg = new TLegend(0.77,0.89,0.95,0.62);
@@ -255,7 +235,7 @@ void treeReader::Analyze(){
 
   for(int flComp = 0; flComp < 4; flComp++){
     for(int flavour = 0; flavour < 2; flavour++){
-        showHist2D(plot2D[flavour+2*flComp],distribs[flavour].vectorHisto2D[0+2*flComp], distribs[flavour].vectorHisto2D[1+2*flComp], flavour, flComp); 
+        showHist2D(plot2D[flavour+2*flComp],distribs2D[flavour].vectorHisto[0+2*flComp], distribs2D[flavour].vectorHisto[1+2*flComp], flavour, flComp); 
     }
   }
 
