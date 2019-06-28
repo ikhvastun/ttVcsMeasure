@@ -53,6 +53,9 @@ using Output::distribs2D;
 
 void treeReader::Analyze(){
 
+  // just mva cut for 3L
+  // magic factor is the A factor in the correction of lepton p_T from the closest jet.
+
   double leptonMVAcut = 0.4; // 0.4 for ttZ, 0.8 for 3L tZq
   double magicFactor = 0.85; // 0.85 for ttZ, 0.95 for tZq
 
@@ -61,6 +64,9 @@ void treeReader::Analyze(){
   //Set CMS plotting style
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
+  // 
+  // input files, root file names, nice to put it as an input
+  //
   //read samples and cross sections from txt file
   //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar.txt"); // 
   //readSamples("data/samples/FRmeasurement/samples_FOtuning_ttbar_2017.txt"); // 
@@ -360,7 +366,7 @@ int main(int argc, char *argv[]){
     TApplication *rootapp = new TApplication("example", &argc, argv);
     treeReader reader;
     reader.Analyze();
-    rootapp->Run();
+//    rootapp->Run();
 
     return 0;
 }

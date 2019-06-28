@@ -47,6 +47,10 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
     }
 
     //if(debug) cout << "info about FO leptons with pt " << _lPt[l] << " (closest jet deep csv): " << _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]  << endl;
+	 // here we tune the FO definition
+	 // _ptRatio
+	 // _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]
+	 // electronMVAvalue cut value
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
 
     if(lepSel != 4 && _leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[leptonSelection]){
