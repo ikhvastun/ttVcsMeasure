@@ -48,7 +48,7 @@ using namespace std;
 using namespace tools;
 
 Errors LastError::lasterror = Errors::UNKNOWN;
-using Output::distribs;
+using Output::distribs1DForFR;
 using Output::distribs2D;
 
 void treeReader::Analyze(){
@@ -111,7 +111,7 @@ void treeReader::Analyze(){
           std::vector<unsigned> indJets;
           std::vector<unsigned> indBJets;
 
-          unsigned third = -9999;
+        
           double mll = 99999;
           double pt_Z = 999999;
           double phi_Z = 999999;
@@ -173,11 +173,11 @@ void treeReader::Analyze(){
             if(fabs(_lEta[i]) > borderOfBarrelEndcap[_lFlavor[i]])
                 additionalPositionIndex = 8;
 
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight); // 
+            distribs1DForFR[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight); // 
             distribs2D[_lFlavor[i]].vectorHisto[featureCategory+additionalFlavourIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), TMath::Abs(_lEta[i]), weight);
 
             // for total
-            distribs[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight);
+            distribs1DForFR[_lFlavor[i]].vectorHisto[featureCategory+additionalPositionIndex].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), weight);
             distribs2D[_lFlavor[i]].vectorHisto[featureCategory].Fill(TMath::Min(double(featureCategory == 0 ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i]),ptBins[nPt-1]-0.001), TMath::Abs(_lEta[i]), weight);
 
             //distribsPtRatio->Fill(TMath::Min(double(magicFactor * _lPt[i] / _ptRatio[i] / _lPt[i]),varMax[16]-0.001), weight);
@@ -239,6 +239,7 @@ void treeReader::Analyze(){
     }
   }
 
+  /*
   Color_t colorFL[4] = {kBlack, kRed, kGreen, kBlue};
   TString posString[2] = {"barrel", "endcap"};
   for(int flavor = 0; flavor < 2; flavor++){
@@ -258,19 +259,20 @@ void treeReader::Analyze(){
         pad1->cd();
 
         for(int flComp = 0; flComp < 4; flComp++){
-            distribs[flavor].vectorHisto[2*flComp+8*pos].Divide(&distribs[flavor].vectorHisto[2*flComp+1+8*pos]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetLineColor(colorFL[flComp]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMarkerColor(colorFL[flComp]);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetTitle(flavorsString[flavor] + " FR (" + posString[pos] + ")");
-            distribs[flavor].vectorHisto[2*flComp+8*pos].GetXaxis()->SetTitle("p_{T}^{corr} [GeV]"); 
-            distribs[flavor].vectorHisto[2*flComp+8*pos].GetYaxis()->SetTitle("FR"); 
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMinimum(0.);
-            distribs[flavor].vectorHisto[2*flComp+8*pos].SetMaximum(0.3);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].Divide(&distribs[flavor].vectorHisto[2*flComp+1+8*pos]);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetLineColor(colorFL[flComp]);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetMarkerColor(colorFL[flComp]);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetTitle(flavorsString[flavor] + " FR (" + posString[pos] + ")");
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].GetXaxis()->SetTitle("p_{T}^{corr} [GeV]"); 
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].GetYaxis()->SetTitle("FR"); 
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetMinimum(0.);
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].SetMaximum(0.3);
             //distribs[flavor].vectorHisto[2*flComp+8*pos].Scale(1. / distribs[flavor].vectorHisto[2*flComp+8*pos].Integral());
-            distribs[flavor].vectorHisto[2*flComp+8*pos].Draw("same");
+            distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos].Draw("same");
             if(flavor == 0 && pos == 0)
-                mtleg->AddEntry(&distribs[flavor].vectorHisto[2*flComp+8*pos], flavorComposString[flComp], "l");
+                mtleg->AddEntry(&distribs1DForFR[flavor].vectorHisto[2*flComp+8*pos], flavorComposString[flComp], "l");
         }
+        */
         /*
         for(int flComp = 1; flComp < 4; flComp++){
             for(int pos = 0; pos < 2; pos++){
@@ -284,6 +286,7 @@ void treeReader::Analyze(){
         //distribs[flavor].vectorHisto[1].Draw("same");
         //
         */
+        /*
         mtleg->Draw("same");
 
         pad1->cd();
@@ -343,6 +346,7 @@ void treeReader::Analyze(){
     }
 
   }
+  */
 
   /*
   TCanvas * plotPtRatio = new TCanvas("plotPtRatio", "plotPtRatio", 500, 450);

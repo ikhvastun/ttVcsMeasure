@@ -4,7 +4,7 @@
 #include "readTreeSync.h"
 
 #include "Output.h"
-using Output::distribs;
+using Output::distribs1DForFR;
 using Output::distribs2D;
 using namespace std;
 
@@ -73,20 +73,20 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
 
 void initdistribsForFR(){
 
-    for(unsigned int i = 0; i < distribs.size(); i++){
+    for(unsigned int i = 0; i < distribs1DForFR.size(); i++){
       TString name = Form("varST_%d",i);
 
-      for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
+      for(unsigned int j = 0; j < distribs1DForFR[i].vectorHisto.size(); j++){
         name = Form("var_%d_%d",i,j);
-        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
+        distribs1DForFR[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
 
-        distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
+        distribs1DForFR[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
-        distribs[i].vectorHisto[j].SetMarkerStyle(20);
-        distribs[i].vectorHisto[j].SetMarkerSize(0.5);
-        distribs[i].vectorHisto[j].SetLineWidth(1);
+        distribs1DForFR[i].vectorHisto[j].SetMarkerStyle(20);
+        distribs1DForFR[i].vectorHisto[j].SetMarkerSize(0.5);
+        distribs1DForFR[i].vectorHisto[j].SetLineWidth(1);
         if (j < nProcesses)
-          distribs[i].vectorHisto[j].Sumw2();
+          distribs1DForFR[i].vectorHisto[j].Sumw2();
       }
     }
 
