@@ -33,18 +33,28 @@ namespace Output{
 	};
 
   struct DistribsAll2D{
+  	// 2 eta categories \times pass or fail \times nonprompt stemming from all flavours, b, c and light = 16
     DistribsAll2D():vectorHisto(16){}
     std::vector<TH2D> vectorHisto;
   };
 
   struct DistribsAllForFR{
+  	// 2 eta categories \times pass or fail \times nonprompt stemming from all flavours, b, c and light = 16
     DistribsAllForFR():vectorHisto(16){}
+    std::vector<TH1D> vectorHisto;
+  };
+
+  struct DistribsAllForCT{
+  	// only 2 categories: events that passed full selection and events used for nonprompt background estimation
+    DistribsAllForCT():vectorHisto(2){}
     std::vector<TH1D> vectorHisto;
   };
 
 	std::vector<DistribsAll> distribs(nVars);
   // separately FR for electrons and muons
   std::vector<DistribsAllForFR> distribs1DForFR(2);
+
+  std::vector<DistribsAllForCT> distribs1DForCT(nVars);
   std::vector<DistribsAll2D> distribs2D(2);
 
 };

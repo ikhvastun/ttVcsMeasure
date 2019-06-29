@@ -49,8 +49,7 @@ using namespace std;
 using namespace tools;
 
 Errors LastError::lasterror = Errors::UNKNOWN;
-using Output::distribs;
-using Output::distribs2D;
+using Output::distribs1DForCT;
 
 void treeReader::Analyze(){
 
@@ -65,26 +64,12 @@ void treeReader::Analyze(){
   //readSamples("data/samples_FOtuning_ttbar.txt"); // 
   readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
   
-  std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
-  initdistribs(namesOfSamples);
-
-  LastError::lasterror = Errors::UNKNOWN;
-
-  vector<TH2D> fakeMaps;
-  getFRmaps(fakeMaps, is2017, leptonSelection);
-
-  if(LastError::lasterror != Errors::OK){
-     cout << "FR maps not found" << endl;
-     return;
-  }
-
-  addVariablesToBDT();
+  std::string selection = "CTInMC";
+  initListToPrint(selection);
+  initdistribsForCT();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample("ttZ");
-
-      Color_t color = assignColor(std::get<0>(samples[sam]));
-      setStackColors(color, sam);
 
       // only for 3L
       //if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue;
@@ -113,16 +98,16 @@ void treeReader::Analyze(){
           //if(it > nEntries / 20) break;
           
           std::vector<unsigned> ind, indFO;
-          const unsigned lCountFO = selectFOLep(indFO, leptonSelection);
+          const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
 
           //if(!(_2017_e || _2017_m || _2017_ee || _2017_em || _2017_mm)) continue;
           //cout << "decision: " << _2017_ee << " " << _2017_mm << " " << _2017_em << " " << _2017_e << " " << _2017_m << endl;
 
-          if(leptonSelectionAnalysis == 3){
+          if(leptonSelection == 3){
             if(lCountFO < 3) continue;
             if(!passPtCuts3L(indFO)) continue;
           }
-          if(leptonSelectionAnalysis == 2){
+          if(leptonSelection == 2){
             if(lCountFO != 2) continue;
             if(!passPtCuts2L(indFO)) continue;
             if(_lCharge[indFO.at(0)] * _lCharge[indFO.at(1)] < 0) continue;
@@ -134,12 +119,7 @@ void treeReader::Analyze(){
           //if(!noConversionInSelection(indFO)) continue;
 
           std::vector<unsigned> indJets;
-
-          unsigned third = -9999;
-          double mll = 99999;
-          double pt_Z = 999999;
-          double phi_Z = 999999;
-          double ptNonZ = 999999;
+          std::vector<unsigned> indBJets;
 
           int featureCategory = 0;
           int promptCategory = 0;
@@ -160,8 +140,8 @@ void treeReader::Analyze(){
           //if(promptCategory == 2)
           //    cout << _runNb << " " << _lumiBlock << " " << _eventNb << endl; 
           
-          if(leptonSelectionAnalysis == 3 && promptCategory > 2) continue;
-          if(leptonSelectionAnalysis == 2 && promptCategory > 1) continue;
+          if(leptonSelection == 3 && promptCategory > 2) continue;
+          if(leptonSelection == 2 && promptCategory > 1) continue;
           //if(featureCategory < 2) continue;
           //if(featureCategory > 3) continue;
           double FRloc = 1.;
@@ -169,41 +149,24 @@ void treeReader::Analyze(){
           //if(featureCategory == 3 && !eventChargeConsistent(indFO)) continue;
           //if(featureCategory < 2){ 
           bool promptInSideband = false;
-          if(featureCategory < leptonSelectionAnalysis){ 
-
-            int nFakeLepCounter = 0;
-
-            for(auto & i : indFO){
-              //if (_leptonMvatZqTTV[i] > leptonMVAcut) continue;
-              if(lepIsGood(i, leptonSelection)) continue;
-              //if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) continue;
-              if(_lIsPrompt[i]) promptInSideband = true;
-
-              // used in ttV
-              const double magicNumber = magicFactor;
-              double leptFakePtCorr = magicNumber * _lPt[i] / _ptRatio[i];
-              double FRloc_loc = fakeMaps.at(_lFlavor[i]).GetBinContent(fakeMaps.at(_lFlavor[i]).FindBin(TMath::Min(leptFakePtCorr,100-1.), fabs(_lEta[i])));
-
-              distribs[19].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(leptFakePtCorr / _lPt[i],varMax[19]-0.01), weight);
-              FRloc *= FRloc_loc;
-              nFakeLepCounter++;
-
-            }
-
-            FRloc *= TMath::Power(-1, nFakeLepCounter + 1);
+          if(featureCategory < leptonSelection){ 
+            weight *= fakeRateWeight();
           }
 
           if(promptInSideband) continue;
 
-          //cout << "FRloc is: " << FRloc << endl;
-
-          weight = weight * FRloc;  
-
           //nJLoc = nJets(0, true, indJets, featureCategory < leptonSelectionAnalysis);
           //nBLoc = nBJets(0, true, true, 1, featureCategory < leptonSelectionAnalysis);
-          double dMZ = deltaMZ(indFO, third, mll, pt_Z, ptNonZ, phi_Z);
+          unsigned third = -9999;
+          double mll = 99999;
+          double mlll = 99999;
+          double ptZ = 999999;
+          double ptNonZ = -999999;
+          TLorentzVector Zboson, lnegative;
+          std::vector<unsigned> indOf2LonZ;
+          double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
 
-          if(leptonSelectionAnalysis == 2){
+          if(leptonSelection == 2){
             //if(nJLoc < 2) continue;
             //if(nBLoc < 1) continue;
 
@@ -224,7 +187,7 @@ void treeReader::Analyze(){
           unsigned jetCount = 0;
           unsigned bJetCount = 0;
           double minDeltaRLeptonbJet = 0.;
-          if(leptonSelectionAnalysis == 3){
+          if(leptonSelection == 3){
              //if(dMZ > 10) continue;
              //make lorentzvectors for leptons
              TLorentzVector lepV[lCountFO];
@@ -236,8 +199,8 @@ void treeReader::Analyze(){
 
              // fill njets and nbjets variables
              std::vector<unsigned> jetInd, bJetInd;
-             jetCount = nJets(jetInd);
-             bJetCount = nBJets(bJetInd);
+             jetCount = nJets(0, true, indJets, samples[sam].is2017());
+             bJetCount = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
 
              //if(jetCount < 2) continue;
              // fill vector of all jets
@@ -263,31 +226,87 @@ void treeReader::Analyze(){
              //cout << "new values are " << fabs(recoilingJet.Eta()) << " " << std::max(maxMJetJet, 0.) << endl;
           }
 
+          double mt1 = 9999;
+          double mvaVL = 0;
+          double mll1stpair = -999., mll2ndpair = -999.;
+          double cosTSt = -999;
+
+          vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
+                                   // currently here we will have ttZ3L and ttZ4L categories
+                                   (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
+
+          vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
+                                     "mtW", "njets", "nbjets", "BDTpp", 
+                                     //"flavour", 
+                                     //"SR",
+                                     "SR3L",
+                                     "SR4L",
+                                     "mll", "ptZ", "ptNonZ", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu",
+                                     "met", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "SRnpCR", "nPV", "mlll",
+                                     "etaLead", "etaSubl", "etaTrail", "eta4th", 
+                                     "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", 
+                                     "cosThetaStar", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "BDTmm", "HT",
+                                     "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR",
+                                     "SRttZCleanPTZ", "SRttZCleanCosTheta",
+                                     "flavour3L", "flavour4L", "flavour4LZZ", 
+                                     "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
+                                     "flavour3L4L",
+                                     "SRTTZ8SR3L",
+                                     "mllnoZcut"
+                                   };
+
+          for(int dist = 0; dist < fillVar.size(); dist++){
+            if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[dist]) == listToPrint[selection].end()) continue;
+            distribs1DForCT[dist].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1),weight);
+          }
 
           //distribs[0].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(TMath::Min(mtHighest,varMax[0]-0.1), weight);
-          distribs[1].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(_met,varMax[1]-0.1), weight);
-          distribs[2].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(HTLoc,varMax[2]-0.1), weight);
-          distribs[3].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(double(jetCount),varMax[3]-0.1), weight);
-          distribs[4].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(double(bJetCount),varMax[4]-0.1), weight);
-          distribs[5].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[5]-0.1), weight);
-          distribs[6].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[6]-0.1), weight);
+          /*
+          distribs[1].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_met,varMax[1]-0.1), weight);
+          distribs[2].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(HTLoc,varMax[2]-0.1), weight);
+          distribs[3].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(double(jetCount),varMax[3]-0.1), weight);
+          distribs[4].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(double(bJetCount),varMax[4]-0.1), weight);
+          distribs[5].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[5]-0.1), weight);
+          distribs[6].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[6]-0.1), weight);
+          if(leptonSelection == 3)
+            distribs[7].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[2].first,varMax[7]-0.1), weight);
+          distribs[8].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[0].second],varMax[8]-0.01), weight);
+          distribs[9].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[1].second],varMax[9]-0.01), weight);
           if(leptonSelectionAnalysis == 3)
-            distribs[7].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(ptCorrV[2].first,varMax[7]-0.1), weight);
-          distribs[8].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[0].second],varMax[8]-0.01), weight);
-          distribs[9].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[1].second],varMax[9]-0.01), weight);
-          if(leptonSelectionAnalysis == 3)
-            distribs[10].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[2].second],varMax[10]-0.01), weight);
-          distribs[11].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(TMath::Min(mll,varMax[11]-0.1), weight);
+            distribs[10].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[2].second],varMax[10]-0.01), weight);
+          distribs[11].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(mll,varMax[11]-0.1), weight);
           //distribs[12].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(SRID(nJLoc, nBLoc, mvaValueRegion, _charges[maxPtInd]), FRloc*scale*_weight);
-          if(leptonSelectionAnalysis == 2)
-            distribs[13].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(flavourCategory2L(nLocEle, _lCharge[indFO.at(0)]), weight);
-          if(leptonSelectionAnalysis == 3)
-            distribs[13].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(flavourCategory3L(nLocEle), weight);
-          if(leptonSelectionAnalysis == 3){
-            distribs[20].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(fabs(recoilingJet.Eta()) == 0 ? -999. : fabs(recoilingJet.Eta()), weight); 
-            distribs[21].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(std::max(maxMJetJet, 0.), weight); 
-            distribs[22].vectorHisto[featureCategory >= leptonSelectionAnalysis ? 0 : 1].Fill(std::max(minDeltaRLeptonbJet, 0.), weight); 
+          if(leptonSelection == 2)
+            distribs[13].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(flavourCategory2L(nLocEle, _lCharge[indFO.at(0)]), weight);
+          if(leptonSelection == 3)
+            distribs[13].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(flavourCategory3L(nLocEle), weight);
+          if(leptonSelection == 3){
+            distribs[20].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(fabs(recoilingJet.Eta()) == 0 ? -999. : fabs(recoilingJet.Eta()), weight); 
+            distribs[21].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(std::max(maxMJetJet, 0.), weight); 
+            distribs[22].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(std::max(minDeltaRLeptonbJet, 0.), weight); 
           }
+          */
 
       }
 
@@ -296,8 +315,10 @@ void treeReader::Analyze(){
       //std::cout << std::endl;
   }
 
-  cout << "Total number expected: " << distribs[1].vectorHisto[0].Integral() << endl;
-  cout << "Total number predicted: " << distribs[1].vectorHisto[1].Integral() << endl;
+  int indexOfFirstKinVar = figNames[listToPrint[selection].at(0)].index;
+
+  cout << "Total number expected: " << distribs1DForCT[indexOfFirstKinVar].vectorHisto[0].Integral() << endl;
+  cout << "Total number predicted: " << distribs1DForCT[indexOfFirstKinVar].vectorHisto[1].Integral() << endl;
 
   TLegend* mtleg = new TLegend(0.17,0.89,0.95,0.72);
   mtleg->SetNColumns(2);
@@ -326,7 +347,7 @@ void treeReader::Analyze(){
 
     //cout << "The sample size is " << samples.size() << endl;
     for (int sam=0; sam != samples.size(); ++sam){
-      if(std::get<0>(samples[sam]) == "data") continue;
+      if(samples[sam].getProcessName() == "data") continue;
 
       // is used in MC CT
       if(sam == 0) continue;
@@ -339,7 +360,7 @@ void treeReader::Analyze(){
       //get syst. uncertainty band:
       double err = 0.;
       for (int sam=0; sam != samples.size(); ++sam) {
-        if(std::get<0>(samples[sam]) == "data") continue;
+        if(samples[sam].getProcessName() == "data") continue;
         // is used in MC CT
         if(sam == 0) continue;
         if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){

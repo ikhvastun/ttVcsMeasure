@@ -1039,3 +1039,52 @@ void treeReader::fillBDTvariables(std::vector<Float_t> & varForBDT, int flavor){
     if(flavor == 1)
        user_segmComp = varForBDT.at(12);
 }
+
+
+TLorentzVector treeReader::findBestNeutrinoAndTop(const TLorentzVector& wLep, const TLorentzVector& met, std::vector<unsigned>& taggedJetI, const std::vector<unsigned>& jetI, const std::vector<unsigned>& bJetI, const TLorentzVector* jetV){
+    static const double mTop = 173.1;
+    //set up tagged jets vector
+    taggedJetI = {99, 99};
+    //Check if there are any jets
+    if(jetI.size() == 0) return met;    //dont attempt to find neutrino Z since we cant fix the ambiguity here
+    std::pair<double, double> pzSol = neutrinoPZ(wLep, met);
+    TLorentzVector neutrinoPlus(met.Px(), met.Py(), pzSol.first, sqrt(met.Px()*met.Px() + met.Py()*met.Py() + pzSol.first*pzSol.first) );
+    TLorentzVector neutrinoMin(met.Px(), met.Py(), pzSol.second, sqrt(met.Px()*met.Px() + met.Py()*met.Py() + pzSol.second*pzSol.second) );
+    bool plus = true;  //true if + solution is chosen, otherwise false
+    if(bJetI.size() == 0){
+        taggedJetI[0] = jetI[0];
+    } else if(bJetI.size() == 1){
+        taggedJetI[0] = bJetI[0];
+    } else{
+        double minDiff = 999999.;
+        for(unsigned b = 0; b < bJetI.size(); ++b){
+            double diffPlus = fabs( (neutrinoPlus + wLep + jetV[bJetI[b]] ).M() - mTop);
+            double diffMin = fabs( (neutrinoMin + wLep + jetV[bJetI[b]] ).M() - mTop);
+            if(diffPlus < minDiff && diffPlus < diffMin){
+                plus = true;
+                minDiff = diffPlus;
+                taggedJetI[0] = bJetI[b];
+            } else if(diffMin < minDiff){
+                plus = false;
+                minDiff = diffMin;
+                taggedJetI[0] = bJetI[b];
+            }
+        }
+    }
+    if(bJetI.size() < 2){
+        if(fabs( (neutrinoPlus + wLep + jetV[taggedJetI[0]] ).M() - mTop)  < fabs( (neutrinoMin + wLep + jetV[taggedJetI[0]] ).M() - mTop) ){
+            plus = true;
+        } else{
+            plus = false;
+        }
+    }
+    //find recoiling jet ( := leading jet not considered the b-jet from top)
+    for(unsigned j = 0; j < jetI.size(); ++j){
+        if(jetI[j] != taggedJetI[0]){
+            taggedJetI[1] = jetI[j];
+            break;                              //jet collection is assumed oredered
+        }
+    }
+    if(plus) return neutrinoPlus;//( neutrinoPlus + wLep + jetV[taggedJetI[0]] ).M();
+    else     return neutrinoMin;//( neutrinoMin  + wLep + jetV[taggedJetI[0]] ).M();
+}
