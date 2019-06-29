@@ -16,6 +16,7 @@ ttVcsMeasure.sublime-workspace
 *root
 *pdf
 scripts/.DS_Store
+runFR
 
 # Prerequisites
 *.d
