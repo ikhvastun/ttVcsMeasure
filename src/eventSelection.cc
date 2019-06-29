@@ -1088,3 +1088,11 @@ TLorentzVector treeReader::findBestNeutrinoAndTop(const TLorentzVector& wLep, co
     if(plus) return neutrinoPlus;//( neutrinoPlus + wLep + jetV[taggedJetI[0]] ).M();
     else     return neutrinoMin;//( neutrinoMin  + wLep + jetV[taggedJetI[0]] ).M();
 }
+
+std::pair<double, double> treeReader::neutrinoPZ(const TLorentzVector& wLep, const TLorentzVector& met){
+    static const double mW = 80.385;
+    double mSquared = 0.5*mW*mW + wLep.Px()*met.Px() + wLep.Py()*met.Py();
+    double preFac = mSquared/(wLep.Pt() * wLep.Pt());
+    double term2 = wLep.P()*sqrt( std::max(0., 1 - met.Pt()*met.Pt()*wLep.Pt()*wLep.Pt()/(mSquared*mSquared) ) );
+    return {preFac*(wLep.Pz() + term2), preFac*(wLep.Pz() - term2)};
+}

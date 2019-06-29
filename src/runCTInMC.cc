@@ -343,6 +343,7 @@ void treeReader::Analyze(){
   mtleg->AddEntry(&distribs[0].vectorHisto[0],"Monte Carlo","lep");
   mtleg->AddEntry(&distribs[0].vectorHisto[1],"Tight-to-loose prediction","f");
 
+  /*
   for (int i=0; i!=nVars; ++i)  {
 
     //cout << "The sample size is " << samples.size() << endl;
@@ -376,6 +377,7 @@ void treeReader::Analyze(){
     }
 
   }
+  */
 
   double scale_num = 1.4;
 
@@ -385,17 +387,17 @@ void treeReader::Analyze(){
   for(int i = 0; i < nVars; i++) plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   for(int i = 0; i < 2; i++) plot2D[i] = new TCanvas(Form("plot_2D_%d", i),"",500,450);
 
-  vector<std::string> figNames = {"Leading lepton M_{T} [GeV]", "Missing E_{T} [GeV]", "H_{T} [GeV]", "N_{jets}", "N_{b jets}", "Leading lepton p_{T}^{corr} [GeV]", "Sub-leading p_{T}^{corr} [GeV]", "Trailing p_{T}^{corr} [GeV]", "Leading lepton #eta", "Sub-leading lepton #eta", "Trailing lepton #eta", "M_{ll} [GeV]", "SR", "Lepton flavors", "Sub-leading lepton M_{T} [GeV]", "Leading jet p_{T} [GeV]", "Sub-leading jet p_{T} [GeV]", "Min #Delta R(jet, trailing lepton)", "BDT score", "p_{T}^{corr} / p_{T}", "Recoiling jet #eta", "M_{jet-jet}^{max} [GeV]", "min #Delta R(lep, b jet)"};
-  vector<TString> namesForSaveFiles = {"mtlead", "met", "HT", "njets", "nbjets", "ptCorrLead", "ptCorrSubLead", "ptCorrTrail", "etaCorrLead", "etaCorrSubLead", "etaCorrTrail", "mll", "SR", "flavour", "mtsublead", "jetptlead", "jetpttrail", "mindeltaR", "mvaVL", "ptcorToPt", "etaJetRecoil", "MjjMax", "minDeltaRLepBjet"};
+  //vector<std::string> figNames = {"Leading lepton M_{T} [GeV]", "Missing E_{T} [GeV]", "H_{T} [GeV]", "N_{jets}", "N_{b jets}", "Leading lepton p_{T}^{corr} [GeV]", "Sub-leading p_{T}^{corr} [GeV]", "Trailing p_{T}^{corr} [GeV]", "Leading lepton #eta", "Sub-leading lepton #eta", "Trailing lepton #eta", "M_{ll} [GeV]", "SR", "Lepton flavors", "Sub-leading lepton M_{T} [GeV]", "Leading jet p_{T} [GeV]", "Sub-leading jet p_{T} [GeV]", "Min #Delta R(jet, trailing lepton)", "BDT score", "p_{T}^{corr} / p_{T}", "Recoiling jet #eta", "M_{jet-jet}^{max} [GeV]", "min #Delta R(lep, b jet)"};
+  //vector<TString> namesForSaveFiles = {"mtlead", "met", "HT", "njets", "nbjets", "ptCorrLead", "ptCorrSubLead", "ptCorrTrail", "etaCorrLead", "etaCorrSubLead", "etaCorrTrail", "mll", "SR", "flavour", "mtsublead", "jetptlead", "jetpttrail", "mindeltaR", "mvaVL", "ptcorToPt", "etaJetRecoil", "MjjMax", "minDeltaRLepBjet"};
 
-  for(int varPlot = 0; varPlot < nVars; varPlot++){
-    //if(varPlot == 0 || varPlot == 7 || varPlot == 10 || varPlot == 12 || varPlot > 13) continue;
-    if(varPlot == 0 || varPlot == 12 || (varPlot > 13 && varPlot < 19)) continue;
+  for(int varPlot = 0; varPlot < listToPrint[selection].size(); varPlot++){
+
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, false, false, dataLumi); // + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + ".root");
+    showHist(plot[varPlot],distribs[figNames[listToPrint[selection].at(varPlot)].index],figNames[listToPrint[selection].at(varPlot)], scale_num, mtleg, false, false, 0);
+    
+    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".root");
     //plot[varPlot]->cd();
     //showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, false); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     //plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
