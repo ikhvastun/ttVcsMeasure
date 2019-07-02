@@ -148,7 +148,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) cout << "met filers flag: " << _passMETFilters << endl;
           if(!_passMETFilters) continue;
           
-          if(it > 10000) break;
+          //if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
@@ -530,7 +530,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
             else
                 weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
-              */
+                */
 
           }
           if(debug){
@@ -796,7 +796,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   histStatAndSystBand ->SetLineColor(kGray+2);
   histStatAndSystBand ->SetFillColor(kGray+2);
   histStatAndSystBand ->SetMarkerStyle(1);
-  mtleg->AddEntry(histStatAndSystBand, "Total unc." ,"f");
+  mtleg->AddEntry(histStatAndSystBand, "Uncertainty" ,"f"); // "Total unc." in Willem's plots
 
   // plots to make with systematics and stat uncertainty on them
   std::string processToStore = selection;

@@ -56,6 +56,8 @@ void treeReader::initSample(const Sample& samp, std::string option){
     currentSample = samp;
     if(option == "ttZ")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+    else if(option == "ttZ4l")
+        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttz_4l"); //" + std::string(samp.is2017() ? "2017/" : "2016/"));
     else if(option == "FR")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_FR/" + std::string(samp.getFileName().find("TT") != std::string::npos ? "ttbar" : "QCD") + "/" + std::string(samp.is2017() ?    "2017" : "2016") + "MC/");
     //sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/wverbeke/ntuples_ewkino/"); //  + (TString)(is2017 ? "" : "newReReco/") 

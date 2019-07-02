@@ -12,11 +12,11 @@ fillJob(){
     if [ ! -d ~/Work/${outputFolder} ]
         then mkdir ~/Work/${outputFolder}
     fi
-    echo "if [ -f ~/Work/$outputFolder/$name ]" >> $2
-    echo "    then rm ~/Work/$outputFolder/$name" >> $2
-    echo "fi" >> $2
+#    echo "if [ -f ~/Work/$outputFolder/$name ]" >> $2
+#    echo "    then rm ~/Work/$outputFolder/$name" >> $2
+#    echo "fi" >> $2
     echo "hadd ~/Work/$outputFolder/$name ${1}/*root" >> $2
-    echo "rm -r $1" >> $2
+#    echo "rm -r $1" >> $2
 }
 
 mergeTuple(){

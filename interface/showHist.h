@@ -84,7 +84,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         dataHist->GetXaxis()->SetNdivisions(104); // 108,505,
     }
     dataHist->Draw("axis");
-    dataGraph->Draw("pe1 same");
+    dataGraph->Draw("pe1Z same");
 
     leg->Draw("same");
     double lumi = 35.9;
@@ -130,12 +130,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     mtlegRatio->SetTextFont(42);
 
     if(info.index == 42){ // SR all TTZ
-        mtlegRatio->AddEntry(stackCopy, "Stat", "f");
-        mtlegRatio->AddEntry(histSystAndStatUnc, "Total", "f");
+        mtlegRatio->AddEntry(stackCopy, "Stat.", "f");
+        //mtlegRatio->AddEntry(histSystAndStatUnc, "Total", "f");
     }
+    /*
     else{
         mtlegRatio->AddEntry(histSystAndStatUnc, "Uncertainty", "f");
     }
+    */
 
     // Draw finally the things
     if(info.index == 5){ // Njets
@@ -147,6 +149,10 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
     stackCopy->GetYaxis()->SetNdivisions(303); // 108,505,
     stackCopy->Draw("axis");
+    histSystAndStatUnc->SetFillStyle(3005);
+    histSystAndStatUnc->SetLineColor(kGray+2);
+    histSystAndStatUnc->SetFillColor(kGray+2);
+    histSystAndStatUnc->SetMarkerStyle(1);
     histSystAndStatUnc->Draw("e2same");
     if(info.index == 42) // SR all TTZ
         stackCopy->Draw("e2same");
@@ -159,7 +165,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 
     mtlegRatio->Draw("same");
 
-    dataCopyGraph->Draw("p"); // dataCopyGraph = data / MC stack
+    dataCopyGraph->Draw("pZ"); // dataCopyGraph = data / MC stack
 
     if(info.index == indexSRTTZ){
         printInfoOnXaxisAllTTZ();
@@ -181,7 +187,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     systAndStatUnc->SetMarkerStyle(1);
     systAndStatUnc->Draw("e2same");
 
-    dataGraph->Draw("pe1 same");
+    dataGraph->Draw("pe1Z same");
 
     if(info.index == indexSRTTZ){
        dataHist->GetXaxis()->SetTitleSize(0.07);
@@ -451,7 +457,7 @@ void printInfoOnXaxisAllTTZ(){
 
     njetsSign.SetTextFont(42);
     njetsSign.SetTextAlign(31);
-    njetsSign.SetTextSize(0.22);
+    njetsSign.SetTextSize(0.18);
     njetsSign.DrawLatex(0.84, 0.08,"N_{j}");
 
     TLatex njetsSign1;
@@ -461,7 +467,7 @@ void printInfoOnXaxisAllTTZ(){
 
     njetsSign1.SetTextFont(42);
     njetsSign1.SetTextAlign(31);
-    njetsSign1.SetTextSize(0.22);
+    njetsSign1.SetTextSize(0.18);
     njetsSign1.DrawLatex(0.58, 0.08,"N_{j}");
 
     TLatex njetsSign2;
@@ -471,7 +477,7 @@ void printInfoOnXaxisAllTTZ(){
 
     njetsSign2.SetTextFont(42);
     njetsSign2.SetTextAlign(31);
-    njetsSign2.SetTextSize(0.22);
+    njetsSign2.SetTextSize(0.18);
     njetsSign2.DrawLatex(0.32, 0.08,"N_{j}");
 
     TLatex nbjetsSign;
@@ -481,7 +487,7 @@ void printInfoOnXaxisAllTTZ(){
 
     nbjetsSign.SetTextFont(42);
     nbjetsSign.SetTextAlign(31);
-    nbjetsSign.SetTextSize(0.22);
+    nbjetsSign.SetTextSize(0.18);
     nbjetsSign.DrawLatex(0.99, 0.08,"N_{b}");
 
 }
@@ -795,9 +801,13 @@ void setUpSystUnc(DistribsAll & distribs, TH1D * histSystAndStatUnc){
         }
     }
 
-    histSystAndStatUnc->SetFillStyle(1001);
-    histSystAndStatUnc->SetLineColor(kOrange - 4);
-    histSystAndStatUnc->SetFillColor(kOrange - 4);
+    histSystAndStatUnc->SetFillStyle(3005);
+    histSystAndStatUnc->SetLineColor(kGray+2);
+    histSystAndStatUnc->SetFillColor(kGray+2);
+
+    //histSystAndStatUnc->SetFillStyle(1001);
+    //histSystAndStatUnc->SetLineColor(kOrange - 4);
+    //histSystAndStatUnc->SetFillColor(kOrange - 4);
     histSystAndStatUnc->SetMarkerStyle(1);
     //histSystAndStatUnc->Draw("same");
 }

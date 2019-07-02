@@ -87,10 +87,10 @@ foldersMC=*/*ewkino2016MCList-v27
 #foldersData=DoubleMuon/*2016LeptonicDataList_v9
 #foldersData=*/*2017LeptonicDataList_ReReco_v11
 #foldersData=DoubleMuon/*2016LeptonicDataList_v20p1
-#foldersData=*/*07Aug17*2016LeptonicDataList_v23
-foldersData=*/*2017LeptonicDataList_ReReco_ZMET_v4
+foldersData=*/*07Aug17*2016LeptonicDataList_v27
+#foldersData=*/*2017LeptonicDataList_ReReco_ZMET_v4
 
-for d in $foldersMC                #skim all samples
-#for d in $foldersData                #skim all samples
+#for d in $foldersMC                #skim all samples
+for d in $foldersData                #skim all samples
     do skimSample $d $baseFolder
 done
