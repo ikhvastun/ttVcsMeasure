@@ -295,6 +295,8 @@ class treeReader {
         double sumAllLeptonsCharge(const std::vector<unsigned>& ind);
         double SRID8SR3L(int & njets, int & nbjets, const double & dMZ);
         bool passTTZSRSelection(const std::vector<unsigned>& ind, std::vector<unsigned> indOf2LonZ, const int njets, const int nbjets, const double dMZ);
+        TLorentzVector findBestNeutrinoAndTop(const TLorentzVector& wLep, const TLorentzVector& met, std::vector<unsigned>& taggedJetI, const std::vector<unsigned>& jetI, const std::vector<unsigned>&     bJetI, const TLorentzVector* jetV);
+        std::pair<double, double> neutrinoPZ(const TLorentzVector& wLep, const TLorentzVector& met);
 
         bool promptLeptons(const std::vector<unsigned>& ind);
         bool leptonIsPrompt(const unsigned& l);

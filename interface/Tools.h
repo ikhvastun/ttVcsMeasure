@@ -6,6 +6,8 @@
 #include "Output.h"
 using Output::distribs1DForFR;
 using Output::distribs2D;
+using Output::distribs;
+using Output::distribs1DForCT;
 using namespace std;
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
@@ -17,7 +19,7 @@ double SRID2L (double mvaVL, double chargesLepton) {
     else return floor((mvaVL + 1) / 0.2) + 10 * chargesLeptonIndex;
 }
 
-void initdistribs(std::vector<std::string> & namesOfSamples, const std::string & selection){
+void initdistribs(std::vector<std::string> & namesOfProcesses, const std::string & selection){
 
     for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
       if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), it->first) == listToPrint[selection].end()) continue;
@@ -64,9 +66,28 @@ void initdistribs(std::vector<std::string> & namesOfSamples, const std::string &
     }
 
     for (unsigned int i=0; i!=distribs.size();++i) {
-      for(unsigned int j = namesOfSamples.size()-1; j != 0; j--){
+      for(unsigned int j = namesOfProcesses.size()-1; j != 0; j--){
 //        if(selection == "ttW" && j == ttWSample) continue;
         distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
+      }
+    }
+}
+
+void initdistribsForCT(){
+
+    for(unsigned int i = 0; i < distribs1DForCT.size(); i++){
+      TString name = Form("varST_%d",i);
+
+      for(unsigned int j = 0; j < distribs1DForCT[i].vectorHisto.size(); j++){
+        name = Form("var_%d_%d",i,j);
+        distribs1DForFR[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
+
+        distribs1DForFR[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
+
+        distribs1DForFR[i].vectorHisto[j].SetMarkerStyle(20);
+        distribs1DForFR[i].vectorHisto[j].SetMarkerSize(0.5);
+        distribs1DForFR[i].vectorHisto[j].SetLineWidth(1);
+        distribs1DForFR[i].vectorHisto[j].Sumw2();
       }
     }
 }
@@ -563,6 +584,8 @@ void initListToPrint(const std::string & selection){
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
   listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L", "ptlead", "trail"};
+
+  listToPrint["CTInMC"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "met", "HT"};
 
   listToPrint["ttbar_emu"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT", "ptMuonPassedTight", "etaMuonPassedTight", "ptLepPassedLooseForEff", "etaLepPassedLooseForEff", "ptLepPassedTightForEff", "etaLepPassedTightForEff", "etaLepPassedLooseForEffLowPt", "etaLepPassedTightForEffLowPt", "etaLepPassedLooseForEffHighPt", "etaLepPassedTightForEffHighPt"};
   listToPrint["DYTo2L"] = {"ptlead", "sublead", "etaLead", "etaSubl","njets", "nbjets", "met", "nPV","HT"};

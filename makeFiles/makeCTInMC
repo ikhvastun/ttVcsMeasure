@@ -7,7 +7,7 @@ CFLAGS = `root-config --cflags --libs`
 
 EXECUTABLE = runCT
 
-SOURCES = src/CMS_lumi.cc src/runCTInMC.cc src/treeReader.cc src/analysisTools.cc src/eventSelection.cc src/Sample.cc src/stringTools.cc src/systemTools.cc
+SOURCES = src/BTagCalibrationStandalone.cc src/CMS_lumi.cc src/runCTInMC.cc src/treeReader.cc src/analysisTools.cc src/eventSelection.cc src/eventWeight.cc src/Sample.cc src/Reweighter.cc src/stringTools.cc src/systemTools.cc src/kinematicTools.cc
 OBJS=$(subst .cc,.o,$(SOURCES))
 
 all: runFR
