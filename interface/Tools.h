@@ -73,21 +73,27 @@ void initdistribs(std::vector<std::string> & namesOfProcesses, const std::string
     }
 }
 
-void initdistribsForCT(){
+void initdistribsForCT(std::vector<std::string> & namesOfProcesses, const std::string & selection){
 
-    for(unsigned int i = 0; i < distribs1DForCT.size(); i++){
-      TString name = Form("varST_%d",i);
+    for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
+      if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), it->first) == listToPrint[selection].end()) continue;
 
-      for(unsigned int j = 0; j < distribs1DForCT[i].vectorHisto.size(); j++){
+      histInfo hist = it->second;
+      TString name = Form("varST_%d",hist.index);
+      int i = hist.index;
+
+      // we have distribs object for each process i.
+      // for each such process we have 2 option: predicted and observed
+      for(unsigned int j = 0; j < 2; j++){
         name = Form("var_%d_%d",i,j);
-        distribs1DForFR[i].vectorHisto[j] = std::move(TH1D(name,name+";",nPt-1, ptBins));
+        distribs1DForCT[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
-        distribs1DForFR[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
+        distribs1DForCT[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
 
-        distribs1DForFR[i].vectorHisto[j].SetMarkerStyle(20);
-        distribs1DForFR[i].vectorHisto[j].SetMarkerSize(0.5);
-        distribs1DForFR[i].vectorHisto[j].SetLineWidth(1);
-        distribs1DForFR[i].vectorHisto[j].Sumw2();
+        distribs1DForCT[i].vectorHisto[j].SetMarkerStyle(20);
+        distribs1DForCT[i].vectorHisto[j].SetMarkerSize(0.5);
+        distribs1DForCT[i].vectorHisto[j].SetLineWidth(1);
+        distribs1DForCT[i].vectorHisto[j].Sumw2();
       }
     }
 }

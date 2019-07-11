@@ -62,11 +62,13 @@ void treeReader::Analyze(){
   //read samples and cross sections from txt file
   //readSamples("data/samples_FOtuning.txt"); // 
   //readSamples("data/samples_FOtuning_ttbar.txt"); // 
-  readSamples("data/samples_FOtuning_ttbar_2017.txt"); // 
+  readSamples("data/samples/ClosureTestInMC/samples_FOtuning_ttbar_2017.txt"); // 
   
   std::string selection = "CTInMC";
   initListToPrint(selection);
-  initdistribsForCT();
+
+  std::vector<std::string> namesOfProcesses = treeReader::getNamesOfTheProcesses();
+  initdistribsForCT(namesOfProcesses, selection);
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample("ttZ");
@@ -150,7 +152,7 @@ void treeReader::Analyze(){
           //if(featureCategory < 2){ 
           bool promptInSideband = false;
           if(featureCategory < leptonSelection){ 
-            weight *= fakeRateWeight();
+            weight *= -1 * fakeRateWeight();
           }
 
           if(promptInSideband) continue;
@@ -215,7 +217,7 @@ void treeReader::Analyze(){
              maxMJetJet = kinematics::maxMass(jetV, jetInd);
 
              std::vector<unsigned> bjetVecInd;
-             for(unsigned l = 0; l < bJetCount; ++l) bjetVecInd.push_back(bJetInd[l]);
+             //for(unsigned l = 0; l < bJetCount; ++l) bjetVecInd.push_back(bJetInd[l]);
 
              std::vector<unsigned> lepVecInd;
              for(unsigned l = 0; l < lCountFO; ++l) lepVecInd.push_back(indFO[l]);
@@ -231,82 +233,26 @@ void treeReader::Analyze(){
           double mll1stpair = -999., mll2ndpair = -999.;
           double cosTSt = -999;
 
-          vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
-                                   mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
-                                   // currently here we will have ttZ3L and ttZ4L categories
-                                   (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999),
-                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
-                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
-                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
-                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
-                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
-                                   (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
-                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
-                                   (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDCosTheta(cosTSt) : -999),
-                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
-                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
-                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
-                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
-                                   (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
-                                   (leptonSelection != 4 ? mll:mll1stpair),
-                                   };
+          map<TString, double> fillVar; 
+          fillVar["ptlead"] = ptCorrV[0].first;
+          fillVar["sublead"] = ptCorrV[1].first;
+          fillVar["trail"] = leptonSelection > 2 ? ptCorrV[2].first : 0.;
+          fillVar["njets"] = double(nJLoc);
+          fillVar["nbjets"] = double(nBLoc);
+          fillVar["mll"] = mll;
+          fillVar["met"] = _met;
+          fillVar["HT"] = HTLoc;
 
-          vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
-                                     "mtW", "njets", "nbjets", "BDTpp", 
-                                     //"flavour", 
-                                     //"SR",
-                                     "SR3L",
-                                     "SR4L",
-                                     "mll", "ptZ", "ptNonZ", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu",
-                                     "met", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "SRnpCR", "nPV", "mlll",
-                                     "etaLead", "etaSubl", "etaTrail", "eta4th", 
-                                     "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", 
-                                     "cosThetaStar", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "BDTmm", "HT",
-                                     "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR",
-                                     "SRttZCleanPTZ", "SRttZCleanCosTheta",
-                                     "flavour3L", "flavour4L", "flavour4LZZ", 
-                                     "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
-                                     "flavour3L4L",
-                                     "SRTTZ8SR3L",
-                                     "mllnoZcut"
-                                   };
+          //cout << "Number of tight : " << featureCategory << "; number of FO: " << lCountFO << endl; 
+          //cout << "The weight is: " << weight << endl;
 
-          for(int dist = 0; dist < fillVar.size(); dist++){
-            if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[dist]) == listToPrint[selection].end()) continue;
-            distribs1DForCT[dist].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1),weight);
+          for ( const auto & varPair : fillVar) {
+              TString name = varPair.first;
+              double var = varPair.second;
+              int index = figNames[name].index;
+              double varMaxOfVar = figNames[name].varMax;
+              distribs1DForCT[index].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(var,varMaxOfVar-0.1),weight);
           }
-
-          //distribs[0].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(TMath::Min(mtHighest,varMax[0]-0.1), weight);
-          /*
-          distribs[1].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_met,varMax[1]-0.1), weight);
-          distribs[2].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(HTLoc,varMax[2]-0.1), weight);
-          distribs[3].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(double(jetCount),varMax[3]-0.1), weight);
-          distribs[4].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(double(bJetCount),varMax[4]-0.1), weight);
-          distribs[5].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[0].first,varMax[5]-0.1), weight);
-          distribs[6].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[1].first,varMax[6]-0.1), weight);
-          if(leptonSelection == 3)
-            distribs[7].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(ptCorrV[2].first,varMax[7]-0.1), weight);
-          distribs[8].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[0].second],varMax[8]-0.01), weight);
-          distribs[9].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[1].second],varMax[9]-0.01), weight);
-          if(leptonSelectionAnalysis == 3)
-            distribs[10].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(_lEta[ptCorrV[2].second],varMax[10]-0.01), weight);
-          distribs[11].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(TMath::Min(mll,varMax[11]-0.1), weight);
-          //distribs[12].vectorHisto[featureCategory >= 2 ? 0 : 1].Fill(SRID(nJLoc, nBLoc, mvaValueRegion, _charges[maxPtInd]), FRloc*scale*_weight);
-          if(leptonSelection == 2)
-            distribs[13].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(flavourCategory2L(nLocEle, _lCharge[indFO.at(0)]), weight);
-          if(leptonSelection == 3)
-            distribs[13].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(flavourCategory3L(nLocEle), weight);
-          if(leptonSelection == 3){
-            distribs[20].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(fabs(recoilingJet.Eta()) == 0 ? -999. : fabs(recoilingJet.Eta()), weight); 
-            distribs[21].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(std::max(maxMJetJet, 0.), weight); 
-            distribs[22].vectorHisto[featureCategory >= leptonSelection ? 0 : 1].Fill(std::max(minDeltaRLeptonbJet, 0.), weight); 
-          }
-          */
 
       }
 
@@ -340,8 +286,8 @@ void treeReader::Analyze(){
         count++;
   }
   */
-  mtleg->AddEntry(&distribs[0].vectorHisto[0],"Monte Carlo","lep");
-  mtleg->AddEntry(&distribs[0].vectorHisto[1],"Tight-to-loose prediction","f");
+  mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[0],"Monte Carlo","lep");
+  mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[1],"Tight-to-loose prediction","f");
 
   /*
   for (int i=0; i!=nVars; ++i)  {
@@ -387,13 +333,10 @@ void treeReader::Analyze(){
   for(int i = 0; i < nVars; i++) plot[i] = new TCanvas(Form("plot_%d", i),"",500,450);
   for(int i = 0; i < 2; i++) plot2D[i] = new TCanvas(Form("plot_2D_%d", i),"",500,450);
 
-  //vector<std::string> figNames = {"Leading lepton M_{T} [GeV]", "Missing E_{T} [GeV]", "H_{T} [GeV]", "N_{jets}", "N_{b jets}", "Leading lepton p_{T}^{corr} [GeV]", "Sub-leading p_{T}^{corr} [GeV]", "Trailing p_{T}^{corr} [GeV]", "Leading lepton #eta", "Sub-leading lepton #eta", "Trailing lepton #eta", "M_{ll} [GeV]", "SR", "Lepton flavors", "Sub-leading lepton M_{T} [GeV]", "Leading jet p_{T} [GeV]", "Sub-leading jet p_{T} [GeV]", "Min #Delta R(jet, trailing lepton)", "BDT score", "p_{T}^{corr} / p_{T}", "Recoiling jet #eta", "M_{jet-jet}^{max} [GeV]", "min #Delta R(lep, b jet)"};
-  //vector<TString> namesForSaveFiles = {"mtlead", "met", "HT", "njets", "nbjets", "ptCorrLead", "ptCorrSubLead", "ptCorrTrail", "etaCorrLead", "etaCorrSubLead", "etaCorrTrail", "mll", "SR", "flavour", "mtsublead", "jetptlead", "jetpttrail", "mindeltaR", "mvaVL", "ptcorToPt", "etaJetRecoil", "MjjMax", "minDeltaRLepBjet"};
-
   for(int varPlot = 0; varPlot < listToPrint[selection].size(); varPlot++){
 
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[selection].at(varPlot)].index],figNames[listToPrint[selection].at(varPlot)], scale_num, mtleg, false, false, 0);
+    showHistCT(plot[varPlot],distribs1DForCT[figNames[listToPrint[selection].at(varPlot)].index],figNames[listToPrint[selection].at(varPlot)], scale_num, mtleg, false);
     
     plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".png");
@@ -413,7 +356,7 @@ int main(int argc, char *argv[]){
     TApplication *rootapp = new TApplication("example", &argc, argv);
     treeReader reader;
     reader.Analyze();
-    rootapp->Run();
+    //rootapp->Run();
 
     return 0;
 }

@@ -23,7 +23,9 @@ const int iPos =0;
 using namespace std;
 
 using Output::distribs;
+using Output::distribs1DForCT;
 using Output::distribs2D;
+using Output::DistribsAllForCT;
 using Output::DistribsAll;
 using Output::DistribsAll2D;
 
@@ -209,6 +211,97 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     pad1->RedrawAxis();
     pad1->Update();
 
+}
+
+void showHistCT(TVirtualPad* c1, DistribsAllForCT & distribs1DForCT, histInfo & info, double num, TLegend *leg, bool plotInLog = false){ 
+    double xPad = 0.; // 0.25
+
+    TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
+    pad1->SetTopMargin(0.09);
+    if(xPad != 0)
+        pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+    pad1->cd();
+    if(plotInLog)
+        pad1->SetLogy();
+    
+    TH1D * observedHist = &distribs1DForCT.vectorHisto[0]; // observed in CT
+    TH1D * predictedHist = &distribs1DForCT.vectorHisto[1]; // predicted in CT
+    
+    observedHist->SetMarkerSize(1);
+    observedHist->SetTitle("");
+    observedHist->GetXaxis()->SetTitle(info.fancyName.c_str());
+    observedHist->GetYaxis()->SetTitle(("Number of events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
+    observedHist->SetMinimum(0.01);
+    observedHist->SetMaximum(TMath::Max(observedHist->GetMaximum(), predictedHist->GetMaximum()) * num);
+    if(plotInLog){
+        observedHist->SetMinimum(0.5);
+        observedHist->SetMaximum(observedHist->GetMaximum() * 5);
+    }
+    observedHist->GetXaxis()->SetLabelOffset(0.02);
+
+    TGraphAsymmErrors* observedGraph = new TGraphAsymmErrors(observedHist);
+    for(int b = 1; b < observedHist->GetNbinsX() + 1; ++b){
+        observedGraph->SetPointError(b - 1, 0, 0, observedHist->GetBinErrorLow(b), (observedHist->GetBinContent(b) == 0 ) ? 0 : observedHist->GetBinErrorUp(b) );
+    }
+
+    observedHist->Draw("axis");
+    predictedHist->Draw("histsame");
+    observedGraph->Draw("pe1Z same");
+
+    leg->Draw("same");
+    double lumi = 35.9;
+    /*
+    if(showLegendOption == 1) lumi = 41.5;
+    else if (showLegendOption == 2) lumi = 77.5;
+    CMS_lumi( pad1, iPeriod, iPos, lumi);
+    */
+
+    pad1->cd();
+    pad1->RedrawAxis();
+    pad1->Update();
+
+    if(xPad == 0) return;
+
+    c1->cd();
+
+    TPad *pad2 = new TPad("pad2","pad2",0,0,1,xPad);
+
+    pad2->SetBottomMargin((1.-xPad)/xPad*0.13);
+    pad2->SetTopMargin(0.06);
+
+    pad2->Draw();
+    pad2->RedrawAxis();
+    pad2->cd();
+
+    TH1D *observedHistCopy = (TH1D*)observedHist->Clone("dataCopy");
+    TH1D *predictedHistCopy = (TH1D*)predictedHist->Clone("stackCopy");
+    observedHistCopy->Divide(predictedHistCopy);
+    TGraphAsymmErrors * observedGraphDivided = new TGraphAsymmErrors(observedHistCopy);
+    // calculate asymmetric uncertainties for data
+    calculateRatioUnc(observedGraphDivided, observedHist, predictedHist);
+
+    setUpRatioFeatures(predictedHistCopy, observedGraphDivided, info, xPad);
+
+    TH1D * histErr = (TH1D*)observedHistCopy->Clone("histErr");
+    for(int i = 1; i < histErr->GetNbinsX() + 1; i++){
+      histErr->SetBinContent(i, 1.);
+      histErr->SetBinError(i, 0.3);
+    }
+    histErr->SetFillStyle(3005);
+    histErr->SetLineColor(kGray+2);
+    histErr->SetFillColor(kGray+2);
+    histErr->SetMarkerStyle(1);
+    histErr->Draw("e2same");
+
+    double xmin = observedHist->GetXaxis()->GetXmin();
+    double xmax = observedHist->GetXaxis()->GetXmax();
+    TLine *line = new TLine(xmin, 1, xmax, 1);
+    line->SetLineStyle(2);
+    line->Draw("same");
+
+    observedGraphDivided->Draw("pZ"); // observedGraphDivided = observed MC / predicted MC 
+    pad2->Update();
 }
 
 void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight, const int nonPromptSample){ 
