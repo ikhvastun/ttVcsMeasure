@@ -53,6 +53,10 @@ using Output::distribs1DForCT;
 
 void treeReader::Analyze(){
 
+  // here define parameters that are needed to be optimized
+  // leptonSelection -> either dilepton or trilepton 
+  // magicFactor - factor A in the definition of the corrected lepton pt, see AN-18-025 for the definition
+  // leptonMVAcut is defined by the analysis itself
   leptonSelection = 3;
   magicFactor = 0.85;
   leptonMVAcut = 0.4;
@@ -60,8 +64,6 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples_FOtuning.txt"); // 
-  //readSamples("data/samples_FOtuning_ttbar.txt"); // 
   readSamples("data/samples/ClosureTestInMC/samples_FOtuning_ttbar_2017.txt"); // 
   
   std::string selection = "CTInMC";
@@ -76,6 +78,8 @@ void treeReader::Analyze(){
       // only for 3L
       //if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue;
       
+      cout << "the sample is 2017: " << samples[sam].is2017() << endl;
+      cout << "sample name is " << samples[sam].getProcessName() << endl;
       if(samples[sam].is2017() && samples[sam].getProcessName().find("TTToSemiLeptonic") != std::string::npos ) continue;
       if(samples[sam].is2017() && samples[sam].getProcessName().find("TTTo2L2Nu") != std::string::npos ) continue;
 
@@ -99,11 +103,9 @@ void treeReader::Analyze(){
           //if(it > 10000) break;
           //if(it > nEntries / 20) break;
           
-          std::vector<unsigned> ind, indFO;
+          // select number of events passing FO selection
+          std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
-
-          //if(!(_2017_e || _2017_m || _2017_ee || _2017_em || _2017_mm)) continue;
-          //cout << "decision: " << _2017_ee << " " << _2017_mm << " " << _2017_em << " " << _2017_e << " " << _2017_m << endl;
 
           if(leptonSelection == 3){
             if(lCountFO < 3) continue;
@@ -115,50 +117,37 @@ void treeReader::Analyze(){
             if(_lCharge[indFO.at(0)] * _lCharge[indFO.at(1)] < 0) continue;
           }
           
-          int nLocEle = getElectronNumber(indFO);
-          //if(nLocEle != 2) continue;
-          //if(nLocEle == 2 || nLocEle == 0) continue;
-          //if(!noConversionInSelection(indFO)) continue;
 
-          std::vector<unsigned> indJets;
-          std::vector<unsigned> indBJets;
-
+          // here we define number of prompt leptons in the event using promptCategory variable
+          // featureCategory is responsible for event clasification into TTT, TTF, etc. categories
           int featureCategory = 0;
           int promptCategory = 0;
           for(auto & i : indFO){
             if (lepIsGood(i, leptonSelection)) featureCategory += 1;
-            //if(_lIsPrompt[i] && _lMatchPdgId[i] != 22) promptCategory += 1;
             if(_lIsPrompt[i]) promptCategory += 1;
-            //if(leptonIsPrompt(i)) promptCategory += 1;
-            /*
-            cout << "lepton info: " << _lPt[i] << " " << _lEta[i] << " " << _lPhi[i] << " " << _lFlavor[i] << " " << _lIsPrompt[i] << " " << _lProvenance[i] << " " << _lProvenanceCompressed[i] << endl;
-            for(int j = 0; j < _gen_nL; j++){
-                cout << "all gen leptons in the event: " << _gen_lPt[j] << " " << _gen_lEta[j] << " " << _gen_lPhi[j] << " " << _gen_lFlavor[j] << " " << _gen_lIsPrompt[j] << endl;
-            }
-            */
           }
         
-          //cout << "prompt cat: " <<promptCategory << endl;
-          //if(promptCategory == 2)
-          //    cout << _runNb << " " << _lumiBlock << " " << _eventNb << endl; 
-          
+          // don't consider leptons steming from the photon conversions, they are also considered as prompt leptons 
           if(leptonSelection == 3 && promptCategory > 2) continue;
           if(leptonSelection == 2 && promptCategory > 1) continue;
-          //if(featureCategory < 2) continue;
-          //if(featureCategory > 3) continue;
-          double FRloc = 1.;
 
-          //if(featureCategory == 3 && !eventChargeConsistent(indFO)) continue;
-          //if(featureCategory < 2){ 
+          // here we estimate the FR weight for events in which at least 1 lepton doesn't pass tight selection
+          // also check if there is a prompt lepton in the sideband, if yes, discard this event
+          //double FRloc = 1.;
           bool promptInSideband = false;
           if(featureCategory < leptonSelection){ 
+            for(auto & i : indFO){
+              if(_lIsPrompt[i]) promptInSideband = true;
+            }
             weight *= -1 * fakeRateWeight();
           }
-
           if(promptInSideband) continue;
 
-          //nJLoc = nJets(0, true, indJets, featureCategory < leptonSelectionAnalysis);
-          //nBLoc = nBJets(0, true, true, 1, featureCategory < leptonSelectionAnalysis);
+
+          std::vector<unsigned> indJets;
+          std::vector<unsigned> indBJets;
+          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
+          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
           unsigned third = -9999;
           double mll = 99999;
           double mlll = 99999;
@@ -166,7 +155,7 @@ void treeReader::Analyze(){
           double ptNonZ = -999999;
           TLorentzVector Zboson, lnegative;
           std::vector<unsigned> indOf2LonZ;
-          double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
+          double dMZ = deltaMZ(indFO, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
 
           if(leptonSelection == 2){
             //if(nJLoc < 2) continue;
@@ -179,6 +168,7 @@ void treeReader::Analyze(){
             double ele_mll = (l0p4+l1p4).M();
 
             if(ele_mll < 12) continue;
+            int nLocEle = getElectronNumber(indFO);
             if(ele_mll > 76 && ele_mll < 106 && nLocEle == 2) continue;
             if(_met < 30) continue;
           }
@@ -190,7 +180,7 @@ void treeReader::Analyze(){
           unsigned bJetCount = 0;
           double minDeltaRLeptonbJet = 0.;
           if(leptonSelection == 3){
-             //if(dMZ > 10) continue;
+             if(dMZ > 10) continue;
              //make lorentzvectors for leptons
              TLorentzVector lepV[lCountFO];
              for(unsigned l = 0; l < lCountFO; ++l) lepV[l].SetPtEtaPhiE(ptCorrV[l].first, _lEta[indFO.at(l)], _lPhi[indFO.at(l)], _lE[indFO.at(l)] * ptCorrV[l].first / _lPt[indFO.at(l)]);
@@ -257,8 +247,9 @@ void treeReader::Analyze(){
       }
 
       std::cout << std::endl;
-      //cout << "Total number of events: " << distribs[1].vectorHisto[sam].Integral() << endl;
-      //std::cout << std::endl;
+      int index = figNames["ptlead"].index;
+      cout << "Total number of events: " << distribs1DForCT[index].vectorHisto[sam].Integral() << endl;
+      std::cout << std::endl;
   }
 
   int indexOfFirstKinVar = figNames[listToPrint[selection].at(0)].index;
@@ -273,57 +264,8 @@ void treeReader::Analyze(){
   mtleg->SetBorderSize(0);
   mtleg->SetTextFont(42);
 
-
-  //mtleg->AddEntry(&distribs[0].vectorHisto[dataSample],"Data","lep"); //data
-  int count = 0;
-
-  /*
-  for (std::vector<std::string>::iterator it = samplesOrderNames.begin(); it != samplesOrderNames.end(); it++) {
-
-        cout << "count and sample name: " << count << " " << *it << " " << samplesOrder.at(count) << endl;
-
-        mtleg->AddEntry(&distribs[0].vectorHisto[samplesOrder.at(count)],(*it).c_str(),"f");
-        count++;
-  }
-  */
   mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[0],"Monte Carlo","lep");
   mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[1],"Tight-to-loose prediction","f");
-
-  /*
-  for (int i=0; i!=nVars; ++i)  {
-
-    //cout << "The sample size is " << samples.size() << endl;
-    for (int sam=0; sam != samples.size(); ++sam){
-      if(samples[sam].getProcessName() == "data") continue;
-
-      // is used in MC CT
-      if(sam == 0) continue;
-
-      //cout << "the sample is added: " << std::get<0>(samples[sam]) << endl;
-      distribs[i].vectorHistoTotalUnc.Add(&distribs[i].vectorHisto[sam]);
-    }
-
-    for (int ibin = 1; ibin!=nBins[i]+1; ++ibin) {
-      //get syst. uncertainty band:
-      double err = 0.;
-      for (int sam=0; sam != samples.size(); ++sam) {
-        if(samples[sam].getProcessName() == "data") continue;
-        // is used in MC CT
-        if(sam == 0) continue;
-        if(distribs[i].vectorHisto[sam].GetBinContent(ibin) != 0){
-          err += TMath::Power(distribs[i].vectorHisto[sam].GetBinError(ibin), 2); //  + TMath::Power(distribs[i].vectorHisto[sam].GetBinContent(ibin) * systematicsLeptonID[sam], 2)
-        }
-        else{
-          err += 0;
-        }
-      }
-
-      err = sqrt(err);
-      distribs[i].vectorHistoTotalUnc.SetBinError(ibin, err);
-    }
-
-  }
-  */
 
   double scale_num = 1.4;
 

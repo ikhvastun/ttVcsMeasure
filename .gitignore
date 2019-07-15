@@ -15,6 +15,7 @@ ttVcsMeasure.sublime-project
 ttVcsMeasure.sublime-workspace
 ./*root
 *pdf
+scripts/makingUncPlots/*root
 scripts/.DS_Store
 runFR
 runCT
