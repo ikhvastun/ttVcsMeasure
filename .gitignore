@@ -13,7 +13,7 @@ skimTree
 sftp-config.json
 ttVcsMeasure.sublime-project
 ttVcsMeasure.sublime-workspace
-*root
+./*root
 *pdf
 scripts/.DS_Store
 runFR
