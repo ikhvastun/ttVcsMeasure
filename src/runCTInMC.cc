@@ -75,16 +75,12 @@ void treeReader::Analyze(){
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample("ttZ");
 
-      // only for 3L
-      //if(std::get<1>(samples[sam]).find("DY") != std::string::npos ) continue;
-      
-      cout << "the sample is 2017: " << samples[sam].is2017() << endl;
-      cout << "sample name is " << samples[sam].getProcessName() << endl;
-      if(samples[sam].is2017() && samples[sam].getProcessName().find("TTToSemiLeptonic") != std::string::npos ) continue;
-      if(samples[sam].is2017() && samples[sam].getProcessName().find("TTTo2L2Nu") != std::string::npos ) continue;
+      if(samples[sam].is2017() && samples[sam].getFileName().find("TTToSemiLeptonic") != std::string::npos ) continue;
+      //if(samples[sam].is2017() && samples[sam].getFileName().find("TTTo2L2Nu") != std::string::npos ) continue;
+      if(samples[sam].is2017() && samples[sam].getFileName().find("DYJetsTo") != std::string::npos ) continue;
 
-      if(samples[sam].getProcessName().find("TTJets_SingleLeptFromT") != std::string::npos ) continue;
-      if(samples[sam].getProcessName().find("TTJets_DiLept") != std::string::npos ) continue;
+      if(samples[sam].getFileName().find("TTJets_SingleLeptFromT") != std::string::npos ) continue;
+      if(samples[sam].getFileName().find("TTJets_DiLept") != std::string::npos ) continue;
 
       std::cout<<"Entries in "<< samples[sam].getProcessName() << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
@@ -137,6 +133,7 @@ void treeReader::Analyze(){
           bool promptInSideband = false;
           if(featureCategory < leptonSelection){ 
             for(auto & i : indFO){
+              if(lepIsGood(i, leptonSelection)) continue;
               if(_lIsPrompt[i]) promptInSideband = true;
             }
             weight *= -1 * fakeRateWeight();
@@ -246,9 +243,6 @@ void treeReader::Analyze(){
 
       }
 
-      std::cout << std::endl;
-      int index = figNames["ptlead"].index;
-      cout << "Total number of events: " << distribs1DForCT[index].vectorHisto[sam].Integral() << endl;
       std::cout << std::endl;
   }
 
