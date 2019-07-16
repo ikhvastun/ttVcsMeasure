@@ -54,7 +54,10 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, double lumi )
       //lumiText += (TString)(lumi == 35.9 ? "2016 35.9 fb^{-1}" : (lumi == 41.5 ? "2017 41.5 fb^{-1}" : "2016+2017 77.5 fb^{-1}"));
       lumiText += (TString)(lumi == 35.9 ? "35.9 fb^{-1}" : (lumi == 41.5 ? "41.5 fb^{-1}" : "77.5 fb^{-1}"));
       lumiText += " (13 TeV)";
-    }
+      if(lumi == 0.){
+        lumiText = "";
+      }
+  }
   else if ( iPeriod==7 )
     { 
       if( outOfFrame ) lumiText += "#scale[0.85]{";
@@ -144,7 +147,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, double lumi )
 	      latex.SetTextFont(extraTextFont);
 	      latex.SetTextAlign(align_);
 	      latex.SetTextSize(extraTextSize*t);
-	      latex.DrawLatex(posX_ + 0.01, posY_- relExtraDY*cmsTextSize*t, extraText);
+	      latex.DrawLatex(posX_ + 0.01, posY_- relExtraDY*cmsTextSize*t, lumi == 0. ? extraTextMC : extraText);
 	    }
 	}
     }

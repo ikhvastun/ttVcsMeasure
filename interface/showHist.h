@@ -214,7 +214,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
 }
 
 void showHistCT(TVirtualPad* c1, DistribsAllForCT & distribs1DForCT, histInfo & info, double num, TLegend *leg, bool plotInLog = false){ 
-    double xPad = 0.; // 0.25
+    double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
     pad1->SetTopMargin(0.09);
@@ -246,16 +246,18 @@ void showHistCT(TVirtualPad* c1, DistribsAllForCT & distribs1DForCT, histInfo & 
     }
 
     observedHist->Draw("axis");
+
+    predictedHist->SetFillColor(kYellow);
+    predictedHist->SetLineColor(kYellow);
+    predictedHist->SetFillStyle(1001);
     predictedHist->Draw("histsame");
     observedGraph->Draw("pe1Z same");
 
     leg->Draw("same");
-    double lumi = 35.9;
-    /*
-    if(showLegendOption == 1) lumi = 41.5;
-    else if (showLegendOption == 2) lumi = 77.5;
+
+    // here we use purely MC
+    double lumi = 0.;
     CMS_lumi( pad1, iPeriod, iPos, lumi);
-    */
 
     pad1->cd();
     pad1->RedrawAxis();
@@ -278,10 +280,10 @@ void showHistCT(TVirtualPad* c1, DistribsAllForCT & distribs1DForCT, histInfo & 
     TH1D *predictedHistCopy = (TH1D*)predictedHist->Clone("stackCopy");
     observedHistCopy->Divide(predictedHistCopy);
     TGraphAsymmErrors * observedGraphDivided = new TGraphAsymmErrors(observedHistCopy);
-    // calculate asymmetric uncertainties for data
+    // calculate asymmetric uncertainties for the ratio
     calculateRatioUnc(observedGraphDivided, observedHist, predictedHist);
 
-    setUpRatioFeatures(predictedHistCopy, observedGraphDivided, info, xPad);
+    //setUpRatioFeatures(predictedHistCopy, observedGraphDivided, info, xPad);
 
     TH1D * histErr = (TH1D*)observedHistCopy->Clone("histErr");
     for(int i = 1; i < histErr->GetNbinsX() + 1; i++){
@@ -292,6 +294,17 @@ void showHistCT(TVirtualPad* c1, DistribsAllForCT & distribs1DForCT, histInfo & 
     histErr->SetLineColor(kGray+2);
     histErr->SetFillColor(kGray+2);
     histErr->SetMarkerStyle(1);
+    histErr->SetMinimum(0.0);
+    histErr->SetMaximum(2.0);
+
+    histErr->SetTitle("");
+    histErr->GetYaxis()->SetTitle("Obs. / Pred.");
+
+    histErr->GetYaxis()->SetTitleOffset(1.2/((1.-xPad)/xPad));
+    histErr->GetYaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    histErr->GetXaxis()->SetTitleSize((1.-xPad)/xPad*0.06);
+    histErr->GetYaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
+    histErr->GetXaxis()->SetLabelSize((1.-xPad)/xPad*0.05);
     histErr->Draw("e2same");
 
     double xmin = observedHist->GetXaxis()->GetXmin();

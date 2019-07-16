@@ -256,8 +256,8 @@ void treeReader::Analyze(){
   mtleg->SetBorderSize(0);
   mtleg->SetTextFont(42);
 
-  mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[0],"Monte Carlo","lep");
-  mtleg->AddEntry(&distribs[indexOfFirstKinVar].vectorHisto[1],"Tight-to-loose prediction","f");
+  mtleg->AddEntry(&distribs1DForCT[indexOfFirstKinVar].vectorHisto[0],"Monte Carlo","lep");
+  mtleg->AddEntry(&distribs1DForCT[indexOfFirstKinVar].vectorHisto[1],"Tight-to-loose prediction","f");
 
   double scale_num = 1.4;
 
