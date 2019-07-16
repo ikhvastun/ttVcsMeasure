@@ -136,15 +136,13 @@ void treeReader::Analyze(){
               if(lepIsGood(i, leptonSelection)) continue;
               if(_lIsPrompt[i]) promptInSideband = true;
             }
+            // -1 here is put intentionally, because in fakeRateWeight() function -1 is added 
+            // to subtract the contribution from prompt leptons in the sideband region 
             weight *= -1 * fakeRateWeight();
           }
           if(promptInSideband) continue;
 
 
-          std::vector<unsigned> indJets;
-          std::vector<unsigned> indBJets;
-          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
-          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
           unsigned third = -9999;
           double mll = 99999;
           double mlll = 99999;
@@ -188,10 +186,10 @@ void treeReader::Analyze(){
 
              // fill njets and nbjets variables
              std::vector<unsigned> jetInd, bJetInd;
-             jetCount = nJets(0, true, indJets, samples[sam].is2017());
-             bJetCount = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
+             jetCount = nJets(0, true, jetInd, samples[sam].is2017());
+             bJetCount = nBJets(0, true, true, bJetInd, 1, samples[sam].is2017());
 
-             //if(jetCount < 2) continue;
+             if(jetCount < 2) continue;
              // fill vector of all jets
              TLorentzVector jetV[(const unsigned) _nJets];
              for(unsigned j = 0; j < _nJets; ++j) jetV[j].SetPtEtaPhiE(_jetPt[j], _jetEta[j], _jetPhi[j], _jetE[j]);
@@ -204,7 +202,7 @@ void treeReader::Analyze(){
              maxMJetJet = kinematics::maxMass(jetV, jetInd);
 
              std::vector<unsigned> bjetVecInd;
-             //for(unsigned l = 0; l < bJetCount; ++l) bjetVecInd.push_back(bJetInd[l]);
+             for(unsigned l = 0; l < bJetCount; ++l) bjetVecInd.push_back(bJetInd[l]);
 
              std::vector<unsigned> lepVecInd;
              for(unsigned l = 0; l < lCountFO; ++l) lepVecInd.push_back(indFO[l]);
@@ -224,8 +222,8 @@ void treeReader::Analyze(){
           fillVar["ptlead"] = ptCorrV[0].first;
           fillVar["sublead"] = ptCorrV[1].first;
           fillVar["trail"] = leptonSelection > 2 ? ptCorrV[2].first : 0.;
-          fillVar["njets"] = double(nJLoc);
-          fillVar["nbjets"] = double(nBLoc);
+          fillVar["njets"] = double(jetCount);
+          fillVar["nbjets"] = double(bJetCount);
           fillVar["mll"] = mll;
           fillVar["met"] = _met;
           fillVar["HT"] = HTLoc;

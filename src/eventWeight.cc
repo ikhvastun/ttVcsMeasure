@@ -173,6 +173,7 @@ double treeReader::fakeRateWeight(const unsigned unc){
             sf *= -fr/(1 - fr);
         }
     }
+    // here we assign factor -1 to sibstitue prompt lepton contribution from the sideband region
     if(!isData) sf *= -1;
     if(debug) std::cout << "fr from class is " << sf << std::endl;
     return sf;
