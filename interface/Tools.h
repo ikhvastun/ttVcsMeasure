@@ -8,6 +8,9 @@ using Output::distribs1DForFR;
 using Output::distribs2D;
 using Output::distribs;
 using Output::distribs1DForCT;
+using Output::fakeMapsCalc;
+using Output::mtMaps;
+using Output::mtStack;
 using namespace std;
 
 bool comp (const pair<double, int> i, const pair<double, int> j) { return (i.first>j.first); }
@@ -98,7 +101,44 @@ void initdistribsForCT(std::vector<std::string> & namesOfProcesses, const std::s
     }
 }
 
-void initdistribsForFR(){
+void initdistribsForFRInData(){
+
+    for (int fl=0; fl!=nFlavors; ++fl) {
+        for (int sam=0; sam!=nProcesses; ++sam) {
+          for(unsigned int range = 0; range < nPt-1; range++){
+            for(unsigned int etaRange = 0; etaRange < 2; etaRange++){ // only 2 regions, barrel and endcap
+
+                if(sam == 0) mtStack[fl][range][etaRange] = new THStack(Form("mtStack_%d_%d_%d",fl,range,etaRange),Form("mtStack_%d_%d_%d",fl,range,etaRange));
+
+                mtMaps[fl][range][etaRange][sam] = new TH1D(Form("mtMaps_%d_%d_%d_%d",fl,sam,range,etaRange),";M_{T} (GeV); events / 10 GeV",20,0,200);
+                mtMaps[fl][range][etaRange][sam]->SetMarkerSize(0.6);
+                mtMaps[fl][range][etaRange][sam]->Sumw2();
+
+                if (sam > 0 && sam < nProcesses) mtStack[fl][range][etaRange]->Add(mtMaps[fl][range][etaRange][sam]);
+            }
+          }
+        }
+    }
+
+    for (int fl=0; fl!=nFlavors; ++fl) {
+          for(unsigned int range = 0; range < nPt-1; range++){
+            for(unsigned int etaRange = 0; etaRange < 2; etaRange++){ // only 2 regions, barrel and endcap
+                for (int st=0; st!=3; ++st) { // 3 here stands for 3 categories (status): passed, all, passed / all
+
+                    fakeMapsCalc[fl][st][range][etaRange] = new TH2D(flavorsString[fl]+"_"+histString[st] + "_"+rangeString[range] + "_" + rangeEtaString[etaRange],
+                                                  flavorsString[fl]+"_"+histString[fl]+"_"+rangeString[range]+"_" + rangeEtaString[etaRange]+
+                                                  ";p_{T} (GeV);|#eta|;"+histString[st],
+                                                  nPt-1, ptBins, nEta-1, etaBins[fl]
+                                                  );
+                    fakeMapsCalc[fl][st][range][etaRange]->Sumw2();
+                }
+            }
+        }
+    }
+
+}
+
+ void initdistribsForFR(){
 
     for(unsigned int i = 0; i < distribs1DForFR.size(); i++){
       TString name = Form("varST_%d",i);

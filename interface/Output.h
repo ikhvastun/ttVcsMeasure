@@ -22,7 +22,7 @@ namespace Output{
     std::vector<TH1D> var;
   };
 
-	struct DistribsAll{
+  struct DistribsAll{
   	DistribsAll():vectorHisto(nProcesses+1), vectorHistoUncUp(nProcesses+1), vectorHistoUncDown(nProcesses+1), vectorHistoPDF(nProcesses+1){}
   	std::vector<TH1D> vectorHisto;
   	TH1D vectorHistoTotalUnc;
@@ -30,7 +30,7 @@ namespace Output{
   	std::vector<Unc> vectorHistoUncDown;
   	std::vector<PDF> vectorHistoPDF;
   	THStack stack;
-	};
+  };
 
   struct DistribsAll2D{
   	// 2 eta categories \times pass or fail \times nonprompt stemming from all flavours, b, c and light = 16
@@ -50,13 +50,17 @@ namespace Output{
     std::vector<TH1D> vectorHisto;
   };
 
-	std::vector<DistribsAll> distribs(nVars);
+  std::vector<DistribsAll> distribs(nVars);
   // separately FR for electrons and muons
   std::vector<DistribsAllForFR> distribs1DForFR(2);
 
   std::vector<DistribsAllForCT> distribs1DForCT(nVars);
   std::vector<DistribsAll2D> distribs2D(2);
 
+  // Histograms needed to measure FR in data
+  TH2D* fakeMapsCalc[nFlavors][3][nPt-1][nEta-2]; // nEta - 2 (4-2) -> consider only barrel and endcap, 3 here stands for 3 categories (status): passed, all, passed / all
+  TH1D* mtMaps[nFlavors][nPt-1][nEta-2][nProcesses+1];
+  THStack* mtStack[nFlavors][nPt-1][nEta-2];
 };
 
 #endif

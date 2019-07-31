@@ -53,9 +53,10 @@ using Output::distribs2D;
 
 void treeReader::Analyze(){
 
-  leptonSelection = leptonSelectionAnalysis;
-  magicFactor = magicFactorAnalysis;
-  leptonMVAcut = leptonMVAcutAnalysis;
+  double leptonMVAcut = 0.4; // 0.4 for ttZ, 0.8 for 3L tZq
+  double magicFactor = 0.85; // 0.85 for ttZ, 0.95 for tZq
+
+  leptonSelection = 3;
   //Set CMS plotting style
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
@@ -63,20 +64,14 @@ void treeReader::Analyze(){
   //readSamples("data/samples_QCD_data.txt"); // 
   readSamples("data/samples_QCD_data_2017.txt"); // 
   
-  std::vector<std::string> namesOfSamples = treeReader::getNamesOfTheSample();
-  initdistribs(namesOfSamples);
-
-  addVariablesToBDT();
+  initdistribsForFRInData();
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
-      initSample();
-
-      Color_t color = assignColor(std::get<0>(samples[sam]));
-      setStackColors(color, sam);
+      initSample("FRInData");
 
       //if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos ) continue;
 
-      std::cout<<"Entries in "<< std::get<1>(samples[sam]) << " " << nEntries << std::endl;
+      std::cout<<"Entries in "<< samples[sam].getProcessName() << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
       for(long unsigned it = 0; it < nEntries; ++it){
           //print progress bar  
@@ -94,19 +89,20 @@ void treeReader::Analyze(){
           //if(it > nEntries / 50) break;
           
           std::vector<unsigned> indFO;
-          const unsigned lCountFO = selectFakeLep(indFO);
+          const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
 
           if(lCountFO != 1) continue;
 
           bool allLeptonsArePrompt = true;
-          if(std::get<0>(samples[sam]) != "data")
+          if(samples[sam].getProcessName() != "data")
             allLeptonsArePrompt = promptLeptons(indFO);
 
-          if((std::get<0>(samples[sam]) == "DYjets" || std::get<0>(samples[sam]) == "Wjets" || std::get<0>(samples[sam]) == "ttbar") && !allLeptonsArePrompt) continue;
+          if((samples[sam].getProcessName() == "DYjets" || samples[sam].getProcessName() == "Wjets" || samples[sam].getProcessName() == "ttbar") && !allLeptonsArePrompt) continue;
 
           int nLocEle = getElectronNumber(indFO);
 
           std::vector<unsigned> indJets;
+          std::vector<unsigned> indBJets;
 
           unsigned third = -9999;
           double mll = 99999;
@@ -114,11 +110,11 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, std::get<0>(samples[sam]) == "nonpromptData");
-          nBLoc = nBJets(0, false, true, 1, std::get<0>(samples[sam]) == "nonpromptData");
+          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
+          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
           HTLoc = HTCalc(indJets);
 
-          double leptFakePtCorr = lepIsGood(indFO.at(0)) ? _lPt[indFO.at(0)] : magicFactorAnalysis * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];
+          double leptFakePtCorr = lepIsGood(indFO.at(0), leptonSelection) ? _lPt[indFO.at(0)] : magicFactor * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];
           TLorentzVector l0p4;
           l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           // let's implement the formula from ttH AN
@@ -176,12 +172,12 @@ void treeReader::Analyze(){
           if(!triggerDecision[_lFlavor[indFO.at(0)]]) continue;
 
           if (fakeCS == 0) { //FR measurement region
-            if(lepIsGood(indFO.at(0))){
-               fakeMapsCalc[_lFlavor[indFO.at(0)]][1][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
+            if(lepIsGood(indFO.at(0), leptonSelection)){
+               fakeMapsCalc[_lFlavor[indFO.at(0)]][1][rangePeriod][rangeEtaPeriod]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
             }
-            fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
+            fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
           }
-          else if (lepIsGood(indFO.at(0))){
+          else if (lepIsGood(indFO.at(0), leptonSelection)){
             mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam]->Fill(mtL,weight);
           }
 
@@ -193,7 +189,7 @@ void treeReader::Analyze(){
   }
 
   TCanvas* c2; // = new TCanvas("promptCont","promptCont",400,400);
-  TPad* c2pads[2][rangePeriods][rangeEtaPeriods];
+  TPad* c2pads[2][nPt-1][nEta-2]; // for eta keep 2 regions: barrel and endcap
 
   std::map<std::string, std::string> listForLegend; 
   listForLegend["data"] = "data";
@@ -209,54 +205,54 @@ void treeReader::Analyze(){
   gStyle->SetPadTopMargin(0.10);
 
   TLegend* leg[2];
-  for(int i=0; i!=nFlavors; ++i) {
-     for(int rangeEta = 0; rangeEta < rangeEtaPeriods; rangeEta++){
-        for(int range = 0; range < rangePeriods; range++){
+  for(int fl=0; fl!=nFlavors; ++fl) {
+     for(int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
+        for(int rangePt = 0; rangePt < nPt-1; rangePt++){
 
             c2 = new TCanvas("promptCont","promptCont",400,400);
             c2->cd();
             //derive normalization for prompt contamination:
-            double datayields = mtMaps[i][range][rangeEta][0]->Integral(80/10+1,150/10+1); // 70 to 120
+            double datayields = mtMaps[fl][rangePt][rangeEta][0]->Integral(80/10+1,150/10+1); // 70 to 120
 
             double MCyields = 0;
-            for (int sam=1; sam!=nSamples; ++sam) {
-                if(sam > (is2017 ? 4 : 5)) continue;
-                MCyields += mtMaps[i][range][rangeEta][sam]->Integral(80/10+1,150/10+1);
-                mtMaps[i][range][rangeEta][nSamples]->Add(mtMaps[i][range][rangeEta][sam]);
+            for (int sam=1; sam!=nProcesses; ++sam) {
+                if(sam > (is2017() ? 4 : 5)) continue;
+                MCyields += mtMaps[fl][rangePt][rangeEta][sam]->Integral(80/10+1,150/10+1);
+                //mtMaps[fl][rangePt][rangeEta][nProcesses]->Add(mtMaps[fl][rangePt][rangeEta][sam]);
             }
             double EWKsf = datayields/MCyields;
-            std::cout<<"SF for "<<flavorsString[i]<<" is "<<EWKsf<<std::endl;
+            std::cout<<"SF for "<<flavorsString[fl]<<" is "<<EWKsf<<std::endl;
 
-            mtMaps[i][range][rangeEta][0]->Scale(1./EWKsf);
+            mtMaps[fl][rangePt][rangeEta][0]->Scale(1./EWKsf);
             //plot histograms showing MT distributions
             //c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
-            c2pads[i][range][rangeEta] = new TPad(Form("pad_%d_%d_%d",i,range,rangeEta),"",0,0.,1,1);
-            c2pads[i][range][rangeEta]->SetTopMargin(0.07);
-            c2pads[i][range][rangeEta]->Draw();
-            c2pads[i][range][rangeEta]->cd();
-            mtMaps[i][range][rangeEta][0]->Draw("pe");
-            mtStack[i][range][rangeEta]->Draw("hist same");
-            mtMaps[i][range][rangeEta][0]->Draw("pe same");
-            mtMaps[i][range][rangeEta][0]->Draw("axis same");
+            c2pads[fl][rangePt][rangeEta] = new TPad(Form("pad_%d_%d_%d",fl,rangePt,rangeEta),"",0,0.,1,1);
+            c2pads[fl][rangePt][rangeEta]->SetTopMargin(0.07);
+            c2pads[fl][rangePt][rangeEta]->Draw();
+            c2pads[fl][rangePt][rangeEta]->cd();
+            mtMaps[fl][rangePt][rangeEta][0]->Draw("pe");
+            mtStack[fl][rangePt][rangeEta]->Draw("hist same");
+            mtMaps[fl][rangePt][rangeEta][0]->Draw("pe same");
+            mtMaps[fl][rangePt][rangeEta][0]->Draw("axis same");
 
             double lumi = 35.9;
-            if(is2017) lumi = 41.5;
-            CMS_lumi( c2pads[i][range][rangeEta], 4, 0, lumi);
+            if(is2017()) lumi = 41.5;
+            CMS_lumi( c2pads[fl][rangePt][rangeEta], 4, 0, lumi);
 
-            leg[i] = new TLegend(0.6,0.85,0.9,0.5,Form("SF=%3.2f",EWKsf),"NDC");
-            leg[i] = new TLegend(0.6,0.85,0.9,0.5,flavorsString[i] + ", p_{T}:" + rangeString[range] + ", #eta:" + rangeEtaString[rangeEta],"NDC");
-            leg[i]->AddEntry(mtMaps[i][0][0][0],"data","pel");
-            for (int sam=1; sam!=nSamples; ++sam) {
+            leg[fl] = new TLegend(0.6,0.85,0.9,0.5,Form("SF=%3.2f",EWKsf),"NDC");
+            leg[fl] = new TLegend(0.6,0.85,0.9,0.5,flavorsString[fl] + ", p_{T}:" + rangeString[rangePt] + ", #eta:" + rangeEtaString[rangeEta],"NDC");
+            leg[fl]->AddEntry(mtMaps[fl][0][0][0],"data","pel");
+            for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > 3) continue;
-                leg[i]->AddEntry(mtMaps[i][0][0][sam],listForLegend[samplesOrderNames.at(sam)].c_str(),"f");
+                leg[fl]->AddEntry(mtMaps[fl][0][0][sam],listForLegend[samplesOrderNames.at(sam)].c_str(),"f");
             }
-            leg[i]->Draw("same");
+            leg[fl]->Draw("same");
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".pdf"); // + std::string(range) + std::string(rangeEta)  
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".png"); // + std::string(range) + std::string(rangeEta)  
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".root"); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.pdf", i, range, rangeEta)); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.png", i, range, rangeEta)); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.root", i, range, rangeEta)); // + std::string(range) + std::string(rangeEta)  
+            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.pdf", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
+            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.png", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
+            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.root", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
             delete c2;
         }
     }

@@ -61,6 +61,8 @@ void treeReader::initSample(const Sample& samp, std::string option){
         sampleFile = samp.getFile("/eos/user/m/mniedzie/ttZ4l/ntuples_ttV_2016/"); //" + std::string(samp.is2017() ? "2017/" : "2016/"));
     else if(option == "FR")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_FR/" + std::string(samp.getFileName().find("TT") != std::string::npos ? "ttbar" : "QCD") + "/" + std::string(samp.is2017() ?    "2017" : "2016") + "MC/");
+    else if(option == "FRInData")
+        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_FR/data/" + std::string(samp.is2017() ? "2017" : "2016") + "MC/");  //
     //sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/wverbeke/ntuples_ewkino/"); //  + (TString)(is2017 ? "" : "newReReco/") 
     sampleFile->cd("blackJackAndHookers");
     fChain = (TTree*) sampleFile->Get("blackJackAndHookers/blackJackAndHookersTree");
@@ -163,6 +165,24 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_passTrigger_eem", &_passTrigger_eem, &b__passTrigger_eem);
     fChain->SetBranchAddress("_passTrigger_emm", &_passTrigger_emm, &b__passTrigger_emm);
     fChain->SetBranchAddress("_passTrigger_mmm", &_passTrigger_mmm, &b__passTrigger_mmm);
+
+    fChain->SetBranchAddress("_HLT_Mu3_PFJet40", &_HLT_Mu3_PFJet40, &b__HLT_Mu3_PFJet40);
+    fChain->SetBranchAddress("_HLT_Mu3_PFJet40_prescale", &_HLT_Mu3_PFJet40_prescale, &b__HLT_Mu3_PFJet40_prescale);
+    fChain->SetBranchAddress("_HLT_Mu8", &_HLT_Mu8, &b__HLT_Mu8);
+    fChain->SetBranchAddress("_HLT_Mu8_prescale", &_HLT_Mu8_prescale, &b__HLT_Mu8_prescale);
+    fChain->SetBranchAddress("_HLT_Mu17", &_HLT_Mu17, &b__HLT_Mu17);
+    fChain->SetBranchAddress("_HLT_Mu17_prescale", &_HLT_Mu17_prescale, &b__HLT_Mu17_prescale);
+    fChain->SetBranchAddress("_HLT_Mu27", &_HLT_Mu27, &b__HLT_Mu27);
+    fChain->SetBranchAddress("_HLT_Mu27_prescale", &_HLT_Mu27_prescale, &b__HLT_Mu27_prescale);
+    fChain->SetBranchAddress("_HLT_Ele8_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele8_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30);
+    fChain->SetBranchAddress("_HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale);
+    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30);
+    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale);
+    fChain->SetBranchAddress("_HLT_Ele17_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele17_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30);
+    fChain->SetBranchAddress("_HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale);
+    fChain->SetBranchAddress("_HLT_Ele23_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele23_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30);
+    fChain->SetBranchAddress("_HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale);
+
 
     fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
     fChain->SetBranchAddress("_nL", &_nL, &b__nL);

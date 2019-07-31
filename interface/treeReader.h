@@ -47,6 +47,24 @@ class treeReader {
         Int_t           _gen_lCharge[gen_nL_max];   
         Int_t           _gen_lMomPdg[gen_nL_max];   
         Bool_t          _gen_lIsPrompt[gen_nL_max];   
+
+        Bool_t          _HLT_Mu3_PFJet40;
+        Int_t           _HLT_Mu3_PFJet40_prescale;
+        Bool_t          _HLT_Mu8;
+        Int_t           _HLT_Mu8_prescale;
+        Bool_t          _HLT_Mu17;
+        Int_t           _HLT_Mu17_prescale;
+        Bool_t          _HLT_Mu27;
+        Int_t           _HLT_Mu27_prescale;
+        Bool_t          _HLT_Ele8_CaloIdM_TrackIdM_PFJet30;
+        Int_t           _HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale;
+        Bool_t          _HLT_Ele12_CaloIdM_TrackIdM_PFJet30;
+        Int_t           _HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;
+        Bool_t          _HLT_Ele17_CaloIdM_TrackIdM_PFJet30;
+        Int_t           _HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale;
+        Bool_t          _HLT_Ele23_CaloIdM_TrackIdM_PFJet30;
+        Int_t           _HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale;
+
         Bool_t          _passTrigger_e;
         Bool_t          _HLT_Ele35_WPTight_Gsf;
         Int_t           _HLT_Ele35_WPTight_Gsf_prescale;
@@ -411,6 +429,24 @@ class treeReader {
         TBranch        *b__gen_lCharge;   
         TBranch        *b__gen_lMomPdg;   
         TBranch        *b__gen_lIsPrompt;   
+
+        TBranch        *b__HLT_Mu3_PFJet40;   //!
+       TBranch        *b__HLT_Mu3_PFJet40_prescale;   //!
+       TBranch        *b__HLT_Mu8;   //!
+       TBranch        *b__HLT_Mu8_prescale;   //!
+       TBranch        *b__HLT_Mu17;   //!
+       TBranch        *b__HLT_Mu17_prescale;   //!
+       TBranch        *b__HLT_Mu27;   //!
+       TBranch        *b__HLT_Mu27_prescale;   //!
+       TBranch        *b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30;   //!
+       TBranch        *b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale;   //!
+       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30;   //!
+       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;   //!
+       TBranch        *b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30;   //!
+       TBranch        *b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale;   //!
+       TBranch        *b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30;   //!
+       TBranch        *b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale;   //!""
+
         TBranch        *b__passTrigger_e;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf;   
         TBranch        *b__HLT_Ele35_WPTight_Gsf_prescale;   
