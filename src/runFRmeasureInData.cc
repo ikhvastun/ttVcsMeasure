@@ -48,8 +48,9 @@ using namespace std;
 using namespace tools;
 
 Errors LastError::lasterror = Errors::UNKNOWN;
-using Output::distribs;
-using Output::distribs2D;
+using Output::fakeMapsCalc;
+using Output::mtMaps;
+using Output::mtStack;
 
 void treeReader::Analyze(){
 
@@ -61,8 +62,8 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples_QCD_data.txt"); // 
-  readSamples("data/samples_QCD_data_2017.txt"); // 
+  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
+  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
   
   initdistribsForFRInData();
 
@@ -86,7 +87,7 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          if(it > nEntries / 50) break;
           
           std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
@@ -250,9 +251,8 @@ void treeReader::Analyze(){
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".pdf"); // + std::string(range) + std::string(rangeEta)  
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".png"); // + std::string(range) + std::string(rangeEta)  
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".root"); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.pdf", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.png", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
-            c2->SaveAs(Form("maps/split/data_fake_EWK%d%d%d.root", fl, rangePt, rangeEta)); // + std::string(range) + std::string(rangeEta)  
+            gSystem->Exec("mkdir -p plotsForSave/maps/split");
+            c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".pdf");  
             delete c2;
         }
     }
