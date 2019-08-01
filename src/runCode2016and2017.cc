@@ -101,8 +101,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   
   for(size_t sam = 0; sam < samples.size(); ++sam){
-//      initSample("ttZ");
-      initSample("ttZ4l");
+      initSample("ttZ");
+//      initSample("ttZ4l");
       int samCategory = processToCounterMap.at(samples[sam].getProcessName());
 
       Color_t color = assignColor(samples[sam].getProcessName());

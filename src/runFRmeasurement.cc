@@ -101,7 +101,7 @@ void treeReader::AnalyzeFR(const vector<std::string> & filesToAnalyse, const std
 
           GetEntry(it);
           //if(it > 100000) break;
-          if(it > nEntries / 20) break;
+          //if(it > nEntries / 20) break;
           
           std::vector<unsigned> ind, indFO;
           const unsigned lCount = selectLep(ind, leptonSelection);

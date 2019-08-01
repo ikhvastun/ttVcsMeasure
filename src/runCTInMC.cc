@@ -272,9 +272,9 @@ void treeReader::Analyze(){
     plot[varPlot]->cd();
     showHistCT(plot[varPlot],distribs1DForCT[figNames[listToPrint[selection].at(varPlot)].index],figNames[listToPrint[selection].at(varPlot)], scale_num, mtleg, false);
     
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + listToPrint[selection].at(varPlot) + ".root");
+    plot[varPlot]->SaveAs("plotsForSave/CT_" + listToPrint[selection].at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/CT_" + listToPrint[selection].at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/CT_" + listToPrint[selection].at(varPlot) + ".root");
     //plot[varPlot]->cd();
     //showHist(plot[varPlot],distribs[varPlot],"",figNames.at(varPlot),"Events", scale_num, mtleg, true, false); //  + std::to_string(int((varMax[varPlot] - varMin[varPlot])/nBins[varPlot]))
     //plot[varPlot]->SaveAs("plotsForSave/" + namesForSaveFiles.at(varPlot) + "Log.pdf");
