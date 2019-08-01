@@ -3,7 +3,6 @@
 outputDir=$PWD/../output/
 ttVdir=$PWD/../
 mkdir -p ${outputDir}
-CMSSW="CMSSW_9_4_4"
 
 if [ -z "$1" ] && [ -z "$2" ]
   then
