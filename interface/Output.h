@@ -58,7 +58,7 @@ namespace Output{
   std::vector<DistribsAll2D> distribs2D(2);
 
   // Histograms needed to measure FR in data
-  TH2D* fakeMapsCalc[nFlavors][3][nPt-1][nEta-2]; // nEta - 2 (4-2) -> consider only barrel and endcap, 3 here stands for 3 categories (status): passed, all, passed / all
+  TH2D* fakeMapsCalc[nFlavors][3][nPt-1][nEta-2][nProcesses+1]; // nEta - 2 (4-2) -> consider only barrel and endcap, 3 here stands for 3 categories (status): passed, all, passed / all
   TH1D* mtMaps[nFlavors][nPt-1][nEta-2][nProcesses+1];
   THStack* mtStack[nFlavors][nPt-1][nEta-2];
 };

@@ -115,24 +115,17 @@ void initdistribsForFRInData(){
                 mtMaps[fl][range][etaRange][sam]->Sumw2();
 
                 if (sam > 0 && sam < nProcesses) mtStack[fl][range][etaRange]->Add(mtMaps[fl][range][etaRange][sam]);
-            }
-          }
-        }
-    }
 
-    for (int fl=0; fl!=nFlavors; ++fl) {
-          for(unsigned int range = 0; range < nPt-1; range++){
-            for(unsigned int etaRange = 0; etaRange < 2; etaRange++){ // only 2 regions, barrel and endcap
                 for (int st=0; st!=3; ++st) { // 3 here stands for 3 categories (status): passed, all, passed / all
-
-                    fakeMapsCalc[fl][st][range][etaRange] = new TH2D(flavorsString[fl]+"_"+histString[st] + "_"+rangeString[range] + "_" + rangeEtaString[etaRange],
-                                                  flavorsString[fl]+"_"+histString[fl]+"_"+rangeString[range]+"_" + rangeEtaString[etaRange]+
+                    fakeMapsCalc[fl][st][range][etaRange][sam] = new TH2D(flavorsString[fl]+"_"+histString[st]+"_" +std::to_string(sam) +"_"+rangeString[range] + "_" + rangeEtaString[etaRange],
+                                                  flavorsString[fl]+"_"+histString[st]+"_"+rangeString[range]+"_" + rangeEtaString[etaRange]+
                                                   ";p_{T} (GeV);|#eta|;"+histString[st],
                                                   nPt-1, ptBins, nEta-1, etaBins[fl]
                                                   );
-                    fakeMapsCalc[fl][st][range][etaRange]->Sumw2();
+                    fakeMapsCalc[fl][st][range][etaRange][sam]->Sumw2();
                 }
             }
+          }
         }
     }
 
