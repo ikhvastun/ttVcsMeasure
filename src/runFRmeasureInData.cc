@@ -177,9 +177,9 @@ void treeReader::Analyze(){
 
           if (fakeCS == 0) { //FR measurement region
             if(lepIsGood(indFO.at(0), leptonSelection)){
-               fakeMapsCalc[_lFlavor[indFO.at(0)]][1][rangePeriod][rangeEtaPeriod]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
+               fakeMapsCalc[_lFlavor[indFO.at(0)]][1][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
             }
-            fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
+            fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
           }
           else if (lepIsGood(indFO.at(0), leptonSelection)){
             mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam]->Fill(mtL,weight);
@@ -191,6 +191,10 @@ void treeReader::Analyze(){
       //cout << "Total number of events: " << distribs[0].vectorHisto[sam].Integral() << endl;
       std::cout << std::endl;
   }
+
+
+  TCanvas* c1 = new TCanvas("fakeMaps","fakeMaps",800,400);
+  c1->Divide(2,1);
 
   TCanvas* c2; // = new TCanvas("promptCont","promptCont",400,400);
   TPad* c2pads[2][nPt-1][nEta-2]; // for eta keep 2 regions: barrel and endcap
@@ -227,6 +231,7 @@ void treeReader::Analyze(){
             double EWKsf = datayields/MCyields;
             std::cout<<"SF for "<<flavorsString[fl]<<" is "<<EWKsf<<std::endl;
 
+            // scale data to get same number of events as in MC
             mtMaps[fl][rangePt][rangeEta][0]->Scale(1./EWKsf);
             //plot histograms showing MT distributions
             //c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
@@ -238,6 +243,12 @@ void treeReader::Analyze(){
             mtStack[fl][rangePt][rangeEta]->Draw("hist same");
             mtMaps[fl][rangePt][rangeEta][0]->Draw("pe same");
             mtMaps[fl][rangePt][rangeEta][0]->Draw("axis same");
+
+            for (int sam=1; sam!=nProcesses; ++sam) {
+                if(sam > (is2017() ? 4 : 5)) continue;
+                fakeMapsCalc[fl][1][rangePt][rangeEta][0]->Add(fakeMapsCalc[fl][1][rangePt][rangeEta][sam],-EWKsf);
+                fakeMapsCalc[fl][0][rangePt][rangeEta][0]->Add(fakeMapsCalc[fl][0][rangePt][rangeEta][sam],-EWKsf);
+            }
 
             double lumi = 35.9;
             if(is2017()) lumi = 41.5;
@@ -263,119 +274,30 @@ void treeReader::Analyze(){
         }
     }
 
- }
-
-  // here everything is plotted on the same canvas, I am going to split the plots and have 1 plot per 1 canvas
-  // Illia 28.11.2018
-  /*
-  TCanvas* c1 = new TCanvas("fakeMaps","fakeMaps",800,400);
-  c1->Divide(2,1);
-
-  TCanvas* c2 = new TCanvas("promptCont","promptCont",800,400);
-  c2->Divide(rangePeriods,2*2);
-  TPad* c2pads[2][rangePeriods][rangeEtaPeriods][2];
-
-  //gStyle->SetPaintTextFormat("1.2f");
-  gStyle->SetOptTitle(1);
-  gStyle->SetPadTopMargin(0.10);
-  //TGaxis::SetMaxDigits(3);
-
-  TLegend* leg[2];
-  for(int i=0; i!=nFlavors; ++i) {
-     for(int rangeEta = 0; rangeEta < rangeEtaPeriods; rangeEta++){
-        for(int range = 0; range < rangePeriods; range++){
-
-            //derive normalization for prompt contamination:
-            double datayields = mtMaps[i][range][rangeEta][0]->Integral(80/10+1,150/10+1); // 70 to 120
-
-            double MCyields = 0;
-            for (int sam=1; sam!=nSamples; ++sam) {
-                if(sam > (is2017 ? 4 : 5)) continue;
-                MCyields += mtMaps[i][range][rangeEta][sam]->Integral(80/10+1,150/10+1);
-                mtMaps[i][range][rangeEta][nSamples]->Add(mtMaps[i][range][rangeEta][sam]);
-            }
-            double EWKsf = datayields/MCyields;
-            std::cout<<"SF for "<<flavorsString[i]<<" is "<<EWKsf<<std::endl;
-
-            mtMaps[i][range][rangeEta][0]->Scale(1./EWKsf);
-            //plot histograms showing MT distributions
-            c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
-            c2pads[i][range][rangeEta][0] = new TPad(Form("pad_%d_%d_%d_0",i,range,rangeEta),"",0,0.3,1,1);
-            c2pads[i][range][rangeEta][0]->Draw();
-            c2pads[i][range][rangeEta][0]->cd();
-            mtMaps[i][range][rangeEta][0]->Draw("pe");
-            mtStack[i][range][rangeEta]->Draw("hist same");
-            mtMaps[i][range][rangeEta][0]->Draw("pe same");
-            mtMaps[i][range][rangeEta][0]->Draw("axis same");
-
-            //leg[i] = new TLegend(0.6,0.85,0.9,0.5,Form("SF=%3.2f",EWKsf),"NDC");
-            leg[i] = new TLegend(0.6,0.85,0.9,0.5,"pt:" + rangeString[range] + ", eta:" + rangeEtaString[rangeEta],"NDC");
-            leg[i]->AddEntry(mtMaps[i][0][0][0],"data","pel");
-            for (int sam=1; sam!=nSamples; ++sam) {
-                if(sam > 3) continue;
-                leg[i]->AddEntry(mtMaps[i][0][0][sam],samplesOrderNames.at(sam).c_str(),"f");
-            }
-            leg[i]->Draw("same");
-            c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
-            c2pads[i][range][rangeEta][1] = new TPad(Form("pad_%d_%d_%d_1",i,range,rangeEta),"",0,0.0,1,0.3);
-            c2pads[i][range][rangeEta][1]->Draw();
-            c2pads[i][range][rangeEta][1]->cd();
-            mtMaps[i][range][rangeEta][nSamples]->Divide(mtMaps[i][range][rangeEta][0],mtMaps[i][range][rangeEta][nSamples]);
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitle("data/MC");
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetRangeUser(0,6);
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetNdivisions(505);
-            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetTitle("");
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitleOffset(0.3/0.7*1.25);
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetTitleSize(0.7/0.3*0.06);
-            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetTitleSize(0.7/0.3*0.06);
-            mtMaps[i][range][rangeEta][nSamples]->GetYaxis()->SetLabelSize(0.7/0.3*0.05);
-            mtMaps[i][range][rangeEta][nSamples]->GetXaxis()->SetLabelSize(0.7/0.3*0.05);
-            mtMaps[i][range][rangeEta][nSamples]->Draw("pe");
-            mtMaps[i][range][rangeEta][nSamples]->Fit("pol0","","",80,150);
-  
-            //obtain and plot FR
-            for (int sam=1; sam!=nSamples; ++sam) {
-                if(sam > (is2017 ? 4 : 5)) continue;
-                fakeMapsCalc[i][1][range][rangeEta][0]->Add(fakeMapsCalc[i][1][range][rangeEta][sam],-EWKsf);
-                fakeMapsCalc[i][0][range][rangeEta][0]->Add(fakeMapsCalc[i][0][range][rangeEta][sam],-EWKsf);
-            }
+    for(int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
+        for(int rangePt = 1; rangePt < nPt-1; rangePt++){
+            fakeMapsCalc[fl][1][0][rangeEta][0]->Add(fakeMapsCalc[fl][1][rangePt][rangeEta][0]);
+            fakeMapsCalc[fl][0][0][rangeEta][0]->Add(fakeMapsCalc[fl][0][rangePt][rangeEta][0]);
         }
     }
-
-    for(int rangeEta = 0; rangeEta < rangeEtaPeriods; rangeEta++){
-        for(int range = 1; range < rangePeriods; range++){
-            fakeMapsCalc[i][1][0][rangeEta][0]->Add(fakeMapsCalc[i][1][range][rangeEta][0]);
-            fakeMapsCalc[i][0][0][rangeEta][0]->Add(fakeMapsCalc[i][0][range][rangeEta][0]);
-        }
-    }
-    fakeMapsCalc[i][1][0][0][0]->Add(fakeMapsCalc[i][1][0][1][0]);
-    fakeMapsCalc[i][0][0][0][0]->Add(fakeMapsCalc[i][0][0][1][0]);
+    fakeMapsCalc[fl][1][0][0][0]->Add(fakeMapsCalc[fl][1][0][1][0]);
+    fakeMapsCalc[fl][0][0][0][0]->Add(fakeMapsCalc[fl][0][0][1][0]);
 
     //fakeMapsCalc[i][2][0][0]->Divide(fakeMapsCalc[i][1][0][0],fakeMapsCalc[i][0][0][0]);
-    TH2D *cloneFirst = (TH2D*) fakeMapsCalc[i][1][0][0][0]->Clone("passed");
-    cloneFirst->Divide(fakeMapsCalc[i][0][0][0][0]);
+    TH2D *cloneFirst = (TH2D*) fakeMapsCalc[fl][1][0][0][0]->Clone("passed");
+    cloneFirst->Divide(fakeMapsCalc[fl][0][0][0][0]);
 
-    c1->cd(1+i);
-
-    //fakeMapsCalc[i][2][0][0]->GetZaxis()->SetRangeUser(0.,1.0);
-    //fakeMapsCalc[i][2][0][0]->SetMarkerSize(1.5);
-
-    //fakeMapsCalc[i][2][0][0]->Draw("col");
-    //fakeMapsCalc[i][2][0][0]->Draw("text e same");
-
-    //fakeMapsCalc[i][2][0][0]->SaveAs("maps/fakerate_"+flavorsString[i] + "_data.root");
+    c1->cd(1+fl);
 
     cloneFirst->GetZaxis()->SetRangeUser(0.,1.0);
     cloneFirst->SetMarkerSize(1.5);
     cloneFirst->Draw("col");
     cloneFirst->Draw("text e same");
-    cloneFirst->SaveAs("maps/fakerate_"+flavorsString[i] + "_data.root");
+    cloneFirst->SaveAs("plotsForSave/maps/fakerate_"+flavorsString[fl] + "_data.root");
 
  }
 
- c1->SaveAs("maps/data_fake_maps.root");
- c2->SaveAs("maps/data_fake_EWK.root");
- */
+
  return;
 
 }
