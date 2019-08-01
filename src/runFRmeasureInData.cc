@@ -62,8 +62,8 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
-  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
+  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
+  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
   
   initdistribsForFRInData();
 
@@ -182,7 +182,7 @@ void treeReader::Analyze(){
             fakeMapsCalc[_lFlavor[indFO.at(0)]][0][rangePeriod][rangeEtaPeriod][sam]->Fill(TMath::Min(leptFakePtCorr, ptBins[nPt-1]-1.), fabs(_lEta[indFO.at(0)]),weight);
           }
           else if (lepIsGood(indFO.at(0), leptonSelection)){
-            mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam]->Fill(mtL,weight);
+            mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam].Fill(mtL,weight);
           }
 
       }
@@ -220,29 +220,29 @@ void treeReader::Analyze(){
             c2 = new TCanvas("promptCont","promptCont",400,400);
             c2->cd();
             //derive normalization for prompt contamination:
-            double datayields = mtMaps[fl][rangePt][rangeEta][0]->Integral(80/10+1,150/10+1); // 70 to 120
+            double datayields = mtMaps[fl][rangePt][rangeEta][0].Integral(80/10+1,150/10+1); // 70 to 120
 
             double MCyields = 0;
             for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > (is2017() ? 4 : 5)) continue;
-                MCyields += mtMaps[fl][rangePt][rangeEta][sam]->Integral(80/10+1,150/10+1);
+                MCyields += mtMaps[fl][rangePt][rangeEta][sam].Integral(80/10+1,150/10+1);
                 //mtMaps[fl][rangePt][rangeEta][nProcesses]->Add(mtMaps[fl][rangePt][rangeEta][sam]);
             }
             double EWKsf = datayields/MCyields;
             std::cout<<"SF for "<<flavorsString[fl]<<" is "<<EWKsf<<std::endl;
 
             // scale data to get same number of events as in MC
-            mtMaps[fl][rangePt][rangeEta][0]->Scale(1./EWKsf);
+            mtMaps[fl][rangePt][rangeEta][0].Scale(1./EWKsf);
             //plot histograms showing MT distributions
             //c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
             c2pads[fl][rangePt][rangeEta] = new TPad(Form("pad_%d_%d_%d",fl,rangePt,rangeEta),"",0,0.,1,1);
             c2pads[fl][rangePt][rangeEta]->SetTopMargin(0.07);
             c2pads[fl][rangePt][rangeEta]->Draw();
             c2pads[fl][rangePt][rangeEta]->cd();
-            mtMaps[fl][rangePt][rangeEta][0]->Draw("pe");
+            mtMaps[fl][rangePt][rangeEta][0].Draw("pe");
             mtStack[fl][rangePt][rangeEta]->Draw("hist same");
-            mtMaps[fl][rangePt][rangeEta][0]->Draw("pe same");
-            mtMaps[fl][rangePt][rangeEta][0]->Draw("axis same");
+            mtMaps[fl][rangePt][rangeEta][0].Draw("pe same");
+            mtMaps[fl][rangePt][rangeEta][0].Draw("axis same");
 
             for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > (is2017() ? 4 : 5)) continue;
@@ -256,10 +256,10 @@ void treeReader::Analyze(){
 
             leg[fl] = new TLegend(0.6,0.85,0.9,0.5,Form("SF=%3.2f",EWKsf),"NDC");
             leg[fl] = new TLegend(0.6,0.85,0.9,0.5,flavorsString[fl] + ", p_{T}:" + rangeString[rangePt] + ", #eta:" + rangeEtaString[rangeEta],"NDC");
-            leg[fl]->AddEntry(mtMaps[fl][0][0][0],"data","pel");
+            leg[fl]->AddEntry(&mtMaps[fl][0][0][0],"data","pel");
             for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > 3) continue;
-                leg[fl]->AddEntry(mtMaps[fl][0][0][sam],listForLegend[samplesOrderNames.at(sam)].c_str(),"f");
+                leg[fl]->AddEntry(&mtMaps[fl][0][0][sam],listForLegend[samplesOrderNames.at(sam)].c_str(),"f");
             }
             leg[fl]->Draw("same");
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".pdf"); // + std::string(range) + std::string(rangeEta)  

@@ -110,11 +110,15 @@ void initdistribsForFRInData(){
 
                 if(sam == 0) mtStack[fl][range][etaRange] = new THStack(Form("mtStack_%d_%d_%d",fl,range,etaRange),Form("mtStack_%d_%d_%d",fl,range,etaRange));
 
-                mtMaps[fl][range][etaRange][sam] = new TH1D(Form("mtMaps_%d_%d_%d_%d",fl,sam,range,etaRange),";M_{T} (GeV); events / 10 GeV",20,0,200);
-                mtMaps[fl][range][etaRange][sam]->SetMarkerSize(0.6);
-                mtMaps[fl][range][etaRange][sam]->Sumw2();
+                mtMaps[fl][range][etaRange][sam] = std::move(TH1D(Form("mtMaps_%d_%d_%d_%d",fl,sam,range,etaRange),";M_{T} (GeV); events / 10 GeV",20,0,200));
+                mtMaps[fl][range][etaRange][sam].SetMarkerSize(0.6);
+                mtMaps[fl][range][etaRange][sam].Sumw2();
 
-                if (sam > 0 && sam < nProcesses) mtStack[fl][range][etaRange]->Add(mtMaps[fl][range][etaRange][sam]);
+                //mtMaps[fl][range][etaRange][sam] = new TH1D(Form("mtMaps_%d_%d_%d_%d",fl,sam,range,etaRange),";M_{T} (GeV); events / 10 GeV",20,0,200);
+                //mtMaps[fl][range][etaRange][sam]->SetMarkerSize(0.6);
+                //mtMaps[fl][range][etaRange][sam]->Sumw2();
+
+                if (sam > 0 && sam < nProcesses) mtStack[fl][range][etaRange]->Add(&mtMaps[fl][range][etaRange][sam]);
 
                 for (int st=0; st!=3; ++st) { // 3 here stands for 3 categories (status): passed, all, passed / all
                     fakeMapsCalc[fl][st][range][etaRange][sam] = new TH2D(flavorsString[fl]+"_"+histString[st]+"_" +std::to_string(sam) +"_"+rangeString[range] + "_" + rangeEtaString[etaRange],
@@ -603,7 +607,7 @@ void setStackColors(Color_t & color, int sam){
     for (int i=0; i!=nFlavors; ++i) {
         for(unsigned int range = 0; range < nPt-1; range++){
             for(unsigned int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
-                mtMaps[i][range][rangeEta][sam]->SetFillColor(color);
+                mtMaps[i][range][rangeEta][sam].SetFillColor(color);
             }
         }
     }
