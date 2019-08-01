@@ -57,8 +57,8 @@ void treeReader::initSample(const Sample& samp, std::string option){
     if(option == "ttZ")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
     else if(option == "ttZ4l")
-//        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttz_4l"); //" + istd::string(samp.is2017() ? "2017/" : "2016/"));
-        sampleFile = samp.getFile("/eos/user/m/mniedzie/ttZ4l/ntuples_ttV_2016/"); //" + std::string(samp.is2017() ? "2017/" : "2016/"));
+        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttz_4l"); //" + istd::string(samp.is2017() ? "2017/" : "2016/"));
+//        sampleFile = samp.getFile("/eos/user/m/mniedzie/ttZ4l/ntuples_ttV_2016/"); //" + std::string(samp.is2017() ? "2017/" : "2016/"));
     else if(option == "FR")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_FR/" + std::string(samp.getFileName().find("TT") != std::string::npos ? "ttbar" : "QCD") + "/" + std::string(samp.is2017() ? "2017" : "2016") + "MC/");
     else if(option == "FRInData")
