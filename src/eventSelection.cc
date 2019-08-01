@@ -633,6 +633,10 @@ Color_t treeReader::assignColor(const std::string & name){
     if(name == "tHq") return kGreen;
     if(name == "ttWZ") return 8;
 
+    if(name == "Wjets") return kRed;
+    if(name == "DYjets") return kBlue;
+    if(name == "ttbar") return kYellow;
+
     return kBlack;
 }
 

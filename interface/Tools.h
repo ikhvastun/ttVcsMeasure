@@ -607,6 +607,13 @@ void setStackColors(Color_t & color, int sam){
         distribs[i].vectorHisto[sam].SetFillColor(color);
         distribs[i].vectorHisto[sam].SetMarkerColor(color);
     }
+    for (int i=0; i!=nFlavors; ++i) {
+        for(unsigned int range = 0; range < nPt-1; range++){
+            for(unsigned int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
+                mtMaps[i][range][rangeEta][sam]->SetFillColor(color);
+            }
+        }
+    }
 }
 
 double mt2ll(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzVector& metVec){

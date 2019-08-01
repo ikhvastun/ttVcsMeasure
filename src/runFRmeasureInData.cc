@@ -70,6 +70,9 @@ void treeReader::Analyze(){
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample("FRInData");
 
+      Color_t color = assignColor(samples[sam].getProcessName());
+      setStackColors(color, sam);
+
       //if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos ) continue;
 
       std::cout<<"Entries in "<< samples[sam].getProcessName() << " " << nEntries << std::endl;
@@ -87,7 +90,7 @@ void treeReader::Analyze(){
 
           GetEntry(it);
           //if(it > 10000) break;
-          if(it > nEntries / 50) break;
+          //if(it > nEntries / 50) break;
           
           std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
@@ -252,7 +255,10 @@ void treeReader::Analyze(){
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".png"); // + std::string(range) + std::string(rangeEta)  
             //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".root"); // + std::string(range) + std::string(rangeEta)  
             gSystem->Exec("mkdir -p plotsForSave/maps/split");
-            c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".pdf");  
+            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".pdf");  
+            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".png");  
+            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".root");  
+            c2->SaveAs(Form("plotsForSave/maps/split/data_fake_EWK%d%d%d.root", fl, rangePt, rangeEta));
             delete c2;
         }
     }
