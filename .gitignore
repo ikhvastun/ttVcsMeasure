@@ -18,6 +18,7 @@ ttVcsMeasure.sublime-workspace
 scripts/makingUncPlots/*root
 scripts/.DS_Store
 runFR
+runFRInData
 runCT
 
 # Prerequisites
