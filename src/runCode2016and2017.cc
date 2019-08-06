@@ -150,7 +150,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
@@ -792,7 +792,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     
   }
 
-  TH1D* histStatAndSystBand = (TH1D*)distribs[figNames[listToPrint[selection].at(0)].index].stack.GetStack()->Last();
+  TH1D* histStatAndSystBand = (TH1D*)distribs[figNames[listToPrint[selection].at(0)].index].stack.GetStack()->Last()->Clone("histStatAndSystBand");
   histStatAndSystBand ->SetFillStyle(3005);
   histStatAndSystBand ->SetLineColor(kGray+2);
   histStatAndSystBand ->SetFillColor(kGray+2);
