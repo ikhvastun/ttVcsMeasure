@@ -57,6 +57,11 @@ void treeReader::Analyze(){
   double leptonMVAcut = 0.4; // 0.4 for ttZ, 0.8 for 3L tZq
   double magicFactor = 0.85; // 0.85 for ttZ, 0.95 for tZq
 
+  // ptRatio cut that is used to select FO object in the ttZ analysis
+  // be careful if you wanna use this for another measurement (for example TOP-18-008)
+  // there the ptRatioCut is different
+  double ptRatioCut = 0.4; 
+
   leptonSelection = 3;
   //Set CMS plotting style
   setTDRStyle();
@@ -145,15 +150,15 @@ void treeReader::Analyze(){
           // here it's done as it's used in TOP-18-009
           // in next iteration of the analysis this should be fixed
           bool eleTrigDecision = _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || 
-                                 //(_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (17 * magicFactor / leptonMVAcut)) || 
-                                 //(_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (23 * magicFactor / leptonMVAcut)); 
+                                 //(_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (17 * magicFactor / ptRatioCut)) || 
+                                 //(_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (23 * magicFactor / ptRatioCut)); 
                                  (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 25) ||
                                  (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 32);
 
            
           bool muTrigDecision = (_HLT_Mu3_PFJet40 || _HLT_Mu8) || 
-                                //(_HLT_Mu17 && leptFakePtCorr > (17 * magicFactor / leptonMVAcut)) || 
-                                //(_HLT_Mu27 && leptFakePtCorr > (27 * magicFactor / leptonMVAcut));
+                                //(_HLT_Mu17 && leptFakePtCorr > (17 * magicFactor / ptRatioCut)) || 
+                                //(_HLT_Mu27 && leptFakePtCorr > (27 * magicFactor / ptRatioCut));
                                 (_HLT_Mu17 && leptFakePtCorr > 32) ||
                                 (_HLT_Mu27 && leptFakePtCorr > 45);
 
