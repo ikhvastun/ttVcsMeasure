@@ -62,10 +62,13 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
-  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
+  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
+  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
   
   initdistribsForFRInData();
+
+  //std::ofstream myfile;
+  //myfile.open("myevents.txt");
 
   for(size_t sam = 0; sam < samples.size(); ++sam){
       initSample("FRInData");
@@ -73,9 +76,9 @@ void treeReader::Analyze(){
       Color_t color = assignColor(samples[sam].getProcessName());
       setStackColors(color, sam);
 
-      //if(std::get<1>(samples[sam]).find("MuEnriched") != std::string::npos ) continue;
+      //if(!((samples[sam].getProcessName()).find("Wjets") != std::string::npos)) continue;
 
-      std::cout<<"Entries in "<< samples[sam].getProcessName() << " " << nEntries << std::endl;
+      std::cout<<"Entries in "<< samples[sam].getFileName() << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
       for(long unsigned it = 0; it < nEntries; ++it){
           //print progress bar  
@@ -89,8 +92,8 @@ void treeReader::Analyze(){
           }
 
           GetEntry(it);
-          //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          //if(it > 100) break;
+          //if(it > nEntries / 10) break;
           
           std::vector<unsigned> indFO;
           const unsigned lCountFO = selectFakeLep(indFO, leptonSelection);
@@ -120,9 +123,9 @@ void treeReader::Analyze(){
 
           double leptFakePtCorr = lepIsGood(indFO.at(0), leptonSelection) ? _lPt[indFO.at(0)] : magicFactor * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];
           TLorentzVector l0p4;
-          l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          //l0p4.SetPtEtaPhiE(_lPt[indFO.at(0)], _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           // let's implement the formula from ttH AN
-          //l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
+          l0p4.SetPtEtaPhiE(35., _lEta[indFO.at(0)], _lPhi[indFO.at(0)], _lE[indFO.at(0)]);
           double mtL = mtCalc(l0p4, _met, _metPhi);
 
           int fakeCS = 0;
@@ -130,49 +133,33 @@ void treeReader::Analyze(){
             fakeCS = 1; //region for EWK subtraction
           } else if (!(_met < 20 && mtL < 20)) continue;
 
-          //double ptCorrCutEle = magicFactorAnalysis * 17 / 0.3; // 17 is pt threshold on high pt prescalled trigger, 0.3 stands for pt ratio cut in FO object
-          //double ptCorrCutMu  = magicFactorAnalysis * 17 / 0.3;
-
-          // for electrons there are 3 triggers: ele8, ele17 and ele23 
-          // here let's consider ele17 will start from 30 GeV, mu27 from 50
-          // for muons 4 triggers: mu3, mu8, mu17 and mu27
-          // here let's consider mu3 from 10, mu8 from 15, mu17 from 30 and mu27 from 50
-          /*
-          int rangePeriod = 0;
-          if(_lFlavor[indFO.at(0)] == 0)
-            rangePeriod = (leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) + (leptFakePtCorr > magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4));
-          if(_lFlavor[indFO.at(0)] == 1)
-            rangePeriod = (leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) + (leptFakePtCorr > magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4));
-
-          bool eleTrigDecision = (_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr < magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) || (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4) && leptFakePtCorr < magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4)) || (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > magicFactorAnalysis * 23 / (is2017 ? 0.3 : 0.4)); 
-          bool muTrigDecision = ((_HLT_Mu3_PFJet40 || _HLT_Mu8) && leptFakePtCorr < magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4)) || (_HLT_Mu17 && leptFakePtCorr > magicFactorAnalysis * 17 / (is2017 ? 0.3 : 0.4) && leptFakePtCorr < magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4)) || (_HLT_Mu27 && leptFakePtCorr > magicFactorAnalysis * 27 / (is2017 ? 0.3 : 0.4));
-
-          */
-          /*
-          int rangePeriod = (leptFakePtCorr > 30) + (leptFakePtCorr > 50);
-          bool eleTrigDecision = _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || 
-                                 (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 30) || 
-                                 (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 50); 
-           
-          bool muTrigDecision = (_HLT_Mu3_PFJet40 || _HLT_Mu8) || 
-                                (_HLT_Mu17 && leptFakePtCorr > 30) || 
-                                (_HLT_Mu27 && leptFakePtCorr > 50);
-          */
-
           int rangePeriod = (leptFakePtCorr > 15) + (leptFakePtCorr > 20) + (leptFakePtCorr > 30) + (leptFakePtCorr > 45) + (leptFakePtCorr > 65);
           int rangeEtaPeriod = _lFlavor[indFO.at(0)] ? fabs(_lEta[indFO.at(0)]) > 1.2 : fabs(_lEta[indFO.at(0)]) > 1.479;
+
+          // for electrons there are 3 triggers: ele8, ele17 and ele23 
+          // here let's consider ele17 will start from 25 GeV, ele23 from 32 
+          // for muons 4 triggers: mu3, mu8, mu17 and mu27, but mu8 is not used in TOP-18-009 (should be checked why in the next iteration of the analysis)
+          // here let's consider mu3 from 10, mu17 from 32 and mu27 from 45 
+
           // pt cut should be in principle magic factor / ptratio cut for FO not tight object
+          // here it's done as it's used in TOP-18-009
+          // in next iteration of the analysis this should be fixed
           bool eleTrigDecision = _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || 
-                                 (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (17 * magicFactor / 0.4)) ||  // 0.4 for ttZ, 0.5 for ttW and 0.6 for tZq
-                                 (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (23 * magicFactor / 0.4)); 
+                                 //(_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (17 * magicFactor / leptonMVAcut)) || 
+                                 //(_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > (23 * magicFactor / leptonMVAcut)); 
+                                 (_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 25) ||
+                                 (_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 && leptFakePtCorr > 32);
+
            
           bool muTrigDecision = (_HLT_Mu3_PFJet40 || _HLT_Mu8) || 
-                                (_HLT_Mu17 && leptFakePtCorr > (17 * magicFactor / 0.4)) || 
-                                (_HLT_Mu27 && leptFakePtCorr > (27 * magicFactor / 0.4));
+                                //(_HLT_Mu17 && leptFakePtCorr > (17 * magicFactor / leptonMVAcut)) || 
+                                //(_HLT_Mu27 && leptFakePtCorr > (27 * magicFactor / leptonMVAcut));
+                                (_HLT_Mu17 && leptFakePtCorr > 32) ||
+                                (_HLT_Mu27 && leptFakePtCorr > 45);
+
 
           bool triggerDecision[2] = {eleTrigDecision, muTrigDecision};
 
-          //if(sam == 0)
           if(!triggerDecision[_lFlavor[indFO.at(0)]]) continue;
 
           if (fakeCS == 0) { //FR measurement region
@@ -185,10 +172,11 @@ void treeReader::Analyze(){
             mtMaps[_lFlavor[indFO.at(0)]][rangePeriod][rangeEtaPeriod][sam].Fill(mtL,weight);
           }
 
+          //myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
+
       }
 
       std::cout << std::endl;
-      //cout << "Total number of events: " << distribs[0].vectorHisto[sam].Integral() << endl;
       std::cout << std::endl;
   }
 
@@ -214,7 +202,7 @@ void treeReader::Analyze(){
 
   TLegend* leg[2];
   for(int fl=0; fl!=nFlavors; ++fl) {
-     for(int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
+     for(int rangeEta = 0; rangeEta < nEta-2; rangeEta++){ // consider barrel and endcap only 
         for(int rangePt = 0; rangePt < nPt-1; rangePt++){
 
             c2 = new TCanvas("promptCont","promptCont",400,400);
@@ -222,11 +210,10 @@ void treeReader::Analyze(){
             //derive normalization for prompt contamination:
             double datayields = mtMaps[fl][rangePt][rangeEta][0].Integral(80/10+1,150/10+1); // 70 to 120
 
-            double MCyields = 0;
+            double MCyields = 0.;
             for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > (is2017() ? 4 : 5)) continue;
                 MCyields += mtMaps[fl][rangePt][rangeEta][sam].Integral(80/10+1,150/10+1);
-                //mtMaps[fl][rangePt][rangeEta][nProcesses]->Add(mtMaps[fl][rangePt][rangeEta][sam]);
             }
             double EWKsf = datayields/MCyields;
             std::cout<<"SF for "<<flavorsString[fl]<<" is "<<EWKsf<<std::endl;
@@ -234,7 +221,6 @@ void treeReader::Analyze(){
             // scale data to get same number of events as in MC
             mtMaps[fl][rangePt][rangeEta][0].Scale(1./EWKsf);
             //plot histograms showing MT distributions
-            //c2->cd(1+rangePeriods*rangeEtaPeriods*i+rangeEta*rangePeriods+range);
             c2pads[fl][rangePt][rangeEta] = new TPad(Form("pad_%d_%d_%d",fl,rangePt,rangeEta),"",0,0.,1,1);
             c2pads[fl][rangePt][rangeEta]->SetTopMargin(0.07);
             c2pads[fl][rangePt][rangeEta]->Draw();
@@ -244,6 +230,8 @@ void treeReader::Analyze(){
             mtMaps[fl][rangePt][rangeEta][0].Draw("pe same");
             mtMaps[fl][rangePt][rangeEta][0].Draw("axis same");
 
+            // 0 and 1 in second index correspond to denominator and numerator
+            // here we subtract the prompt contamination both in denominator and numerator
             for (int sam=1; sam!=nProcesses; ++sam) {
                 if(sam > (is2017() ? 4 : 5)) continue;
                 fakeMapsCalc[fl][1][rangePt][rangeEta][0]->Add(fakeMapsCalc[fl][1][rangePt][rangeEta][sam],-EWKsf);
@@ -262,18 +250,13 @@ void treeReader::Analyze(){
                 leg[fl]->AddEntry(&mtMaps[fl][0][0][sam],listForLegend[samplesOrderNames.at(sam)].c_str(),"f");
             }
             leg[fl]->Draw("same");
-            //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".pdf"); // + std::string(range) + std::string(rangeEta)  
-            //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".png"); // + std::string(range) + std::string(rangeEta)  
-            //c2->SaveAs("maps/split/data_fake_EWK" + (TString)i + (TString)range + (TString)rangeEta + ".root"); // + std::string(range) + std::string(rangeEta)  
             gSystem->Exec("mkdir -p plotsForSave/maps/split");
-            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".pdf");  
-            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".png");  
-            //c2->SaveAs("plotsForSave/maps/split/data_fake_EWK" + TString(fl) + TString(rangePt) + TString(rangeEta) + ".root");  
             c2->SaveAs(Form("plotsForSave/maps/split/data_fake_EWK%d%d%d.root", fl, rangePt, rangeEta));
             delete c2;
         }
     }
 
+    // here we sum over all eta and pt regions
     for(int rangeEta = 0; rangeEta < nEta-2; rangeEta++){
         for(int rangePt = 1; rangePt < nPt-1; rangePt++){
             fakeMapsCalc[fl][1][0][rangeEta][0]->Add(fakeMapsCalc[fl][1][rangePt][rangeEta][0]);
@@ -283,7 +266,7 @@ void treeReader::Analyze(){
     fakeMapsCalc[fl][1][0][0][0]->Add(fakeMapsCalc[fl][1][0][1][0]);
     fakeMapsCalc[fl][0][0][0][0]->Add(fakeMapsCalc[fl][0][0][1][0]);
 
-    //fakeMapsCalc[i][2][0][0]->Divide(fakeMapsCalc[i][1][0][0],fakeMapsCalc[i][0][0][0]);
+    // finally obtain FR maps
     TH2D *cloneFirst = (TH2D*) fakeMapsCalc[fl][1][0][0][0]->Clone("passed");
     cloneFirst->Divide(fakeMapsCalc[fl][0][0][0][0]);
 
@@ -295,7 +278,7 @@ void treeReader::Analyze(){
     cloneFirst->Draw("text e same");
     cloneFirst->SaveAs("plotsForSave/maps/fakerate_"+flavorsString[fl] + "_data.root");
 
- }
+  }
 
 
  return;
