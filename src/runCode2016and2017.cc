@@ -657,28 +657,24 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
-                for(int cat = 0; cat < 20; cat++){
-                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
-                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                for(int cat = 0; cat < 24; cat++){
+                    if(cat == 20){
+                      distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight*1.3);
+                      distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight*0.7);
+                    }
+                    else{
+                      distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                      distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    }
                 }
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*1.3);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*0.7);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
-
-                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
-                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
             }
           }
 			 // break out when the event was found
           if(debug) break;
       }
 
+      // if any histogram filled with prompt leptons input has a negative number of events
+      // we set the number of events to 0
       if(samCategory != nonPromptSample && samCategory != dataSample){
         for(auto & name : listToPrint[selection]){
             int dist = figNames[name].index;
@@ -826,16 +822,25 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   std::string crToPrint = selection;
 
   for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
+
+    TString figName = listToPrint[crToPrint].at(varPlot);
+    int distIndex = figNames[figName].index;
+    bool plotInLogFlag = false;
+    bool normalizedToDataFlag = false;
+
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");
+    showHist(plot[varPlot],distribs[distIndex],figNames[figName], scale_num, mtleg, plotInLogFlag, normalizedToDataFlag, showLegendOption);
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".root");
+
+
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
+    plotInLogFlag = true;
+    showHist(plot[varPlot],distribs[distIndex],figNames[figName], scale_num, mtleg, plotInLogFlag, normalizedToDataFlag, showLegendOption);
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.png");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.root");
   }
   
   if(crToPrint == "ttZ"){
