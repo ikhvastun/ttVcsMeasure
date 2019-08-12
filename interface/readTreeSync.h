@@ -497,23 +497,23 @@ std::map<TString, histInfo> figNames  =         {
 
 const int nVars  = figNames.size() ;
 
-const unsigned int indexSR3L3m = 51;
+const unsigned int indexSR3L3m = 51;    // these 4 correspond to 3lepton SRs split into different flavor composition.
 const unsigned int indexSR3L2m1e = 52;
 const unsigned int indexSR3L1m2e = 53;
-const unsigned int indexSR3L3e = 54;
-const unsigned int indexFlavour3L4L = 55;
-const unsigned int indexSRTTZ8SR3L = 56;
+const unsigned int indexSR3L3e = 54; 
+const unsigned int indexFlavour3L4L = 55;	// combined 3L4L yields, see table 4 in paper
+const unsigned int indexSRTTZ8SR3L = 56;	// 3lepton nb>=1 region ( so also higher ttZ contribution)
 
-const unsigned int indexSRttZcleanCosTheta = 47;
+const unsigned int indexSRttZcleanCosTheta = 47;  // cos theta distrib (only in ttZ enriched region, dubbed ttZclean)
 const unsigned int indexSRttZcleanPTZ = 46;
 const unsigned int indexSRTTCR = 45;
 const unsigned int indexSRZZCR = 44;
 const unsigned int indexSRWZCR = 43;
-const unsigned int indexSRTTZ = 42;
-const unsigned int indexSR3L = 8;
+const unsigned int indexSRTTZ = 42; // the "main plot", fig 3 in paper
+const unsigned int indexSR3L = 8;   // and this split into 3L and 4L
 const unsigned int indexSR4L = 9;
 
-const unsigned int indexFlavour3L = 48;
+const unsigned int indexFlavour3L = 48; 
 const unsigned int indexFlavour4L = 49;
 const unsigned int indexFlavour4LZZ = 50;
 
