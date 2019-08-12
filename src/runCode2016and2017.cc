@@ -750,48 +750,40 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetTextSize(0.06);
 
   // fill the legend with entries.
-
   mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","ep"); //data
 
-  std::map<int, std::string> processToCounterMapReversed;
   std::vector<std::string> processOrder;
-  for(map<std::string,int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
-    processToCounterMapReversed.insert(std::pair<int,std::string>(it->second, it->first));
-  }
-
-  // correct order according to increase
-  for(map<int,std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
-    processOrder.push_back(it->second);
-  }
-  
-  for(map<int, std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
+  for(map<std::string, int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
     //std::cout << it->first << " " << it->second << std::endl;
-    if(it->second == "data") continue;
-    if(it->second == "ttH") continue;
+    processOrder.push_back(it->first);
+
+    if(it->first == "data") continue;
+    if(it->first == "ttH") continue;
 
     if(selection == "ZZ" || selection == "ttZ4L"){
-      if(it->second == "WZ") continue;
+      if(it->first == "WZ") continue;
     }
 
-    if(it->second == "nonpromptData")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Nonprompt","f");
-    else if(it->second == "Xgamma")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"X#gamma","f");
-    else if(it->second == "rare")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Rare","f");
-    else if(it->second == "ttZ")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}Z","f");
-    else if(it->second == "ttW")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}W","f");
-    else if(it->second == "ttH")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}H","f");
-    else if(it->second == "ttX")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t(#bar{t})X","f");
+    if(it->first == "nonpromptData")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Nonprompt","f");
+    else if(it->first == "Xgamma")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"X#gamma","f");
+    else if(it->first == "rare")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Rare","f");
+    else if(it->first == "ttZ")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}Z","f");
+    else if(it->first == "ttW")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}W","f");
+    else if(it->first == "ttH")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}H","f");
+    else if(it->first == "ttX")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t(#bar{t})X","f");
     else
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],it->second.c_str(),"f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],it->first.c_str(),"f");
     
   }
 
+  // uncertainty band on the top plot
   TH1D* histStatAndSystBand = (TH1D*)distribs[figNames[listToPrint[selection].at(0)].index].stack.GetStack()->Last()->Clone("histStatAndSystBand");
   histStatAndSystBand ->SetFillStyle(3005);
   histStatAndSystBand ->SetLineColor(kGray+2);
