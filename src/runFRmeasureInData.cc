@@ -67,8 +67,8 @@ void treeReader::Analyze(){
   setTDRStyle();
   gROOT->SetBatch(kTRUE);
   //read samples and cross sections from txt file
-  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
-  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
+  readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data.txt"); // 
+  //readSamples("data/samples/FRmeasurement/FRInData/samples_QCD_data_2017.txt"); // 
   
   initdistribsForFRInData();
 
@@ -295,7 +295,7 @@ int main(int argc, char *argv[]){
     TApplication *rootapp = new TApplication("example", &argc, argv);
     treeReader reader;
     reader.Analyze();
-    rootapp->Run();
+//    rootapp->Run();
 
     return 0;
 }

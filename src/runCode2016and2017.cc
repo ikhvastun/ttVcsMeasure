@@ -150,12 +150,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          if(it > nEntries / 50) break;
+          //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
-			    // start with 3 lepton selection, but it changes later
-			    // the counts of tight/loose/tight4l/loose4l leptons are calculated here
+			 // start with 3 lepton selection, but it changes later
+			 // the counts of tight/loose/tight4l/loose4l leptons are calculated here
           leptonSelection = 3;
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
@@ -179,11 +179,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
               if(lCount4LLoose != 4) continue;
               if(selection == "ttZ3L" || selection == "ttZ3Lclean" || selection == "DY" || selection == "Xgamma" || selection == "WZ" || selection == "ttbar") continue;
               leptonSelection = 4;
+              //samCategory = sam;
               ind = indTight4L;
           }
           else if (lCount == 3){
               if(lCountFake != 3) continue;
               if(selection == "ZZ" || selection == "ttZ4L") continue;
+              //samCategory = sam;
               ind = indTight;
           }
           else if (lCount < 3) {
@@ -202,6 +204,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
           // consider only prompt leptons from the MC, all nonprompt should be taken into account by DD estimation
           bool allLeptonsArePrompt = true;
+          
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData" && (samples[sam].getProcessName()) != "chargeMisIDData")
             allLeptonsArePrompt = promptLeptons(ind);
 
@@ -216,11 +219,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                                          || (samples[sam].getProcessName()) == "rare") && !allLeptonsArePrompt) continue;
           }
           if(leptonSelection == 4){
-            // WZ goes to nonprompt in 4L category
+            // WZ goes to nonprompt here
             if((samples[sam].getProcessName()) == "WZ") samCategory = nonPromptSample;
             if(!allLeptonsArePrompt) samCategory = nonPromptSample;
           }
-
           int nLocEle = getElectronNumber(ind);
           //if(nLocEle != 0) continue;
 
@@ -314,6 +316,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             }
             if(selection == "ttbar" &&!passttbarCRSelection(nBLoc, dMZ, mlll)) continue;
             if(selection == "Xgamma" && !passZGCRSelection(mlll, dMZ)) continue;
+
           }
 
           double mvaVL = 0;
@@ -337,144 +340,151 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           int mvaValueRegion = 0;
 
           if(debug) cout << "lepton selection is " << leptonSelection << " total SR: " << SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll) << endl; 
+          //if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
           if(samples[sam].getProcessName() == "data" && samCategory == dataSample) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
 
-          // Histograms filling starts here
-          // define histograms to be filled in the loop
-          map<TString, double> fillVar; 
-          fillVar["ptlead"] = ptCorrV[0].first;
-          fillVar["sublead"] = ptCorrV[1].first;
-          fillVar["trail"] = leptonSelection > 2 ? ptCorrV[2].first : 0.;
-          fillVar["pt4th"] = leptonSelection > 3 ? ptCorrV[3].first : 0.;
-          fillVar["etaLead"] = _lEta[ptCorrV[0].second];
-          fillVar["etaSubl"] = _lEta[ptCorrV[1].second];
-          fillVar["etaTrail"] = leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.;
-          fillVar["eta4th"] = leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.;
+          vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
+                                   // currently here we will have ttZ3L and ttZ4L categories
+                                   (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVL : -999), HTLoc,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll), SRIDWZCR(nJLoc, nBLoc, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc), SRIDTTCR(nJLoc, nBLoc, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
 
-          fillVar["ptZ"] = ptZ;
-          fillVar["cosThetaStar"] = cosTSt;
-          fillVar["ptNonZ"] = ptNonZ;
+          vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocUp), double(nBLocUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocUp)? SRID4L(nJLocUp, nBLocUp) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJECUp,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll), SRIDWZCR(nJLocUp, nBLocUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp), SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
 
-          fillVar["mll"] = leptonSelection != 4 ? mll:mll1stpair;
-          fillVar["mll3e"] = nLocEle == 3 ? mll : -999.;
-          fillVar["mll2e1mu"] = nLocEle == 2 ? mll : -999.;
-          fillVar["mll1e2mu"] = nLocEle == 1 ? mll : -999.;
-          fillVar["mll3mu"] = nLocEle == 0 ? mll : -999.;
-          fillVar["mllnoZcut"] = leptonSelection != 4 ? mll : mll1stpair;
+          vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocDown), double(nBLocDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocDown)? SRID4L(nJLocDown, nBLocDown) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll), SRIDWZCR(nJLocDown, nBLocDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown), SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
 
-          fillVar["njets"] = double(nJLoc);
-          fillVar["nbjets"] = double(nBLoc);
-          fillVar["HT"] = HTLoc;
-          fillVar["met"] = _met;
-          fillVar["nPV"] = double(_nVertex);
+          vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocJERUp), double(nBLocJERUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERUp)? SRID4L(nJLocJERUp, nBLocJERUp) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECUp : -999), HTLocJERUp,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ, mlll), SRIDWZCR(nJLocJERUp, nBLocJERUp, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp), SRIDTTCR(nJLocJERUp, nBLocJERUp, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
 
-          fillVar["SR3L"] = leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SR3L3m"] = leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SR3L2m1e"] = leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SR3L1m2e"] = leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SR3L3e"] = leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SR4L"] = leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLoc) ? SRID4L(nJLoc, nBLoc) : -999;
+          vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+                                   mt1, double(nJLocJERDown), double(nBLocJERDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
+                                   (leptonSelection == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERDown)? SRID4L(nJLocJERDown, nBLocJERDown) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),ptZ,ptNonZ, (nLocEle == 3?mll:-999.), (nLocEle==2?mll:-999.), (nLocEle==1?mll:-999.), (nLocEle==0? mll: -999.),
+                                   _met, minDeltaR, minDeltaRlead, mtHighest, mtLowest, leadingJetPt, trailJetPt, 0., double(_nVertex), mlll,
+                                   _lEta[ptCorrV[0].second], _lEta[ptCorrV[1].second], (leptonSelection > 2 ? _lEta[ptCorrV[2].second] : -999.), (leptonSelection > 3 ? _lEta[ptCorrV[3].second] : -999.),
+                                   (nLocEle == 3?mt1:-999.), (nLocEle==2?mt1:-999.), (nLocEle==1?mt1:-999.), (nLocEle==0? mt1: -999.),
+                                   cosTSt, mll_ss, double(chargeOfLeptons), ll_deltaR, mt2ll_ss,
+                                   (_lCharge[ind.at(0)] == -1 ?  mvaVLJECDown : -999), HTLocJECDown,
+                                   SRIDTTZ(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ, mlll), SRIDWZCR(nJLocJERDown, nBLocJERDown, dMZ), SRIDZZCR(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown), SRIDTTCR(nJLocJERDown, nBLocJERDown, dMZ, mlll),
+                                   (leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDPTZ(ptZ) : -999), (leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDCosTheta(cosTSt) : -999),
+                                   (leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999),
+                                   (leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999),
+                                   (leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (passTTZSRSelection(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
+                                   (leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
+                                   (leptonSelection != 4 ? mll:mll1stpair),
+                                   };
 
-          fillVar["SRTTZ8SR3L"] = leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999;
-          fillVar["SRallTTZ"] = SRIDTTZ(ind, indOf2LonZ, nJLoc, nBLoc, dMZ, mlll);
-          fillVar["SRWZCR"] = SRIDWZCR(nJLoc, nBLoc, dMZ);
-          fillVar["SRZZCR"] = SRIDZZCR(ind, indOf2LonZ, nJLoc, nBLoc);
-          fillVar["SRTTCR"] = SRIDTTCR(nJLoc, nBLoc, dMZ, mlll);
-          fillVar["SRttZCleanPTZ"] = leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDPTZ(ptZ) : -999;
-          fillVar["SRttZCleanCosTheta"] = leptonSelection == 3 && passTTZCleanSelection(nJLoc, nBLoc, dMZ) ? SRIDCosTheta(cosTSt) : -999;
-
-          fillVar["flavour3L"] = leptonSelection == 3 ? flavourCategory3L(nLocEle) : -999;
-          fillVar["flavour4L"] = leptonSelection == 4 ? flavourCategory4L(nLocEle) : -999;
-          fillVar["flavour4LZZ"] = leptonSelection == 4 ? flavourCategory4LZZ(nLocEle) : -999;
-          fillVar["flavour3L4L"] = passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999;
-
-          // same as before but with JEC uncertainty up
-          map<TString, double> fillVarJecUp(fillVar); 
-          fillVarJecUp["njets"] = nJLocUp;
-          fillVarJecUp["nbjets"] = nBLocUp;
-          fillVarJecUp["HT"] = HTLocJECUp;
-
-          fillVarJecUp["SR3L"] = leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999;
-          fillVarJecUp["SR3L3m"] = leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999;
-          fillVarJecUp["SR3L2m1e"] = leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999;
-          fillVarJecUp["SR3L1m2e"] = leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999;
-          fillVarJecUp["SR3L3e"] = leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999;
-
-          fillVarJecUp["SR4L"] = leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocUp) ? SRID4L(nJLocUp, nBLocUp) : -999;
-          fillVarJecUp["SRTTZ8SR3L"] = leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999;
-          fillVarJecUp["SRallTTZ"] = SRIDTTZ(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ, mlll);
-          fillVarJecUp["SRWZCR"] = SRIDWZCR(nJLocUp, nBLocUp, dMZ);
-          fillVarJecUp["SRZZCR"] = SRIDZZCR(ind, indOf2LonZ, nJLocUp, nBLocUp);
-          fillVarJecUp["SRTTCR"] = SRIDTTCR(nJLocUp, nBLocUp, dMZ, mlll);
-          fillVarJecUp["SRttZCleanPTZ"] = leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDPTZ(ptZ) : -999;
-          fillVarJecUp["SRttZCleanCosTheta"] = leptonSelection == 3 && passTTZCleanSelection(nJLocUp, nBLocUp, dMZ) ? SRIDCosTheta(cosTSt) : -999;
-
-          // JEC uncertainty down
-          map<TString, double> fillVarJecDown(fillVar); 
-          fillVarJecDown["njets"] = nJLocDown;
-          fillVarJecDown["nbjets"] = nBLocDown;
-          fillVarJecDown["HT"] = HTLocJECDown;
-
-          fillVarJecDown["SR3L"] = leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999;
-          fillVarJecDown["SR3L3m"] = leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999;
-          fillVarJecDown["SR3L2m1e"] = leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999;
-          fillVarJecDown["SR3L1m2e"] = leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999;
-          fillVarJecDown["SR3L3e"] = leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999;
-
-          fillVarJecDown["SR4L"] = leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocDown) ? SRID4L(nJLocDown, nBLocDown) : -999;
-          fillVarJecDown["SRTTZ8SR3L"] = leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999;
-          fillVarJecDown["SRallTTZ"] = SRIDTTZ(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ, mlll);
-          fillVarJecDown["SRWZCR"] = SRIDWZCR(nJLocDown, nBLocDown, dMZ);
-          fillVarJecDown["SRZZCR"] = SRIDZZCR(ind, indOf2LonZ, nJLocDown, nBLocDown);
-          fillVarJecDown["SRTTCR"] = SRIDTTCR(nJLocDown, nBLocDown, dMZ, mlll);
-          fillVarJecDown["SRttZCleanPTZ"] = leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDPTZ(ptZ) : -999;
-          fillVarJecDown["SRttZCleanCosTheta"] = leptonSelection == 3 && passTTZCleanSelection(nJLocDown, nBLocDown, dMZ) ? SRIDCosTheta(cosTSt) : -999;
-
-          // JER uncertainty up
-          map<TString, double> fillVarJerUp(fillVar); 
-          fillVarJerUp["njets"] = nJLocJERUp;
-          fillVarJerUp["nbjets"] = nBLocJERUp;
-          fillVarJerUp["HT"] = HTLocJERUp;
-
-          fillVarJerUp["SR3L"] = leptonSelection == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-          fillVarJerUp["SR3L3m"] = leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-          fillVarJerUp["SR3L2m1e"] = leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-          fillVarJerUp["SR3L1m2e"] = leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-          fillVarJerUp["SR3L3e"] = leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-
-          fillVarJerUp["SR4L"] = leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERUp) ? SRID4L(nJLocJERUp, nBLocJERUp) : -999;
-          fillVarJerUp["SRTTZ8SR3L"] = leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999;
-          fillVarJerUp["SRallTTZ"] = SRIDTTZ(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ, mlll);
-          fillVarJerUp["SRWZCR"] = SRIDWZCR(nJLocJERUp, nBLocJERUp, dMZ);
-          fillVarJerUp["SRZZCR"] = SRIDZZCR(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp);
-          fillVarJerUp["SRTTCR"] = SRIDTTCR(nJLocJERUp, nBLocJERUp, dMZ, mlll);
-          fillVarJerUp["SRttZCleanPTZ"] = leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDPTZ(ptZ) : -999;
-          fillVarJerUp["SRttZCleanCosTheta"] = leptonSelection == 3 && passTTZCleanSelection(nJLocJERUp, nBLocJERUp, dMZ) ? SRIDCosTheta(cosTSt) : -999;
-
-          // JER uncertainty down
-          map<TString, double> fillVarJerDw(fillVar); 
-          fillVarJerDw["njets"] = nJLocJERDown;
-          fillVarJerDw["nbjets"] = nBLocJERDown;
-          fillVarJerDw["HT"] = HTLocJERDown;
-
-          fillVarJerDw["SR3L"] = leptonSelection == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-          fillVarJerDw["SR3L3m"] = leptonSelection == 3 && nLocEle == 0 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-          fillVarJerDw["SR3L2m1e"] = leptonSelection == 3 && nLocEle == 1 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-          fillVarJerDw["SR3L1m2e"] = leptonSelection == 3 && nLocEle == 2 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-          fillVarJerDw["SR3L3e"] = leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-
-          fillVarJerDw["SR4L"] = leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERDown) ? SRID4L(nJLocJERDown, nBLocJERDown) : -999;
-          fillVarJerDw["SRTTZ8SR3L"] = leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999;
-          fillVarJerDw["SRallTTZ"] = SRIDTTZ(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ, mlll);
-          fillVarJerDw["SRWZCR"] = SRIDWZCR(nJLocJERDown, nBLocJERDown, dMZ);
-          fillVarJerDw["SRZZCR"] = SRIDZZCR(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown);
-          fillVarJerDw["SRTTCR"] = SRIDTTCR(nJLocJERDown, nBLocJERDown, dMZ, mlll);
-          fillVarJerDw["SRttZCleanPTZ"] = leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDPTZ(ptZ) : -999;
-          fillVarJerDw["SRttZCleanCosTheta"] = leptonSelection == 3 && passTTZCleanSelection(nJLocJERDown, nBLocJERDown, dMZ) ? SRIDCosTheta(cosTSt) : -999;
-
-                                  
+          vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
+                                     "mtW", "njets", "nbjets", "BDTpp", 
+                                     //"flavour", 
+                                     //"SR",
+                                     "SR3L",
+                                     "SR4L",
+                                     "mll", "ptZ", "ptNonZ", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu",
+                                     "met", "deltaR", "deltaRlead", "mtLeading", "mtTrailing", "leadJetPt", "trailJetPt", "SRnpCR", "nPV", "mlll",
+                                     "etaLead", "etaSubl", "etaTrail", "eta4th", 
+                                     "mt_3m", "mt_2m1e", "mt_1m2e", "mt_3e", 
+                                     "cosThetaStar", "mll_ss", "chargeOfLeptons", "ll_deltaR", "mt2ll_ss", "BDTmm", "HT",
+                                     "SRallTTZ", "SRWZCR", "SRZZCR", "SRTTCR",
+                                     "SRttZCleanPTZ", "SRttZCleanCosTheta",
+                                     "flavour3L", "flavour4L", "flavour4LZZ", 
+                                     "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
+                                     "flavour3L4L",
+                                     "SRTTZ8SR3L",
+                                     "mllnoZcut"
+                                   };
+                                   
           //start = std::chrono::high_resolution_clock::now();
-          // SF estimation starts here
           double lepSF = 1.;
           double lepSFSystUp = 1.; double lepSFSystDown = 1.; 
           double lepSFStatUp = 1.; double lepSFStatDown = 1.;
@@ -516,10 +526,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             // used previously
             // weight *= scaler.postFitScaling(samples[sam].getProcessName());
             
+            /*
             if(samples[sam].is2016())
                 weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
             else
                 weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+                */
 
           }
           if(debug){
@@ -531,154 +543,154 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //elapsed = finish - start;
           //std::cout << "time needed to estimate all sf and deviations: " << elapsed.count() << std::endl;
 
-          for ( const auto & varPair : fillVar) {
-            TString name = varPair.first;
-            double var = varPair.second;
-            int index = figNames[name].index;
-            double varMaxOfVar = figNames[name].varMax;
+			 // each histogram produced in the analysis has its version corresponding to each uncertainty (up and down)
+			 // below each of these uncertainty histograms is filled. The second argument of the FillUnc function corresponds to uncertainty source 
 
-            double varJECUp = fillVarJecUp.at(name);
-            double varJECDown = fillVarJecDown.at(name);
-
-            double varJERUp = fillVarJerUp.at(name);
-            double varJERDown = fillVarJerDw.at(name);
-
-            // check if variable is in the list to print
-            if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), name) == listToPrint[selection].end()) continue;
-            distribs[index].vectorHisto[samCategory].Fill(TMath::Min(var,varMaxOfVar-0.1),weight);
+          for(int dist = 0; dist < fillVar.size(); dist++){
+            if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[dist]) == listToPrint[selection].end()) continue;
+            //if(listToPrint[selection].find(fncName[dist]) == listToPrint[selection].end()) continue;
+            distribs[dist].vectorHisto[samCategory].Fill(TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1),weight);
 
             if((samples[sam].getProcessName()) != "data"){
 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 0, varMaxOfVar-0.1, weight * lepSFSystUp / lepSF);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var, 0, varMaxOfVar-0.1, weight * lepSFSystDown / lepSF);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFSystUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFSystDown / lepSF);
                 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 1, varMaxOfVar-0.1, weight * lepSFStatUp / lepSF);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var, 1, varMaxOfVar-0.1, weight * lepSFStatDown / lepSF);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFStatUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 1, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFStatDown / lepSF);
                 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 2, varMaxOfVar-0.1, weight * lepSFRecoUp / lepSF);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  2, varMaxOfVar-0.1, weight * lepSFRecoDown / lepSF);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFRecoUp / lepSF);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 2, figNames[fncName.at(dist)].varMax-0.1, weight * lepSFRecoDown / lepSF);
                 
                 //distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * jetPrefW);
                 //distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 0, figNames[fncName.at(dist)].varMax-0.1, weight * jetPrefW);
 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 3, varMaxOfVar-0.1, weight*puWUp/puW);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  3, varMaxOfVar-0.1, weight*puWDown/puW);
-                
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 4, varMaxOfVar-0.1, weight*btagLUp/btagL);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  4, varMaxOfVar-0.1, weight*btagLDown/btagL);
-                
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 5, varMaxOfVar-0.1, weight*btagCUp*btagBUp/btagC/btagB);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  5, varMaxOfVar-0.1, weight*btagCDown*btagBDown/btagC/btagB);
-                
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(varJECUp, 6, varMaxOfVar-0.1, weight);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(varJECDown,  6, varMaxOfVar-0.1, weight);
-                
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(varJERUp, 7, varMaxOfVar-0.1, weight);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(varJERDown,  7, varMaxOfVar-0.1, weight);
-                
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*puWUp/puW);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 3, figNames[fncName.at(dist)].varMax-0.1, weight*puWDown/puW);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*btagLUp/btagL);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 4, figNames[fncName.at(dist)].varMax-0.1, weight*btagLDown/btagL);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
+
+					 // JEC and JER are applied directly to jet momenta, so rather than reweighting distributions, one files distributions with modified jet momenta
+					 // thus here fillVarJecUp etc. values are used
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJerUp.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJerDw.at(dist), 7, figNames[fncName.at(dist)].varMax-0.1, weight);
+
                 if(samples[sam].getProcessName() == "WZ" && nBLoc > 0){ // 8 % uncertainty for WZ + bb background in high nbjets categories
-                  distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 8, varMaxOfVar-0.1, weight * 1.08);
-                  distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  8, varMaxOfVar-0.1, weight * 0.92);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight * 1.08);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight * 0.92);
                 }
                 else{
-                  distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 8, varMaxOfVar-0.1, weight);
-                  distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  8, varMaxOfVar-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
                 if((samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos || samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos) && samples[sam].is2017()){ 
-                    // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - JERUp factor 2, 6, 7 - down factor 2, 30th Aug Daniel said in ttX chat that for FSR factor sqrt(2) should be used, indeces 3 and 5
+                    // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - up factor 2, 6, 7 - down factor 2, 30th Aug Daniel said in ttX chat that for FSR factor sqrt(2) should be used, indeces 3 and 5
                     // as well from https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio there is an instruction to use envelope uncertrtainty, i.e. largest between ISR and FSR
                     // description of the order for the PS weights: https://twiki.cern.ch/twiki/bin/view/CMS/TopModGen#Event_Generation
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 9, varMaxOfVar-0.1, weight*_psWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleUp); 
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  9, varMaxOfVar-0.1, weight*_psWeight[6]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleDown); 
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[6]*sumSimulatedEventWeights/sumSimulatedEventWeightsISRScaleDown); 
 
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 10, varMaxOfVar-0.1, weight*_psWeight[5]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleUp); 
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  10, varMaxOfVar-0.1, weight*_psWeight[3]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleDown); 
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[5]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*_psWeight[3]*sumSimulatedEventWeights/sumSimulatedEventWeightsFSRScaleDown); 
                 }
-                /*
-                else if(samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos && samples[sam].is2016() && index == indexSRTTZ){ // apply same weights as in 2017
-                    // here let's take for the moment largest deviation from unity in a particular SR (bin)
-                    for(int bin = 0; bin < figNames[name].nBins; bin++){
-                      double psWUp = ttZISRUpW[bin] > ttZFSRUpW[bin] ? ttZISRUpW[bin] : ttZFSRUpW[bin];
-                      double psWDown = ttZISRDownW[bin] > ttZFSRDownW[bin] ? ttZISRDownW[bin] : ttZFSRDownW[bin];
+                else if(samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos && samples[sam].is2016() && dist == indexSRTTZ){ // apply same weights as in 2017
+                    // here let's take for the moment largest deviation from unity
+						  // the arrays used here contain numbers taken from 2017 dists
+                    double psWUp = ttZISRUpW[fillVar.at(dist)] > ttZFSRUpW[fillVar.at(dist)] ? ttZISRUpW[fillVar.at(dist)] : ttZFSRUpW[fillVar.at(dist)];
+                    double psWDown = ttZISRDownW[fillVar.at(dist)] > ttZFSRDownW[fillVar.at(dist)] ? ttZISRDownW[fillVar.at(dist)] : ttZFSRDownW[fillVar.at(dist)];
 
-                      distribs[dist].vectorHistoUncUp[samCategory][9].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
-                      distribs[dist].vectorHistoUncDown[samCategory][9].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
 
-                      distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
-                      distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
-                    }
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWUp); 
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight*psWDown); 
                 }
-                */
                 else{
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 9, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  9, varMaxOfVar-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 9, figNames[fncName.at(dist)].varMax-0.1, weight);
 
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 10, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  10, varMaxOfVar-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
-                // renormalization and factorization uncertainties
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 11, varMaxOfVar-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  11, varMaxOfVar-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
+					 // [4] both renormalization and factorization scales down by 2
+					 // [8] both renormalization and factorization scales up by 2
 
-                if(index == indexSR3L || index == indexSR4L || index == indexSRTTZ || index == indexSRWZCR || index == indexSRZZCR || index == indexSRTTCR){
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 11,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
+
+                if(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR){
                     for(int varPDF = 0; varPDF < 100; varPDF++){
-                        distribs[index].vectorHistoPDF[samCategory].var[varPDF].Fill(var, weight*_lheWeight[9+varPDF]);
+                        distribs[dist].vectorHistoPDF[samCategory].var[varPDF].Fill(fillVar.at(dist), weight*_lheWeight[9+varPDF]);
                     }
                 }
                 else{
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 12, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  12, varMaxOfVar-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
+// normalization uncertianties are stored in arrays defined in interface/readTreeSync.h
                 for(int cat = 0; cat < 8; cat++){
                     if(cat == samCategory){
-                        distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 13+cat, varMaxOfVar-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
-                        distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  13+cat, varMaxOfVar-0.1, weight*(1-uncOnNorm[samples[sam].getProcessName()]));
+                        distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
+                        distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight*(1-uncOnNorm[samples[sam].getProcessName()]));
                     }
                     else{
-                        distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 13+cat, varMaxOfVar-0.1, weight);
-                        distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  13+cat, varMaxOfVar-0.1, weight);
+                        distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                        distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight);
                     }
                 }
 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  21, varMaxOfVar-0.1, weight * 1.025); // 2.5% for lumi
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  21, varMaxOfVar-0.1, weight * 0.975);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight * 1.025); // 2.5% for lumi
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight * 0.975);
                 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  22, varMaxOfVar-0.1, weight * 1.01); // 1% for trigger 
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  22, varMaxOfVar-0.1, weight * 0.99);
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 1.01); // 1% for trigger 
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight * 0.99);
 
                 if(samples[sam].getProcessName() == "WZ" && nJLoc > 2){ // 20 % uncertainty in tails of njets, namely in njets >= 3
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 1.2);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 0.8);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight * 1.2);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight * 0.8);
                 }
                 else{
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 23, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight);
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
 
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
-                for(int cat = 0; cat < 24; cat++){
-                    if(cat == 20){
-                      distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight*1.3);
-                      distribs[index].vectorHistoUncDown[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight*0.7);
-                    }
-                    else{
-                      distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight);
-                      distribs[index].vectorHistoUncDown[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight);
-                    }
+                for(int cat = 0; cat < 20; cat++){
+                    distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
+                    distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), cat, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*1.3);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 20, figNames[fncName.at(dist)].varMax-0.1, weight*0.7);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 21, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 22, figNames[fncName.at(dist)].varMax-0.1, weight);
+
+                distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
+                distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 23, figNames[fncName.at(dist)].varMax-0.1, weight);
             }
           }
 			 // break out when the event was found
           if(debug) break;
       }
 
-      // if any histogram filled with prompt leptons input has a negative number of events
-      // we set the number of events to 0
+		// loop through all of the histograms which zeros bins which bin contents are smaller than 0. only for prompt prediction.
       if(samCategory != nonPromptSample && samCategory != dataSample){
         for(auto & name : listToPrint[selection]){
             int dist = figNames[name].index;
@@ -750,40 +762,48 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->SetTextSize(0.06);
 
   // fill the legend with entries.
+
   mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","ep"); //data
 
+  std::map<int, std::string> processToCounterMapReversed;
   std::vector<std::string> processOrder;
-  for(map<std::string, int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
-    //std::cout << it->first << " " << it->second << std::endl;
-    processOrder.push_back(it->first);
+  for(map<std::string,int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
+    processToCounterMapReversed.insert(std::pair<int,std::string>(it->second, it->first));
+  }
 
-    if(it->first == "data") continue;
-    if(it->first == "ttH") continue;
+  // correct order according to increase
+  for(map<int,std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
+    processOrder.push_back(it->second);
+  }
+  
+  for(map<int, std::string>::const_iterator it = processToCounterMapReversed.begin();it != processToCounterMapReversed.end(); ++it){
+    //std::cout << it->first << " " << it->second << std::endl;
+    if(it->second == "data") continue;
+    if(it->second == "ttH") continue;
 
     if(selection == "ZZ" || selection == "ttZ4L"){
-      if(it->first == "WZ") continue;
+      if(it->second == "WZ") continue;
     }
 
-    if(it->first == "nonpromptData")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Nonprompt","f");
-    else if(it->first == "Xgamma")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"X#gamma","f");
-    else if(it->first == "rare")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Rare","f");
-    else if(it->first == "ttZ")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}Z","f");
-    else if(it->first == "ttW")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}W","f");
-    else if(it->first == "ttH")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}H","f");
-    else if(it->first == "ttX")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t(#bar{t})X","f");
+    if(it->second == "nonpromptData")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Nonprompt","f");
+    else if(it->second == "Xgamma")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"X#gamma","f");
+    else if(it->second == "rare")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"Rare","f");
+    else if(it->second == "ttZ")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}Z","f");
+    else if(it->second == "ttW")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}W","f");
+    else if(it->second == "ttH")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t#bar{t}H","f");
+    else if(it->second == "ttX")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],"t(#bar{t})X","f");
     else
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],it->first.c_str(),"f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->first],it->second.c_str(),"f");
     
   }
 
-  // uncertainty band on the top plot
   TH1D* histStatAndSystBand = (TH1D*)distribs[figNames[listToPrint[selection].at(0)].index].stack.GetStack()->Last()->Clone("histStatAndSystBand");
   histStatAndSystBand ->SetFillStyle(3005);
   histStatAndSystBand ->SetLineColor(kGray+2);
@@ -826,25 +846,16 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   std::string crToPrint = selection;
 
   for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
-
-    TString figName = listToPrint[crToPrint].at(varPlot);
-    int distIndex = figNames[figName].index;
-    bool plotInLogFlag = false;
-    bool normalizedToDataFlag = false;
-
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[distIndex],figNames[figName], scale_num, mtleg, plotInLogFlag, normalizedToDataFlag, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + ".root");
-
-
+    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");
     plot[varPlot]->cd();
-    plotInLogFlag = true;
-    showHist(plot[varPlot],distribs[distIndex],figNames[figName], scale_num, mtleg, plotInLogFlag, normalizedToDataFlag, showLegendOption);
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.pdf");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.png");
-    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + figName + "Log.root");
+    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, showLegendOption);
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.pdf");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
+    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
   }
   
   if(crToPrint == "ttZ"){
@@ -883,7 +894,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
 int main(int argc, const char **argv)
 {
-    int rargc = 1; char *rargv[1] = {""};
+    //int rargc = 1; char// *rargv[1] = {""};
     cout << "Number of input arguments " << argc << endl;
     for(int i = 0; i < argc; ++i){
         cout << "Argument " << i << " " << argv[i] << endl;
