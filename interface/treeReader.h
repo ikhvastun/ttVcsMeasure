@@ -29,16 +29,16 @@ class treeReader {
         ULong_t       _runNb;
         ULong_t       _lumiBlock;
         ULong_t       _eventNb;
-        UChar_t         _nVertex;
+        UInt_t         _nVertex;
         Double_t        _weight;
-        UChar_t         _nLheWeights;
+        UInt_t         _nLheWeights;
         Double_t        _lheWeight[110];
-        UChar_t         _nPsWeights;
+        UInt_t         _nPsWeights;
         Double_t        _psWeight[14];
         Float_t         _nTrueInt;
         Double_t        _gen_met;
         Double_t        _gen_metPhi;
-        UChar_t         _gen_nL;
+        UInt_t         _gen_nL;
         Double_t        _gen_lPt[gen_nL_max];   
         Double_t        _gen_lEta[gen_nL_max];   
         Double_t        _gen_lPhi[gen_nL_max];   
@@ -124,11 +124,11 @@ class treeReader {
         Int_t           _HLT_TripleMu_5_3_3_Mass3p8to60_DZ_prescale;
         Bool_t          _TripleMu_12_10_5;
         Bool_t          _passMETFilters;
-        UChar_t         _nL;
-        UChar_t         _nMu;
-        UChar_t         _nEle;
-        UChar_t         _nLight;
-        UChar_t         _nTau;
+        UInt_t         _nL;
+        UInt_t         _nMu;
+        UInt_t         _nEle;
+        UInt_t         _nLight;
+        UInt_t         _nTau;
         Double_t        _lPt[nL_max];   
         Double_t        _lEta[nL_max];   
         Double_t        _lEtaSC[nL_max];   
@@ -187,7 +187,7 @@ class treeReader {
         Int_t           _lMatchPdgId[nL_max];   
         UInt_t          _lProvenance[nL_max];   //[_nL]
         UInt_t          _lProvenanceCompressed[nL_max];
-        UChar_t         _nJets;
+        UInt_t         _nJets;
         Double_t        _jetPt[nJets_max];   
         Double_t        _jetPt_JECUp[nJets_max];   
         Double_t        _jetPt_JECDown[nJets_max];   

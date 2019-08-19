@@ -306,7 +306,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     outputTree->Branch("_runNb",                        &_runNb,                        "_runNb/l");
     outputTree->Branch("_lumiBlock",                    &_lumiBlock,                    "_lumiBlock/l");
     outputTree->Branch("_eventNb",                      &_eventNb,                      "_eventNb/l");
-    outputTree->Branch("_nVertex",                      &_nVertex,                      "_nVertex/b");
+    outputTree->Branch("_nVertex",                      &_nVertex,                      "_nVertex/i");
 
     outputTree->Branch("_met",                          &_met,                          "_met/D");
 
@@ -338,10 +338,10 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
 
     outputTree->Branch("_passMETFilters",               &_passMETFilters,               "_passMETFilters/O");
 
-    outputTree->Branch("_nL",                           &_nL,                           "_nL/b");
-    outputTree->Branch("_nMu",                          &_nMu,                          "_nMu/b");
-    outputTree->Branch("_nEle",                         &_nEle,                         "_nEle/b");
-    outputTree->Branch("_nLight",                       &_nLight,                       "_nLight/b");
+    outputTree->Branch("_nL",                           &_nL,                           "_nL/i");
+    outputTree->Branch("_nMu",                          &_nMu,                          "_nMu/i");
+    outputTree->Branch("_nEle",                         &_nEle,                         "_nEle/i");
+    outputTree->Branch("_nLight",                       &_nLight,                       "_nLight/i");
 
     outputTree->Branch("_lPt",                          &_lPt,                          "_lPt[_nL]/D");
     outputTree->Branch("_lEta",                         &_lEta,                         "_lEta[_nL]/D");
@@ -396,7 +396,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     outputTree->Branch("_lMuonTrackPt",                 &_lMuonTrackPt,                 "_lMuonTrackPt[_nMu]/D");
     outputTree->Branch("_lMuonTrackPtErr",              &_lMuonTrackPtErr,              "_lMuonTrackPtErr[_nMu]/D");
 
-    outputTree->Branch("_nJets",                     &_nJets,                    "_nJets/b");
+    outputTree->Branch("_nJets",                     &_nJets,                    "_nJets/i");
     outputTree->Branch("_jetPt",                     &_jetPt,                    "_jetPt[_nJets]/D");
     outputTree->Branch("_jetSmearedPt",              &_jetSmearedPt,             "_jetSmearedPt[_nJets]/D");
     outputTree->Branch("_jetSmearedPt_JECDown",      &_jetSmearedPt_JECDown,     "_jetSmearedPt_JECDown[_nJets]/D");
@@ -424,9 +424,9 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     //outputTree->Branch("_jetIsTightLepVeto",         &_jetIsTightLepVeto,        "_jetIsTightLepVeto[_nJets]/O");
 
     if(!isData){
-        outputTree->Branch("_nLheWeights",               &_nLheWeights,               "_nLheWeights/b");
+        outputTree->Branch("_nLheWeights",               &_nLheWeights,               "_nLheWeights/i");
         outputTree->Branch("_lheWeight",                 &_lheWeight,                 "_lheWeight[_nLheWeights]/D");
-        outputTree->Branch("_nPsWeights",                &_nPsWeights,                "_nPsWeights/b");
+        outputTree->Branch("_nPsWeights",                &_nPsWeights,                "_nPsWeights/i");
         outputTree->Branch("_psWeight",                  &_psWeight,                  "_psWeight[_nPsWeights]/D");
 
         outputTree->Branch("_lIsPrompt",                 &_lIsPrompt,                 "_lIsPrompt[_nL]/O");
@@ -440,7 +440,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
         outputTree->Branch("_gen_met",                   &_gen_met,                   "_gen_met/D");
         outputTree->Branch("_gen_metPhi",                &_gen_metPhi,                "_gen_metPhi/D");
 
-        outputTree->Branch("_gen_nL",                    &_gen_nL,                    "_gen_nL/b");
+        outputTree->Branch("_gen_nL",                    &_gen_nL,                    "_gen_nL/i");
         outputTree->Branch("_gen_lPt",                   &_gen_lPt,                   "_gen_lPt[_gen_nL]/D");
         outputTree->Branch("_gen_lEta",                  &_gen_lEta,                  "_gen_lEta[_gen_nL]/D");
         outputTree->Branch("_gen_lPhi",                  &_gen_lPhi,                  "_gen_lPhi[_gen_nL]/D");
