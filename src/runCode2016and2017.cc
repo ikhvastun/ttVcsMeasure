@@ -150,7 +150,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          if(it > nEntries / 50) break;
+          //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
@@ -543,6 +543,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //elapsed = finish - start;
           //std::cout << "time needed to estimate all sf and deviations: " << elapsed.count() << std::endl;
 
+			 // each histogram produced in the analysis has its version corresponding to each uncertainty (up and down)
+			 // below each of these uncertainty histograms is filled. The second argument of the FillUnc function corresponds to uncertainty source 
+
           for(int dist = 0; dist < fillVar.size(); dist++){
             if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[dist]) == listToPrint[selection].end()) continue;
             //if(listToPrint[selection].find(fncName[dist]) == listToPrint[selection].end()) continue;
@@ -571,6 +574,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCUp*btagBUp/btagC/btagB);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 5, figNames[fncName.at(dist)].varMax-0.1, weight*btagCDown*btagBDown/btagC/btagB);
 
+					 // JEC and JER are applied directly to jet momenta, so rather than reweighting distributions, one files distributions with modified jet momenta
+					 // thus here fillVarJecUp etc. values are used
+
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVarJecUp.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVarJecDw.at(dist), 6, figNames[fncName.at(dist)].varMax-0.1, weight);
 
@@ -598,6 +604,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 }
                 else if(samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos && samples[sam].is2016() && dist == indexSRTTZ){ // apply same weights as in 2017
                     // here let's take for the moment largest deviation from unity
+						  // the arrays used here contain numbers taken from 2017 dists
                     double psWUp = ttZISRUpW[fillVar.at(dist)] > ttZFSRUpW[fillVar.at(dist)] ? ttZISRUpW[fillVar.at(dist)] : ttZFSRUpW[fillVar.at(dist)];
                     double psWDown = ttZISRDownW[fillVar.at(dist)] > ttZFSRDownW[fillVar.at(dist)] ? ttZISRDownW[fillVar.at(dist)] : ttZFSRDownW[fillVar.at(dist)];
 
@@ -615,6 +622,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 10, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
+					 // [4] both renormalization and factorization scales down by 2
+					 // [8] both renormalization and factorization scales up by 2
+
                 distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 11, figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
                 distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 11,figNames[fncName.at(dist)].varMax-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
 
@@ -628,6 +638,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 12, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
+// normalization uncertianties are stored in arrays defined in interface/readTreeSync.h
                 for(int cat = 0; cat < 8; cat++){
                     if(cat == samCategory){
                         distribs[dist].vectorHistoUncUp[samCategory].FillUnc(fillVar.at(dist), 13+cat, figNames[fncName.at(dist)].varMax-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
@@ -679,6 +690,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(debug) break;
       }
 
+		// loop through all of the histograms which zeros bins which bin contents are smaller than 0. only for prompt prediction.
       if(samCategory != nonPromptSample && samCategory != dataSample){
         for(auto & name : listToPrint[selection]){
             int dist = figNames[name].index;
@@ -882,7 +894,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
 int main(int argc, const char **argv)
 {
-    int rargc = 1; char *rargv[1] = {""};
+    //int rargc = 1; char// *rargv[1] = {""};
     cout << "Number of input arguments " << argc << endl;
     for(int i = 0; i < argc; ++i){
         cout << "Argument " << i << " " << argv[i] << endl;
