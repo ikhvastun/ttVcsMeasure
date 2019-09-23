@@ -281,6 +281,9 @@ class treeReader {
         //unsigned nBJets(const unsigned unc = 0, const bool deepCSV = true, const bool clean = true, std::vector<unsigned>& ind = vector<unsigned>(), const unsigned wp = 1, bool nonpromptSample = false);
         unsigned nBJets(const unsigned unc, const bool deepCSV, const bool clean, std::vector<unsigned>& ind, const unsigned wp, bool nonpromptSample);
         double HTCalc(const std::vector<unsigned>& ind);
+        int getNumberOfCJets(std::vector<unsigned> indJets) const;
+        int getNumberOfBJets(std::vector<unsigned> indJets) const;
+        
         double deltaMZ(const std::vector<unsigned>&, unsigned &, double & , double &, double &, double &, std::vector<unsigned>&, TLorentzVector &, TLorentzVector &);
         bool invMassOfAny2Lbelow12GeV(const std::vector<unsigned>& ind);
         bool invMassOfAny2Lbelow20GeV(const std::vector<unsigned>& ind);

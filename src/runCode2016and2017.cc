@@ -114,8 +114,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       //if(samples[sam].getProcessName() == "data") continue;
 
       if((option == "runOnOneProcess" || debug) && (samples[sam].getProcessName()) != sampleToDebug) continue;
-      if(samples[sam].getProcessName() == "nonpromptData"){
-          cout << "Total number of events: " << distribs[0].vectorHisto[samCategory].Integral() << endl;
+
+      // adding here WZc and WZb
+      // no need to run over them, just using them in the sample list file to create histograms
+      // the inputs will be taken from WZ sample
+      if(samples[sam].getProcessName() == "nonpromptData" || samples[sam].getProcessName() == "WZc" || samples[sam].getProcessName() == "WZb"){
+          cout << "Total number of events in " << samples[sam].getProcessName() << " sample is " << distribs[0].vectorHisto[samCategory].Integral() << endl;
           continue;
       }
 
@@ -150,7 +154,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          if(it > nEntries / 50) break;
+          //if(it > nEntries / 50) break;
 
           std::vector<unsigned> indTight, indFake, indOf2LonZ;
           //select leptons relative to the analysis
@@ -261,6 +265,15 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           int nBLocUp = nBJets(2, true, true, indBJetsJECUp, 1, samples[sam].is2017());
           int nBLocJERDown = nBJets(3, true, true, indBJetsJERDown, 1, samples[sam].is2017());
           int nBLocJERUp = nBJets(4, true, true, indBJetsJERUp, 1, samples[sam].is2017());
+
+          // check how jets in WZ sample are light, c- and b-jets
+          if(samples[sam].getProcessName() == "WZ" && leptonSelection == 3){
+            int numberOfCJets = getNumberOfCJets(indJets);
+            int numberOfBJets = getNumberOfBJets(indJets);
+            if(numberOfCJets != 0) samCategory = processToCounterMap.at("WZc");
+            if(numberOfBJets != 0) samCategory = processToCounterMap.at("WZb");
+          }
+          
 
           TLorentzVector Zboson, lnegative;
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
@@ -622,17 +635,22 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                 distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 11, varMaxOfVar-0.1, weight*_lheWeight[8]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleUp);
                 distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  11, varMaxOfVar-0.1, weight*_lheWeight[4]*sumSimulatedEventWeights/sumSimulatedEventWeightsScaleDown);
 
+                // PDF uncertainties (will be filled later)
                 if(index == indexSR3L || index == indexSR4L || index == indexSRTTZ || index == indexSRWZCR || index == indexSRZZCR || index == indexSRTTCR){
                     for(int varPDF = 0; varPDF < 100; varPDF++){
                         distribs[index].vectorHistoPDF[samCategory].var[varPDF].Fill(var, weight*_lheWeight[9+varPDF]);
                     }
                 }
-                else{
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 12, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  12, varMaxOfVar-0.1, weight);
-                }
+                
+                //  all dists apart from SRs dists will have 0 uncertainty
+                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 12, varMaxOfVar-0.1, weight);
+                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  12, varMaxOfVar-0.1, weight);
 
-                for(int cat = 0; cat < 8; cat++){
+
+                // normalization uncertianties are stored in arrays defined in interface/readTreeSync.h
+                // changed from 8 to 10, added WZc and WZb
+                for(int cat = 0; cat < 10; cat++){
+
                     if(cat == samCategory){
                         distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 13+cat, varMaxOfVar-0.1, weight*(1+uncOnNorm[samples[sam].getProcessName()]));
                         distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  13+cat, varMaxOfVar-0.1, weight*(1-uncOnNorm[samples[sam].getProcessName()]));
@@ -643,26 +661,26 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                     }
                 }
 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  21, varMaxOfVar-0.1, weight * 1.025); // 2.5% for lumi
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  21, varMaxOfVar-0.1, weight * 0.975);
+                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 1.025); // 2.5% for lumi
+                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 0.975);
                 
-                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  22, varMaxOfVar-0.1, weight * 1.01); // 1% for trigger 
-                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  22, varMaxOfVar-0.1, weight * 0.99);
+                distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  24, varMaxOfVar-0.1, weight * 1.01); // 1% for trigger 
+                distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  24, varMaxOfVar-0.1, weight * 0.99);
 
-                if(samples[sam].getProcessName() == "WZ" && nJLoc > 2){ // 20 % uncertainty in tails of njets, namely in njets >= 3
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 1.2);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight * 0.8);
+                if(samples[sam].getProcessName() == "WZ" && nJLoc > 2 && leptonSelection == 3){ // 20 % uncertainty in tails of njets, namely in njets >= 3, only in 3L category
+                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var,  25, varMaxOfVar-0.1, weight * 1.2);
+                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  25, varMaxOfVar-0.1, weight * 0.8);
                 }
                 else{
-                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 23, varMaxOfVar-0.1, weight);
-                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  23, varMaxOfVar-0.1, weight);
+                    distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, 25, varMaxOfVar-0.1, weight);
+                    distribs[index].vectorHistoUncDown[samCategory].FillUnc(var,  25, varMaxOfVar-0.1, weight);
                 }
 
 
             }
             else if(samCategory == nonPromptSample && leptonSelection != 4){
-                for(int cat = 0; cat < 24; cat++){
-                    if(cat == 20){
+                for(int cat = 0; cat < 26; cat++){
+                    if(cat == 22){
                       distribs[index].vectorHistoUncUp[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight*1.3);
                       distribs[index].vectorHistoUncDown[samCategory].FillUnc(var, cat, varMaxOfVar-0.1, weight*0.7);
                     }
@@ -714,24 +732,28 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   // this should be done to be fully correct in PDF, takes a lot of time, an effect estimated with ttZ sample, uncertainty on acceptance is under 1%, simply assign flat uncertainty of 1 % to all signal and bkg
   // for the moment draw this uncertainty only for SR and will propagate them to datacards 
-  for(int dist = 0; dist < figNames.size(); dist++){
+  for(auto & name : listToPrint[selection]){
+    int dist = figNames[name].index; 
     if(!(dist == indexSR3L || dist == indexSR4L || dist == indexSRTTZ || dist == indexSRWZCR || dist == indexSRZZCR || dist == indexSRTTCR)) continue;
 
-    for(unsigned sam = 0; sam < processToCounterMap.size(); ++sam){
-      if(sam == dataSample) continue;
-      if(sam == nonPromptSample) continue;
-      for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[sam].unc.at(pdfUncIndex).GetNbinsX() + 1; ++bin){
+    for(unsigned proc = 0; proc < processToCounterMap.size(); ++proc){
+      if(proc == dataSample) continue;
+      if(proc == nonPromptSample) continue;
+      for(unsigned bin = 1; bin < (unsigned) distribs[dist].vectorHistoUncUp[proc].unc.at(pdfUncIndex).GetNbinsX() + 1; ++bin){
           double pdfVarRms = 0.;
           for(unsigned pdf = 0; pdf < 100; ++pdf){
-              double variedBin = distribs[dist].vectorHistoPDF[sam].var[pdf].GetBinContent(bin);
-              variedBin *= crossSectionRatio[sam][pdf];
-              double diff = (  variedBin - distribs[dist].vectorHisto[sam].GetBinContent(bin) );
+              double variedBin = distribs[dist].vectorHistoPDF[proc].var[pdf].GetBinContent(bin);
+              //variedBin *= crossSectionRatio[proc][pdf]; // here should be not proc, but sample index
+              // commented at the moment, because here we are looping over list of processes 
+              // crossSectionRatio is stored per sample, not per process
+              // therefore not clear which process correction should be taken
+              double diff = (  variedBin - distribs[dist].vectorHisto[proc].GetBinContent(bin) );
               pdfVarRms += diff * diff;
           }
           pdfVarRms = sqrt( 0.01 * pdfVarRms );
-          //cout << "pdf rms for bin " << bin << " is equal to " << pdfVarRms << endl;
-          distribs[dist].vectorHistoUncUp[sam].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) + pdfVarRms);
-          distribs[dist].vectorHistoUncDown[sam].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[sam].GetBinContent(bin) - pdfVarRms);
+          cout << "pdf rms for bin " << bin << " in process " << namesOfTheProcesses[proc] << " is equal to " << pdfVarRms << endl;
+          distribs[dist].vectorHistoUncUp[proc].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[proc].GetBinContent(bin) + pdfVarRms);
+          distribs[dist].vectorHistoUncDown[proc].unc.at(pdfUncIndex).SetBinContent(bin, distribs[dist].vectorHisto[proc].GetBinContent(bin) - pdfVarRms);
       }
     }
   }
@@ -742,7 +764,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   if(selection == "ZZ" || selection == "ttZ4L")
     mtleg->SetNColumns(4);
   if(selection == "ttZ")
-    mtleg->SetNColumns(5);
+    mtleg->SetNColumns(4);
   mtleg->SetFillColor(0);
   mtleg->SetFillStyle(0);
   mtleg->SetBorderSize(0);
@@ -753,33 +775,42 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[dataSample],"Data","ep"); //data
 
   std::vector<std::string> processOrder;
-  for(map<std::string, int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
-    //std::cout << it->first << " " << it->second << std::endl;
-    processOrder.push_back(it->first);
+  // iterator here doesn't work, map is unordered
+  //for(map<std::string, int>::const_iterator it = processToCounterMap.begin();it != processToCounterMap.end(); ++it){
+  for(unsigned proc = 0; proc < processToCounterMap.size(); ++proc){
+    std::pair<std::string, int> it(namesOfTheProcesses[proc], proc);
+    std::cout << it.first << " " << it.second << std::endl;
+    processOrder.push_back(it.first);
 
-    if(it->first == "data") continue;
-    if(it->first == "ttH") continue;
+    if(it.first == "data") continue;
+    if(it.first == "ttH") continue;
 
     if(selection == "ZZ" || selection == "ttZ4L"){
-      if(it->first == "WZ") continue;
+      if(it.first == "WZ") continue;
     }
 
-    if(it->first == "nonpromptData")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Nonprompt","f");
-    else if(it->first == "Xgamma")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"X#gamma","f");
-    else if(it->first == "rare")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"Rare","f");
-    else if(it->first == "ttZ")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}Z","f");
-    else if(it->first == "ttW")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}W","f");
-    else if(it->first == "ttH")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t#bar{t}H","f");
-    else if(it->first == "ttX")
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],"t(#bar{t})X","f");
+    if(it.first == "nonpromptData")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"Nonprompt","f");
+    else if(it.first == "Xgamma")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"X#gamma","f");
+    else if(it.first == "rare")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"Rare","f");
+    else if(it.first == "ttZ")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"t#bar{t}Z","f");
+    else if(it.first == "ttW")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"t#bar{t}W","f");
+    else if(it.first == "ttH")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"t#bar{t}H","f");
+    else if(it.first == "ttX")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"t(#bar{t})X","f");
+    else if(it.first == "WZ")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"WZ+light","f");
+    else if(it.first == "WZc")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"WZ+c","f");
+    else if(it.first == "WZb")
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],"WZ+b","f");
     else
-      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it->second],it->first.c_str(),"f");
+      mtleg->AddEntry(&distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[it.second],it.first.c_str(),"f");
     
   }
 

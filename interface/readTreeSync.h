@@ -10,11 +10,11 @@ const int nFlavors = 2;
 
 //const int leptonSelectionAnalysis = 3;
 
-const int nProcesses = 11;
+const int nProcesses = 12;
 const int dataSample = 0;
 const int ttWSample = 1;
 
-const int numberOfSyst = 24;
+const int numberOfSyst = 26;
 //const int numberOfSyst = 3;
 const int pdfUncIndex = 12;
 
@@ -527,6 +527,8 @@ std::map<std::string, double> uncOnNorm = {{"ttZ", 0.0},
                                            {"ttH", 0.11}, 
                                            {"ttX", 0.11}, 
                                            {"WZ", 0.1}, 
+                                           {"WZc", 0.1},
+                                           {"WZb", 0.1},
                                            {"ZZ", 0.1}, 
                                            {"Xgamma", 0.2}, 
                                            {"rare", 0.5}, 
