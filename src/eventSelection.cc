@@ -618,6 +618,11 @@ Color_t treeReader::assignColor(const std::string & name){
     //if(name == "ttH") return kMagenta-7;
     if(name == "ttX") return kRed-10;
     if(name == "WZ") return 51;
+    //if(name == "WZ") return 51;
+    if(name == "WZ") return kGray+1; // kGray+3, kGray+2, kGray+1
+    if(name == "WZc") return kGray+2;
+    if(name == "WZb") return kGray+3;
+
     if(name == "ZZ") return kGreen+3;
     if(name == "rare") return 8;
     if(name == "Xgamma") return kGreen;
@@ -1099,4 +1104,24 @@ std::pair<double, double> treeReader::neutrinoPZ(const TLorentzVector& wLep, con
     double preFac = mSquared/(wLep.Pt() * wLep.Pt());
     double term2 = wLep.P()*sqrt( std::max(0., 1 - met.Pt()*met.Pt()*wLep.Pt()*wLep.Pt()/(mSquared*mSquared) ) );
     return {preFac*(wLep.Pz() + term2), preFac*(wLep.Pz() - term2)};
+}
+
+int treeReader::getNumberOfCJets(std::vector<unsigned> indJets) const {
+    int numberOfCJets = 0;
+    for(auto jetIndex : indJets){
+        if(_jetHadronFlavor[jetIndex] == 4){
+            numberOfCJets += 1;
+        }
+    }
+    return numberOfCJets;
+}
+
+int treeReader::getNumberOfBJets(std::vector<unsigned> indJets) const {
+    int numberOfBJets = 0;
+    for(auto jetIndex : indJets){
+        if(_jetHadronFlavor[jetIndex] == 5){
+            numberOfBJets += 1;
+        }
+    }
+    return numberOfBJets;
 }
