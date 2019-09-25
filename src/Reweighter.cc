@@ -240,11 +240,11 @@ void Reweighter::initializeMuonWeights(){
 void Reweighter::initializeFakeRate(){
 
     //WARNING : To be updated with new fake-rate in 2016/2017 splitting
-    //TFile* frFileEl = TFile::Open("data/FRmaps/elFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
-    //TFile* frFileMu = TFile::Open("data/FRmaps/muFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
+    TFile* frFileEl = TFile::Open("data/FRmaps/elFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
+    TFile* frFileMu = TFile::Open("data/FRmaps/muFR_data_" + TString(leptonSelection == 2 ? "2L_" : "") + (is2016 ? "2016" : "2017") + ".root");
 	 // FR maps produced for test of code.
-    TFile* frFileEl = TFile::Open("plotsForSave/elFR_all.root");
-    TFile* frFileMu = TFile::Open("plotsForSave/muFR_all.root");
+    //TFile* frFileEl = TFile::Open("plotsForSave/elFR_all.root");
+    //TFile* frFileMu = TFile::Open("plotsForSave/muFR_all.root");
     // tZq
     //TFile* frFileEl = TFile::Open("data/FRmaps/elFR_data_" + TString(leptonSelection == 2 ? "2L_" : "3L_tZq_") + (is2016 ? "2016" : "2017") + ".root");
     //TFile* frFileMu = TFile::Open("data/FRmaps/muFR_data_" + TString(leptonSelection == 2 ? "2L_" : "3L_tZq_") + (is2016 ? "2016" : "2017") + ".root");
