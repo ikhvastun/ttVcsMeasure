@@ -20,7 +20,9 @@ skimSample(){                                           #function to skim one sa
         name="${name}_RECOPF"
     fi
 
-    if [[ $1 = *"Fall17"* ]] || [[ $1 = *"Run2017"* ]]; then
+    if [[ $1 = *"MiniAOD2018"* ]] || [[ $1 = *"Run2018"* ]]; then # added now
+        name="${name}_MiniAOD2018"                                # added now
+    elif [[ $1 = *"Fall17"* ]] || [[ $1 = *"Run2017"* ]]; then
         name="${name}_Fall17"
     else 
         name="${name}_Summer16"
@@ -50,7 +52,8 @@ skimSample(){                                           #function to skim one sa
     rm $submit                                          #remove temporary submit file
 }
 
-baseFolder=/pnfs/iihe/cms/store/user/wverbeke/heavyNeutrino/
+#baseFolder=/pnfs/iihe/cms/store/user/wverbeke/heavyNeutrino/
+baseFolder=/pnfs/iihe/cms/store/user/tutran/heavyNeutrino/
 #baseFolder=/pnfs/iihe/cms/store/user/ikhvastu/heavyNeutrino/
 cd $baseFolder
 #working copies
@@ -68,7 +71,9 @@ cd $baseFolder
 #foldersMC=DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/*ewkino2016MCList-v20p1
 #foldersMC=TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_Moriond2017-v1_ewkino2016MCList-v20p1
 #foldersMC=TTJets_SingleLeptFromT*TuneCUETP8M1_13TeV-madgraphMLM-pythia8/*ewkino2016MCList-v21
-foldersMC=*/*ewkino2016MCList-v27
+#foldersMC=*/*ewkino2016MCList-v27
+#foldersMC=TTV_MC18_v2/QCD_Pt-15to20*/*
+foldersMC=TTV_MC18_v2/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*
 #foldersMC=WJets*/*ttVMCList-v15
 #foldersMC=TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/*colorReconSamples-v1
 #foldersMC=TT_TuneCUETP8M2T4_erdON_13TeV-powheg-pythia8/crab_Moriond2017-v1_colorReconSamples-v1
@@ -90,7 +95,7 @@ foldersMC=*/*ewkino2016MCList-v27
 foldersData=*/*07Aug17*2016LeptonicDataList_v27
 #foldersData=*/*2017LeptonicDataList_ReReco_ZMET_v4
 
-#for d in $foldersMC                #skim all samples
-for d in $foldersData                #skim all samples
+for d in $foldersMC                #skim all samples
+#for d in $foldersData                #skim all samples
     do skimSample $d $baseFolder
 done

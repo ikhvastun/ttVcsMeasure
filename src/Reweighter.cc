@@ -138,10 +138,13 @@ void Reweighter::initializeElectronWeights(){
 
     //read electron ID SF weights
     TFile* electronIdFile; //  = TFile::Open("data/leptonSF/scaleFactors_electrons_2016.root");
+    TFile* ttHSFelefiles;
     if(is2016){
         electronIdFile = TFile::Open("data/leptonSF/scaleFactors_electrons_2016_upd.root");
+        ttHSFelefiles = TFile::Open("looseToTight_2016_e_3l.root");
     } else {
         electronIdFile = TFile::Open("data/leptonSF/scaleFactors_electrons_2017_upd.root");
+        ttHSFelefiles = TFile::Open("looseToTight_2017_e_3l.root");
     } 
 
     electronLooseToRecoSF = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLoose") );
@@ -162,19 +165,23 @@ void Reweighter::initializeElectronWeights(){
     */
     if(leptonSelection == 2){
         electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("TTVLooseToTTVLeptonMvattW_syst") );
+        electronTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFelefiles->Get("EGamma_SF2D") );
         electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("TTVLooseToTTVLeptonMvattW_stat") );
     }
     if(leptonSelection == 3){
         electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_sys") );
+        electronTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFelefiles->Get("EGamma_SF2D") );
         electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ3l_stat") );
         //electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_sys") );
         //electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvatZq_stat") );
     }
     if(leptonSelection == 4){
         electronTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ4l_sys") );
+        electronTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFelefiles->Get("EGamma_SF2D") );
         electronTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) electronIdFile->Get("EleToTTVLeptonMvattZ4l_stat") );
     }
     electronTightToRecoSF_syst->SetDirectory(gROOT);
+    electronTightToRecoSF_syst_ttH->SetDirectory(gROOT);
     electronTightToRecoSF_stat->SetDirectory(gROOT);
     electronIdFile->Close();
 }
@@ -196,10 +203,13 @@ void Reweighter::initializeMuonWeights(){
 
     //read muon ID SF weights
     TFile* muonIdFile;
+    TFile* ttHSFfiles;
     if(is2016){
         muonIdFile = TFile::Open("data/leptonSF/scaleFactors_muons_2016_upd.root");
+        ttHSFfiles = TFile::Open("looseToTight_2016_m_3l.root");
     } else {
         muonIdFile = TFile::Open("data/leptonSF/scaleFactors_muons_2017_upd.root"); // use _upd when Tom will update on muon SFs, updated on 14th of September, 2018
+        ttHSFfiles = TFile::Open("looseToTight_2017_m_3l.root");
     }
     
     muonLooseToRecoSF = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLoose") );
@@ -220,19 +230,23 @@ void Reweighter::initializeMuonWeights(){
     */
     if(leptonSelection == 2){
         muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattW_sys") );
+        muonTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFfiles->Get("EGamma_SF2D") );
         muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattW_stat") );
     }
     if(leptonSelection == 3){
         muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_sys") );
+        muonTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFfiles->Get("EGamma_SF2D") );
         muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ3l_stat") );
         //muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_sys") );
         //muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvatZq_stat") );
     }
     if(leptonSelection == 4){
         muonTightToRecoSF_syst = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ4l_sys") );
+        muonTightToRecoSF_syst_ttH = std::shared_ptr<TH2D>( (TH2D*) ttHSFfiles->Get("EGamma_SF2D") );
         muonTightToRecoSF_stat = std::shared_ptr<TH2D>( (TH2D*) muonIdFile->Get("MuonToTTVLeptonMvattZ4l_stat") );
     }
     muonTightToRecoSF_syst->SetDirectory(gROOT);
+    muonTightToRecoSF_syst_ttH->SetDirectory(gROOT);
     muonTightToRecoSF_stat->SetDirectory(gROOT);
     muonIdFile->Close();    
 }
@@ -393,12 +407,14 @@ double Reweighter::muonTightIdWeight(const double pt, const double eta, const un
 }
 */
 double Reweighter::muonTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const{
+    //MAREK double croppedPt = std::min(pt, 119.);
     double croppedPt = std::min(pt, 199.);
     double croppedEta = std::min( fabs(eta), 2.39);
 
     double sftight = muonTightToRecoSF_syst->GetBinContent( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) );
     int var = unc == 2 ? -1 : int(unc);
-    return sftight + (var != 0 ? var * muonTightToRecoSF_syst->GetBinError( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) ) : 0.);
+//MAREK    return sftight + (var != 0 ? var * muonTightToRecoSF_syst->GetBinError( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) ) : 0.);
+    return sftight + (var != 0 ? var * muonTightToRecoSF_syst_ttH->GetBinError( muonTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt) ) : 0.);
 }
 
 double Reweighter::muonTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const{
@@ -437,7 +453,8 @@ double Reweighter::electronTightIdWeight(const double pt, const double eta, cons
 */
 
 double Reweighter::electronTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const{
-    double croppedPt = std::min(pt, 199.);
+    //MAREK double croppedPt = std::min(pt, 199.);
+    double croppedPt = std::min(pt, 119.);
     double croppedEta;
     if( is2016 ){   //asymmetric scale factors are currently only available for 2016 data!
         croppedEta = std::min( std::max( -2.49, eta ), 2.49 ); 
@@ -448,7 +465,8 @@ double Reweighter::electronTightIdWeightOnlySyst(const double pt, const double e
     double sftight = electronTightToRecoSF_syst->GetBinContent( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta) );
 
     int var = unc == 2 ? -1 : int(unc);
-    return sftight + (var != 0 ? var * electronTightToRecoSF_syst->GetBinError( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta)) : 0.);
+//MAREK    return sftight + (var != 0 ? var * electronTightToRecoSF_syst->GetBinError( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta)) : 0.);
+    return sftight + (var != 0 ? var * electronTightToRecoSF_syst_ttH->GetBinError( electronTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt)) : 0.);
 }
 
 double Reweighter::electronTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const{

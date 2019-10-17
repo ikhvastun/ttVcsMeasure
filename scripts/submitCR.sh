@@ -56,7 +56,7 @@ sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZ
 #sh runCode.sh data/samples/2017CR/samples_ttZ_2017_npDD_ZZ.txt ZZ
 
 # 3L + 4L
-#sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZ
+sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZ
 # clean here stands for 3L + 3jets + 1b or 4L + 1b
 #sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZclean
 

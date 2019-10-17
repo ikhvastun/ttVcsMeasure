@@ -18,7 +18,7 @@ double treeReader::bTagWeight(const unsigned jetFlavor, const unsigned unc){
     for(unsigned j = 0; j < _nJets; ++j){
         if(_jetHadronFlavor[j] == jetFlavor){
             //QUESTION: should JEC and b-tag weights also be varied up and down at the same time when computing systematics?
-            if(jetIsGood(j, 30., 0, true, currentSample.is2017())){
+            if(jetIsGood(j, 30., 0, true)){
                 double sf = reweighter->bTagWeight(_jetHadronFlavor[j], _jetSmearedPt[j], _jetEta[j], _closestJetDeepCsv_b[j] + _closestJetDeepCsv_bb[j], unc);
                 double eff = reweighter->bTagEff(_jetHadronFlavor[j], _jetSmearedPt[j], _jetEta[j]);
                 //if(debug) std::cout << "jet with pt: " << _jetPt[j] << "; has btagEffcalc: " << eff << "; and centralValue: " << sf << "; csv value: " << _closestJetDeepCsv_b[j] + _closestJetDeepCsv_bb[j] << std::endl;
@@ -195,7 +195,7 @@ double treeReader::CMIDRateWeight(const unsigned unc){
 double treeReader::jetPrefiringWeight(){
     double sf = 1.;
     for(unsigned j = 0; j < _nJets; ++j){
-        if( jetIsGood(j, 30., 0, true, currentSample.is2017()) ){
+        if( jetIsGood(j, 30., 0, true) ){
             double prefiringProbability = reweighter->jetPrefiringProbability( _jetPt[j], _jetEta[j] );
             sf *= ( 1. - prefiringProbability );
         }

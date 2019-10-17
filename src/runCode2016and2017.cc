@@ -121,6 +121,14 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
       std::cout<<"Entries in "<< (samples[sam].getFileName()) << " " << nEntries << std::endl;
       double progress = 0;  //for printing progress bar
+
+
+      int eeeLooseCount = 0;      int eeeeLooseCount = 0;
+      int eeeFakeCount = 0;       int eeeeFakeCount = 0;
+      int eeeTightCount = 0;      int eeeeTightCount = 0;
+      int mmmLooseCount = 0;      int mmmmLooseCount = 0;
+      int mmmFakeCount = 0;       int mmmmFakeCount = 0;
+      int mmmTightCount = 0;      int mmmmTightCount = 0;
 		// 
 		// loop over all events in a given sample
 		//
@@ -152,17 +160,54 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //if(it > 10000) break;
           //if(it > nEntries / 50) break;
 
-          std::vector<unsigned> indTight, indFake, indOf2LonZ;
+          std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
           //select leptons relative to the analysis
 			 // start with 3 lepton selection, but it changes later
 			 // the counts of tight/loose/tight4l/loose4l leptons are calculated here
           leptonSelection = 3;
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
+          const unsigned lCountLoose = selectLooseLep(indLoose);
 
           std::vector<unsigned> indTight4L, indLoose4L;
           const unsigned lCount4L = selectLep(indTight4L, 4);
           const unsigned lCount4LLoose = selectFakeLep(indLoose4L, 4);
+
+
+          if( selection != "ttZ4L" ){
+            if(lCountLoose==3){
+			     if(  _lMatchPdgId[indLoose[0]] != 22 && _lMatchPdgId[indLoose[1]] != 22 && _lMatchPdgId[indLoose[2]] != 22 ){
+                if(_lFlavor[indLoose[0]] == 0 && _lFlavor[indLoose[1]] == 0 &&_lFlavor[indLoose[2]] == 0 ) eeeLooseCount++;
+                if(_lFlavor[indLoose[0]] == 1 && _lFlavor[indLoose[1]] == 1 &&_lFlavor[indLoose[2]] == 1 ) mmmLooseCount++;
+              }
+            }
+            if(lCountFake==3){
+			     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 ){
+                if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 ) eeeFakeCount++;
+                if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 ) mmmFakeCount++;
+              }
+				}
+          }
+
+          if( selection == "ttZ4L"){
+            if(lCount4LLoose==4){
+			     if(  _lMatchPdgId[indLoose4L[0]] != 22 && _lMatchPdgId[indLoose4L[1]] != 22 && _lMatchPdgId[indLoose4L[2]] != 22 && _lMatchPdgId[indLoose4L[3]] != 22 ){
+                if(_lFlavor[indLoose4L[0]] == 0 && _lFlavor[indLoose4L[1]] == 0 &&_lFlavor[indLoose4L[2]] == 0 &&_lFlavor[indLoose4L[3]] == 0) eeeeLooseCount++;
+                if(_lFlavor[indLoose4L[0]] == 1 && _lFlavor[indLoose4L[1]] == 1 &&_lFlavor[indLoose4L[2]] == 1 &&_lFlavor[indLoose4L[3]] == 1) mmmmLooseCount++;
+              }
+            }
+            
+            if(lCountFake==4){
+			     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 && _lMatchPdgId[indFake[3]] != 22 ){
+                if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 &&_lFlavor[indFake[3]] == 0) eeeeFakeCount++;
+                if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 &&_lFlavor[indFake[3]] == 1) mmmmFakeCount++;
+              }
+            }
+          }
+
+
+
+
 
           // discard heavy flavour resonances
           if(debug) cout << "number of ttZ3L tight and fo leptons: " << lCount << " " << lCountFake << endl;
@@ -207,9 +252,26 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData" && (samples[sam].getProcessName()) != "chargeMisIDData")
             allLeptonsArePrompt = promptLeptons(ind);
-
+          
           if(debug) cout << "all leptons are prompt ? " << allLeptonsArePrompt << endl;
           
+/* ////Marek////
+          if( allLeptonsArePrompt== true){
+            if( selection != "ttZ4L" && lCount==3 ){
+			     if(  _lMatchPdgId[indTight[0]] != 22 && _lMatchPdgId[indTight[1]] != 22 && _lMatchPdgId[indTight[2]] != 22 ){
+                if(_lFlavor[indTight[0]] == 0 && _lFlavor[indTight[1]] == 0 &&_lFlavor[indTight[2]] == 0 ) eeeTightCount++;
+                if(_lFlavor[indTight[0]] == 1 && _lFlavor[indTight[1]] == 1 &&_lFlavor[indTight[2]] == 1 ) mmmTightCount++;
+              }
+            }
+            if( selection == "ttZ4L" && lCount4L==4 ){
+			     if( _lMatchPdgId[indTight4L[0]] != 22 && _lMatchPdgId[indTight4L[1]] != 22 && _lMatchPdgId[indTight4L[2]] != 22 && _lMatchPdgId[indTight4L[3]] != 22 ){
+                if(_lFlavor[indTight4L[0]] == 0 && _lFlavor[indTight4L[1]] == 0 &&_lFlavor[indTight4L[2]] == 0 &&_lFlavor[indTight4L[3]] == 0) eeeeTightCount++;
+                if(_lFlavor[indTight4L[0]] == 1 && _lFlavor[indTight4L[1]] == 1 &&_lFlavor[indTight4L[2]] == 1 &&_lFlavor[indTight4L[3]] == 1) mmmmTightCount++;
+              }
+            }
+          }
+
+			 */ //Marek//
           if((samples[sam].getProcessName()) == "chargeMisID" && !allLeptonsArePrompt) continue;
           if((samples[sam].getProcessName()) == "Nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
@@ -252,17 +314,17 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double ptZ = 999999;
           double ptNonZ = -999999;
 
-          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
-          int nJLocDown = nJets(1, true, indJetsJECDown, samples[sam].is2017());
-          int nJLocUp = nJets(2, true, indJetsJECUp, samples[sam].is2017());
-          int nJLocJERDown = nJets(3, true, indJetsJERDown, samples[sam].is2017());
-          int nJLocJERUp = nJets(4, true, indJetsJERUp, samples[sam].is2017());
-          nJLocNotB = nJetsNotB(0, true, indJetsNotB, 2, samples[sam].is2017());
-          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
-          int nBLocDown = nBJets(1, true, true, indBJetsJECDown, 1, samples[sam].is2017());
-          int nBLocUp = nBJets(2, true, true, indBJetsJECUp, 1, samples[sam].is2017());
-          int nBLocJERDown = nBJets(3, true, true, indBJetsJERDown, 1, samples[sam].is2017());
-          int nBLocJERUp = nBJets(4, true, true, indBJetsJERUp, 1, samples[sam].is2017());
+          nJLoc = nJets(0, true, indJets);
+          int nJLocDown = nJets(1, true, indJetsJECDown);
+          int nJLocUp = nJets(2, true, indJetsJECUp);
+          int nJLocJERDown = nJets(3, true, indJetsJERDown);
+          int nJLocJERUp = nJets(4, true, indJetsJERUp);
+
+          nBLoc = nBJets(0, true, true, indBJets, 1);
+          int nBLocDown = nBJets(1, true, true, indBJetsJECDown, 1);
+          int nBLocUp = nBJets(2, true, true, indBJetsJECUp, 1);
+          int nBLocJERDown = nBJets(3, true, true, indBJetsJERDown, 1);
+          int nBLocJERUp = nBJets(4, true, true, indBJetsJERUp, 1);
 
           TLorentzVector Zboson, lnegative;
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
@@ -526,12 +588,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             // used previously
             // weight *= scaler.postFitScaling(samples[sam].getProcessName());
             
-            /*
-            if(samples[sam].is2016())
-                weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
-            else
-                weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
-                */
+            //if(samples[sam].is2016())
+            //    weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+            //else
+            //    weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
 
           }
           if(debug){
@@ -710,6 +770,22 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       if(leptonSelection != 4)
         cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
       cout << endl;
+
+/* ////Marek////
+      cout << "Number of loose eee events: " << eeeLooseCount << endl; 
+      cout << "Number of fake eee events: " << eeeFakeCount << endl;
+      cout << "Number of tight eee events: " << eeeTightCount << endl;
+      cout << "Number of loose mmm events: " << mmmLooseCount << endl;
+      cout << "Number of fake mmm events: " << mmmFakeCount << endl;
+      cout << "Number of tight mmm events: " << mmmTightCount << endl;
+
+      cout << "Number of loose eeee events: " << eeeeLooseCount << endl; 
+      cout << "Number of fake eeee events: " << eeeeFakeCount << endl;
+      cout << "Number of tight eeee events: " << eeeeTightCount << endl;
+      cout << "Number of loose mmmm events: " << mmmmLooseCount << endl;
+      cout << "Number of fake mmmm events: " << mmmmFakeCount << endl;
+      cout << "Number of tight mmmm events: " << mmmmTightCount << endl;
+			 */ //Marek//
   }
 
   // after prompt subtraction from non-prompt we set all the negative yields to 0

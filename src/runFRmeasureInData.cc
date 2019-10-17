@@ -122,8 +122,8 @@ void treeReader::Analyze(){
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
-          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
+          nJLoc = nJets(0, true, indJets);
+          nBLoc = nBJets(0, true, true, indBJets, 1);
           HTLoc = HTCalc(indJets);
 
           double leptFakePtCorr = lepIsGood(indFO.at(0), leptonSelection) ? _lPt[indFO.at(0)] : magicFactor * _lPt[indFO.at(0)] / _ptRatio[indFO.at(0)];

@@ -131,7 +131,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           leptonSelection = 3;
           const unsigned lCount = selectLep(indTight, leptonSelection);
           const unsigned lCountFake = selectFakeLep(indFake, leptonSelection);
-          const unsigned lCountLoose = selectLooseLep(indLoose, leptonSelection);
+          const unsigned lCountLoose = selectLooseLep(indLoose);
 
           if(lCountLoose != 2) continue;
           if(lCount != 2) continue;

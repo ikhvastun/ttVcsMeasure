@@ -2,7 +2,7 @@
 
 #include functions to export CMSSW in submit
 source setCMSSW.sh
-outputFolder=ntuples_ttz_4l
+outputFolder=ntuples_ttz_dilep
 
 fillJob(){
     name=${1%/}

@@ -121,12 +121,14 @@ class Reweighter{
         std::shared_ptr<TH2D> muonTightToRecoSF;
         std::shared_ptr<TH2D> muonChargeConsToTightSF;
         std::shared_ptr<TH2D> muonTightToRecoSF_syst;
+        std::shared_ptr<TH2D> muonTightToRecoSF_syst_ttH;
         std::shared_ptr<TH2D> muonTightToRecoSF_stat;
 
         //electron id scale factors
         std::shared_ptr<TH2D> electronLooseToRecoSF;
         std::shared_ptr<TH2D> electronTightToLooseSF;
         std::shared_ptr<TH2D> electronTightToRecoSF_syst;
+        std::shared_ptr<TH2D> electronTightToRecoSF_syst_ttH;
         std::shared_ptr<TH2D> electronTightToRecoSF_stat;
         std::shared_ptr<TH2D> electronChargeConsToTightSF;
 

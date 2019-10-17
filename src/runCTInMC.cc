@@ -186,8 +186,8 @@ void treeReader::Analyze(){
 
              // fill njets and nbjets variables
              std::vector<unsigned> jetInd, bJetInd;
-             jetCount = nJets(0, true, jetInd, samples[sam].is2017());
-             bJetCount = nBJets(0, true, true, bJetInd, 1, samples[sam].is2017());
+             jetCount = nJets(0, true, jetInd);
+             bJetCount = nBJets(0, true, true, bJetInd, 1);
 
              if(jetCount < 2) continue;
              // fill vector of all jets
