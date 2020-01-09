@@ -20,6 +20,8 @@ if [[ $sampleFile = *","* ]]; then
     year="comb"
 elif [[ $sampleFile = *"2017"* ]]; then
     year="2017"
+elif [[ $sampleFile = *"2018"* ]]; then
+    year="2018"
 else 
     year="2016"
 fi

@@ -55,7 +55,10 @@ void treeReader::initSample(const Sample& samp, std::string option){
 	 ///////////////////////////////////////////////////////////////////
     currentSample = samp;
     if(option == "ttZ")
-        sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+        //sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
+//        if( samp.is2018() ) sampleFile = samp.getFile("/pnfs/iihe/cms/store/user/mniedzie/ntuples_ttz_2018/" ); //  + (TString)(is2017 ? "" : "newReReco/") 
+								if( samp.is2018() ) sampleFile = samp.getFile("/user/mniedzie/Work/ntuples_ttz_dilep_2018/" );
+        else sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttV_" + std::string(samp.is2017() ? "2017/" : "2016/")); //  + (TString)(is2017 ? "" : "newReReco/") 
 		  //sampleFile = samp.getFile("/user/mniedzie/Work/ntuples_temp_TTV_MC18_v2");
     else if(option == "ttZ4l")
         sampleFile = samp.getFile("/user/ikhvastu/Work/ntuples_ttz_4l"); //" + istd::string(samp.is2017() ? "2017/" : "2016/"));
@@ -106,11 +109,10 @@ void treeReader::initSample(const Sample& samp, std::string option){
         delete lheCounter;
         //event weights set with lumi depending on sample's era 
         double dataLumi;
-        if( is2016() ){
-            dataLumi = lumi2016;
-        } else {
-            dataLumi = lumi2017;
-        } 
+        if( is2016() ){ dataLumi = lumi2016;} 
+								else if( is2017() ) { dataLumi = lumi2017; } 
+								else if( is2018() ) dataLumi = lumi2018;
+
         scale = samp.getXSec()*dataLumi*1000/sumSimulatedEventWeights;       //xSec*lumi divided by total sum of simulated event weights
     }
 
@@ -177,13 +179,12 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_HLT_Mu27_prescale", &_HLT_Mu27_prescale, &b__HLT_Mu27_prescale);
     fChain->SetBranchAddress("_HLT_Ele8_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele8_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30);
     fChain->SetBranchAddress("_HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale);
-    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30);
-    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale);
+//    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30);
+//    fChain->SetBranchAddress("_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale);
     fChain->SetBranchAddress("_HLT_Ele17_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele17_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30);
     fChain->SetBranchAddress("_HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale);
     fChain->SetBranchAddress("_HLT_Ele23_CaloIdM_TrackIdM_PFJet30", &_HLT_Ele23_CaloIdM_TrackIdM_PFJet30, &b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30);
     fChain->SetBranchAddress("_HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale", &_HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale, &b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30_prescale);
-
 
     fChain->SetBranchAddress("_passMETFilters", &_passMETFilters, &b__passMETFilters);
     fChain->SetBranchAddress("_nL", &_nL, &b__nL);
@@ -202,18 +203,19 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_dz", _dz, &b__dz);
     fChain->SetBranchAddress("_3dIP", _3dIP, &b__3dIP);
     fChain->SetBranchAddress("_3dIPSig", _3dIPSig, &b__3dIPSig);
-    fChain->SetBranchAddress("_lElectronMva", _lElectronMva, &b__lElectronMva);
-    fChain->SetBranchAddress("_lElectronMvaHZZ", _lElectronMvaHZZ, &b__lElectronMvaHZZ);
-    fChain->SetBranchAddress("_lElectronMvaFall17NoIso", _lElectronMvaFall17NoIso, &b__lElectronMvaFall17NoIso);
     fChain->SetBranchAddress("_lElectronPassEmu", _lElectronPassEmu, &b__lElectronPassEmu);
     fChain->SetBranchAddress("_lElectronPassConvVeto", _lElectronPassConvVeto, &b__lElectronPassConvVeto);
     fChain->SetBranchAddress("_lElectronChargeConst", _lElectronChargeConst, &b__lElectronChargeConst);
     fChain->SetBranchAddress("_lElectronMissingHits", _lElectronMissingHits, &b__lElectronMissingHits);
-    fChain->SetBranchAddress("_leptonMvaSUSY", _leptonMvaSUSY, &b__leptonMvaSUSY);
     fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvaTTH, &b__leptonMvaTTH);
-    fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
-    //fChain->SetBranchAddress("_leptonMvatZqTTV16", _leptonMvatZqTTV, &b__leptonMvatZqTTV);
-
+    if( is2018() ){
+//      fChain->SetBranchAddress("_leptonMvatZq", _leptonMvatZq, &b__leptonMvatZq);         // in new files
+      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);         // in new files
+				} else {
+//      fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZq, &b__leptonMvatZq);    // in old files
+      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);    // in old files
+				}
+    fChain->SetBranchAddress("_lElectronMvaFall17NoIso", _lElectronMvaFall17NoIso, &b__lElectronMvaFall17NoIso);
     fChain->SetBranchAddress("_lPOGLoose", _lPOGLoose, &b__lPOGLoose);
     fChain->SetBranchAddress("_lPOGMedium", _lPOGMedium, &b__lPOGMedium);
     fChain->SetBranchAddress("_lPOGTight", _lPOGTight, &b__lPOGTight);
@@ -228,7 +230,11 @@ void treeReader::initTree(TTree *tree, const bool isData)
     //fChain->SetBranchAddress("_tauVTightMvaNew", _tauVTightMvaNew, &b__tauVTightMvaNew);
     //fChain->SetBranchAddress("_tauVTightMvaOld", _tauVTightMvaOld, &b__tauVTightMvaOld);
     fChain->SetBranchAddress("_relIso", _relIso, &b__relIso);
-    fChain->SetBranchAddress("_relIso0p4Mu", _relIso0p4Mu, &b__relIso0p4Mu);
+    if( is2018() ){
+       fChain->SetBranchAddress("_relIso0p4MuDeltaBeta", _relIso0p4MuDeltaBeta, &b__relIso0p4MuDeltaBeta);    // in new files
+				} else {
+       fChain->SetBranchAddress("_relIso0p4Mu", _relIso0p4MuDeltaBeta, &b__relIso0p4MuDeltaBeta);           // in old files
+				}
     fChain->SetBranchAddress("_miniIso", _miniIso, &b__miniIso);
     fChain->SetBranchAddress("_miniIsoCharged", _miniIsoCharged, &b__miniIsoCharged);
     fChain->SetBranchAddress("_ptRel", _ptRel, &b__ptRel);
@@ -244,8 +250,8 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_jetPt", _jetPt, &b__jetPt);
     fChain->SetBranchAddress("_jetPt_JECUp", _jetPt_JECUp, &b__jetPt_JECUp);
     fChain->SetBranchAddress("_jetPt_JECDown", _jetPt_JECDown, &b__jetPt_JECDown);
-    fChain->SetBranchAddress("_jetPt_JERUp", _jetPt_JERUp, &b__jetPt_JERUp);
-    fChain->SetBranchAddress("_jetPt_JERDown", _jetPt_JERDown, &b__jetPt_JERDown);
+//    fChain->SetBranchAddress("_jetPt_JERUp", _jetPt_JERUp, &b__jetPt_JERUp);
+//    fChain->SetBranchAddress("_jetPt_JERDown", _jetPt_JERDown, &b__jetPt_JERDown);
     fChain->SetBranchAddress("_jetSmearedPt", _jetSmearedPt, &b__jetSmearedPt);
     fChain->SetBranchAddress("_jetSmearedPt_JECDown", _jetSmearedPt_JECDown, &b__jetSmearedPt_JECDown);
     fChain->SetBranchAddress("_jetSmearedPt_JECUp", _jetSmearedPt_JECUp, &b__jetSmearedPt_JECUp);
@@ -367,7 +373,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     outputTree->Branch("_lElectronMissingHits",         &_lElectronMissingHits,         "_lElectronMissingHits[_nLight]/i");
     outputTree->Branch("_leptonMvaSUSY",                &_leptonMvaSUSY,                "_leptonMvaSUSY[_nLight]/D");
     outputTree->Branch("_leptonMvaTTH",                 &_leptonMvaTTH,                 "_leptonMvaTTH[_nLight]/D");
-    outputTree->Branch("_leptonMvatZqTTV",              &_leptonMvatZqTTV,              "_leptonMvatZqTTV[_nLight]/D");
+    outputTree->Branch("_leptonMvatZq",              &_leptonMvatZq,              "_leptonMvatZq[_nLight]/D");
  
      // the only string needed for ZllMET
     outputTree->Branch("_lPOGTight",                    &_lPOGTight,                    "_lPOGTight[_nL]/O");
@@ -379,7 +385,7 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
     //outputTree->Branch("_lPOGTightWOIso",               &_lPOGTightWOIso,               "_lPOGTightWOIso[_nL]/O");
 
     outputTree->Branch("_relIso",                       &_relIso,                       "_relIso[_nLight]/D");
-    outputTree->Branch("_relIso0p4Mu",                  &_relIso0p4Mu,                  "_relIso0p4Mu[_nMu]/D");
+    outputTree->Branch("_relIso0p4MuDeltaBeta",                  &_relIso0p4MuDeltaBeta,                  "_relIso0p4MuDeltaBeta[_nMu]/D");
 
     //outputTree->Branch("_relIso0p4",                  &_relIso0p4,                  "_relIso0p4[_nLight]/D");
     //outputTree->Branch("_relIso0p6",                  &_relIso0p6,                  "_relIso0p6[_nLight]/D");
@@ -407,8 +413,8 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
 
     outputTree->Branch("_jetPt_JECUp",               &_jetPt_JECUp,              "_jetPt_JECUp[_nJets]/D");
     outputTree->Branch("_jetPt_JECDown",             &_jetPt_JECDown,            "_jetPt_JECDown[_nJets]/D");
-    outputTree->Branch("_jetPt_JERUp",               &_jetPt_JERUp,              "_jetPt_JERUp[_nJets]/D");
-    outputTree->Branch("_jetPt_JERDown",             &_jetPt_JERDown,            "_jetPt_JERDown[_nJets]/D");
+//    outputTree->Branch("_jetPt_JERUp",               &_jetPt_JERUp,              "_jetPt_JERUp[_nJets]/D");
+//    outputTree->Branch("_jetPt_JERDown",             &_jetPt_JERDown,            "_jetPt_JERDown[_nJets]/D");
 
     outputTree->Branch("_jetEta",                    &_jetEta,                   "_jetEta[_nJets]/D");
     outputTree->Branch("_jetPhi",                    &_jetPhi,                   "_jetPhi[_nJets]/D");

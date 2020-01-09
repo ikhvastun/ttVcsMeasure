@@ -10,8 +10,16 @@ void Sample::setData(){
     }
 }
 
+void Sample::set2016(){
+    is2016Sample = (fileName.find("Summer16") != std::string::npos) || (fileName.find("2016") != std::string::npos);
+}
+
 void Sample::set2017(){
     is2017Sample = (fileName.find("Fall17") != std::string::npos) || (fileName.find("2017") != std::string::npos);
+}
+
+void Sample::set2018(){
+    is2018Sample = (fileName.find("MiniAOD2018") != std::string::npos) || (fileName.find("2018") != std::string::npos);
 }
 
 Sample::Sample(const std::string& line){
@@ -38,7 +46,9 @@ Sample::Sample(const std::string& line){
     xSec = (xSecString == "" ? 0 : std::stod(xSecString) );
 
     setData();
+    set2016();
     set2017();
+    set2018();
 
     //unique name is equal to fileName without file extension
     uniqueName = fileNameWithoutExtension(fileName);

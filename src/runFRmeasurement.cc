@@ -125,8 +125,8 @@ void treeReader::AnalyzeFR(const vector<std::string> & filesToAnalyse, const std
           double phi_Z = 999999;
           double ptNonZ = 999999;
 
-          nJLoc = nJets(0, true, indJets, samples[sam].is2017());
-          nBLoc = nBJets(0, true, true, indBJets, 1, samples[sam].is2017());
+          nJLoc = nJets(0, true, indJets);
+          nBLoc = nBJets(0, true, true, indBJets, 1);
           HTLoc = HTCalc(indJets);
           //if(HTLoc < 200) continue;
 
@@ -154,7 +154,7 @@ void treeReader::AnalyzeFR(const vector<std::string> & filesToAnalyse, const std
 
           for(auto & i : indFO){
             double mvaVL = -999.;
-            mvaVL =  _leptonMvatZqTTV[i];
+            mvaVL =  _leptonMvatZq[i];
 
             // for ttbar (also maybe for QCD ??? )
             if(_lIsPrompt[i]) continue;

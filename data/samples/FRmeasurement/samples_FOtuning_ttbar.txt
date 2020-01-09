@@ -1,2 +1,2 @@
-tight TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_newJEC_Summer16.root              182.7
-loose TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_newJEC_Summer16.root              182.7
+tight TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_newJEC.root              182.7
+loose TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_newJEC.root              182.7

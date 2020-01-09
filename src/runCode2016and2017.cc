@@ -24,11 +24,11 @@
 #include "TLatex.h"
 #include "TGraphAsymmErrors.h"
 
-#include "TMVA/Tools.h"
-#include "TMVA/Reader.h"
-#include "TMVA/MethodCuts.h"
+////////#include "TMVA/Tools.h"
+////////#include "TMVA/Reader.h"
+////////#include "TMVA/MethodCuts.h"
 
-#include "../interface/BTagCalibrationStandalone.h" 
+#include "../interface/BTagCalibrationStandalone.h"
 
 #include "../interface/showHist.h"
 #include "../interface/readTreeSync.h"
@@ -88,11 +88,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   // here you load in post fit weights, in case you have them already and want your histograms
   // to show post fit values
 
-  PostFitScaler scaler2016, scaler2017;
+  PostFitScaler scaler2016, scaler2017, scaler2018;
   scaler2016.setInputFile("data/postFit/outputTTZ_2016_new.txt");
   scaler2016.setPostfitYields();
   scaler2017.setInputFile("data/postFit/outputTTZ_2017_new.txt");
   scaler2017.setPostfitYields();
+  scaler2018.setInputFile("data/postFit/outputTTZ_2018.txt");
+  scaler2018.setPostfitYields();
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // Loop over all samples. Reads in from the text file. For each category, separate histograms 
@@ -123,12 +125,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       double progress = 0;  //for printing progress bar
 
 
-      int eeeLooseCount = 0;      int eeeeLooseCount = 0;
-      int eeeFakeCount = 0;       int eeeeFakeCount = 0;
-      int eeeTightCount = 0;      int eeeeTightCount = 0;
-      int mmmLooseCount = 0;      int mmmmLooseCount = 0;
-      int mmmFakeCount = 0;       int mmmmFakeCount = 0;
-      int mmmTightCount = 0;      int mmmmTightCount = 0;
+  //    int eeeLooseCount = 0;      int eeeeLooseCount = 0;
+  //    int eeeFakeCount = 0;       int eeeeFakeCount = 0;
+  //    int eeeTightCount = 0;      int eeeeTightCount = 0;
+  //    int mmmLooseCount = 0;      int mmmmLooseCount = 0;
+  //    int mmmFakeCount = 0;       int mmmmFakeCount = 0;
+  //    int mmmTightCount = 0;      int mmmmTightCount = 0;
 		// 
 		// loop over all events in a given sample
 		//
@@ -159,6 +161,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           //if(it > 10000) break;
           //if(it > nEntries / 50) break;
+          //if(it > 5) break;
 
           std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
           //select leptons relative to the analysis
@@ -173,37 +176,36 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           const unsigned lCount4L = selectLep(indTight4L, 4);
           const unsigned lCount4LLoose = selectFakeLep(indLoose4L, 4);
 
+         // if( selection != "ttZ4L" ){
+         //   if(lCountLoose==3){
+			      //     if(  _lMatchPdgId[indLoose[0]] != 22 && _lMatchPdgId[indLoose[1]] != 22 && _lMatchPdgId[indLoose[2]] != 22 ){
+         //       if(_lFlavor[indLoose[0]] == 0 && _lFlavor[indLoose[1]] == 0 &&_lFlavor[indLoose[2]] == 0 ) eeeLooseCount++;
+         //       if(_lFlavor[indLoose[0]] == 1 && _lFlavor[indLoose[1]] == 1 &&_lFlavor[indLoose[2]] == 1 ) mmmLooseCount++;
+         //     }
+         //   }
+         //   if(lCountFake==3){
+			      //     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 ){
+         //       if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 ) eeeFakeCount++;
+         //       if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 ) mmmFakeCount++;
+         //     }
+			      //  	}
+         // }
 
-          if( selection != "ttZ4L" ){
-            if(lCountLoose==3){
-			     if(  _lMatchPdgId[indLoose[0]] != 22 && _lMatchPdgId[indLoose[1]] != 22 && _lMatchPdgId[indLoose[2]] != 22 ){
-                if(_lFlavor[indLoose[0]] == 0 && _lFlavor[indLoose[1]] == 0 &&_lFlavor[indLoose[2]] == 0 ) eeeLooseCount++;
-                if(_lFlavor[indLoose[0]] == 1 && _lFlavor[indLoose[1]] == 1 &&_lFlavor[indLoose[2]] == 1 ) mmmLooseCount++;
-              }
-            }
-            if(lCountFake==3){
-			     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 ){
-                if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 ) eeeFakeCount++;
-                if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 ) mmmFakeCount++;
-              }
-				}
-          }
-
-          if( selection == "ttZ4L"){
-            if(lCount4LLoose==4){
-			     if(  _lMatchPdgId[indLoose4L[0]] != 22 && _lMatchPdgId[indLoose4L[1]] != 22 && _lMatchPdgId[indLoose4L[2]] != 22 && _lMatchPdgId[indLoose4L[3]] != 22 ){
-                if(_lFlavor[indLoose4L[0]] == 0 && _lFlavor[indLoose4L[1]] == 0 &&_lFlavor[indLoose4L[2]] == 0 &&_lFlavor[indLoose4L[3]] == 0) eeeeLooseCount++;
-                if(_lFlavor[indLoose4L[0]] == 1 && _lFlavor[indLoose4L[1]] == 1 &&_lFlavor[indLoose4L[2]] == 1 &&_lFlavor[indLoose4L[3]] == 1) mmmmLooseCount++;
-              }
-            }
-            
-            if(lCountFake==4){
-			     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 && _lMatchPdgId[indFake[3]] != 22 ){
-                if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 &&_lFlavor[indFake[3]] == 0) eeeeFakeCount++;
-                if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 &&_lFlavor[indFake[3]] == 1) mmmmFakeCount++;
-              }
-            }
-          }
+         // if( selection == "ttZ4L"){
+         //   if(lCount4LLoose==4){
+			      //     if(  _lMatchPdgId[indLoose4L[0]] != 22 && _lMatchPdgId[indLoose4L[1]] != 22 && _lMatchPdgId[indLoose4L[2]] != 22 && _lMatchPdgId[indLoose4L[3]] != 22 ){
+         //       if(_lFlavor[indLoose4L[0]] == 0 && _lFlavor[indLoose4L[1]] == 0 &&_lFlavor[indLoose4L[2]] == 0 &&_lFlavor[indLoose4L[3]] == 0) eeeeLooseCount++;
+         //       if(_lFlavor[indLoose4L[0]] == 1 && _lFlavor[indLoose4L[1]] == 1 &&_lFlavor[indLoose4L[2]] == 1 &&_lFlavor[indLoose4L[3]] == 1) mmmmLooseCount++;
+         //     }
+         //   }
+         //   
+         //   if(lCountFake==4){
+			      //     if(  _lMatchPdgId[indFake[0]] != 22 && _lMatchPdgId[indFake[1]] != 22 && _lMatchPdgId[indFake[2]] != 22 && _lMatchPdgId[indFake[3]] != 22 ){
+         //       if(_lFlavor[indFake[0]] == 0 && _lFlavor[indFake[1]] == 0 &&_lFlavor[indFake[2]] == 0 &&_lFlavor[indFake[3]] == 0) eeeeFakeCount++;
+         //       if(_lFlavor[indFake[0]] == 1 && _lFlavor[indFake[1]] == 1 &&_lFlavor[indFake[2]] == 1 &&_lFlavor[indFake[3]] == 1) mmmmFakeCount++;
+         //     }
+         //   }
+         // }
 
 
 
@@ -252,26 +254,26 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           
           if((samples[sam].getProcessName()) != "data" && (samples[sam].getProcessName()) != "nonpromptData" && (samples[sam].getProcessName()) != "chargeMisIDData")
             allLeptonsArePrompt = promptLeptons(ind);
-          
+
           if(debug) cout << "all leptons are prompt ? " << allLeptonsArePrompt << endl;
           
-/* ////Marek////
-          if( allLeptonsArePrompt== true){
-            if( selection != "ttZ4L" && lCount==3 ){
-			     if(  _lMatchPdgId[indTight[0]] != 22 && _lMatchPdgId[indTight[1]] != 22 && _lMatchPdgId[indTight[2]] != 22 ){
-                if(_lFlavor[indTight[0]] == 0 && _lFlavor[indTight[1]] == 0 &&_lFlavor[indTight[2]] == 0 ) eeeTightCount++;
-                if(_lFlavor[indTight[0]] == 1 && _lFlavor[indTight[1]] == 1 &&_lFlavor[indTight[2]] == 1 ) mmmTightCount++;
-              }
-            }
-            if( selection == "ttZ4L" && lCount4L==4 ){
-			     if( _lMatchPdgId[indTight4L[0]] != 22 && _lMatchPdgId[indTight4L[1]] != 22 && _lMatchPdgId[indTight4L[2]] != 22 && _lMatchPdgId[indTight4L[3]] != 22 ){
-                if(_lFlavor[indTight4L[0]] == 0 && _lFlavor[indTight4L[1]] == 0 &&_lFlavor[indTight4L[2]] == 0 &&_lFlavor[indTight4L[3]] == 0) eeeeTightCount++;
-                if(_lFlavor[indTight4L[0]] == 1 && _lFlavor[indTight4L[1]] == 1 &&_lFlavor[indTight4L[2]] == 1 &&_lFlavor[indTight4L[3]] == 1) mmmmTightCount++;
-              }
-            }
-          }
+ //  ////Marek////
+ //         if( allLeptonsArePrompt== true){
+ //           if( selection != "ttZ4L" && lCount==3 ){
+	//		     if(  _lMatchPdgId[indTight[0]] != 22 && _lMatchPdgId[indTight[1]] != 22 && _lMatchPdgId[indTight[2]] != 22 ){
+ //               if(_lFlavor[indTight[0]] == 0 && _lFlavor[indTight[1]] == 0 &&_lFlavor[indTight[2]] == 0 ) eeeTightCount++;
+ //               if(_lFlavor[indTight[0]] == 1 && _lFlavor[indTight[1]] == 1 &&_lFlavor[indTight[2]] == 1 ) mmmTightCount++;
+ //             }
+ //           }
+ //           if( selection == "ttZ4L" && lCount4L==4 ){
+	//		     if( _lMatchPdgId[indTight4L[0]] != 22 && _lMatchPdgId[indTight4L[1]] != 22 && _lMatchPdgId[indTight4L[2]] != 22 && _lMatchPdgId[indTight4L[3]] != 22 ){
+ //               if(_lFlavor[indTight4L[0]] == 0 && _lFlavor[indTight4L[1]] == 0 &&_lFlavor[indTight4L[2]] == 0 &&_lFlavor[indTight4L[3]] == 0) eeeeTightCount++;
+ //               if(_lFlavor[indTight4L[0]] == 1 && _lFlavor[indTight4L[1]] == 1 &&_lFlavor[indTight4L[2]] == 1 &&_lFlavor[indTight4L[3]] == 1) mmmmTightCount++;
+ //             }
+ //           }
+ //         }
 
-			 */ //Marek//
+	//		  //Marek//
           if((samples[sam].getProcessName()) == "chargeMisID" && !allLeptonsArePrompt) continue;
           if((samples[sam].getProcessName()) == "Nonprompt" && allLeptonsArePrompt) continue; // works just for MC
 
@@ -325,6 +327,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           int nBLocUp = nBJets(2, true, true, indBJetsJECUp, 1);
           int nBLocJERDown = nBJets(3, true, true, indBJetsJERDown, 1);
           int nBLocJERUp = nBJets(4, true, true, indBJetsJERUp, 1);
+
+//          if( nBLoc != 0)  continue;
 
           TLorentzVector Zboson, lnegative;
           double dMZ = deltaMZ(ind, third, mll, ptZ, ptNonZ, mlll, indOf2LonZ, Zboson, lnegative);
@@ -398,6 +402,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //std::cout << "time needed to estimate event weight: " << elapsed.count() << std::endl;
 
           if(debug) cout << "weight of event is " << weight << endl;
+         // cout << "weight of event after est is " << weight << endl;
 
           int mvaValueRegion = 0;
 
@@ -588,10 +593,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
             // used previously
             // weight *= scaler.postFitScaling(samples[sam].getProcessName());
             
-            //if(samples[sam].is2016())
-            //    weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
-            //else
-            //    weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+            if(samples[sam].is2016())
+                weight *= scaler2016.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+            else if(samples[sam].is2017())
+                weight *= scaler2017.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
+            else if(samples[sam].is2018())
+                weight *= scaler2018.postFitScaling(samples[sam].getProcessName() != "data" ? samples[sam].getProcessName() : "nonpromptData");
 
           }
           if(debug){
@@ -652,7 +659,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                     distribs[dist].vectorHistoUncDown[samCategory].FillUnc(fillVar.at(dist), 8, figNames[fncName.at(dist)].varMax-0.1, weight);
                 }
 
-                if((samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos || samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos) && samples[sam].is2017()){ 
+                if((samples[sam].getFileName().find("ST_tWll_") != std::string::npos || samples[sam].getFileName().find("TTWJetsToLNu") != std::string::npos || samples[sam].getFileName().find("tZq_ll") != std::string::npos || samples[sam].getFileName().find("TTZToLLNuNu_M-10_") != std::string::npos) && ( samples[sam].is2017() || samples[sam].is2018() )){ 
                     // 10, 12 - factor 4; 6 and 8 - factor 2; 8, 9 - up factor 2, 6, 7 - down factor 2, 30th Aug Daniel said in ttX chat that for FSR factor sqrt(2) should be used, indeces 3 and 5
                     // as well from https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio there is an instruction to use envelope uncertrtainty, i.e. largest between ISR and FSR
                     // description of the order for the PS weights: https://twiki.cern.ch/twiki/bin/view/CMS/TopModGen#Event_Generation
@@ -770,22 +777,37 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       if(leptonSelection != 4)
         cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
       cout << endl;
+////    std::cout << "electrons before miniIso cut     : " <<  leptons_preMiniIsoCut  << std::endl;
+////    std::cout << "electrons after  miniIso cut     : " <<  leptons_postMiniIsoCut << std::endl;
+////    std::cout << "electrons after  missing hits cut: " <<  leptons_postMissingHits<< std::endl;
+////    std::cout << "electrons after  passEmu cut     : " <<  leptons_postPassEmu    << std::endl;
+////    std::cout << "electrons after  loose cut       : " <<  leptons_loose          << std::endl;
+////    std::cout << "electrons after  clean cut       : " <<  leptons_clean          << std::endl;
+////    std::cout << "electrons after  MVA cut         : " <<  leptons_passMVA        << std::endl;
+////
+////    leptons_preMiniIsoCut  = 0;	
+////    leptons_postMiniIsoCut = 0;
+////    leptons_loose          = 0;
+////    leptons_clean          = 0;
+////    leptons_passMVA        = 0;
+////    leptons_postMissingHits= 0;
+////    leptons_postPassEmu    = 0;
 
-/* ////Marek////
-      cout << "Number of loose eee events: " << eeeLooseCount << endl; 
-      cout << "Number of fake eee events: " << eeeFakeCount << endl;
-      cout << "Number of tight eee events: " << eeeTightCount << endl;
-      cout << "Number of loose mmm events: " << mmmLooseCount << endl;
-      cout << "Number of fake mmm events: " << mmmFakeCount << endl;
-      cout << "Number of tight mmm events: " << mmmTightCount << endl;
-
-      cout << "Number of loose eeee events: " << eeeeLooseCount << endl; 
-      cout << "Number of fake eeee events: " << eeeeFakeCount << endl;
-      cout << "Number of tight eeee events: " << eeeeTightCount << endl;
-      cout << "Number of loose mmmm events: " << mmmmLooseCount << endl;
-      cout << "Number of fake mmmm events: " << mmmmFakeCount << endl;
-      cout << "Number of tight mmmm events: " << mmmmTightCount << endl;
-			 */ //Marek//
+  // ////Marek////
+  //      cout << "Number of loose eee events: " << eeeLooseCount << endl; 
+  //      cout << "Number of fake eee events: " << eeeFakeCount << endl;
+  //      cout << "Number of tight eee events: " << eeeTightCount << endl;
+  //      cout << "Number of loose mmm events: " << mmmLooseCount << endl;
+  //      cout << "Number of fake mmm events: " << mmmFakeCount << endl;
+  //      cout << "Number of tight mmm events: " << mmmTightCount << endl;
+  //
+  //      cout << "Number of loose eeee events: " << eeeeLooseCount << endl; 
+  //      cout << "Number of fake eeee events: " << eeeeFakeCount << endl;
+  //      cout << "Number of tight eeee events: " << eeeeTightCount << endl;
+  //      cout << "Number of loose mmmm events: " << mmmmLooseCount << endl;
+  //      cout << "Number of fake mmmm events: " << mmmmFakeCount << endl;
+  //      cout << "Number of tight mmmm events: " << mmmmTightCount << endl;
+  //			  //Marek//
   }
 
   // after prompt subtraction from non-prompt we set all the negative yields to 0
@@ -890,7 +912,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   // plots to make with systematics and stat uncertainty on them
   std::string processToStore = selection;
   TString folderToStorePlots;
-  int showLegendOption = 0; // 0 - 2016, 1 - 2017, 2 - 2016+2017
+  int showLegendOption = 0; // 0 - 2016, 1 - 2017, 2 - 2016+2017, 3 - 2018
   // not implemented at the moment for more than 2 files
   if(filesToAnalyse.size() > 2)
     return;
@@ -902,6 +924,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     if(filesToAnalyse.at(0).find("2017") != std::string::npos){
       folderToStorePlots = "2017/";
       showLegendOption = 1;
+    }
+    else if (filesToAnalyse.at(0).find("2018") != std::string::npos){
+      folderToStorePlots = "2018/";
+       showLegendOption = 3;
     }
     else{
       folderToStorePlots = "2016/";
@@ -923,12 +949,12 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 
   for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
+    showHist(plot[varPlot], distribs[figNames[listToPrint[crToPrint].at(varPlot)].index], figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");
     plot[varPlot]->cd();
-    showHist(plot[varPlot],distribs[figNames[listToPrint[crToPrint].at(varPlot)].index],figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, showLegendOption);
+    showHist(plot[varPlot], distribs[figNames[listToPrint[crToPrint].at(varPlot)].index], figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, true, false, showLegendOption);
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
@@ -943,27 +969,31 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   }
 
   // no need to fill datacards when running over 2016 and 2017 together
+		bool Analyzing2018 = false;
+		if (filesToAnalyse.at(0).find("2018") != std::string::npos){
+		  Analyzing2018 = true;
+		}
   if(showLegendOption == 2) return;
   if(crToPrint == "ttZ3Lclean"){
-    fillDatacards(distribs[indexSRttZcleanPTZ], processOrder, "SRttZCleanPTZ", (bool)showLegendOption);
-    fillDatacards(distribs[indexSRttZcleanCosTheta], processOrder, "SRttZCleanCosTheta", (bool)showLegendOption);
+    fillDatacards(distribs[indexSRttZcleanPTZ], processOrder, "SRttZCleanPTZ", (bool)showLegendOption, Analyzing2018);
+    fillDatacards(distribs[indexSRttZcleanCosTheta], processOrder, "SRttZCleanCosTheta", (bool)showLegendOption, Analyzing2018);
   }
   if(crToPrint == "ttZ"){
 
-    fillDatacards(distribs[indexSRTTZ8SR3L], processOrder, "SRTTZ8SR3L", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR4L], processOrder, "SR4L", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR3L3m], processOrder, "SR3L3m", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR3L2m1e], processOrder, "SR3L2m1e", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR3L1m2e], processOrder, "SR3L1m2e", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSR3L3e], processOrder, "SR3L3e", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSRWZCR], processOrder, "SRWZCR", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSRZZCR], processOrder, "SRZZCR", (bool)showLegendOption); 
-    fillDatacards(distribs[indexSRTTCR], processOrder, "SRTTCR", (bool)showLegendOption); 
+    fillDatacards(distribs[indexSRTTZ8SR3L], processOrder, "SRTTZ8SR3L", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR3L], processOrder, "SR3L", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR4L], processOrder, "SR4L", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSRTTZ], processOrder, "SRallTTZ", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR3L3m], processOrder, "SR3L3m", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR3L2m1e], processOrder, "SR3L2m1e", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR3L1m2e], processOrder, "SR3L1m2e", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSR3L3e], processOrder, "SR3L3e", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSRWZCR], processOrder, "SRWZCR", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSRZZCR], processOrder, "SRZZCR", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexSRTTCR], processOrder, "SRTTCR", (bool)showLegendOption, Analyzing2018); 
 
-    fillDatacards(distribs[indexLeadPt], processOrder, "ptlead", (bool)showLegendOption); 
-    fillDatacards(distribs[indexTrailPt], processOrder, "trail", (bool)showLegendOption); 
+    fillDatacards(distribs[indexLeadPt], processOrder, "ptlead", (bool)showLegendOption, Analyzing2018); 
+    fillDatacards(distribs[indexTrailPt], processOrder, "trail", (bool)showLegendOption, Analyzing2018); 
   }
   return;
 }

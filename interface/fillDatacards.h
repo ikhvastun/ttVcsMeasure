@@ -26,10 +26,10 @@ void fillExperUnc(ofstream &, vector<std::string> &, std::vector<TString> &, std
 double largestAmongAll(const std::vector<double> & weights);
 double smallestAmongAll(const std::vector<double> & weights);
 
-void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false){
+void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false, bool is2018 = false){
 
   std::vector<double> experUnc      = {1.025, 1.01};  // for trigger agreed to reduce it to 1%
-  std::vector<TString> experUncName = {"lumi" + (std::string)(is2017 ? "2017" : "2016"), "trigger" + (std::string)(is2017 ? "2017" : "2016")}; //"JES", "btagl", "btagb", "PDF", "Q2"};
+  std::vector<TString> experUncName = {"lumi" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016") ), "trigger" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016"))}; //"JES", "btagl", "btagb", "PDF", "Q2"};
   std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
   const int SRNumber = figNames[name].nBins;
@@ -51,20 +51,20 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
   nameOfProcessesForDatacard.erase(nameOfProcessesForDatacard.begin()); // here we erase 1 element - data
   const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal
 
-   gSystem->Exec("rm datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root"); // delete previous tex file
-   gSystem->Exec("rm datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt"); // delete previous tex file
+   gSystem->Exec("rm datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root"); // delete previous tex file
+   gSystem->Exec("rm datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt"); // delete previous tex file
    gSystem->Exec("mkdir -p datacards/"); // delete previous tex file
    gSystem->Exec("mkdir -p datacards/shapes"); // delete previous tex file
    ofstream fileout;
-   fileout .open ( "datacards/datacard_" + name + (TString)(is2017 ? "2017" : "2016") + ".txt", ios_base::app); // create a new tex file
+   fileout .open ( "datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt", ios_base::app); // create a new tex file
    fileout << fixed << showpoint << setprecision(2);
    fileout << "imax 1 number of channels " <<  endl;
    fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
    //fileout << "kmax " << (lepSel == 2 ? 195 : (lepSel == 34 ? 129 : (lepSel == 3 ? 96 : 33))) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "kmax 130 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "----------- " <<  endl;
-   TFile *file = TFile::Open("datacards/shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root", "RECREATE");
-   fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2017 ? "2017" : "2016") + ".root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
+   TFile *file = TFile::Open("datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root", "RECREATE");
+   fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
    fileout << "-----------  " <<  endl;
    fileout << "bin  bin1" <<  endl;
    fileout << "observation  " << intYield[0] << endl;
@@ -132,7 +132,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    fillExperUnc(fileout, nameOfProcessesForDatacard, experUncName, experUnc);
    
    // here fill all syst shape uncertainties 
-   std::vector<std::string> systShapeNames = {"lepSFsyst", "lepSFstat" + (std::string)(is2017 ? "2017" : "2016"), "lepSFReco", "pileup", "bTag_udsg" + (std::string)(is2017 ? "2017" : "2016"), "bTag_bc" + (std::string)(is2017 ? "2017" : "2016"), "jec", "jer", "WZbb"}; // , "ISRandFSR"
+   std::vector<std::string> systShapeNames = {"lepSFsyst", "lepSFstat" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016")), "lepSFReco", "pileup", "bTag_udsg" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016")), "bTag_bc" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016")), "jec", "jer", "WZbb"}; // , "ISRandFSR"
    for(int syst = 0; syst < systShapeNames.size(); syst++){
        for(int cat = 1; cat < nCategories; cat++){ 
           TH1D *histStUp, *histStDown;

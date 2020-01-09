@@ -6,18 +6,17 @@ using namespace std;
 
 bool treeReader::lepIsGoodFortZq(const unsigned l){
     // what is used in leptonMVA analysis
-    //cout << "lepton info: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _leptonMvatZqTTV[l] << " " << _lPOGMedium[l] << " " << _lCharge[l] << endl;
+    //cout << "lepton info: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _leptonMvatZq[l] << " " << _lPOGMedium[l] << " " << _lCharge[l] << endl;
     if(!lepIsFOGoodFortZq(l)) return false;
-    if(_leptonMvatZqTTV[l] < 0.8) return false;
+    if(_leptonMvatZq[l] < 0.8) return false;
 
     return true;
 }
 
 bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
     // what is used in leptonMVA analysis
-    //cout << "lepton info: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _leptonMvatZqTTV[l] << " " << _lPOGMedium[l] << " " << _lCharge[l] << endl;
     if(!lepIsFOGood(l, lepSel)) return false;
-    if(_leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[lepSel]) return false;
+    if(_leptonMvatZq[l] < leptonMVAcutInAnalysis[lepSel]) return false;
 
     if(lepSel == 2){
         if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
@@ -26,17 +25,15 @@ bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
         if(_lFlavor[l] == 0 && _lElectronMissingHits[l] != 0) return false;
     }
 
-    //if(debug) cout << "lepton with flavour " << _lFlavor[l] << ", charge " << _lCharge[l] << ", pt " << _lPt[l] << ", eta " << _lEta[l] << ", phi " << _lPhi[l] << " and lepton MVA " << _leptonMvatZqTTV[l] << " is tight for " << lepSel << " selection" << endl;
+    //if(debug) cout << "lepton with flavour " << _lFlavor[l] << ", charge " << _lCharge[l] << ", pt " << _lPt[l] << ", eta " << _lEta[l] << ", phi " << _lPhi[l] << " and lepton MVA " << _leptonMvatZq[l] << " is tight for " << lepSel << " selection" << endl;
     return true;
 }
 
 bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
 
-//MAREK//    if(_lPt[l] < 25) return false;
     if(_lPt[l] < 10) return false;
     if(!lepIsLoose(l)) return false;
 
-    //if(debug) cout << "lepton with pt " << _lPt[l] << " is clean? " <<  eleIsClean(l) << endl;
     if(_lFlavor[l] == 0 && !eleIsClean(l)) return false;
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
@@ -52,13 +49,15 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
 	 // _ptRatio
 	 // _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]
 	 // electronMVAvalue cut value
-    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? 0.8001 : (currentSample.is2017() ? 0.8001 : 0.8958))) return false;
+//    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
 
-    if(lepSel != 4 && _leptonMvatZqTTV[l] < leptonMVAcutInAnalysis[leptonSelection]){
+    if(lepSel != 4 && _leptonMvatZq[l] < leptonMVAcutInAnalysis[leptonSelection]){
         if(_ptRatio[l] < (currentSample.is2017() ? (leptonSelection == 3 ? 0.4 : 0.5) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
-        double electronMVAvalue = currentSample.is2017() ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (currentSample.is2017() ? (leptonSelection == 3 ? -0.3 : -0.1) : (leptonSelection == 3 ? -0.1 : -0.6))    +    (fabs(_lEta[l]) >= 1.479)*(currentSample.is2017() ? (leptonSelection ==    3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.4))) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? (leptonSelection == 3 ? 0.5 : 0.2) : (currentSample.is2017() ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5)))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
+//      if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
+        double electronMVAvalue = currentSample.is2018() ? _lElectronMvaFall17NoIso[l] : ( currentSample.is2017() ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l] );
+        if(_lFlavor[l] == 0 && electronMVAvalue < ( ( currentSample.is2017() || currentSample.is2018() ) ? (leptonSelection == 3 ? -0.3 : -0.1) : (leptonSelection == 3 ? -0.1 : -0.6))    +    (fabs(_lEta[l]) >= 1.479)*( (currentSample.is2017() || currentSample.is2018() ) ? (leptonSelection ==    3 ? 0.6 : 0.4) : (leptonSelection == 3 ? 0.8 : 0.4))) return false;
         // numbers for tZq
         /*
         if(_ptRatio[l] < (is2017 ? 0.6 : 0.6)) return false; // 0.3 for 2017
@@ -67,7 +66,7 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
         if(_lFlavor[l] == 0 && electronMVAvalue < (is2017 ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(is2017 ? 0.3 : 0.3)) return false;
         */
     }
-    //cout << "info about FO leptons: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _lCharge[l] << " " << _leptonMvatZqTTV[l]  << endl;
+    //cout << "info about FO leptons: " << _lPt[l] << " " << _lEta[l] << " " << _lFlavor[l] << " " << _lCharge[l] << " " << _leptonMvatZq[l]  << endl;
 
     return true;
 }
@@ -82,13 +81,14 @@ bool treeReader::lepIsFOGoodFortZq(const unsigned l){
     if(_lFlavor[l] == 1 && !_lPOGMedium[l]) return false;
 
     //if(debug) cout << "info about FO leptons with pt " << _lPt[l] << " (closest jet deep csv): " << _closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l]  << endl;
-    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
+    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? 0.8001 : (currentSample.is2017() ? 0.8001 : 0.8958))) return false;
 
-    if(_leptonMvatZqTTV[l] < 0.8){
+    if(_leptonMvatZq[l] < 0.8){
         if(_ptRatio[l] < (currentSample.is2017() ? 0.6 : 0.6)) return false; // 0.3 for 2017
-        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.3 : 0.4)) return false;
-        double electronMVAvalue = currentSample.is2017() ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l];
-        if(_lFlavor[l] == 0 && electronMVAvalue < (currentSample.is2017() ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(currentSample.is2017() ? 0.3 : 0.3)) return false;
+        if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? 0.3 : (currentSample.is2017() ? 0.3 : 0.4))) return false;
+        double electronMVAvalue = currentSample.is2018() ? _lElectronMvaFall17NoIso[l] : ( currentSample.is2017() ? _lElectronMvaFall17NoIso[l] : _lElectronMva[l] );
+//        if(_lFlavor[l] == 0 && electronMVAvalue < (currentSample.is2017() ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*(currentSample.is2017() ? 0.3 : 0.3)) return false;
+        if(_lFlavor[l] == 0 && electronMVAvalue < ( (currentSample.is2017() || currentSample.is2018()) ? 0.3 : 0.4) + (fabs(_lEta[l]) >= 1.479)*( (currentSample.is2017() || currentSample.is2018()) ? 0.3 : 0.3)) return false;
     }
     return true;
 }
@@ -111,7 +111,6 @@ bool treeReader::lepIsLoose(const unsigned ind){
     //if(debug) cout << "info about loose lepton with pt " << _lPt[ind] << ": " << (fabs(_dxy[ind]) >= 0.05) << " " << (fabs(_dz[ind]) >= 0.1) << " " << (_3dIPSig[ind] >= 8) << " " << (_miniIso[ind] >= 0.4) << " " << (_lElectronMissingHits[ind] > 1) << " " << (!_lElectronPassEmu[ind]) << " " << !_lPOGLoose[ind] << " " << !_lPOGMedium[ind] << endl;
     //cout << "lepton miniiso: " << _miniIso[ind] << endl;
     //if(_lPt[ind] <= 7 - 2*_lFlavor[ind]) return false;
-//MAREK//    if(_lPt[ind] <= 25) return false;
     if(_lPt[ind] <= 10) return false;
     if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
     if(fabs(_dxy[ind]) >= 0.05) return false;
@@ -129,7 +128,6 @@ bool treeReader::lepIsLoose(const unsigned ind){
 
 bool treeReader::lepIsGoodForLeptonMVA(const unsigned ind){
     if(_lFlavor[ind] == 2) return false;  //don't consider taus here
-//MAREK//    if(_lPt[ind] <= 25) return false;
     if(_lPt[ind] <= 10) return false;
     if(fabs(_lEta[ind]) >= (2.5 - 0.1*_lFlavor[ind])) return false;
     if(fabs(_dxy[ind]) >= 0.05) return false;
@@ -151,6 +149,7 @@ unsigned treeReader::selectLepGoodForLeptonMVA(std::vector<unsigned>& ind){
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
         if(lepIsGoodForLeptonMVA(l)){
+//        if(lepIsLoose(l)){
             ++lCount;
             ptMap.push_back({_lPt[l], l});
         }
@@ -201,7 +200,6 @@ unsigned treeReader::selectLooseLep(std::vector<unsigned>& ind){
     unsigned lCount = 0;
     std::vector<std::pair<double, unsigned>> ptMap;
     for(unsigned l = 0; l < _nLight; ++l){
-//MAREK//        if(_lPt[l] < 25) continue;
         if(_lPt[l] < 10) continue;
         if(lepIsLoose(l)){
             ++lCount;
@@ -241,7 +239,7 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = _leptonMvatZqTTV[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
+        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
         
     }
@@ -264,7 +262,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = _leptonMvatZqTTV[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
+        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
         //double ptcor = lepIsGood(i) ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
     }
@@ -340,6 +338,7 @@ bool treeReader::jetIsClean(const unsigned ind, const int lepSel){
 bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsigned unc, const bool clean, const double eta){
     if(fabs(_jetEta[ind]) > eta) return false;
     if(is2017() && !_jetIsTight[ind]) return false;
+    if(is2018() && !_jetIsTight[ind]) return false;
     // temporary fix to sync with Daniel, 9 july 2018
     //if(!_jetIsTight[ind]) return false;
     switch(unc){
@@ -353,8 +352,8 @@ bool treeReader::jetIsGood(const unsigned ind, const unsigned ptCut, const unsig
         case 0: if((_jetPt[ind]) < ptCut) return false; break;
         case 1: if(_jetPt_JECDown[ind] < ptCut) return false; break;
         case 2: if(_jetPt_JECUp[ind] < ptCut) return false; break;
-        case 3: if(_jetPt_JERDown[ind] < ptCut) return false; break;
-        case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;
+        case 3: if(_jetPt_JERDown[ind] < ptCut) return false; break;   // not in the tree anymore
+        case 4: if(_jetPt_JERUp[ind] < ptCut) return false; break;     // not in the tree anymore
         */
         default: ;
     }
@@ -398,7 +397,7 @@ unsigned treeReader::nJetsNotB(const unsigned unc, const bool clean, std::vector
 }
 
 bool treeReader::bTaggedDeepCSV(const unsigned ind, const unsigned wp){
-    static const double bTagWP[3] = {(currentSample.is2017() ? 0.1522 : 0.2219), (currentSample.is2017() ? 0.4941 : 0.6324),  (currentSample.is2017() ? 0.8001 : 0.8958)};
+    static const double bTagWP[3] = {(( currentSample.is2017() || currentSample.is2018() ) ? 0.1522 : 0.2219), ( ( currentSample.is2017() || currentSample.is2018() ) ? 0.4941 : 0.6324),  (( currentSample.is2017() || currentSample.is2018() ) ? 0.8001 : 0.8958)};
     return (_jetDeepCsv_b[ind] + _jetDeepCsv_bb[ind]) > bTagWP[wp];
 }
 
@@ -494,14 +493,14 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
 
     for (unsigned l0 = 0; l0 < ind.size(); l0++) {
         //double ptcor1 = _lPt[ind.at(l0)];
-        double ptcor1 = leptonSelection != 4 ? (_leptonMvatZqTTV[ind.at(l0)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l0)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l0)] / _ptRatio[ind.at(l0)]) : _lPt[ind.at(l0)];
+        double ptcor1 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l0)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l0)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l0)] / _ptRatio[ind.at(l0)]) : _lPt[ind.at(l0)];
         
         l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
         for(unsigned l1 = l0+1; l1 < ind.size(); l1++){
 
             //if(ind.at(l0) == ind.at(l1)) continue;
             //double ptcor2 = _lPt[ind.at(l1)];
-            double ptcor2 = leptonSelection != 4 ? (_leptonMvatZqTTV[ind.at(l1)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l1)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l1)] / _ptRatio[ind.at(l1)]) : _lPt[ind.at(l1)];
+            double ptcor2 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l1)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l1)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l1)] / _ptRatio[ind.at(l1)]) : _lPt[ind.at(l1)];
             //cout << "l1 is " << ind.at(l1) << endl;
 
             if (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) {
@@ -527,7 +526,7 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                                 if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;
                                 third = lepThird;
                                 //double ptcor3 = _lPt[lepThird];
-                                double ptcor3 = leptonSelection != 4 ? (_leptonMvatZqTTV[lepThird] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[lepThird] : magicFactorInAnalysis[leptonSelection] * _lPt[lepThird] / _ptRatio[lepThird]) : _lPt[lepThird];
+                                double ptcor3 = leptonSelection != 4 ? (_leptonMvatZq[lepThird] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[lepThird] : magicFactorInAnalysis[leptonSelection] * _lPt[lepThird] / _ptRatio[lepThird]) : _lPt[lepThird];
                                 l2p4.SetPtEtaPhiE(ptcor3 ,_lEta[lepThird],_lPhi[lepThird],_lE[lepThird] * ptcor3 / _lPt[lepThird]);
                                 ptNonZ = ptcor3;
                                 mlll = (l1p4+l2p4).M();
@@ -916,8 +915,8 @@ bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std
     if(nbjets < 1) return false;
 
     TLorentzVector l0p4, l1p4;
-    double lepCorrLead = _leptonMvatZqTTV[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
-    double lepCorrSubLead = _leptonMvatZqTTV[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
     l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
     l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
 
@@ -934,8 +933,8 @@ bool treeReader::pass2Lcleanpreselection(const int njets, const int nbjets, cons
     if(nbjets < 2) return false;
 
     TLorentzVector l0p4, l1p4;
-    double lepCorrLead = _leptonMvatZqTTV[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
-    double lepCorrSubLead = _leptonMvatZqTTV[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
     l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
     l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
 
@@ -992,7 +991,7 @@ void treeReader::addVariablesToBDT(){
     readerLeptonMVAele->AddVariable( "sip3d", &user_sip3d);
     readerLeptonMVAele->AddVariable( "dxy", &user_dxy);
     readerLeptonMVAele->AddVariable( "dz", &user_dz);
-    if(currentSample.is2017())
+    if(currentSample.is2017() || currentSample.is2018() )
         readerLeptonMVAele->AddVariable( "electronMvaFall17NoIso", &user_eleMVA);
     else
         readerLeptonMVAele->AddVariable( "electronMvaSpring16GP", &user_eleMVA);
@@ -1013,14 +1012,14 @@ void treeReader::addVariablesToBDT(){
 
     TString methodName = TString("BDTG method");
     TString weightfile;
-    if(currentSample.is2017())
+    if(currentSample.is2017() || currentSample.is2018() )
         weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2017MC/WillemFiles/BDTG/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_electron_2017.weights.xml";
     else
         weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2016MC/WillemFiles/BDTG/toBeTested/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_electron.weights.xml";
     readerLeptonMVAele->BookMVA( methodName, weightfile );
 
     methodName = TString("BDTG method");
-    if(currentSample.is2017())
+    if(currentSample.is2017() || currentSample.is2018() )
         weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2017MC/WillemFiles/BDTG/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_muon_2017.weights.xml";
     else
         weightfile = "/user/ikhvastu/Work/ttVcsMeasure/checkLeptonMVAvar/MVAtrainings/2016MC/WillemFiles/BDTG/toBeTested/TMVAClassification_BDTG_200Cuts_Depth4_baggedGrad_1000trees_shrinkage0p1_muon.weights.xml";

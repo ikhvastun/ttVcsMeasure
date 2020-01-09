@@ -264,11 +264,11 @@ std::vector<BinLabelOptions> flavourLabelOptionsFor4LZZ = {
       
     };
 
-// trees for BDT
-TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
-TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
-TTree* signalTree = new TTree("signalTree","signalTree");
-TTree* bkgTree = new TTree("bkgTree","bkgTree");
+//// trees for BDT
+//TMVA::Reader *readerTTWcsttbar = new TMVA::Reader( "!Color:!Silent" );   
+//TFile* fileDummy = new TFile("fileDummy.root", "RECREATE");
+//TTree* signalTree = new TTree("signalTree","signalTree");
+//TTree* bkgTree = new TTree("bkgTree","bkgTree");
 
 double _jetPt1, _jetEta1, _jetPhi1, _jetE1, _jetCSV1;
 double _jetPt2, _jetEta2, _jetPhi2, _jetE2, _jetCSV2;

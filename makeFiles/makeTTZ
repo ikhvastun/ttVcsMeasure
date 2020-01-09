@@ -1,6 +1,6 @@
 CXX=g++
 RM=rm -f
-CPPFLAGS=-std=c++0x -O3 -g $(shell root-config --cflags) -Wwrite-strings
+CPPFLAGS=-std=c++0x -g $(shell root-config --cflags) -Wwrite-strings
 LDFLAGS=-g $(shell root-config --ldflags)
 LDLIBS=$(shell root-config --libs) -lTMVA
 CFLAGS = `root-config --cflags --libs`

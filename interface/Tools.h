@@ -221,320 +221,320 @@ double flavourCategory4LZZ(int nLocEle){
   return double(1 + nLocEle / 2);
 }
 
-void addBranchToNNTreeVariables(){
-
-    signalTree->Branch("_jetPt1", &_jetPt1, "_jetPt1/D");
-    signalTree->Branch("_jetEta1", &_jetEta1, "_jetEta1/D");
-    signalTree->Branch("_jetPhi1", &_jetPhi1, "_jetPhi1/D");
-    signalTree->Branch("_jetE1", &_jetE1, "_jetE1/D");
-    signalTree->Branch("_jetCSV1", &_jetCSV1, "_jetCSV1/D");
-
-    signalTree->Branch("_jetPt2", &_jetPt2, "_jetPt2/D");
-    signalTree->Branch("_jetEta2", &_jetEta2, "_jetEta2/D");
-    signalTree->Branch("_jetPhi2", &_jetPhi2, "_jetPhi2/D");
-    signalTree->Branch("_jetE2", &_jetE2, "_jetE2/D");
-    signalTree->Branch("_jetCSV2", &_jetCSV2, "_jetCSV2/D");
-
-    signalTree->Branch("_jetPt3", &_jetPt3, "_jetPt3/D");
-    signalTree->Branch("_jetEta3", &_jetEta3, "_jetEta3/D");
-    signalTree->Branch("_jetPhi3", &_jetPhi3, "_jetPhi3/D");
-    signalTree->Branch("_jetE3", &_jetE3, "_jetE3/D");
-    signalTree->Branch("_jetCSV3", &_jetCSV3, "_jetCSV3/D");
-
-    signalTree->Branch("_jetPt4", &_jetPt4, "_jetPt4/D");
-    signalTree->Branch("_jetEta4", &_jetEta4, "_jetEta4/D");
-    signalTree->Branch("_jetPhi4", &_jetPhi4, "_jetPhi4/D");
-    signalTree->Branch("_jetE4", &_jetE4, "_jetE4/D");
-    signalTree->Branch("_jetCSV4", &_jetCSV4, "_jetCSV4/D");
-
-    signalTree->Branch("_jetPt5", &_jetPt5, "_jetPt5/D");
-    signalTree->Branch("_jetEta5", &_jetEta5, "_jetEta5/D");
-    signalTree->Branch("_jetPhi5", &_jetPhi5, "_jetPhi5/D");
-    signalTree->Branch("_jetE5", &_jetE5, "_jetE5/D");
-    signalTree->Branch("_jetCSV5", &_jetCSV5, "_jetCSV5/D");
-
-    signalTree->Branch("_jetPt6", &_jetPt6, "_jetPt6/D");
-    signalTree->Branch("_jetEta6", &_jetEta6, "_jetEta6/D");
-    signalTree->Branch("_jetPhi6", &_jetPhi6, "_jetPhi6/D");
-    signalTree->Branch("_jetE6", &_jetE6, "_jetE6/D");
-    signalTree->Branch("_jetCSV6", &_jetCSV6, "_jetCSV6/D");
-
-    signalTree->Branch("_lepPt1", &_lepPt1, "_lepPt1/D");
-    signalTree->Branch("_lepEta1", &_lepEta1, "_lepEta1/D");
-    signalTree->Branch("_lepPhi1", &_lepPhi1, "_lepPhi1/D");
-    signalTree->Branch("_lepE1", &_lepE1, "_lepE1/D");
-    signalTree->Branch("_lepCharge1", &_lepCharge1, "_lepCharge1/D");
-
-    signalTree->Branch("_lepPt2", &_lepPt2, "_lepPt2/D");
-    signalTree->Branch("_lepEta2", &_lepEta2, "_lepEta2/D");
-    signalTree->Branch("_lepPhi2", &_lepPhi2, "_lepPhi2/D");
-    signalTree->Branch("_lepE2", &_lepE2, "_lepE2/D");
-    signalTree->Branch("_lepCharge2", &_lepCharge2, "_lepCharge2/D");
-
-    signalTree->Branch("_metPt1", &_metPt1, "_metPt1/D");
-    signalTree->Branch("_metEta1", &_metEta1, "_metEta1/D");
-    signalTree->Branch("_metPhi1", &_metPhi1, "_metPhi1/D");
-    signalTree->Branch("_metE1", &_metE1, "_metE1/D");
-
-    signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    signalTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    signalTree->Branch("_met", &MET, "_met/D");
-
-    signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    signalTree->Branch("mt", &mtHighest, "mt/D");
-
-    signalTree->Branch("leadpt", &leadpt, "leadpt/D");
-    signalTree->Branch("trailpt", &trailpt, "trailpt/D");
-    signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
-    signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-    signalTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
-    signalTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
-    signalTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
-    signalTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
-
-    signalTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
-    signalTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
-
-    signalTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
-    signalTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
-
-    signalTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
-    signalTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
-    signalTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
-    signalTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
-    signalTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
-    signalTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
-    signalTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
-
-    signalTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
-    signalTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
-    signalTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
-
-    signalTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
-    signalTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
-
-    signalTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
-    signalTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
-
-    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-    bkgTree->Branch("_jetPt1", &_jetPt1, "_jetPt1/D");
-    bkgTree->Branch("_jetEta1", &_jetEta1, "_jetEta1/D");
-    bkgTree->Branch("_jetPhi1", &_jetPhi1, "_jetPhi1/D");
-    bkgTree->Branch("_jetE1", &_jetE1, "_jetE1/D");
-    bkgTree->Branch("_jetCSV1", &_jetCSV1, "_jetCSV1/D");
-
-    bkgTree->Branch("_jetPt2", &_jetPt2, "_jetPt2/D");
-    bkgTree->Branch("_jetEta2", &_jetEta2, "_jetEta2/D");
-    bkgTree->Branch("_jetPhi2", &_jetPhi2, "_jetPhi2/D");
-    bkgTree->Branch("_jetE2", &_jetE2, "_jetE2/D");
-    bkgTree->Branch("_jetCSV2", &_jetCSV2, "_jetCSV2/D");
-
-    bkgTree->Branch("_jetPt3", &_jetPt3, "_jetPt3/D");
-    bkgTree->Branch("_jetEta3", &_jetEta3, "_jetEta3/D");
-    bkgTree->Branch("_jetPhi3", &_jetPhi3, "_jetPhi3/D");
-    bkgTree->Branch("_jetE3", &_jetE3, "_jetE3/D");
-    bkgTree->Branch("_jetCSV3", &_jetCSV3, "_jetCSV3/D");
-
-    bkgTree->Branch("_jetPt4", &_jetPt4, "_jetPt4/D");
-    bkgTree->Branch("_jetEta4", &_jetEta4, "_jetEta4/D");
-    bkgTree->Branch("_jetPhi4", &_jetPhi4, "_jetPhi4/D");
-    bkgTree->Branch("_jetE4", &_jetE4, "_jetE4/D");
-    bkgTree->Branch("_jetCSV4", &_jetCSV4, "_jetCSV4/D");
-
-    bkgTree->Branch("_jetPt5", &_jetPt5, "_jetPt5/D");
-    bkgTree->Branch("_jetEta5", &_jetEta5, "_jetEta5/D");
-    bkgTree->Branch("_jetPhi5", &_jetPhi5, "_jetPhi5/D");
-    bkgTree->Branch("_jetE5", &_jetE5, "_jetE5/D");
-    bkgTree->Branch("_jetCSV5", &_jetCSV5, "_jetCSV5/D");
-
-    bkgTree->Branch("_jetPt6", &_jetPt6, "_jetPt6/D");
-    bkgTree->Branch("_jetEta6", &_jetEta6, "_jetEta6/D");
-    bkgTree->Branch("_jetPhi6", &_jetPhi6, "_jetPhi6/D");
-    bkgTree->Branch("_jetE6", &_jetE6, "_jetE6/D");
-    bkgTree->Branch("_jetCSV6", &_jetCSV6, "_jetCSV6/D");
-
-    bkgTree->Branch("_lepPt1", &_lepPt1, "_lepPt1/D");
-    bkgTree->Branch("_lepEta1", &_lepEta1, "_lepEta1/D");
-    bkgTree->Branch("_lepPhi1", &_lepPhi1, "_lepPhi1/D");
-    bkgTree->Branch("_lepE1", &_lepE1, "_lepE1/D");
-    bkgTree->Branch("_lepCharge1", &_lepCharge1, "_lepCharge1/D");
-
-    bkgTree->Branch("_lepPt2", &_lepPt2, "_lepPt2/D");
-    bkgTree->Branch("_lepEta2", &_lepEta2, "_lepEta2/D");
-    bkgTree->Branch("_lepPhi2", &_lepPhi2, "_lepPhi2/D");
-    bkgTree->Branch("_lepE2", &_lepE2, "_lepE2/D");
-    bkgTree->Branch("_lepCharge2", &_lepCharge2, "_lepCharge2/D");
-
-    bkgTree->Branch("_metPt1", &_metPt1, "_metPt1/D");
-    bkgTree->Branch("_metEta1", &_metEta1, "_metEta1/D");
-    bkgTree->Branch("_metPhi1", &_metPhi1, "_metPhi1/D");
-    bkgTree->Branch("_metE1", &_metE1, "_metE1/D");
-
-    bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    bkgTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    bkgTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    bkgTree->Branch("_met", &MET, "_met/D");
-
-    bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    bkgTree->Branch("mt", &mtHighest, "mt/D");
-
-    bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
-    bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
-    bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
-    bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-    bkgTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
-    bkgTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
-    bkgTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
-    bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
-
-    bkgTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
-    bkgTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
-
-    bkgTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
-    bkgTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
-
-    bkgTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
-    bkgTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
-    bkgTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
-    bkgTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
-    bkgTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
-    bkgTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
-    bkgTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
-
-    bkgTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
-    bkgTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
-    bkgTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
-
-    bkgTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
-    bkgTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
-
-    bkgTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
-    bkgTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
-
-    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-}
-
-void addBranchToBDTTreeVariables(){
-    signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    signalTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    signalTree->Branch("_met", &MET, "_met/D");
-
-    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-    signalTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
-    signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    signalTree->Branch("mt", &mtHighest, "mt/D");
-    signalTree->Branch("mtlow", &mtLowest, "mtlow/D");
-
-    signalTree->Branch("leadpt", &leadpt, "leadpt/D");
-    signalTree->Branch("trailpt", &trailpt, "trailpt/D");
-    signalTree->Branch("leadeta", &leadeta, "leadeta/D");
-    signalTree->Branch("traileta", &traileta, "traileta/D");
-    signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
-    signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-    signalTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
-    signalTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
-    signalTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
-    signalTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
-
-    signalTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
-    signalTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
-
-    signalTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
-    signalTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
-
-    signalTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
-    signalTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
-    signalTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
-    signalTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
-    signalTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
-    signalTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
-    signalTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
-
-    signalTree->Branch("minDeltaPhiLeptonMET", &minDeltaPhiLeptonMET, "minDeltaPhiLeptonMET/D");
-    signalTree->Branch("maxDeltaPhiLeptonMET", &maxDeltaPhiLeptonMET, "maxDeltaPhiLeptonMET/D");
-    signalTree->Branch("minmTLeptonMET", &minmTLeptonMET, "minmTLeptonMET/D");
-    signalTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
-    signalTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
-    signalTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
-
-    signalTree->Branch("minDeltaPhiJetMET", &minDeltaPhiJetMET, "minDeltaPhiJetMET/D");
-    signalTree->Branch("maxDeltaPhiJetMET", &maxDeltaPhiJetMET, "maxDeltaPhiJetMET/D");
-    signalTree->Branch("minmTJetMET", &minmTJetMET, "minmTJetMET/D");
-    signalTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
-    signalTree->Branch("minpTJetMET", &minpTJetMET, "minpTJetMET/D");
-    signalTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
-
-    signalTree->Branch("minDeltaPhiBJetMET", &minDeltaPhiBJetMET, "minDeltaPhiBJetMET/D");
-    signalTree->Branch("maxDeltaPhiBJetMET", &maxDeltaPhiBJetMET, "maxDeltaPhiBJetMET/D");
-    signalTree->Branch("minmTBJetMET", &minmTBJetMET, "minmTBJetMET/D");
-    signalTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
-    signalTree->Branch("minpTBJetMET", &minpTBJetMET, "minpTBJetMET/D");
-    signalTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
-
-    bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
-    bkgTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
-    bkgTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
-    bkgTree->Branch("_met", &MET, "_met/D");
-
-    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
-
-    bkgTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
-    bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
-    bkgTree->Branch("mt", &mtHighest, "mt/D");
-    bkgTree->Branch("mtlow", &mtLowest, "mtlow/D");
-
-    bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
-    bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
-    bkgTree->Branch("leadeta", &leadeta, "leadeta/D");
-    bkgTree->Branch("traileta", &traileta, "traileta/D");
-    bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");  
-    bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
-    bkgTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
-    bkgTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
-    bkgTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
-    bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
-
-    bkgTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
-    bkgTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
-
-    bkgTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
-    bkgTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
-
-    bkgTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
-    bkgTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
-    bkgTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
-    bkgTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
-    bkgTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
-    bkgTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
-    bkgTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
-
-    bkgTree->Branch("minDeltaPhiLeptonMET", &minDeltaPhiLeptonMET, "minDeltaPhiLeptonMET/D");
-    bkgTree->Branch("maxDeltaPhiLeptonMET", &maxDeltaPhiLeptonMET, "maxDeltaPhiLeptonMET/D");
-    bkgTree->Branch("minmTLeptonMET", &minmTLeptonMET, "minmTLeptonMET/D");
-    bkgTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
-    bkgTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
-    bkgTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
-
-    bkgTree->Branch("minDeltaPhiJetMET", &minDeltaPhiJetMET, "minDeltaPhiJetMET/D");
-    bkgTree->Branch("maxDeltaPhiJetMET", &maxDeltaPhiJetMET, "maxDeltaPhiJetMET/D");
-    bkgTree->Branch("minmTJetMET", &minmTJetMET, "minmTJetMET/D");
-    bkgTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
-    bkgTree->Branch("minpTJetMET", &minpTJetMET, "minpTJetMET/D");
-    bkgTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
-
-    bkgTree->Branch("minDeltaPhiBJetMET", &minDeltaPhiBJetMET, "minDeltaPhiBJetMET/D");
-    bkgTree->Branch("maxDeltaPhiBJetMET", &maxDeltaPhiBJetMET, "maxDeltaPhiBJetMET/D");
-    bkgTree->Branch("minmTBJetMET", &minmTBJetMET, "minmTBJetMET/D");
-    bkgTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
-    bkgTree->Branch("minpTBJetMET", &minpTBJetMET, "minpTBJetMET/D");
-    bkgTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
-
-}
+////void addBranchToNNTreeVariables(){
+////
+////    signalTree->Branch("_jetPt1", &_jetPt1, "_jetPt1/D");
+////    signalTree->Branch("_jetEta1", &_jetEta1, "_jetEta1/D");
+////    signalTree->Branch("_jetPhi1", &_jetPhi1, "_jetPhi1/D");
+////    signalTree->Branch("_jetE1", &_jetE1, "_jetE1/D");
+////    signalTree->Branch("_jetCSV1", &_jetCSV1, "_jetCSV1/D");
+////
+////    signalTree->Branch("_jetPt2", &_jetPt2, "_jetPt2/D");
+////    signalTree->Branch("_jetEta2", &_jetEta2, "_jetEta2/D");
+////    signalTree->Branch("_jetPhi2", &_jetPhi2, "_jetPhi2/D");
+////    signalTree->Branch("_jetE2", &_jetE2, "_jetE2/D");
+////    signalTree->Branch("_jetCSV2", &_jetCSV2, "_jetCSV2/D");
+////
+////    signalTree->Branch("_jetPt3", &_jetPt3, "_jetPt3/D");
+////    signalTree->Branch("_jetEta3", &_jetEta3, "_jetEta3/D");
+////    signalTree->Branch("_jetPhi3", &_jetPhi3, "_jetPhi3/D");
+////    signalTree->Branch("_jetE3", &_jetE3, "_jetE3/D");
+////    signalTree->Branch("_jetCSV3", &_jetCSV3, "_jetCSV3/D");
+////
+////    signalTree->Branch("_jetPt4", &_jetPt4, "_jetPt4/D");
+////    signalTree->Branch("_jetEta4", &_jetEta4, "_jetEta4/D");
+////    signalTree->Branch("_jetPhi4", &_jetPhi4, "_jetPhi4/D");
+////    signalTree->Branch("_jetE4", &_jetE4, "_jetE4/D");
+////    signalTree->Branch("_jetCSV4", &_jetCSV4, "_jetCSV4/D");
+////
+////    signalTree->Branch("_jetPt5", &_jetPt5, "_jetPt5/D");
+////    signalTree->Branch("_jetEta5", &_jetEta5, "_jetEta5/D");
+////    signalTree->Branch("_jetPhi5", &_jetPhi5, "_jetPhi5/D");
+////    signalTree->Branch("_jetE5", &_jetE5, "_jetE5/D");
+////    signalTree->Branch("_jetCSV5", &_jetCSV5, "_jetCSV5/D");
+////
+////    signalTree->Branch("_jetPt6", &_jetPt6, "_jetPt6/D");
+////    signalTree->Branch("_jetEta6", &_jetEta6, "_jetEta6/D");
+////    signalTree->Branch("_jetPhi6", &_jetPhi6, "_jetPhi6/D");
+////    signalTree->Branch("_jetE6", &_jetE6, "_jetE6/D");
+////    signalTree->Branch("_jetCSV6", &_jetCSV6, "_jetCSV6/D");
+////
+////    signalTree->Branch("_lepPt1", &_lepPt1, "_lepPt1/D");
+////    signalTree->Branch("_lepEta1", &_lepEta1, "_lepEta1/D");
+////    signalTree->Branch("_lepPhi1", &_lepPhi1, "_lepPhi1/D");
+////    signalTree->Branch("_lepE1", &_lepE1, "_lepE1/D");
+////    signalTree->Branch("_lepCharge1", &_lepCharge1, "_lepCharge1/D");
+////
+////    signalTree->Branch("_lepPt2", &_lepPt2, "_lepPt2/D");
+////    signalTree->Branch("_lepEta2", &_lepEta2, "_lepEta2/D");
+////    signalTree->Branch("_lepPhi2", &_lepPhi2, "_lepPhi2/D");
+////    signalTree->Branch("_lepE2", &_lepE2, "_lepE2/D");
+////    signalTree->Branch("_lepCharge2", &_lepCharge2, "_lepCharge2/D");
+////
+////    signalTree->Branch("_metPt1", &_metPt1, "_metPt1/D");
+////    signalTree->Branch("_metEta1", &_metEta1, "_metEta1/D");
+////    signalTree->Branch("_metPhi1", &_metPhi1, "_metPhi1/D");
+////    signalTree->Branch("_metE1", &_metE1, "_metE1/D");
+////
+////    signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
+////    signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
+////    signalTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
+////    signalTree->Branch("_met", &MET, "_met/D");
+////
+////    signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
+////    signalTree->Branch("mt", &mtHighest, "mt/D");
+////
+////    signalTree->Branch("leadpt", &leadpt, "leadpt/D");
+////    signalTree->Branch("trailpt", &trailpt, "trailpt/D");
+////    signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
+////    signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+////    signalTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+////    signalTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+////    signalTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+////    signalTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
+////
+////    signalTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
+////    signalTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
+////
+////    signalTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
+////    signalTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
+////
+////    signalTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
+////    signalTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
+////    signalTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
+////    signalTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
+////    signalTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
+////    signalTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
+////    signalTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
+////
+////    signalTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
+////    signalTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
+////    signalTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
+////
+////    signalTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
+////    signalTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
+////
+////    signalTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
+////    signalTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
+////
+////    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+////
+////    bkgTree->Branch("_jetPt1", &_jetPt1, "_jetPt1/D");
+////    bkgTree->Branch("_jetEta1", &_jetEta1, "_jetEta1/D");
+////    bkgTree->Branch("_jetPhi1", &_jetPhi1, "_jetPhi1/D");
+////    bkgTree->Branch("_jetE1", &_jetE1, "_jetE1/D");
+////    bkgTree->Branch("_jetCSV1", &_jetCSV1, "_jetCSV1/D");
+////
+////    bkgTree->Branch("_jetPt2", &_jetPt2, "_jetPt2/D");
+////    bkgTree->Branch("_jetEta2", &_jetEta2, "_jetEta2/D");
+////    bkgTree->Branch("_jetPhi2", &_jetPhi2, "_jetPhi2/D");
+////    bkgTree->Branch("_jetE2", &_jetE2, "_jetE2/D");
+////    bkgTree->Branch("_jetCSV2", &_jetCSV2, "_jetCSV2/D");
+////
+////    bkgTree->Branch("_jetPt3", &_jetPt3, "_jetPt3/D");
+////    bkgTree->Branch("_jetEta3", &_jetEta3, "_jetEta3/D");
+////    bkgTree->Branch("_jetPhi3", &_jetPhi3, "_jetPhi3/D");
+////    bkgTree->Branch("_jetE3", &_jetE3, "_jetE3/D");
+////    bkgTree->Branch("_jetCSV3", &_jetCSV3, "_jetCSV3/D");
+////
+////    bkgTree->Branch("_jetPt4", &_jetPt4, "_jetPt4/D");
+////    bkgTree->Branch("_jetEta4", &_jetEta4, "_jetEta4/D");
+////    bkgTree->Branch("_jetPhi4", &_jetPhi4, "_jetPhi4/D");
+////    bkgTree->Branch("_jetE4", &_jetE4, "_jetE4/D");
+////    bkgTree->Branch("_jetCSV4", &_jetCSV4, "_jetCSV4/D");
+////
+////    bkgTree->Branch("_jetPt5", &_jetPt5, "_jetPt5/D");
+////    bkgTree->Branch("_jetEta5", &_jetEta5, "_jetEta5/D");
+////    bkgTree->Branch("_jetPhi5", &_jetPhi5, "_jetPhi5/D");
+////    bkgTree->Branch("_jetE5", &_jetE5, "_jetE5/D");
+////    bkgTree->Branch("_jetCSV5", &_jetCSV5, "_jetCSV5/D");
+////
+////    bkgTree->Branch("_jetPt6", &_jetPt6, "_jetPt6/D");
+////    bkgTree->Branch("_jetEta6", &_jetEta6, "_jetEta6/D");
+////    bkgTree->Branch("_jetPhi6", &_jetPhi6, "_jetPhi6/D");
+////    bkgTree->Branch("_jetE6", &_jetE6, "_jetE6/D");
+////    bkgTree->Branch("_jetCSV6", &_jetCSV6, "_jetCSV6/D");
+////
+////    bkgTree->Branch("_lepPt1", &_lepPt1, "_lepPt1/D");
+////    bkgTree->Branch("_lepEta1", &_lepEta1, "_lepEta1/D");
+////    bkgTree->Branch("_lepPhi1", &_lepPhi1, "_lepPhi1/D");
+////    bkgTree->Branch("_lepE1", &_lepE1, "_lepE1/D");
+////    bkgTree->Branch("_lepCharge1", &_lepCharge1, "_lepCharge1/D");
+////
+////    bkgTree->Branch("_lepPt2", &_lepPt2, "_lepPt2/D");
+////    bkgTree->Branch("_lepEta2", &_lepEta2, "_lepEta2/D");
+////    bkgTree->Branch("_lepPhi2", &_lepPhi2, "_lepPhi2/D");
+////    bkgTree->Branch("_lepE2", &_lepE2, "_lepE2/D");
+////    bkgTree->Branch("_lepCharge2", &_lepCharge2, "_lepCharge2/D");
+////
+////    bkgTree->Branch("_metPt1", &_metPt1, "_metPt1/D");
+////    bkgTree->Branch("_metEta1", &_metEta1, "_metEta1/D");
+////    bkgTree->Branch("_metPhi1", &_metPhi1, "_metPhi1/D");
+////    bkgTree->Branch("_metE1", &_metE1, "_metE1/D");
+////
+////    bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
+////    bkgTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
+////    bkgTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
+////    bkgTree->Branch("_met", &MET, "_met/D");
+////
+////    bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
+////    bkgTree->Branch("mt", &mtHighest, "mt/D");
+////
+////    bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
+////    bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
+////    bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
+////    bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+////    bkgTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+////    bkgTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+////    bkgTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+////    bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
+////
+////    bkgTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
+////    bkgTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
+////
+////    bkgTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
+////    bkgTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
+////
+////    bkgTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
+////    bkgTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
+////    bkgTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
+////    bkgTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
+////    bkgTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
+////    bkgTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
+////    bkgTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
+////
+////    bkgTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
+////    bkgTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
+////    bkgTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
+////
+////    bkgTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
+////    bkgTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
+////
+////    bkgTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
+////    bkgTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
+////
+////    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+////
+////}
+////
+////void addBranchToBDTTreeVariables(){
+////    signalTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
+////    signalTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
+////    signalTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
+////    signalTree->Branch("_met", &MET, "_met/D");
+////
+////    signalTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+////
+////    signalTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
+////    signalTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
+////    signalTree->Branch("mt", &mtHighest, "mt/D");
+////    signalTree->Branch("mtlow", &mtLowest, "mtlow/D");
+////
+////    signalTree->Branch("leadpt", &leadpt, "leadpt/D");
+////    signalTree->Branch("trailpt", &trailpt, "trailpt/D");
+////    signalTree->Branch("leadeta", &leadeta, "leadeta/D");
+////    signalTree->Branch("traileta", &traileta, "traileta/D");
+////    signalTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");
+////    signalTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+////    signalTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+////    signalTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+////    signalTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+////    signalTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
+////
+////    signalTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
+////    signalTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
+////
+////    signalTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
+////    signalTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
+////
+////    signalTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
+////    signalTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
+////    signalTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
+////    signalTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
+////    signalTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
+////    signalTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
+////    signalTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
+////
+////    signalTree->Branch("minDeltaPhiLeptonMET", &minDeltaPhiLeptonMET, "minDeltaPhiLeptonMET/D");
+////    signalTree->Branch("maxDeltaPhiLeptonMET", &maxDeltaPhiLeptonMET, "maxDeltaPhiLeptonMET/D");
+////    signalTree->Branch("minmTLeptonMET", &minmTLeptonMET, "minmTLeptonMET/D");
+////    signalTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
+////    signalTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
+////    signalTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
+////
+////    signalTree->Branch("minDeltaPhiJetMET", &minDeltaPhiJetMET, "minDeltaPhiJetMET/D");
+////    signalTree->Branch("maxDeltaPhiJetMET", &maxDeltaPhiJetMET, "maxDeltaPhiJetMET/D");
+////    signalTree->Branch("minmTJetMET", &minmTJetMET, "minmTJetMET/D");
+////    signalTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
+////    signalTree->Branch("minpTJetMET", &minpTJetMET, "minpTJetMET/D");
+////    signalTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
+////
+////    signalTree->Branch("minDeltaPhiBJetMET", &minDeltaPhiBJetMET, "minDeltaPhiBJetMET/D");
+////    signalTree->Branch("maxDeltaPhiBJetMET", &maxDeltaPhiBJetMET, "maxDeltaPhiBJetMET/D");
+////    signalTree->Branch("minmTBJetMET", &minmTBJetMET, "minmTBJetMET/D");
+////    signalTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
+////    signalTree->Branch("minpTBJetMET", &minpTBJetMET, "minpTBJetMET/D");
+////    signalTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
+////
+////    bkgTree->Branch("nJLoc", &nJLoc, "nJLoc/I");
+////    bkgTree->Branch("nBLoc", &nBLoc, "nBLoc/I");
+////    bkgTree->Branch("HTLoc", &HTLoc, "HTLoc/D");
+////    bkgTree->Branch("_met", &MET, "_met/D");
+////
+////    bkgTree->Branch("_weight", &_weightEventInTree, "_weight/D");
+////
+////    bkgTree->Branch("minDeltaRlead", &minDeltaRlead, "minDeltaRlead/D");
+////    bkgTree->Branch("minDeltaR", &minDeltaR, "minDeltaR/D");
+////    bkgTree->Branch("mt", &mtHighest, "mt/D");
+////    bkgTree->Branch("mtlow", &mtLowest, "mtlow/D");
+////
+////    bkgTree->Branch("leadpt", &leadpt, "leadpt/D");
+////    bkgTree->Branch("trailpt", &trailpt, "trailpt/D");
+////    bkgTree->Branch("leadeta", &leadeta, "leadeta/D");
+////    bkgTree->Branch("traileta", &traileta, "traileta/D");
+////    bkgTree->Branch("leadingJetPt", &leadingJetPt, "leadingJetPt/D");  
+////    bkgTree->Branch("trailJetPt", &trailJetPt, "trailJetPt/D");
+////    bkgTree->Branch("chargeOfLeptons", &chargeOfLeptons, "chargeOfLeptons/I");
+////    bkgTree->Branch("mll_ss", &mll_ss, "mll_ss/D");
+////    bkgTree->Branch("ll_deltaR", &ll_deltaR, "ll_deltaR/D");
+////    bkgTree->Branch("mt2ll_ss", &mt2ll_ss, "mt2ll_ss/D");
+////
+////    bkgTree->Branch("maxMLeptonJet", &maxMLeptonJet, "maxMLeptonJet/D");
+////    bkgTree->Branch("maxpTLeptonJet", &maxpTLeptonJet, "maxpTLeptonJet/D");
+////
+////    bkgTree->Branch("maxMLeptonbJet", &maxMLeptonbJet, "maxMLeptonbJet/D");
+////    bkgTree->Branch("maxpTLeptonbJet", &maxpTLeptonbJet, "maxpTLeptonbJet/D");
+////
+////    bkgTree->Branch("minMJetJet", &minMJetJet, "minMJetJet/D");
+////    bkgTree->Branch("maxMJetJet", &maxMJetJet, "maxMJetJet/D");
+////    bkgTree->Branch("minDeltaRJetJet", &minDeltaRJetJet, "minDeltaRJetJet/D");
+////    bkgTree->Branch("maxDeltaRJetJet", &maxDeltaRJetJet, "maxDeltaRJetJet/D");
+////    bkgTree->Branch("minDeltaPhiJetJet", &minDeltaPhiJetJet, "minDeltaPhiJetJet/D");
+////    bkgTree->Branch("maxDeltaPhiJetJet", &maxDeltaPhiJetJet, "maxDeltaPhiJetJet/D");
+////    bkgTree->Branch("maxpTJetJet", &maxpTJetJet, "maxpTJetJet/D");
+////
+////    bkgTree->Branch("minDeltaPhiLeptonMET", &minDeltaPhiLeptonMET, "minDeltaPhiLeptonMET/D");
+////    bkgTree->Branch("maxDeltaPhiLeptonMET", &maxDeltaPhiLeptonMET, "maxDeltaPhiLeptonMET/D");
+////    bkgTree->Branch("minmTLeptonMET", &minmTLeptonMET, "minmTLeptonMET/D");
+////    bkgTree->Branch("maxmTLeptonMET", &maxmTLeptonMET, "maxmTLeptonMET/D");
+////    bkgTree->Branch("minpTLeptonMET", &minpTLeptonMET, "minpTLeptonMET/D");
+////    bkgTree->Branch("maxpTLeptonMET", &maxpTLeptonMET, "maxpTLeptonMET/D");
+////
+////    bkgTree->Branch("minDeltaPhiJetMET", &minDeltaPhiJetMET, "minDeltaPhiJetMET/D");
+////    bkgTree->Branch("maxDeltaPhiJetMET", &maxDeltaPhiJetMET, "maxDeltaPhiJetMET/D");
+////    bkgTree->Branch("minmTJetMET", &minmTJetMET, "minmTJetMET/D");
+////    bkgTree->Branch("maxmTJetMET", &maxmTJetMET, "maxmTJetMET/D");
+////    bkgTree->Branch("minpTJetMET", &minpTJetMET, "minpTJetMET/D");
+////    bkgTree->Branch("maxpTJetMET", &maxpTJetMET, "maxpTJetMET/D");
+////
+////    bkgTree->Branch("minDeltaPhiBJetMET", &minDeltaPhiBJetMET, "minDeltaPhiBJetMET/D");
+////    bkgTree->Branch("maxDeltaPhiBJetMET", &maxDeltaPhiBJetMET, "maxDeltaPhiBJetMET/D");
+////    bkgTree->Branch("minmTBJetMET", &minmTBJetMET, "minmTBJetMET/D");
+////    bkgTree->Branch("maxmTBJetMET", &maxmTBJetMET, "maxmTBJetMET/D");
+////    bkgTree->Branch("minpTBJetMET", &minpTBJetMET, "minpTBJetMET/D");
+////    bkgTree->Branch("maxpTBJetMET", &maxpTBJetMET, "maxpTBJetMET/D");
+////
+////}
 
 /*
 void addVariablesToBDT(const bool is2017 = false){

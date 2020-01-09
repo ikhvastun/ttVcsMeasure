@@ -52,7 +52,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, double lumi )
   else if ( iPeriod==4 )
     {
       //lumiText += (TString)(lumi == 35.9 ? "2016 35.9 fb^{-1}" : (lumi == 41.5 ? "2017 41.5 fb^{-1}" : "2016+2017 77.5 fb^{-1}"));
-      lumiText += (TString)(lumi == 35.9 ? "35.9 fb^{-1}" : (lumi == 41.5 ? "41.5 fb^{-1}" : "77.5 fb^{-1}"));
+      lumiText += (TString)(lumi == 35.9 ? "35.9 fb^{-1}" : (lumi == 41.5 ? "41.5 fb^{-1}" : (lumi == 59.7 ? "59.7 fb^{-1}" : "77.5 fb^{-1}")));
       lumiText += " (13 TeV)";
       if(lumi == 0.){
         lumiText = "";

@@ -28,7 +28,7 @@
 #sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_ZZ.txt ZZ
 
 # 3L + 4L
-sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZ
+#sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZ
 # clean here stands for 3L + 3jets + 1b or 4L + 1b
 #sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZclean
 
@@ -56,12 +56,26 @@ sh runCode.sh data/samples/samples_ttZ_npDD.txt ttZ
 #sh runCode.sh data/samples/2017CR/samples_ttZ_2017_npDD_ZZ.txt ZZ
 
 # 3L + 4L
-sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZ
+#sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZ
 # clean here stands for 3L + 3jets + 1b or 4L + 1b
 #sh runCode.sh data/samples/samples_ttZ_2017_npDD.txt ttZclean
 
-###########################################################################
+######################################################
+#                      2018                        ###
+######################################################
+
+# 3L + 4L
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttZ
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ZZ
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt WZ
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttbar
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt DY
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt Xgamma
+sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttZclean
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_pretend.txt ttZ
+######################################################
 # combination of 2016 and 2017
+######################################################
 # 3L
 #sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_WZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_WZ.txt WZ
 #sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_nonprompt.txt,data/samples/2017CR/samples_ttZ_2017_npDD_nonprompt.txt ttbar

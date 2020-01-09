@@ -43,7 +43,6 @@ void Reweighter::initializePuWeights(const std::vector< Sample >& sampleList){
     for(auto& sample : sampleList){
         //no pu weights for data 
         if( sample.isData() ) continue;
-
         //open root file corresponding to sample
         std::string str = sample.getFileName();
         TFile* puFile = TFile::Open( (const TString&) "data/pileUpReweighing/puWeights_" + sample.getFileName());
@@ -51,7 +50,10 @@ void Reweighter::initializePuWeights(const std::vector< Sample >& sampleList){
         //extract pu weights 
         for(unsigned var = 0; var < 3; ++var){
             std::string histName = "puw_Run";
-            histName += (sample.is2016() ? "2016" : "2017");
+            if(sample.is2018()) histName += "2018";
+												else histName += (sample.is2016() ? "2016" : "2017");
+            //if(sample.is2018()) histName += "2017";  // TEMPORARY for pretend 2018 run!!
+												//else histName += (sample.is2016() ? "2016" : "2018");  // TEMPORARY for pretend 2017 run!!
             histName += "Inclusive_" + minBiasVariation[var];
             puWeights[sample.getUniqueName()].push_back( std::shared_ptr<TH1D> ( (TH1D*)puFile->Get( (const TString&) histName ) ) );
 
@@ -184,6 +186,8 @@ void Reweighter::initializeElectronWeights(){
     electronTightToRecoSF_syst_ttH->SetDirectory(gROOT);
     electronTightToRecoSF_stat->SetDirectory(gROOT);
     electronIdFile->Close();
+    ttHSFelefiles->Close();
+
 }
 
 
@@ -249,6 +253,7 @@ void Reweighter::initializeMuonWeights(){
     muonTightToRecoSF_syst_ttH->SetDirectory(gROOT);
     muonTightToRecoSF_stat->SetDirectory(gROOT);
     muonIdFile->Close();    
+    ttHSFfiles->Close();
 }
 
 void Reweighter::initializeFakeRate(){
@@ -309,6 +314,7 @@ double Reweighter::puWeight(const double nTrueInt, const Sample& sample, const u
 
         //check if pu weights are available for this sample
         if( weightVectorIter == puWeights.cend() ){
+//            if( !sample.isData() ) std::cerr << "Error: no pu weights found for sample : " << sample.getUniqueName() << " returning weight 0  " << std::endl;
             std::cerr << "Error: no pu weights found for sample : " << sample.getUniqueName() << " returning weight 0  " << std::endl;
             return 0.;
         }
@@ -413,8 +419,8 @@ double Reweighter::muonTightIdWeightOnlySyst(const double pt, const double eta, 
 
     double sftight = muonTightToRecoSF_syst->GetBinContent( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) );
     int var = unc == 2 ? -1 : int(unc);
-//MAREK    return sftight + (var != 0 ? var * muonTightToRecoSF_syst->GetBinError( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) ) : 0.);
-    return sftight + (var != 0 ? var * muonTightToRecoSF_syst_ttH->GetBinError( muonTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt) ) : 0.);
+    return sftight + (var != 0 ? var * muonTightToRecoSF_syst->GetBinError( muonTightToRecoSF_syst->FindBin( croppedPt, croppedEta) ) : 0.);
+//MAREK    return sftight + (var != 0 ? var * muonTightToRecoSF_syst_ttH->GetBinError( muonTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt) ) : 0.);
 }
 
 double Reweighter::muonTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const{
@@ -453,8 +459,8 @@ double Reweighter::electronTightIdWeight(const double pt, const double eta, cons
 */
 
 double Reweighter::electronTightIdWeightOnlySyst(const double pt, const double eta, const unsigned unc) const{
-    //MAREK double croppedPt = std::min(pt, 199.);
-    double croppedPt = std::min(pt, 119.);
+    double croppedPt = std::min(pt, 199.);
+    //MAREKdouble croppedPt = std::min(pt, 119.);
     double croppedEta;
     if( is2016 ){   //asymmetric scale factors are currently only available for 2016 data!
         croppedEta = std::min( std::max( -2.49, eta ), 2.49 ); 
@@ -465,8 +471,8 @@ double Reweighter::electronTightIdWeightOnlySyst(const double pt, const double e
     double sftight = electronTightToRecoSF_syst->GetBinContent( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta) );
 
     int var = unc == 2 ? -1 : int(unc);
-//MAREK    return sftight + (var != 0 ? var * electronTightToRecoSF_syst->GetBinError( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta)) : 0.);
-    return sftight + (var != 0 ? var * electronTightToRecoSF_syst_ttH->GetBinError( electronTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt)) : 0.);
+    return sftight + (var != 0 ? var * electronTightToRecoSF_syst->GetBinError( electronTightToRecoSF_syst->FindBin( croppedPt, croppedEta)) : 0.);
+//MAREK    return sftight + (var != 0 ? var * electronTightToRecoSF_syst_ttH->GetBinError( electronTightToRecoSF_syst_ttH->FindBin( croppedEta, croppedPt)) : 0.);
 }
 
 double Reweighter::electronTightIdWeightOnlyStat(const double pt, const double eta, const unsigned unc) const{

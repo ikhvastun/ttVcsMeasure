@@ -39,7 +39,7 @@ void printInfoOnPlotNPCR();
 void printInfoOnXaxisAllTTZ();
 void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog, bool normalizedToData, const int showLegendOption); // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
 void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight);
-void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
+void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017, 3 - 2018
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
@@ -92,6 +92,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     double lumi = 35.9;
     if(showLegendOption == 1) lumi = 41.5;
     else if (showLegendOption == 2) lumi = 77.5;
+    else if (showLegendOption == 3) lumi = 59.7;
     CMS_lumi( pad1, iPeriod, iPos, lumi);
 
     pad1->cd();
@@ -514,6 +515,7 @@ void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info
     double lumi = 35.9;
     if(showLegendOption == 1) lumi = 41.5;
     else if (showLegendOption == 2) lumi = 77.5;
+    else if (showLegendOption == 3) lumi = 59.7;
     CMS_lumi( pad1, iPeriod, iPos, lumi);
 
     pad1->cd();

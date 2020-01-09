@@ -71,11 +71,29 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
             tools::printProgress(progress);
         }
         sampleTree->GetEntry(it);
+								////  for(unsigned l = 0; l < _nLight; ++l){
+								////    if ( _lFlavor[l] == 0 && _lElectronPassEmu[l]!=0 ){
+								////      std::cout << "electrons value of pass Emu : "<<  _lElectronPassEmu[l] << std::endl;
+								////    } 
+								////  }
+
+								// selectLooseLep is used for FR measurements. Also, for general ttZ analysis, we could simply run with at least 3 leptons, but i keep 2lep events for possible checks, the size of samples is still manegable 
         std::vector<unsigned> ind, indJets;
-        //unsigned lCount = selectLepGoodForLeptonMVA(ind);
-        unsigned lCount = selectLooseLep(ind);
-        //if(lCount < 4) continue;
-        //if(_nJets < 2) continue;
+        unsigned lCount = selectLepGoodForLeptonMVA(ind);
+
+        //std::vector<unsigned> ind_loose, ind_fake, ind_tight;
+        //unsigned lCount_loose = selectLooseLep(ind_loose);
+        //unsigned lCount_fake = selectFakeLep(ind_fake);
+        //unsigned lCount_tight = selectLep(ind);
+        if(lCount < 2) continue;
+								// at least 5 jets for Steven
+        unsigned jetCount = nJets(0, true, indJets);
+        if(jetCount < 5) continue;
+        // same sign selection
+        //if(lCount == 2){
+        //    if(_lCharge[ind.at(0)] * _lCharge[ind.at(1)] < 0)
+        //        continue;
+        //}
 
         /*
         bool allPrompt = true;
@@ -97,22 +115,17 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         
         // this is used for FR measurement in QCD
         
+        /*
         if(lCount < 1) continue;
         unsigned jetCount = nJets(0, true, indJets);
         if(!deltaRCalcForWS(indJets, ind.at(0))) continue;
+        */
+        
         
 
         // additional requirement for FR in data
         //if(!(_HLT_Mu3_PFJet40 || _HLT_Mu8 || _HLT_Mu17 || _HLT_Mu27 || _HLT_Ele8_CaloIdM_TrackIdM_PFJet30 || _HLT_Ele17_CaloIdM_TrackIdM_PFJet30 || _HLT_Ele23_CaloIdM_TrackIdM_PFJet30)) continue;
 
-        // same sign selection
-        /*
-        if(lCount < 2) continue;
-        if(lCount == 2){
-            if(_lCharge[ind.at(0)] * _lCharge[ind.at(1)] < 0)
-                continue;
-        }
-        */
 
         // is used for ttbar emu
         /*
@@ -184,23 +197,23 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         if(!is_in) continue;
         */
 
-        for(int i = 0; i < _nLight; i++){
-            std::vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)fabs(_lEta[i]), (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_ptRatio[i], (Float_t)_relIso[i],(Float_t)(std::isnan(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i]) ? 0. : std::max(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i], 0.)),(Float_t)_3dIPSig[i], (Float_t)log( fabs(_dxy[i])), (Float_t)log( fabs(_dz[i])), 
-            _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
-            //_lFlavor[i] == 0 ? (Float_t)_lElectronMvaFall17NoIso[i] : (Float_t)_lMuonSegComp[i]};
-            fillBDTvariables(varForBDT, _lFlavor[i]);
-            //if(_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i] != _closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i]) continue;
-            double mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
-            _leptonMvatZqTTV[i] = mvaVL;
-            //std::cout << "mva value is " << mvaVL << std::endl;
-        }
+        //for(int i = 0; i < _nLight; i++){
+        //    std::vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)fabs(_lEta[i]), (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_ptRatio[i], (Float_t)_relIso[i],(Float_t)(std::isnan(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i]) ? 0. : std::max(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i], 0.)),(Float_t)_3dIPSig[i], (Float_t)log( fabs(_dxy[i])), (Float_t)log( fabs(_dz[i])), 
+        //    _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
+        //    //_lFlavor[i] == 0 ? (Float_t)_lElectronMvaFall17NoIso[i] : (Float_t)_lMuonSegComp[i]};
+        //    fillBDTvariables(varForBDT, _lFlavor[i]);
+        //    //if(_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i] != _closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i]) continue;
+        //    double mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
+        //    //MAREK// _leptonMvatZqTTV[i] = mvaVL;
+        //    std::cout << "mva calculated value is " << mvaVL << std::endl;
+        //    std::cout << "mva value in tree is " << _leptonMvatZqTTV[i] << std::endl;
+        //}
         //std::vector<unsigned> indTightTTW;
         //unsigned lCountTightTTW = selectLepTightTTW(indTightTTW);
         //if(lCountTightTTW < 2) continue;
 
         outputTree->Fill();
     }   
-    std::cout << std::endl;
     if(!isData){
         hCounter->Write();
         lheCounter->Write();
@@ -215,7 +228,7 @@ int main(int argc, char* argv[]){
     treeReader reader;
     bool isData = false;
     if(argc != 0){
-        std::vector<std::string> datasets = {"SingleElectron", "SingleMuon", "DoubleEG", "DoubleMuon", "MuonEG"}; 
+        std::vector<std::string> datasets = {"SingleElectron", "SingleMuon", "DoubleEG", "DoubleMuon", "MuonEG", "EGamma"}; 
         for(auto it = datasets.cbegin(); it != datasets.cend(); ++it){
             std::string name(argv[1]);
             auto pos = name.find(*it);

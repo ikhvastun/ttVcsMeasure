@@ -2,12 +2,12 @@
 
 #include functions to export CMSSW in submit
 source setCMSSW.sh
-outputFolder=ntuples_ttz_dilep
+outputFolder=ntuples_ttz_2L_ttZ_2018
 
 fillJob(){
     name=${1%/}
     name=${name##*/}
-    name=${name#ntuples_temp_*}
+    name=${name#ntuples_temp_2L*}
     name=${name}.root
     if [ ! -d ~/Work/${outputFolder} ]
         then mkdir ~/Work/${outputFolder}
@@ -34,7 +34,7 @@ submitMergeTuple(){
     rm mergeJob.sh
 }
 
-skimmedTuples=~/Work/ntuples_temp_*
+skimmedTuples=~/Work/ntuples_temp_2L*
 mergeTuples(){
     for d in $skimmedTuples
         do mergeTuple $d

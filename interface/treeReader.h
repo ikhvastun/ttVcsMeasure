@@ -21,6 +21,13 @@
 
 class treeReader {
     public :
+//        int leptons_preMiniIsoCut = 0;
+//        int leptons_postMiniIsoCut = 0;
+//        int leptons_loose = 0;
+//        int leptons_clean = 0;
+//        int leptons_passMVA = 0;
+//        int leptons_postMissingHits = 0;
+//        int leptons_postPassEmu = 0;
         //Declare leaf types
         static const unsigned nL_max = 20;
         static const unsigned nJets_max = 20;
@@ -58,8 +65,8 @@ class treeReader {
         Int_t           _HLT_Mu27_prescale;
         Bool_t          _HLT_Ele8_CaloIdM_TrackIdM_PFJet30;
         Int_t           _HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale;
-        Bool_t          _HLT_Ele12_CaloIdM_TrackIdM_PFJet30;
-        Int_t           _HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;
+//        Bool_t          _HLT_Ele12_CaloIdM_TrackIdM_PFJet30;
+//        Int_t           _HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;
         Bool_t          _HLT_Ele17_CaloIdM_TrackIdM_PFJet30;
         Int_t           _HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale;
         Bool_t          _HLT_Ele23_CaloIdM_TrackIdM_PFJet30;
@@ -149,7 +156,7 @@ class treeReader {
         UInt_t          _lElectronMissingHits[nL_max];   //[_nLight]  
         Double_t        _leptonMvaSUSY[nL_max];   //[_nLight]
         Double_t        _leptonMvaTTH[nL_max];   //[_nLight]
-        Double_t        _leptonMvatZqTTV[nL_max];   //[_nLight]
+        Double_t        _leptonMvatZq[nL_max];   //[_nLight]
         Double_t        _leptonMvatZqTTV16[nL_max];   //[_nLight]
         Bool_t          _lHNLoose[nL_max];   
         Bool_t          _lHNFO[nL_max];   
@@ -171,7 +178,7 @@ class treeReader {
         Bool_t          _tauVTightMvaNew[nL_max];   
         Bool_t          _tauVTightMvaOld[nL_max];   
         Double_t        _relIso[nL_max];   
-        Double_t        _relIso0p4Mu[nL_max];
+        Double_t        _relIso0p4MuDeltaBeta[nL_max];
         Double_t        _miniIso[nL_max];   
         Double_t        _miniIsoCharged[nL_max];   
         Double_t        _ptRel[nL_max];   
@@ -191,8 +198,8 @@ class treeReader {
         Double_t        _jetPt[nJets_max];   
         Double_t        _jetPt_JECUp[nJets_max];   
         Double_t        _jetPt_JECDown[nJets_max];   
-        Double_t        _jetPt_JERUp[nJets_max];   
-        Double_t        _jetPt_JERDown[nJets_max];   
+//        Double_t        _jetPt_JERUp[nJets_max];   
+//        Double_t        _jetPt_JERDown[nJets_max];   
         Double_t        _jetSmearedPt[nJets_max];
         Double_t        _jetSmearedPt_JECDown[nJets_max];
         Double_t        _jetSmearedPt_JECUp[nJets_max];
@@ -388,17 +395,22 @@ class treeReader {
         double dataLumi = 41.5;                                          //in units of 1/fb
         int nonPromptSample = -999;
         int CMIDSample = -999;
-        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
+//        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
+        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.8}, {4, 0.8}};   // ttH mva WP values
         std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
         std::shared_ptr<Reweighter> reweighter;
         double crossSectionRatio[100][100];
 
         std::map<std::string, int> processToCounterMap;
 
+        bool is2018() { return currentSample.is2018(); }
         bool is2017() { return currentSample.is2017(); }
         bool is2016() { return currentSample.is2016(); }                  //if sample is not 2017 it is automatically 2016
         double lumi2016 = 35.9;
         double lumi2017 = 41.5;
+        double lumi2018 = 59.7;
+//        double lumi2017 = 59.7;  // TEMPORARY change for pretend 2017
+//        double lumi2018 = 41.5;  // TEMPORARY change for pretend 2018 
         //bool isData() { return currentSample.isData(); }
         //bool isMC() { return currentSample.isMC(); } 
         Float_t user_pt, user_eta, user_trackMult,  user_miniIsoCharged, user_miniIsoNeutral, user_ptrel, user_ptratio, user_jetBtagCSV, user_sip3d, user_dxy, user_dz, user_segmComp, user_eleMVA, user_relIso;
@@ -441,8 +453,8 @@ class treeReader {
        TBranch        *b__HLT_Mu27_prescale;   //!
        TBranch        *b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30;   //!
        TBranch        *b__HLT_Ele8_CaloIdM_TrackIdM_PFJet30_prescale;   //!
-       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30;   //!
-       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;   //!
+//       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30;   //!
+//       TBranch        *b__HLT_Ele12_CaloIdM_TrackIdM_PFJet30_prescale;   //!
        TBranch        *b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30;   //!
        TBranch        *b__HLT_Ele17_CaloIdM_TrackIdM_PFJet30_prescale;   //!
        TBranch        *b__HLT_Ele23_CaloIdM_TrackIdM_PFJet30;   //!
@@ -532,7 +544,7 @@ class treeReader {
         TBranch        *b__lElectronMissingHits;   //! 
         TBranch        *b__leptonMvaSUSY;   //!
         TBranch        *b__leptonMvaTTH;   //! 
-        TBranch        *b__leptonMvatZqTTV;   //! 
+        TBranch        *b__leptonMvatZq;   //! 
         TBranch        *b__leptonMvatZqTTV16;   //! 
         TBranch        *b__lHNLoose;   
         TBranch        *b__lHNFO;   
@@ -554,7 +566,7 @@ class treeReader {
         TBranch        *b__tauVTightMvaNew;   
         TBranch        *b__tauVTightMvaOld;   
         TBranch        *b__relIso;   
-        TBranch        *b__relIso0p4Mu;
+        TBranch        *b__relIso0p4MuDeltaBeta;
         TBranch        *b__miniIso;   
         TBranch        *b__miniIsoCharged;   
         TBranch        *b__ptRel;   
@@ -574,8 +586,8 @@ class treeReader {
         TBranch        *b__jetPt;   
         TBranch        *b__jetPt_JECUp;   
         TBranch        *b__jetPt_JECDown;   
-        TBranch        *b__jetPt_JERUp;   
-        TBranch        *b__jetPt_JERDown;   
+//        TBranch        *b__jetPt_JERUp;   
+//        TBranch        *b__jetPt_JERDown;   
         TBranch        *b__jetSmearedPt;
         TBranch        *b__jetSmearedPt_JECDown;
         TBranch        *b__jetSmearedPt_JECUp;

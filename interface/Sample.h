@@ -36,9 +36,11 @@ class Sample{
 
         bool isMC() const { return !isDataSample; }
 
+        bool is2016() const { return is2016Sample; }
+
         bool is2017() const { return is2017Sample; }
 
-        bool is2016() const { return !is2017Sample; }
+        bool is2018() const { return is2018Sample; }
 
         bool isSMSignal() const { return smSignal; }
 
@@ -49,7 +51,11 @@ class Sample{
     private:
         void setData(); 
 
+        void set2016();
+
         void set2017();
+
+        void set2018();
 
         void setOptions(const std::string&);
 
@@ -60,7 +66,9 @@ class Sample{
 
         double xSec;
         bool isDataSample;
+        bool is2018Sample;
         bool is2017Sample;
+        bool is2016Sample;
         bool smSignal;
         bool newPhysicsSignal;
 };
