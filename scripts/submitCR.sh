@@ -71,7 +71,7 @@
 #sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttbar
 #sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt DY
 #sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt Xgamma
-sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttZclean
+#sh runCode.sh data/samples/samples_ttZ_2018_npDD_test.txt ttZclean
 #sh runCode.sh data/samples/samples_ttZ_2018_npDD_pretend.txt ttZ
 ######################################################
 # combination of 2016 and 2017

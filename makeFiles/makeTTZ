@@ -2,7 +2,7 @@ CXX=g++
 RM=rm -f
 CPPFLAGS=-std=c++0x -g $(shell root-config --cflags) -Wwrite-strings
 LDFLAGS=-g $(shell root-config --ldflags)
-LDLIBS=$(shell root-config --libs) -lTMVA
+LDLIBS=$(shell root-config --libs) -lTMVA -L/user/mniedzie/ttZ/TopKinFit -lKinFit
 CFLAGS = `root-config --cflags --libs`
 
 EXECUTABLE = main
@@ -13,7 +13,7 @@ OBJS=$(subst .cc,.o,$(SOURCES))
 all: main
 
 main: $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS) $(LDLIBS) 
+	$(CXX) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS) $(LDLIBS) -I/user/mniedzie/ttZ/TopKinFit/include
 
 %.o: %.c 
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<

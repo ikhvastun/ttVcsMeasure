@@ -209,11 +209,11 @@ void treeReader::initTree(TTree *tree, const bool isData)
     fChain->SetBranchAddress("_lElectronMissingHits", _lElectronMissingHits, &b__lElectronMissingHits);
     fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvaTTH, &b__leptonMvaTTH);
     if( is2018() ){
-//      fChain->SetBranchAddress("_leptonMvatZq", _leptonMvatZq, &b__leptonMvatZq);         // in new files
-      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);         // in new files
+      fChain->SetBranchAddress("_leptonMvatZq", _leptonMvatZq, &b__leptonMvatZq);         // in new files
+//      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);         // in new files
 				} else {
-//      fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZq, &b__leptonMvatZq);    // in old files
-      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);    // in old files
+      fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZq, &b__leptonMvatZq);    // in old files
+//      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);    // in old files
 				}
     fChain->SetBranchAddress("_lElectronMvaFall17NoIso", _lElectronMvaFall17NoIso, &b__lElectronMvaFall17NoIso);
     fChain->SetBranchAddress("_lPOGLoose", _lPOGLoose, &b__lPOGLoose);

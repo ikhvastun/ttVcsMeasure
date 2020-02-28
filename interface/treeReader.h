@@ -395,8 +395,8 @@ class treeReader {
         double dataLumi = 41.5;                                          //in units of 1/fb
         int nonPromptSample = -999;
         int CMIDSample = -999;
-//        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
-        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.8}, {4, 0.8}};   // ttH mva WP values
+        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
+//        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.8}, {4, 0.8}};   // ttH mva WP values
         std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
         std::shared_ptr<Reweighter> reweighter;
         double crossSectionRatio[100][100];

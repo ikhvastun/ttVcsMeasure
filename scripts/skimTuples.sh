@@ -32,7 +32,7 @@ skimSample(){                                           #function to skim one sa
         name="${name}_Summer16"
     fi
     echo "$name"
-    outputDir=~/Work/ntuples_temp_2L_ttZ_${name}
+    outputDir=~/Work/ntuples_temp_2L_ttZ_v2${name}
     if [ ! -d "$outputDir" ]; then                      #make output directory if it doesn't exist 
         mkdir -p $outputDir
     fi
@@ -139,6 +139,10 @@ declare -a array=("TTZToLLNuNu_M-10_T"
 declare -a array2L=("TTZToLLNuNu_M-10_TuneCP5"
 																		"DYJetsToLL_M-50_TuneCP5"
 																		"TTTo2L2Nu_TuneCP5"
+																		"ttHToNonbb_M125_TuneCP5"
+																		"tZq_ll_4f_13TeV-amcatnlo-pythia8"
+																		"TTTT_TuneCP5_13TeV"
+																		"ST_tWll_5f_LO_TuneCP5"
 )
 
 declare -a data_array=("MuonEG"
@@ -146,13 +150,13 @@ declare -a data_array=("MuonEG"
 )
 for d in $foldersMC
 do                #skim all samples
-    for n in "${array2L[@]}"
-    do
-        if [[ $d == *$n* ]] 
-        then 
-            skimSample $d $baseFolder
-        fi
-    done
+#    for n in "${array2L[@]}"
+#    do
+    if [[ $d == *$n* ]] 
+    then 
+        skimSample $d $baseFolder
+    fi
+#    done
 done
 
 #for d in $foldersData                #skim all samples

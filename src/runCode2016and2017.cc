@@ -24,6 +24,8 @@
 #include "TLatex.h"
 #include "TGraphAsymmErrors.h"
 
+#include "/user/mniedzie/ttZ/TopKinFit/include/kinfit.h"
+
 ////////#include "TMVA/Tools.h"
 ////////#include "TMVA/Reader.h"
 ////////#include "TMVA/MethodCuts.h"
@@ -96,6 +98,35 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   scaler2018.setInputFile("data/postFit/outputTTZ_2018.txt");
   scaler2018.setPostfitYields();
 
+
+          KINFIT::kfit *kf = new KINFIT::kfit();
+										kf->Init(TOPTOPLEPHAD); // Initialize tool for ttbar with one top decaying leptonically
+										std::string pdfFileName = "/user/mniedzie/ttZ/TopKinFit/test/GenAnalysis/TopTopLepHad/pdf.root";
+
+          kf->SetPDF("TopWMass",pdfFileName.c_str(),"TopLepWM_Fit");
+          kf->SetPDF("TopMass",pdfFileName.c_str(),"TopLepRecM_Fit");
+          kf->SetPDF("TopWHadMass",pdfFileName.c_str(),"TopHadWRecM_Fit");
+          kf->SetPDF("TopHadMass",pdfFileName.c_str(),"TopHadRecM_Fit");
+          kf->SetPDF("MetPx",pdfFileName.c_str(),"dMetPx_Gaus");
+          kf->SetPDF("MetPy",pdfFileName.c_str(),"dMetPy_Gaus");
+          kf->SetPDF("BJetPx",pdfFileName.c_str(),"dBJetPx_Fit");
+          kf->SetPDF("BJetPy",pdfFileName.c_str(),"dBJetPy_Fit");
+          kf->SetPDF("BJetPz",pdfFileName.c_str(),"dBJetPz_Fit");
+          kf->SetPDF("BJetE",pdfFileName.c_str(),"dBJetE_Fit");
+          kf->SetPDF("NonBJetPx",pdfFileName.c_str(),"dNonBJetPx_Fit");
+          kf->SetPDF("NonBJetPy",pdfFileName.c_str(),"dNonBJetPy_Fit");
+          kf->SetPDF("NonBJetPz",pdfFileName.c_str(),"dNonBJetPz_Fit");
+          kf->SetPDF("NonBJetE",pdfFileName.c_str(),"dNonBJetE_Fit");
+          kf->SetPDF("ElecPx",pdfFileName.c_str(),"dElecPx_Fit");
+          kf->SetPDF("ElecPy",pdfFileName.c_str(),"dElecPy_Fit");
+          kf->SetPDF("ElecPz",pdfFileName.c_str(),"dElecPz_Fit");
+          kf->SetPDF("ElecE",pdfFileName.c_str(),"dElecE_Fit");
+          kf->SetPDF("MuonPx",pdfFileName.c_str(),"dMuonPx_Fit");
+          kf->SetPDF("MuonPy",pdfFileName.c_str(),"dMuonPy_Fit");
+          kf->SetPDF("MuonPz",pdfFileName.c_str(),"dMuonPz_Fit");
+          kf->SetPDF("MuonE",pdfFileName.c_str(),"dMuonE_Fit");
+       
+          kf->SetNToy(20);
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // Loop over all samples. Reads in from the text file. For each category, separate histograms 
   // are declared. Important: the last entry is the nonprompt data, which uses the same data root 
@@ -160,7 +191,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          //if(it > nEntries / 50) break;
+          if(it > nEntries / 20) break;
           //if(it > 5) break;
 
           std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
@@ -388,6 +419,18 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           double mvaVL = 0;
           double mvaVLJECUp = 0;
           double mvaVLJECDown = 0;
+
+										std::vector<float> BJetPt,BJetEta,BJetPhi,BJetE;
+										std::vector<float> NonBJetFilteredPt,NonBJetFilteredEta,NonBJetFilteredPhi,NonBJetFilteredE;	
+										std::vector<float> ElectronPt,ElectronEta,ElectronPhi,ElectronE;
+										std::vector<float> MuonPt,MuonEta,MuonPhi,MuonE;
+										float MetRecPx,MetRecPy;
+
+//TOPKINFIT//		  kf->SetBJet(BJetPt,BJetEta,BJetPhi,BJetE);
+//TOPKINFIT//		  kf->SetNonBJet(NonBJetFilteredPt,NonBJetFilteredEta,NonBJetFilteredPhi,NonBJetFilteredE);	
+//TOPKINFIT//		  kf->SetElectron(ElectronPt,ElectronEta,ElectronPhi,ElectronE);
+//TOPKINFIT//		  kf->SetMuon(MuonPt,MuonEta,MuonPhi,MuonE);
+//TOPKINFIT//		  kf->SetMet(MetRecPx,MetRecPy);
 
           // weight estimation for event
           //auto start = std::chrono::high_resolution_clock::now();

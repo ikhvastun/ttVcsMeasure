@@ -24,56 +24,56 @@ double SRID2L (double mvaVL, double chargesLepton) {
 
 void initdistribs(std::vector<std::string> & namesOfProcesses, const std::string & selection){
 
-    for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
-      if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), it->first) == listToPrint[selection].end()) continue;
+  for (std::map<TString, histInfo>::iterator it=figNames.begin(); it!=figNames.end(); ++it){
+    if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), it->first) == listToPrint[selection].end()) continue;
 
-      histInfo hist = it->second;
-      TString name = Form("varST_%d",hist.index);
-      int i = hist.index;
+    histInfo hist = it->second;
+    TString name = Form("varST_%d",hist.index);
+    int i = hist.index;
 
 		// we have distribs object for each process i. 
 		// for each such process we have all histograms required for the selection
-      for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
-        name = Form("var_%d_%d",i,j);
-        distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+    for(unsigned int j = 0; j < distribs[i].vectorHisto.size(); j++){
+      name = Form("var_%d_%d",i,j);
+      distribs[i].vectorHisto[j] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
-			// we make histog for each uncertainty up and down. 
-			// we acces the ditributions later in code by calling:
-			// distribs[i].vectorHistoUncUp[j].unc[k] where i refers to variable/hist, j to process and k to uncertianty
-        for(unsigned int k = 0; k < numberOfSyst; k++){
-          name = Form("varUp_%d_%d_%d",i,j,k);
-          distribs[i].vectorHistoUncUp[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+		// we make histog for each uncertainty up and down. 
+		// we acces the ditributions later in code by calling:
+		// distribs[i].vectorHistoUncUp[j].unc[k] where i refers to variable/hist, j to process and k to uncertianty
+      for(unsigned int k = 0; k < numberOfSyst; k++){
+        name = Form("varUp_%d_%d_%d",i,j,k);
+        distribs[i].vectorHistoUncUp[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
 
-          name = Form("varDown_%d_%d_%d",i,j,k);
-          distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
-        }
-
-        // pdf uncertainties, taes quite a lot for time to initialize them, for convenience atm are commented 
-        if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ || i == indexSRTTCR || i == indexSRWZCR || i == indexSRZZCR){
-            for(unsigned int pdf = 0; pdf < 100; pdf++){
-                name = Form("pdf_%d_%d_%d",i,j,pdf);
-                distribs[i].vectorHistoPDF[j].var[pdf] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
-            }
-        }
-        
-		  // we set for all processes poissonian errors.
-
-        distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
-
-        distribs[i].vectorHisto[j].SetMarkerStyle(20);
-        distribs[i].vectorHisto[j].SetMarkerSize(0.5);
-        distribs[i].vectorHisto[j].SetLineWidth(1);
-        if (j < nProcesses)
-          distribs[i].vectorHisto[j].Sumw2();
+        name = Form("varDown_%d_%d_%d",i,j,k);
+        distribs[i].vectorHistoUncDown[j].unc[k] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
       }
-    }
 
-    for (unsigned int i=0; i!=distribs.size();++i) {
-      for(unsigned int j = namesOfProcesses.size()-1; j != 0; j--){
-//        if(selection == "ttW" && j == ttWSample) continue;
-        distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
+      // pdf uncertainties, taes quite a lot for time to initialize them, for convenience atm are commented 
+      if(i == indexSR3L || i == indexSR4L || i == indexSRTTZ || i == indexSRTTCR || i == indexSRWZCR || i == indexSRZZCR){
+        for(unsigned int pdf = 0; pdf < 100; pdf++){
+          name = Form("pdf_%d_%d_%d",i,j,pdf);
+          distribs[i].vectorHistoPDF[j].var[pdf] = std::move(TH1D(name,name+";",hist.nBins,hist.varMin,hist.varMax));
+        }
       }
+      
+		// we set for all processes poissonian errors.
+
+      distribs[i].vectorHisto[j].SetBinErrorOption(TH1::kPoisson);
+
+      distribs[i].vectorHisto[j].SetMarkerStyle(20);
+      distribs[i].vectorHisto[j].SetMarkerSize(0.5);
+      distribs[i].vectorHisto[j].SetLineWidth(1);
+      if (j < nProcesses)
+        distribs[i].vectorHisto[j].Sumw2();
     }
+  }
+
+  for (unsigned int i=0; i!=distribs.size();++i) {
+    for(unsigned int j = namesOfProcesses.size()-1; j != 0; j--){
+//      if(selection == "ttW" && j == ttWSample) continue;
+      distribs[i].stack.Add(&distribs[i].vectorHisto[j]);
+    }
+  }
 }
 
 void initdistribsForCT(std::vector<std::string> & namesOfProcesses, const std::string & selection){

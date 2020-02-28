@@ -70,6 +70,7 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
             progress = 1.;
             tools::printProgress(progress);
         }
+        //if(it > 5) break;
         sampleTree->GetEntry(it);
 								////  for(unsigned l = 0; l < _nLight; ++l){
 								////    if ( _lFlavor[l] == 0 && _lElectronPassEmu[l]!=0 ){
@@ -88,7 +89,7 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         if(lCount < 2) continue;
 								// at least 5 jets for Steven
         unsigned jetCount = nJets(0, true, indJets);
-        if(jetCount < 5) continue;
+        if(jetCount < 4) continue;
         // same sign selection
         //if(lCount == 2){
         //    if(_lCharge[ind.at(0)] * _lCharge[ind.at(1)] < 0)
