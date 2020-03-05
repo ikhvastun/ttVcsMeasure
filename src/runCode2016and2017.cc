@@ -24,6 +24,7 @@
 #include "TLatex.h"
 #include "TGraphAsymmErrors.h"
 
+// a path to libKinFit.so has to be added to LD_LIBRARY_PATH
 #include "/user/mniedzie/ttZ/TopKinFit/include/kinfit.h"
 
 ////////#include "TMVA/Tools.h"
@@ -126,7 +127,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           kf->SetPDF("MuonPz",pdfFileName.c_str(),"dMuonPz_Fit");
           kf->SetPDF("MuonE",pdfFileName.c_str(),"dMuonE_Fit");
        
-          kf->SetNToy(20);
+          kf->SetNToy(10);
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // Loop over all samples. Reads in from the text file. For each category, separate histograms 
   // are declared. Important: the last entry is the nonprompt data, which uses the same data root 
@@ -191,7 +192,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          if(it > nEntries / 20) break;
+          if(it > nEntries / 50) break;
           //if(it > 5) break;
 
           std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
@@ -424,13 +425,100 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 										std::vector<float> NonBJetFilteredPt,NonBJetFilteredEta,NonBJetFilteredPhi,NonBJetFilteredE;	
 										std::vector<float> ElectronPt,ElectronEta,ElectronPhi,ElectronE;
 										std::vector<float> MuonPt,MuonEta,MuonPhi,MuonE;
-										float MetRecPx,MetRecPy;
 
-//TOPKINFIT//		  kf->SetBJet(BJetPt,BJetEta,BJetPhi,BJetE);
-//TOPKINFIT//		  kf->SetNonBJet(NonBJetFilteredPt,NonBJetFilteredEta,NonBJetFilteredPhi,NonBJetFilteredE);	
-//TOPKINFIT//		  kf->SetElectron(ElectronPt,ElectronEta,ElectronPhi,ElectronE);
-//TOPKINFIT//		  kf->SetMuon(MuonPt,MuonEta,MuonPhi,MuonE);
-//TOPKINFIT//		  kf->SetMet(MetRecPx,MetRecPy);
+										float TopLepBJetFitPt = 40.0;
+										float TopLepBJetFitEta = 0.0;
+										float TopLepBJetFitPhi = 0.0;
+										float TopLepBJetFitE = 0.0;
+
+//          cout << "number of leptons/jets/bjets/dMZ: " << lCount << " " << nJLoc << " " << nBLoc << " " << dMZ << endl;
+          if( lCount>2 && dMZ < 10 && nBLoc>1 ){
+//										    std::cout << "No of bjets = " << nBLoc << std::endl;
+             for( int i =0; i<nBLoc; i++){
+									      	BJetPt.push_back (_jetPt[indBJets[i]]);
+									      	BJetEta.push_back(_jetEta[indBJets[i]]);
+									      	BJetPhi.push_back(_jetPhi[indBJets[i]]);
+									      	BJetE.push_back  (_jetE[indBJets[i]]);
+										   }
+
+										   // std::cout << "No of light jets = " << nJLoc << std::endl;
+             for( int i =0; i<nJLoc; i++){
+									      	NonBJetFilteredPt.push_back (_jetPt[indJets[i]]);
+									      	NonBJetFilteredEta.push_back(_jetEta[indJets[i]]);
+									      	NonBJetFilteredPhi.push_back(_jetPhi[indJets[i]]);
+									      	NonBJetFilteredE.push_back  (_jetE[indJets[i]]);
+										   }
+
+										   // std::cout << "No of light leptons = " << lCount << std::endl;
+             for( int i =0; i<lCount; i++){
+         	   									// std::cout << i << "-th lepton flavor is " << _lFlavor[i] << std::endl;
+										      if( (i != indOf2LonZ[0]) && (i != indOf2LonZ[1]) ){
+										         if(_lFlavor[i]==0){
+         	   									// std::cout << "Lepton from top is an electron" << std::endl;
+      		              ElectronPt .push_back (_lPt[indTight[i]]);
+										   			   			ElectronEta.push_back(_lEta[indTight[i]]);
+										   			   			ElectronPhi.push_back(_lPhi[indTight[i]]);
+										   			   			ElectronE  .push_back  (_lE[indTight[i]]);
+										   			   }else if(_lFlavor[i]==1){
+         	   									// std::cout << "Lepton from top is a muon" << std::endl;
+      		              MuonPt .push_back (_lPt[indTight[i]]);
+										   			   			MuonEta.push_back(_lEta[indTight[i]]);
+										   			   			MuonPhi.push_back(_lPhi[indTight[i]]);
+										   			   			MuonE  .push_back  (_lE[indTight[i]]);
+										   			   }
+										   			}
+										   }
+
+             // std::cout <<  "# of bjets " << BJetPt.size() <<
+             //              " # of jets " << NonBJetFilteredPt.size() <<
+             //              " # of el " << ElectronPt.size() <<
+             //              " # of mu " << MuonPt.size() << 
+             //              " met values: " << _met*TMath::Cos(_metPhi) << ", " << _met*TMath::Sin(_metPhi) << std::endl;
+      		     kf->SetBJet(BJetPt,BJetEta,BJetPhi,BJetE);
+      		     kf->SetNonBJet(NonBJetFilteredPt,NonBJetFilteredEta,NonBJetFilteredPhi,NonBJetFilteredE);
+
+										   // std::cout << "Setting el and mu kinematics" << std::endl;
+      		     kf->SetElectron( ElectronPt, ElectronEta,ElectronPhi,ElectronE);
+      		     kf->SetMuon( MuonPt, MuonEta,MuonPhi,MuonE);
+
+      		     kf->SetMet(_met*TMath::Cos(_metPhi),_met*TMath::Sin(_metPhi));
+
+										   // std::cout << "Running the fit " << std::endl;
+										   kf->Run(); // Run the tool
+
+										   int NPerm = kf->GetNPerm(); // Get number of permutations
+										   // std::cout << "NPerm = " << NPerm << std::endl;
+   										float disc = kf->GetDisc(0); // Get minimized likelihood value
+										   // Get index of object in input collection
+										   int idxEle  = kf->GetIndex( ELECTRON_TOPTOPLEPHAD, 0 );
+										   int idxMuon  = kf->GetIndex( MUON_TOPTOPLEPHAD, 0 );
+										   int idxBJetLep  = kf->GetIndex( BJETLEP_TOPTOPLEPHAD, 0); 
+										   int idxBJetHad  = kf->GetIndex( BJETHAD_TOPTOPLEPHAD, 0 );
+										   int idxJet1  = kf->GetIndex( NONBJET1_TOPTOPLEPHAD, 0 );
+										   int idxJet2  = kf->GetIndex( NONBJET2_TOPTOPLEPHAD, 0 );
+										   
+										   // Get reconstructed neutrino
+										   float NuPx = kf->GetNuPx(0,0);
+										   float NuPy = kf->GetNuPy(0,0);
+										   float NuPz = kf->GetNuPz(0,0);
+										   
+										   // Build up b jet from leptonic top quark decay
+										   TopLepBJetFitPt = BJetPt[idxBJetLep];
+										   TopLepBJetFitEta = BJetEta[idxBJetLep];
+										   TopLepBJetFitPhi = BJetPhi[idxBJetLep];
+										   TopLepBJetFitE = BJetE[idxBJetLep];
+
+//             std::cout << "the _jetId value for the leptonic leg b jet: " << _jetId[indBJets[idxBJetLep]] << ", was b tagged? " << bTaggedDeepCSV(indBJets[idxBJetLep], 1) << std::endl;
+//             std::cout << "the leptonic top jet pt: " << TopLepBJetFitPt << std::endl;
+										}
+
+													 
+
+
+
+//////    TLorentzVector test;
+//////    test.SetPtEtaPhiE(_lPt[0],0.0,_lPhi[0],_lE[0]);
+//////				std::cout << "px, py " << test.Px() << ", " << test.Py() << "cos and sin phi times pt" << _lPt[0]*TMath::Cos(_lPhi[0]) << ", " << _lPt[0]*TMath::Sin(_lPhi[0]) << std::endl;
 
           // weight estimation for event
           //auto start = std::chrono::high_resolution_clock::now();
@@ -476,6 +564,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
+//																																			TopLepBJetFitPt,
+																																			ptCorrV[0].first,
                                    };
 
           vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -500,6 +590,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
+//																																			TopLepBJetFitPt,
+																																			ptCorrV[0].first,
                                    };
 
           vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -524,6 +616,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
+//																																			TopLepBJetFitPt,
+																																			ptCorrV[0].first,
                                    };
 
           vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -548,6 +642,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
+//																																			TopLepBJetFitPt,
+																																			ptCorrV[0].first,
                                    };
 
           vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
@@ -572,6 +668,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
+//																																			TopLepBJetFitPt,
+																																			ptCorrV[0].first,
                                    };
 
           vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
@@ -591,7 +689,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "SR3L3m","SR3L2m1e","SR3L1m2e","SR3L3e",
                                      "flavour3L4L",
                                      "SRTTZ8SR3L",
-                                     "mllnoZcut"
+                                     "mllnoZcut",
+																																					"topPt"
                                    };
                                    
           //start = std::chrono::high_resolution_clock::now();
@@ -659,6 +758,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           for(int dist = 0; dist < fillVar.size(); dist++){
             if(std::find(listToPrint[selection].begin(), listToPrint[selection].end(), fncName[dist]) == listToPrint[selection].end()) continue;
             //if(listToPrint[selection].find(fncName[dist]) == listToPrint[selection].end()) continue;
+//												if(fncName[dist] == "topPt" ) std::cout << "filling dist : " << fncName[dist] << ", number of dist indice " << dist << ", samCategory " << samCategory <<" with value " << fillVar.at(dist) << ", top pt value : " << TopLepBJetFitPt << ", varMax thingy:  " << figNames[fncName.at(dist)].varMax-0.1  << " and the minimum " << TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1) << std::endl;
             distribs[dist].vectorHisto[samCategory].Fill(TMath::Min(fillVar.at(dist),figNames[fncName.at(dist)].varMax-0.1),weight);
 
             if((samples[sam].getProcessName()) != "data"){
@@ -820,6 +920,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
       if(leptonSelection != 4)
         cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
       cout << endl;
+
+        distribs[58].vectorHisto[0].SetBinContent(10,0.1);
+        distribs[58].vectorHisto[0].SetBinContent(20,0.1);
+        distribs[58].vectorHisto[0].SetBinContent(15,0.1);
+        distribs[58].vectorHisto[0].SetBinContent(25,0.1);
+        std::cout << "entries in top pt hist" << distribs[58].vectorHisto[0].GetEntries() << std::endl;
+        std::cout << "entries in top pt hist" << distribs[58].vectorHisto[1].GetEntries() << std::endl;
 ////    std::cout << "electrons before miniIso cut     : " <<  leptons_preMiniIsoCut  << std::endl;
 ////    std::cout << "electrons after  miniIso cut     : " <<  leptons_postMiniIsoCut << std::endl;
 ////    std::cout << "electrons after  missing hits cut: " <<  leptons_postMissingHits<< std::endl;
@@ -983,7 +1090,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   gSystem->Exec("mkdir -p plotsForSave/" + folderToStorePlots + processToStore);
   double scale_num = 1.6;
   
-  TCanvas* plot[nVars];
+  TCanvas* plot[nVars+1];
   for(int i = 0; i < nVars; i++){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,500);
   }
@@ -993,6 +1100,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
     plot[varPlot]->cd();
     showHist(plot[varPlot], distribs[figNames[listToPrint[crToPrint].at(varPlot)].index], figNames[listToPrint[crToPrint].at(varPlot)], scale_num, mtleg, false, false, showLegendOption);
+//    plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
+    std::cout << Form("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf") << std::endl;
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".pdf");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".png");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + ".root");

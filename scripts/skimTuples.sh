@@ -32,7 +32,8 @@ skimSample(){                                           #function to skim one sa
         name="${name}_Summer16"
     fi
     echo "$name"
-    outputDir=~/Work/ntuples_temp_2L_ttZ_v2${name}
+#    outputDir=~/Work/ntuples_temp_2L_ttZ_v2${name}
+    outputDir=~/Work/ntuples_temp_2L_ttZ_wGenInfo${name}
     if [ ! -d "$outputDir" ]; then                      #make output directory if it doesn't exist 
         mkdir -p $outputDir
     fi
@@ -61,7 +62,8 @@ skimSample(){                                           #function to skim one sa
     rm $submit                                          #remove temporary submit file
 }
 
-baseFolder=/pnfs/iihe/cms/store/user/wverbeke/heavyNeutrino/
+#baseFolder=/pnfs/iihe/cms/store/user/wverbeke/heavyNeutrino/
+baseFolder=/pnfs/iihe/cms/store/user/kskovpen/TopLeptonMVA_2016/
 #baseFolder=/pnfs/iihe/cms/store/user/tutran/heavyNeutrino/
 #baseFolder=/pnfs/iihe/cms/store/user/ikhvastu/heavyNeutrino/
 cd $baseFolder
@@ -104,7 +106,8 @@ cd $baseFolder
 #foldersData=*/*07Aug17*2016LeptonicDataList_v27
 #foldersData=*/*2017LeptonicDataList_ReReco_ZMET_v4
 
-foldersMC=*/*dilepton_MC_2018_v5
+foldersMC=*/*
+#foldersMC=*/*dilepton_MC_2018_v5
 #foldersMC=*/*dilepton_MC_2018_v7
 foldersData=*/*dilepton_data_2018_v5
 
@@ -150,12 +153,13 @@ declare -a data_array=("MuonEG"
 )
 for d in $foldersMC
 do                #skim all samples
+    skimSample $d $baseFolder
 #    for n in "${array2L[@]}"
 #    do
-    if [[ $d == *$n* ]] 
-    then 
-        skimSample $d $baseFolder
-    fi
+#    if [[ $d == *$n* ]] 
+#    then 
+#        skimSample $d $baseFolder
+#    fi
 #    done
 done
 

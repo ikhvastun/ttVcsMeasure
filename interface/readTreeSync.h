@@ -492,6 +492,9 @@ std::map<TString, histInfo> figNames  =   {
                                            {"etaLepPassedTightForEffLowPt",  {"Muon #eta (p_{T} < 25 GeV)", 107, -2.5, 2.5, 20, false}},
                                            {"etaLepPassedLooseForEffHighPt",  {"Muon #eta (p_{T} > 25 GeV)", 108, -2.5, 2.5, 20, false}},
                                            {"etaLepPassedTightForEffHighPt",  {"Muon #eta (p_{T} > 25 GeV)", 109, -2.5, 2.5, 20, false}},
+
+                                           {"topPt", {"Reconstructed top p_{T}", 110, 30, 300, 20, false}},
+                                           {"topEta", {"Reconstructed top eta", 111, -2.5, 2.5, 20, false}},
                                           };
 
 

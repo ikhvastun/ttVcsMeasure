@@ -39,6 +39,7 @@ void printInfoOnPlotNPCR();
 void printInfoOnXaxisAllTTZ();
 void showSeparationHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog, bool normalizedToData, const int showLegendOption); // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017
 void showHistEff(TVirtualPad* c1, DistribsAll & distribsLoose, DistribsAll & distribsTight);
+
 void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double num, TLegend *leg, bool plotInLog = false, bool normalizedToData = false, const int showLegendOption = 0){ // showLegendOption 0 - 2016, 1 - 2017, 2 - 2016+2017, 3 - 2018
     double xPad = 0.25; // 0.25
 
@@ -67,7 +68,7 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
     dataHist->GetYaxis()->SetTitle(("Number of events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
     dataHist->SetMinimum(0.01);
-    dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num);
+    dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()+0.1) * num);
     if(plotInLog){
         dataHist->SetMinimum(0.5);
         dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num * 5);

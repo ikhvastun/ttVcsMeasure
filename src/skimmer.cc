@@ -198,17 +198,17 @@ void treeReader::skimTree(const std::string& fileName, std::string outputDirecto
         if(!is_in) continue;
         */
 
-        //for(int i = 0; i < _nLight; i++){
-        //    std::vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)fabs(_lEta[i]), (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_ptRatio[i], (Float_t)_relIso[i],(Float_t)(std::isnan(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i]) ? 0. : std::max(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i], 0.)),(Float_t)_3dIPSig[i], (Float_t)log( fabs(_dxy[i])), (Float_t)log( fabs(_dz[i])), 
-        //    _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
-        //    //_lFlavor[i] == 0 ? (Float_t)_lElectronMvaFall17NoIso[i] : (Float_t)_lMuonSegComp[i]};
-        //    fillBDTvariables(varForBDT, _lFlavor[i]);
-        //    //if(_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i] != _closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i]) continue;
-        //    double mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
-        //    //MAREK// _leptonMvatZqTTV[i] = mvaVL;
-        //    std::cout << "mva calculated value is " << mvaVL << std::endl;
-        //    std::cout << "mva value in tree is " << _leptonMvatZqTTV[i] << std::endl;
-        //}
+        for(int i = 0; i < _nLight; i++){
+            std::vector<Float_t> varForBDT = { (Float_t)_lPt[i], (Float_t)fabs(_lEta[i]), (Float_t)_selectedTrackMult[i], (Float_t)_miniIsoCharged[i], (Float_t)(_miniIso[i] - _miniIsoCharged[i]), (Float_t)_ptRel[i], (Float_t)_ptRatio[i], (Float_t)_relIso[i],(Float_t)(std::isnan(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i]) ? 0. : std::max(_closestJetDeepCsv_b[i] + _closestJetDeepCsv_bb[i], 0.)),(Float_t)_3dIPSig[i], (Float_t)log( fabs(_dxy[i])), (Float_t)log( fabs(_dz[i])), 
+            _lFlavor[i] == 0 ? (Float_t)_lElectronMva[i] : (Float_t)_lMuonSegComp[i]};
+            //_lFlavor[i] == 0 ? (Float_t)_lElectronMvaFall17NoIso[i] : (Float_t)_lMuonSegComp[i]};
+            fillBDTvariables(varForBDT, _lFlavor[i]);
+            //if(_closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i] != _closestJetDeepCsv_bb[i] + _closestJetDeepCsv_b[i]) continue;
+            double mvaVL =  _lFlavor[i] == 0 ? readerLeptonMVAele->EvaluateMVA( "BDTG method") : readerLeptonMVAmu->EvaluateMVA( "BDTG method");
+            _leptonMvatZq[i] = mvaVL;
+            //std::cout << "mva calculated value is " << mvaVL << std::endl;
+            //std::cout << "mva value in tree is " << _leptonMvatZq[i] << std::endl;
+        }
         //std::vector<unsigned> indTightTTW;
         //unsigned lCountTightTTW = selectLepTightTTW(indTightTTW);
         //if(lCountTightTTW < 2) continue;

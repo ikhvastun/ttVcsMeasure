@@ -213,6 +213,7 @@ void treeReader::initTree(TTree *tree, const bool isData)
 //      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);         // in new files
 				} else {
       fChain->SetBranchAddress("_leptonMvatZqTTV", _leptonMvatZq, &b__leptonMvatZq);    // in old files
+//      fChain->SetBranchAddress("_leptonMvatZq", _leptonMvatZq, &b__leptonMvatZq);         // in new files
 //      fChain->SetBranchAddress("_leptonMvaTTH", _leptonMvatZq, &b__leptonMvatZq);    // in old files
 				}
     fChain->SetBranchAddress("_lElectronMvaFall17NoIso", _lElectronMvaFall17NoIso, &b__lElectronMvaFall17NoIso);
@@ -303,6 +304,25 @@ void treeReader::initTree(TTree *tree, const bool isData)
         fChain->SetBranchAddress("_lMatchPdgId", _lMatchPdgId, &b__lMatchPdgId);
         fChain->SetBranchAddress("_lProvenance", _lProvenance, &b__lProvenance);
         fChain->SetBranchAddress("_lProvenanceCompressed", _lProvenanceCompressed, &b__lProvenanceCompressed);
+
+
+
+
+        fChain->SetBranchAddress("_gen_n", &_gen_n, &b__gen_n);
+        fChain->SetBranchAddress("_gen_pt", _gen_pt, &b__gen_pt);
+        fChain->SetBranchAddress("_gen_eta", _gen_eta, &b__gen_eta);
+        fChain->SetBranchAddress("_gen_phi", _gen_phi, &b__gen_phi);
+        fChain->SetBranchAddress("_gen_E", _gen_E, &b__gen_E);
+        fChain->SetBranchAddress("_gen_pdgId", _gen_pdgId, &b__gen_pdgId);
+        fChain->SetBranchAddress("_gen_charge", _gen_charge, &b__gen_charge);
+        fChain->SetBranchAddress("_gen_status", _gen_status, &b__gen_status);
+        fChain->SetBranchAddress("_gen_isPromptFinalState", _gen_isPromptFinalState, &b__gen_isPromptFinalState);
+        fChain->SetBranchAddress("_gen_isDirectPromptTauDecayProductFinalState", _gen_isDirectPromptTauDecayProductFinalState, &b__gen_isDirectPromptTauDecayProductFinalState);
+        fChain->SetBranchAddress("_gen_isLastCopy", _gen_isLastCopy, &b__gen_isLastCopy);
+        fChain->SetBranchAddress("_gen_index", _gen_index, &b__gen_index);
+        fChain->SetBranchAddress("_gen_motherIndex", _gen_motherIndex, &b__gen_motherIndex);
+        fChain->SetBranchAddress("_gen_daughter_n", _gen_daughter_n, &b__gen_daughter_n);
+        fChain->SetBranchAddress("_gen_daughterIndex", _gen_daughterIndex, &b__gen_daughterIndex);
     }
 
     
@@ -460,6 +480,22 @@ void treeReader::setOutputTree(TTree* outputTree, const bool isData){
 
         //outputTree->Branch("_lProvenance",               &_lProvenance,               "_lProvenance[_nL]/i");
         //outputTree->Branch("_lProvenanceCompressed",     &_lProvenanceCompressed,     "_lProvenanceCompressed[_nL]/i");
+
+        outputTree->Branch("_gen_n",                                       &_gen_n,                                      "_gen_n/I");
+        outputTree->Branch("_gen_pt",                                      &_gen_pt,                                     "_gen_pt[_gen_n]/D");
+        outputTree->Branch("_gen_eta",                                     &_gen_eta,                                    "_gen_eta[_gen_n]/D");
+        outputTree->Branch("_gen_phi",                                     &_gen_phi,                                    "_gen_phi[_gen_n]/D");
+        outputTree->Branch("_gen_E",                                       &_gen_E,                                      "_gen_E[_gen_n]/D");
+        outputTree->Branch("_gen_pdgId",                                   &_gen_pdgId,                                  "_gen_pdgId[_gen_n]/I");
+        outputTree->Branch("_gen_charge",                                  &_gen_charge,                                 "_gen_charge[_gen_n]/I");
+        outputTree->Branch("_gen_status",                                  &_gen_status,                                 "_gen_status[_gen_n]/I");
+        outputTree->Branch("_gen_isPromptFinalState",                      &_gen_isPromptFinalState,                     "_gen_isPromptFinalState[_gen_n]/O");
+        outputTree->Branch("_gen_isDirectPromptTauDecayProductFinalState", &_gen_isDirectPromptTauDecayProductFinalState,"_gen_isDirectPromptTauDecayProductFinalState[_gen_n]/O");
+        outputTree->Branch("_gen_isLastCopy",                              &_gen_isLastCopy,                             "_gen_isLastCopy[_gen_n]/O");
+        outputTree->Branch("_gen_index",                                   &_gen_index,                                  "_gen_index[_gen_n]/I");
+        outputTree->Branch("_gen_motherIndex",                             &_gen_motherIndex,                            "_gen_motherIndex[_gen_n]/I");
+        outputTree->Branch("_gen_daughter_n",                              &_gen_daughter_n,                             "_gen_daughter_n[_gen_n]/I");
+        outputTree->Branch("_gen_daughterIndex",                           &_gen_daughterIndex,                          "_gen_daughterIndex[_gen_n][100]/I");
 
     }
 

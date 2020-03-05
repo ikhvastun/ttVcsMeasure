@@ -33,6 +33,7 @@ class treeReader {
         static const unsigned nJets_max = 20;
         static const unsigned gen_nL_max = 20;
         static const unsigned gen_nPh_max = 10;
+        static const unsigned gen_n_max = 400;
         ULong_t       _runNb;
         ULong_t       _lumiBlock;
         ULong_t       _eventNb;
@@ -54,6 +55,23 @@ class treeReader {
         Int_t           _gen_lCharge[gen_nL_max];   
         Int_t           _gen_lMomPdg[gen_nL_max];   
         Bool_t          _gen_lIsPrompt[gen_nL_max];   
+
+        UInt_t           _gen_n;
+        Double_t        _gen_pt[gen_n_max];
+        Double_t        _gen_eta[gen_n_max];
+        Double_t        _gen_phi[gen_n_max];
+        Double_t        _gen_E[gen_n_max];
+        Int_t           _gen_pdgId[gen_n_max];
+        Int_t           _gen_charge[gen_n_max];
+        Int_t           _gen_status[gen_n_max];
+        Bool_t          _gen_isPromptFinalState[gen_n_max];
+        Bool_t          _gen_isDirectPromptTauDecayProductFinalState[gen_n_max];
+        Bool_t          _gen_isLastCopy[gen_n_max];
+        Int_t           _gen_index[gen_n_max];
+        Int_t           _gen_motherIndex[gen_n_max];
+        Int_t           _gen_daughter_n[gen_n_max];
+        Int_t           _gen_daughterIndex[gen_n_max][100];
+
 
         Bool_t          _HLT_Mu3_PFJet40;
         Int_t           _HLT_Mu3_PFJet40_prescale;
@@ -586,6 +604,23 @@ class treeReader {
         TBranch        *b__jetPt;   
         TBranch        *b__jetPt_JECUp;   
         TBranch        *b__jetPt_JECDown;   
+
+        TBranch        *b__gen_n;                                       
+        TBranch        *b__gen_pt;                                      
+        TBranch        *b__gen_eta;                                     
+        TBranch        *b__gen_phi;                                     
+        TBranch        *b__gen_E;                                       
+        TBranch        *b__gen_pdgId;                                   
+        TBranch        *b__gen_charge;                                  
+        TBranch        *b__gen_status;                                  
+        TBranch        *b__gen_isPromptFinalState;                      
+        TBranch        *b__gen_isDirectPromptTauDecayProductFinalState; 
+        TBranch        *b__gen_isLastCopy;                              
+        TBranch        *b__gen_index;                                   
+        TBranch        *b__gen_motherIndex;                             
+        TBranch        *b__gen_daughter_n;                              
+        TBranch        *b__gen_daughterIndex;                           
+
 //        TBranch        *b__jetPt_JERUp;   
 //        TBranch        *b__jetPt_JERDown;   
         TBranch        *b__jetSmearedPt;
