@@ -75,4 +75,4 @@ To submit code on T2 use `submitCR.sh` code in `scripts/` directory.
 sh submitCR.sh
 ```
 
-
+The path to top kin fit .so file has to be added to LD_LIBRARY_PATH!

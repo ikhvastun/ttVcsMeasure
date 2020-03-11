@@ -192,8 +192,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           if(!_passMETFilters) continue;
           
           //if(it > 10000) break;
-          if(it > nEntries / 50) break;
-          //if(it > 5) break;
+          if(it > nEntries / 20) break;
+          //if(it > 100) break;
 
           std::vector<unsigned> indTight, indFake, indLoose, indOf2LonZ;
           //select leptons relative to the analysis
@@ -513,7 +513,8 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
 										}
 
 													 
-
+          if( TopLepBJetFitPt != TopLepBJetFitPt) 
+             std::cout << "the leptonic top jet pt is a NaN! " << std::endl;
 
 
 //////    TLorentzVector test;
@@ -541,7 +542,7 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
           //if(leptonSelection == 4 && passZZCRSelection(ind, indOf2LonZ, nJLoc)) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
           if(samples[sam].getProcessName() == "data" && samCategory == dataSample) myfile << _runNb << " " << _lumiBlock << " " << _eventNb << endl;
 
-          vector<double> fillVar = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVar = { ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLoc), double(nBLoc), (_lCharge[ind.at(0)] == 1 ?  mvaVL : -999),
                                    // currently here we will have ttZ3L and ttZ4L categories
                                    (leptonSelection == 3 ? SRID3L(nJLoc, nBLoc, dMZ) : -999),
@@ -564,11 +565,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLoc, nBLoc, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLoc > 0 ? SRID8SR3L(nJLoc, nBLoc, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
-//																																			TopLepBJetFitPt,
-																																			ptCorrV[0].first,
+																																			TopLepBJetFitPt,
                                    };
 
-          vector<double> fillVarJecUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJecUp = { ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocUp), double(nBLocUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocUp)? SRID4L(nJLocUp, nBLocUp) : -999),
@@ -590,11 +590,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocUp, nBLocUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocUp > 0 ? SRID8SR3L(nJLocUp, nBLocUp, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
-//																																			TopLepBJetFitPt,
-																																			ptCorrV[0].first,
+																																			TopLepBJetFitPt,
                                    };
 
-          vector<double> fillVarJecDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJecDw = { ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocDown), double(nBLocDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocDown)? SRID4L(nJLocDown, nBLocDown) : -999),
@@ -616,11 +615,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocDown, nBLocDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocDown > 0 ? SRID8SR3L(nJLocDown, nBLocDown, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
-//																																			TopLepBJetFitPt,
-																																			ptCorrV[0].first,
+																																			TopLepBJetFitPt,
                                    };
 
-          vector<double> fillVarJerUp = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJerUp = { ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocJERUp), double(nBLocJERUp), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECUp : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERUp)? SRID4L(nJLocJERUp, nBLocJERUp) : -999),
@@ -642,11 +640,10 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERUp, nBLocJERUp, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERUp > 0 ? SRID8SR3L(nJLocJERUp, nBLocJERUp, dMZ) : -999),
                                    (leptonSelection != 4 ? mll:mll1stpair),
-//																																			TopLepBJetFitPt,
-																																			ptCorrV[0].first,
+																																			TopLepBJetFitPt,
                                    };
 
-          vector<double> fillVarJerDw = {ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
+          vector<double> fillVarJerDw = { ptCorrV[0].first, ptCorrV[1].first, leptonSelection > 2 ? ptCorrV[2].first : 0., leptonSelection > 3 ? ptCorrV[3].first : 0.,
                                    mt1, double(nJLocJERDown), double(nBLocJERDown), (_lCharge[ind.at(0)] == 1 ?  mvaVLJECDown : -999),
                                    (leptonSelection == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
                                    (leptonSelection == 4 && passTTZ4LSelection(ind, indOf2LonZ, nJLocJERDown)? SRID4L(nJLocJERDown, nBLocJERDown) : -999),
@@ -667,12 +664,11 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                    (leptonSelection == 3 && nLocEle == 3 ? SRID3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
                                    (passTTZSRSelection(ind, indOf2LonZ, nJLocJERDown, nBLocJERDown, dMZ) ? flavourCategory3L4L(leptonSelection, nLocEle) : -999),
                                    (leptonSelection == 3 && nBLocJERDown > 0 ? SRID8SR3L(nJLocJERDown, nBLocJERDown, dMZ) : -999),
-                                   (leptonSelection != 4 ? mll:mll1stpair),
-//																																			TopLepBJetFitPt,
-																																			ptCorrV[0].first,
+                                   (leptonSelection != 4 ? mll:mll1stpair), 
+																																			TopLepBJetFitPt,
                                    };
 
-          vector<TString> fncName = {"ptlead", "sublead", "trail", "pt4th", 
+          vector<TString> fncName = { "ptlead", "sublead", "trail", "pt4th", 
                                      "mtW", "njets", "nbjets", "BDTpp", 
                                      //"flavour", 
                                      //"SR",
@@ -690,9 +686,9 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
                                      "flavour3L4L",
                                      "SRTTZ8SR3L",
                                      "mllnoZcut",
-																																					"topPt"
+																																					 "topPt",
                                    };
-                                   
+
           //start = std::chrono::high_resolution_clock::now();
           double lepSF = 1.;
           double lepSFSystUp = 1.; double lepSFSystDown = 1.; 
@@ -921,12 +917,14 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
         cout << "Total number of events in non prompt category: " << distribs[figNames[listToPrint[selection].at(0)].index].vectorHisto[nonPromptSample].Integral() << endl;
       cout << endl;
 
-        distribs[58].vectorHisto[0].SetBinContent(10,0.1);
-        distribs[58].vectorHisto[0].SetBinContent(20,0.1);
-        distribs[58].vectorHisto[0].SetBinContent(15,0.1);
-        distribs[58].vectorHisto[0].SetBinContent(25,0.1);
-        std::cout << "entries in top pt hist" << distribs[58].vectorHisto[0].GetEntries() << std::endl;
-        std::cout << "entries in top pt hist" << distribs[58].vectorHisto[1].GetEntries() << std::endl;
+        distribs[figNames["topPt"].index].vectorHisto[0].SetBinContent(10,0.1);
+        distribs[figNames["topPt"].index].vectorHisto[0].SetBinContent(20,0.1);
+        distribs[figNames["topPt"].index].vectorHisto[0].SetBinContent(15,0.1);
+        distribs[figNames["topPt"].index].vectorHisto[0].SetBinContent(25,0.1);
+        std::cout << "entries in top pt hist" << distribs[figNames["topPt"].index].vectorHisto[0].GetEntries() << std::endl;
+        std::cout << "entries in top pt hist" << distribs[figNames["topPt"].index].vectorHisto[1].GetEntries() << std::endl;
+
+
 ////    std::cout << "electrons before miniIso cut     : " <<  leptons_preMiniIsoCut  << std::endl;
 ////    std::cout << "electrons after  miniIso cut     : " <<  leptons_postMiniIsoCut << std::endl;
 ////    std::cout << "electrons after  missing hits cut: " <<  leptons_postMissingHits<< std::endl;
@@ -1090,12 +1088,23 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
   gSystem->Exec("mkdir -p plotsForSave/" + folderToStorePlots + processToStore);
   double scale_num = 1.6;
   
-  TCanvas* plot[nVars+1];
+  TCanvas* plot[nVars];
   for(int i = 0; i < nVars; i++){
       plot[i] = new TCanvas(Form("plot_%d", i),"",500,500);
   }
 
   std::string crToPrint = selection;
+
+// TFile f("histos.root", "recreate");
+// distribs[0].vectorHisto[0].Write();
+// distribs[0].vectorHisto[1].Write();
+        TFile f1("histos_before.root", "recreate");
+        distribs[figNames["topPt"].index].vectorHisto[0].Write();
+        distribs[figNames["topPt"].index].vectorHisto[1].Write();
+        distribs[figNames["topPt"].index].vectorHisto[2].Write();
+        distribs[figNames["topPt"].index].vectorHisto[3].Write();
+        distribs[figNames["topPt"].index].vectorHisto[4].Write();
+        distribs[figNames["topPt"].index].vectorHisto[5].Write();
 
   for(int varPlot = 0; varPlot < listToPrint[crToPrint].size(); varPlot++){
     plot[varPlot]->cd();
@@ -1111,6 +1120,13 @@ void treeReader::Analyze(const vector<std::string> & filesToAnalyse, const std::
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.png");
     plot[varPlot]->SaveAs("plotsForSave/" + folderToStorePlots + processToStore + "/" + listToPrint[crToPrint].at(varPlot) + "Log.root");
   }
+        TFile f2("histos_after.root", "recreate");
+        distribs[figNames["topPt"].index].vectorHisto[0].Write();
+        distribs[figNames["topPt"].index].vectorHisto[1].Write();
+        distribs[figNames["topPt"].index].vectorHisto[2].Write();
+        distribs[figNames["topPt"].index].vectorHisto[3].Write();
+        distribs[figNames["topPt"].index].vectorHisto[4].Write();
+        distribs[figNames["topPt"].index].vectorHisto[5].Write();
   
   if(crToPrint == "ttZ"){
     fillTablesSRTTZ(distribs[indexSRTTZ], processOrder, "SRallTTZ", showLegendOption);

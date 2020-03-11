@@ -631,10 +631,10 @@ void initListToPrint(const std::string & selection){
   listToPrint["ZZ"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "flavour4LZZ", "SRZZCR"};
   listToPrint["ttZ3L"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "flavour3L"};
   listToPrint["ttZ3Lclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "SR3L", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "mll3e", "mll2e1mu", "mll1e2mu", "mll3mu"};
-  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L", "mllnoZcut"};
+  listToPrint["ttZclean"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "ptZ", "ptNonZ", "met", "cosThetaStar", "SRttZCleanPTZ", "SRttZCleanCosTheta", "flavour3L", "flavour4L", "flavour3L4L", "mllnoZcut", "topPt"};
   listToPrint["ttZ4L"] = {"ptlead", "sublead", "trail", "pt4th", "njets", "nbjets", "met", "nPV", "mll", "ptZ", "etaLead", "etaSubl", "etaTrail", "eta4th", "SR4L", "cosThetaStar", "flavour4L"};
   listToPrint["tZq"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "met", "nPV"};
-  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L", "ptlead", "trail", "topPt"};
+  listToPrint["ttZ"] = {"SRallTTZ", "SR3L", "SR4L", "SRWZCR", "SRZZCR", "SRTTCR", "SR3L3m", "SR3L2m1e", "SR3L1m2e", "SR3L3e", "SRTTZ8SR3L", "flavour3L4L", "ptlead", "trail", "topPt", "HT"};
 
   listToPrint["CTInMC"] = {"ptlead", "sublead", "trail", "njets", "nbjets", "mll", "met", "HT"};
 

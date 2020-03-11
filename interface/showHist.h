@@ -44,14 +44,14 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
     double xPad = 0.25; // 0.25
 
     TPad *pad1 = new TPad("pad1","pad1",0,xPad,1,1);
-    pad1->SetTopMargin(0.09);
+    pad1 -> SetTopMargin(0.09);
     if(xPad != 0)
         pad1->SetBottomMargin(0.02);
-    pad1->Draw();
-    pad1->cd();
+    pad1 -> Draw();
+    pad1 -> cd();
     if(plotInLog)
-        pad1->SetLogy();
-    
+        pad1 -> SetLogy();
+
     TH1D * dataHist = &distribs.vectorHisto[dataSample];
     // here is the code for blinding, number of events in data is set to 0
     // finally we are unblinded, 23 Oct 2018
@@ -63,12 +63,12 @@ void showHist(TVirtualPad* c1, DistribsAll & distribs, histInfo & info, double n
         }
     }
     */
-    dataHist->SetMarkerSize(1);
-    dataHist->SetTitle("");
-    dataHist->GetXaxis()->SetTitle(info.fancyName.c_str());
-    dataHist->GetYaxis()->SetTitle(("Number of events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
-    dataHist->SetMinimum(0.01);
-    dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()+0.1) * num);
+    dataHist -> SetMarkerSize(1);
+    dataHist -> SetTitle("");
+    dataHist -> GetXaxis()->SetTitle(info.fancyName.c_str());
+    dataHist -> GetYaxis()->SetTitle(("Number of events " + (info.isEnVar ? ("/ " + std::to_string(int((info.varMax - info.varMin) / info.nBins)) + " GeV") : "")).c_str());
+    dataHist -> SetMinimum(0.01);
+    dataHist -> SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()+0.1) * num);
     if(plotInLog){
         dataHist->SetMinimum(0.5);
         dataHist->SetMaximum(TMath::Max(distribs.stack.GetMaximum(), distribs.vectorHisto[dataSample].GetMaximum()) * num * 5);
