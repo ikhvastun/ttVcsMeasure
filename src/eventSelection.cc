@@ -16,7 +16,7 @@ bool treeReader::lepIsGoodFortZq(const unsigned l){
 bool treeReader::lepIsGood(const unsigned l, const int lepSel = 3){
     // what is used in leptonMVA analysis
     if(!lepIsFOGood(l, lepSel)) return false;
-    if(_leptonMvatZq[l] < leptonMVAcutInAnalysis[lepSel]) return false;
+    if(_leptonMvatZq[l] < leptonMVAcutInAnalysis.at(lepSel) ) return false;
 
     if(lepSel == 2){
         if(_lFlavor[l] == 1 && ((_lMuonTrackPtErr[l]/_lMuonTrackPt[l]) > 0.2)) return false;
@@ -51,8 +51,15 @@ bool treeReader::lepIsFOGood(const unsigned l, const int lepSel = 3){
 	 // electronMVAvalue cut value
     if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? 0.8001 : (currentSample.is2017() ? 0.8001 : 0.8958))) return false;
 //    if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? 0.8001 : 0.8958)) return false;
-
-    if(lepSel != 4 && _leptonMvatZq[l] < leptonMVAcutInAnalysis[leptonSelection]){
+//    std::cout << "test1 ";
+//				std::cout << "a:" << lepSel << ", ";
+//				std::cout << "b:" << _leptonMvatZq[l] << ", ";
+//				std::cout << "c:" << leptonSelection << ", ";
+//				std::cout << "d at 3:" << leptonMVAcutInAnalysis.at(3);
+//				std::cout << ", d at lepton selection :" << leptonMVAcutInAnalysis.at(leptonSelection);
+//				std::cout << std::endl;
+//    std::cout << "test2 " << std::endl;
+    if(lepSel != 4 && _leptonMvatZq[l] < leptonMVAcutInAnalysis.at(leptonSelection) ){
         if(_ptRatio[l] < (currentSample.is2017() ? (leptonSelection == 3 ? 0.4 : 0.5) : (leptonSelection == 3 ? 0.4 : 0.5))) return false;  // 0.4 original for 3L in 2016, 0.3 in 2017
         if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2018() ? (leptonSelection == 3 ? 0.5 : 0.2) : (currentSample.is2017() ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5)))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
 //      if(_closestJetDeepCsv_bb[l] + _closestJetDeepCsv_b[l] > (currentSample.is2017() ? (leptonSelection == 3 ? 0.5 : 0.2) : (leptonSelection == 3 ? 0.4 : 0.5))) return false; // 0.4 original one, medium WP :          (is2017 ? 0.4941 : 0.6324)
@@ -121,7 +128,6 @@ bool treeReader::lepIsLoose(const unsigned ind){
         if(!_lPOGLoose[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
-        if(!_lElectronPassEmu[ind]) return false;
     }
     return true;
 }
@@ -139,7 +145,6 @@ bool treeReader::lepIsGoodForLeptonMVA(const unsigned ind){
         if(!_lPOGMedium[ind]) return false;
     } else if(_lFlavor[ind] == 0){
         if(_lElectronMissingHits[ind] > 1) return false;
-        if(!_lElectronPassEmu[ind]) return false;
     }
     return true;
 }
@@ -239,7 +244,7 @@ bool treeReader::passPtCuts3L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
+        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis.at(leptonSelection) ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
         
     }
@@ -262,7 +267,7 @@ bool treeReader::passPtCuts2L(const std::vector<unsigned>& ind){
     
     std::vector<std::pair<double, unsigned>> ptMap;
     for(auto & i : ind){
-        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
+        double ptcor = _leptonMvatZq[i] > leptonMVAcutInAnalysis.at(leptonSelection) ? _lPt[i] : magicFactorInAnalysis[leptonSelection] * _lPt[i] / _ptRatio[i];
         //double ptcor = lepIsGood(i) ? _lPt[i] : magicFactor * _lPt[i] / _ptRatio[i];
         ptMap.push_back({ptcor, i});
     }
@@ -493,14 +498,14 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
 
     for (unsigned l0 = 0; l0 < ind.size(); l0++) {
         //double ptcor1 = _lPt[ind.at(l0)];
-        double ptcor1 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l0)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l0)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l0)] / _ptRatio[ind.at(l0)]) : _lPt[ind.at(l0)];
+        double ptcor1 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l0)] > leptonMVAcutInAnalysis.at(leptonSelection) ? _lPt[ind.at(l0)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l0)] / _ptRatio[ind.at(l0)]) : _lPt[ind.at(l0)];
         
         l0p4.SetPtEtaPhiE(ptcor1 ,_lEta[ind.at(l0)],_lPhi[ind.at(l0)],_lE[ind.at(l0)] * ptcor1 / _lPt[ind.at(l0)] );          
         for(unsigned l1 = l0+1; l1 < ind.size(); l1++){
 
             //if(ind.at(l0) == ind.at(l1)) continue;
             //double ptcor2 = _lPt[ind.at(l1)];
-            double ptcor2 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l1)] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[ind.at(l1)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l1)] / _ptRatio[ind.at(l1)]) : _lPt[ind.at(l1)];
+            double ptcor2 = leptonSelection != 4 ? (_leptonMvatZq[ind.at(l1)] > leptonMVAcutInAnalysis.at(leptonSelection) ? _lPt[ind.at(l1)] : magicFactorInAnalysis[leptonSelection] * _lPt[ind.at(l1)] / _ptRatio[ind.at(l1)]) : _lPt[ind.at(l1)];
             //cout << "l1 is " << ind.at(l1) << endl;
 
             if (_lCharge[ind.at(l0)] != _lCharge[ind.at(l1)]) {
@@ -526,7 +531,7 @@ double treeReader::deltaMZ(const std::vector<unsigned>& ind, unsigned & third, d
                                 if(lepThird == ind.at(l0) || lepThird == ind.at(l1)) continue;
                                 third = lepThird;
                                 //double ptcor3 = _lPt[lepThird];
-                                double ptcor3 = leptonSelection != 4 ? (_leptonMvatZq[lepThird] > leptonMVAcutInAnalysis[leptonSelection] ? _lPt[lepThird] : magicFactorInAnalysis[leptonSelection] * _lPt[lepThird] / _ptRatio[lepThird]) : _lPt[lepThird];
+                                double ptcor3 = leptonSelection != 4 ? (_leptonMvatZq[lepThird] > leptonMVAcutInAnalysis.at(leptonSelection) ? _lPt[lepThird] : magicFactorInAnalysis[leptonSelection] * _lPt[lepThird] / _ptRatio[lepThird]) : _lPt[lepThird];
                                 l2p4.SetPtEtaPhiE(ptcor3 ,_lEta[lepThird],_lPhi[lepThird],_lE[lepThird] * ptcor3 / _lPt[lepThird]);
                                 ptNonZ = ptcor3;
                                 mlll = (l1p4+l2p4).M();
@@ -915,8 +920,8 @@ bool treeReader::pass2Lpreselection(const int njets, const int nbjets, const std
     if(nbjets < 1) return false;
 
     TLorentzVector l0p4, l1p4;
-    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
-    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis.at(2) ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis.at(2) ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
     l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
     l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
 
@@ -933,8 +938,8 @@ bool treeReader::pass2Lcleanpreselection(const int njets, const int nbjets, cons
     if(nbjets < 2) return false;
 
     TLorentzVector l0p4, l1p4;
-    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
-    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis[2] ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
+    double lepCorrLead = _leptonMvatZq[ind.at(0)] > leptonMVAcutInAnalysis.at(2) ? _lPt[ind.at(0)] : magicFactorInAnalysis[2] * _lPt[ind.at(0)] / _ptRatio[ind.at(0)];
+    double lepCorrSubLead = _leptonMvatZq[ind.at(1)] > leptonMVAcutInAnalysis.at(2) ? _lPt[ind.at(1)] : magicFactorInAnalysis[2] * _lPt[ind.at(1)] / _ptRatio[ind.at(1)];
     l0p4.SetPtEtaPhiE(lepCorrLead, _lEta[ind.at(0)], _lPhi[ind.at(0)], _lE[ind.at(0)] * lepCorrLead / _lPt[ind.at(0)]);
     l1p4.SetPtEtaPhiE(lepCorrSubLead, _lEta[ind.at(1)], _lPhi[ind.at(1)], _lE[ind.at(1)] * lepCorrSubLead / _lPt[ind.at(1)]);
 

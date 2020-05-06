@@ -26,9 +26,9 @@ void fillExperUnc(ofstream &, vector<std::string> &, std::vector<TString> &, std
 double largestAmongAll(const std::vector<double> & weights);
 double smallestAmongAll(const std::vector<double> & weights);
 
-void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false, bool is2018 = false){
+void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesForDatacard, const TString name, bool is2017 = false, bool is2018 = false, double MVAcut = 0.4){
 
-  std::vector<double> experUnc      = {1.025, 1.01};  // for trigger agreed to reduce it to 1%
+  std::vector<double> experUnc      = {1.025, 1.02};  // for trigger agreed to reduce it to 1%
   std::vector<TString> experUncName = {"lumi" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016") ), "trigger" + (std::string)(is2018 ? "2018" : (is2017 ? "2017" : "2016"))}; //"JES", "btagl", "btagb", "PDF", "Q2"};
   std::vector<TString> ttVprocesses = {"ttW", "ttZ", "ttH", "ttX"};
 
@@ -51,28 +51,36 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
   nameOfProcessesForDatacard.erase(nameOfProcessesForDatacard.begin()); // here we erase 1 element - data
   const int numberOfBKG = nameOfProcessesForDatacard.size() - 1; // -1 for signal
 
-   gSystem->Exec("rm datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root"); // delete previous tex file
-   gSystem->Exec("rm datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt"); // delete previous tex file
-   gSystem->Exec("mkdir -p datacards/"); // delete previous tex file
-   gSystem->Exec("mkdir -p datacards/shapes"); // delete previous tex file
+ 		std::string MVAstr = std::to_string (MVAcut);
+  		MVAstr.erase ( MVAstr.find_last_not_of('0') + 1, std::string::npos );
+
+   gSystem->Exec("rm output/outputMVAvalue"+ MVAstr +"/datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root"); // delete previous tex file
+   gSystem->Exec("rm output/outputMVAvalue"+ MVAstr +"/datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt"); // delete previous tex file
+   gSystem->Exec( ("mkdir -p output/outputMVAvalue"+ MVAstr +"/datacards/").c_str() ); // delete previous tex file
+   gSystem->Exec( ("mkdir -p output/outputMVAvalue"+ MVAstr +"/datacards/shapes").c_str() ); // delete previous tex file
    ofstream fileout;
-   fileout .open ( "datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt", ios_base::app); // create a new tex file
+   fileout .open ( "output/outputMVAvalue"+ MVAstr +"/datacards/datacard_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".txt", ios_base::app); // create a new tex file
    fileout << fixed << showpoint << setprecision(2);
-   fileout << "imax 1 number of channels " <<  endl;
-   fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
+//   fileout << "imax 1 number of channels " <<  endl;
+   fileout << "imax * number of channels " <<  endl;
+//   fileout << "jmax " << numberOfBKG << " number of backgrounds " <<  endl;
+   fileout << "jmax * number of backgrounds " <<  endl;
    //fileout << "kmax " << (lepSel == 2 ? 195 : (lepSel == 34 ? 129 : (lepSel == 3 ? 96 : 33))) <<  " number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
-   fileout << "kmax 130 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+//   fileout << "kmax 130 number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
+   fileout << "kmax * number of nuisance parameters (sources of systematical uncertainties) " <<  endl;
    fileout << "----------- " <<  endl;
-   TFile *file = TFile::Open("datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root", "RECREATE");
-   fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
+   TFile *file = TFile::Open("output/outputMVAvalue"+ MVAstr +"/datacards/shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + ".root", "RECREATE");
+   fileout << "shapes * * shapes/shapeFile_" + name + (TString)(is2018 ? "2018" : (is2017 ? "2017" : "2016")) + "_outWZunc.root  $PROCESS $PROCESS_$SYSTEMATIC" << endl;
    fileout << "-----------  " <<  endl;
    fileout << "bin  bin1" <<  endl;
-   fileout << "observation  " << intYield[0] << endl;
+//   fileout << "observation  " << intYield[0] << endl;
+   fileout << "observation  -1" << endl;
    fileout << "-----------  " <<  endl;
 
    vector<TString> datastrVector;
    vector<TString> processNumberVector;
    vector<double> rateVector;
+   vector<int> rateVector2 = { -1, -1, -1, -1, -1, -1, -1, -1 };
 
    for(int i = 1; i < nCategories; i++){ // here -1 we don't consider data
       datastrVector.push_back("bin" + std::to_string(1));
@@ -90,7 +98,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    fillString(fileout, processNumberVector);
 
    fileout << "rate        " ;
-   fillString(fileout, rateVector);
+   fillString(fileout, rateVector2);
 
    // first fill stat unc
    for(int cat = 0; cat < nCategories; cat++){ 
@@ -121,10 +129,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
          histStUp->SetBinContent(sr+1, hist->GetBinContent(sr+1));
          histStDown->SetBinContent(sr+1, hist->GetBinContent(sr+1));
 
-         fileout << nameOfProcessesForDatacard[cat-1] + "_stat" + name + "_bin_" + std::to_string(sr+1) + " shape     " ;
-         vector<int> newString = formEmptyStringInt(numberOfBKG + 1); // + 1 for signal
-         newString[cat-1] = 1;
-         fillString(fileout, newString);
+//         fileout << nameOfProcessesForDatacard[cat-1] + "_stat" + name + "_bin_" + std::to_string(sr+1) + " shape     " ;
+//         vector<int> newString = formEmptyStringInt(numberOfBKG + 1); // + 1 for signal
+//         newString[cat-1] = 1;
+//         fillString(fileout, newString);
        }
    }
 
@@ -200,6 +208,7 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
         vector<int> newString;
         newString = formEmptyStringInt(numberOfBKG + 1);
         newString[0] = 1.;
+        newString[3] = 1.;
         fillString(fileout, newString);
    }
 
@@ -234,6 +243,8 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
       fileout <<  systShapeAcceptNames.at(syst - systShapeNames.size() - systISRFSRNames.size()) << " shape     " ;
       vector<int> newString = formUnityStringInt(numberOfBKG + 1); // + 1 for signal
       newString[7] = 999; // don't consider uncertainty on nonprompt
+      newString[3] = 999; // don't consider uncertainty on nonprompt
+      newString[4] = 999; // don't consider uncertainty on nonprompt
       //if(lepSel == 2)
       //    newString[3] = 999;
       fillString(fileout, newString);
@@ -276,6 +287,11 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
    }
    fillString(fileout, newString);
 
+   fileout << ("WZcs shape ");
+   newString = formEmptyString(numberOfBKG + 1);
+   newString[3] = 1;
+   fillString(fileout, newString);
+
    fileout << ("ZZ     lnN ");
    newString = formEmptyString(numberOfBKG + 1);
    for(int i = 0; i < nameOfProcessesForDatacard.size(); i++){
@@ -301,6 +317,10 @@ void fillDatacards(DistribsAll & distribs, vector<std::string> nameOfProcessesFo
          newString[i] = 1.5;
    }
    fillString(fileout, newString);
+
+   fileout << "* autoMCStats 0" <<  endl;
+
+
 
    file->Close();
     

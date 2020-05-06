@@ -88,5 +88,5 @@
 #sh runCode.sh data/samples/2016CR/samples_ttZ_npDD_ZZ.txt,data/samples/2017CR/samples_ttZ_2017_npDD_ZZ.txt ZZ
 
 # 3L + 4L
-#sh runCode.sh data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt ttZ
-#sh runCode.sh data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt ttZclean
+sh runCode.sh data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt ttZ
+sh runCode.sh data/samples/samples_ttZ_npDD.txt,data/samples/samples_ttZ_2017_npDD.txt ttZclean

@@ -172,10 +172,9 @@ class treeReader {
         Bool_t          _lElectronPassConvVeto[nL_max];   //[_nLight]
         Bool_t          _lElectronChargeConst[nL_max];   //[_nLight]
         UInt_t          _lElectronMissingHits[nL_max];   //[_nLight]  
-        Double_t        _leptonMvaSUSY[nL_max];   //[_nLight]
+        Double_t        _leptonMvaTOP[nL_max];   //[_nLight]
         Double_t        _leptonMvaTTH[nL_max];   //[_nLight]
         Double_t        _leptonMvatZq[nL_max];   //[_nLight]
-        Double_t        _leptonMvatZqTTV16[nL_max];   //[_nLight]
         Bool_t          _lHNLoose[nL_max];   
         Bool_t          _lHNFO[nL_max];   
         Bool_t          _lHNTight[nL_max];   
@@ -272,10 +271,10 @@ class treeReader {
         //functions to analyze tree
         void GetEntry(long unsigned entry);
         void Analyze();
-        void AnalyzeFR(const std::vector<std::string>& fileToAnalyse, const std::string outputDir);
-        void Analyze(const std::vector<std::string>& fileToAnalyse, const std::string option = "", const std::string selection = "", const std::string& sampleToDebug = "", long = -999);
-        void GetEntry(const Sample&, long unsigned entry);
-        void Loop(const std::string& sample, const double xSection);
+        void AnalyzeFR( const std::vector<std::string>& fileToAnalyse, const std::string outputDir);
+        void Analyze( const std::vector<std::string>& fileToAnalyse, const std::string option = "", const std::string selection = "", const std::string& sampleToDebug = "", long = -999);
+        void GetEntry( const Sample&, long unsigned entry);
+        void Loop( const std::string& sample, const double xSection);
 
         //functions for event selection
         unsigned dilFlavorComb(const std::vector<unsigned>&);
@@ -414,7 +413,6 @@ class treeReader {
         int nonPromptSample = -999;
         int CMIDSample = -999;
         std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.4}, {4, -0.4}};
-//        std::map<int, double> leptonMVAcutInAnalysis = {{2, 0.6}, {3, 0.8}, {4, 0.8}};   // ttH mva WP values
         std::map<int, double> magicFactorInAnalysis = {{2, 0.9}, {3, 0.85}};
         std::shared_ptr<Reweighter> reweighter;
         double crossSectionRatio[100][100];
@@ -560,10 +558,9 @@ class treeReader {
         TBranch        *b__lElectronPassConvVeto;   //!
         TBranch        *b__lElectronChargeConst;   //!
         TBranch        *b__lElectronMissingHits;   //! 
-        TBranch        *b__leptonMvaSUSY;   //!
+        TBranch        *b__leptonMvaTOP;   //!
         TBranch        *b__leptonMvaTTH;   //! 
         TBranch        *b__leptonMvatZq;   //! 
-        TBranch        *b__leptonMvatZqTTV16;   //! 
         TBranch        *b__lHNLoose;   
         TBranch        *b__lHNFO;   
         TBranch        *b__lHNTight;   

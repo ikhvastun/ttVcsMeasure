@@ -495,6 +495,15 @@ std::map<TString, histInfo> figNames  =   {
 
                                            {"topPt", {"Reconstructed top p_{T}", 110, 40, 300, 13, false}},
                                            {"topEta", {"Reconstructed top eta", 111, -2.5, 2.5, 20, false}},
+                                           {"lepTopMass", {"Reconstructed leptonic top mass", 112, 0, 300, 50, false}},
+                                           {"hadTopMass", {"Reconstructed hadronic top mass", 113, 0, 300, 50, false}},
+                                           {"hadWMass", {"Reconstructed hadronic W mass", 114, 0, 300, 50, false}},
+                                           {"lepTopPt", {"Reconstructed leptonic top p_{T}", 115, 40, 300, 13, false}},
+                                           {"hadTopPt", {"Reconstructed hadronic top p_{T}", 116, 40, 300, 13, false}},
+
+                                           {"promptLepMVA", {"signal input for purity and efficiency calculation", 117, -1, 1, 50, false}},
+                                           {"looseLepMVA", {"bacground input for purity and efficiency calculation", 118, -1, 1, 50, false}},
+                                           {"selectedByMVA", {"events selected using given MVA value", 119, -1, 1, 50, false}},
                                           };
 
 
